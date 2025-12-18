@@ -3,37 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EasyTipMe - Payment</title>
+    <title>Payment - EasyTipMe</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://js.stripe.com/v3/"></script>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #fafafa; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; margin: 0; color: #1a1a1a; padding-top: 20px; }
         .main-card { background: white; width: 92%; max-width: 380px; padding: 25px 25px 35px; border-radius: 32px; box-shadow: 0 4px 25px rgba(0,0,0,0.03); position: relative; border: 1px solid #f2f2f2; box-sizing: border-box; }
         
-        /* زر الرجوع الناعم */
+        /* زر الرجوع */
         .back-nav { display: flex; align-items: center; margin-bottom: 15px; }
         .back-btn { background: none; border: none; color: #888; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 0; }
 
-        /* الهيدر الموحد: 30 حرف للعنوان و 90 للبايو */
+        /* الهيدر الموحد */
         .brand-header { text-align: center; margin-bottom: 25px; border-bottom: 1px solid #f8f8f8; padding-bottom: 20px; }
         .brand-logo { width: 64px; height: 64px; border-radius: 14px; margin-bottom: 12px; }
-        .brand-name { font-size: 20px; font-weight: 600; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 30ch; }
+        .brand-name { font-size: 20px; font-weight: 600; margin: 0; max-width: 30ch; overflow: hidden; margin-left: auto; margin-right: auto; }
         .brand-bio { font-size: 13px; color: #888; margin: 8px auto 0; line-height: 1.4; max-width: 90ch; }
 
-        /* منطقة الموظف */
-        .staff-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        /* منطقة الموظف المتغيرة */
+        .staff-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-top: 15px; }
         .staff-name { font-size: 24px; font-weight: 600; margin: 0; }
         .avatar-container { display: flex; align-items: center; }
         .avatar-img { width: 55px; height: 55px; border-radius: 50%; border: 2px solid #fff; margin-left: -20px; object-fit: cover; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         .avatar-img:first-child { margin-left: 0; }
 
-        .question { color: #888; font-size: 15px; margin-bottom: 20px; text-align: left; }
-
-        /* شبكة القيم الستة */
         .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
         .amount-btn { background: #fff; border: 1px solid #eeeeee; padding: 18px 5px; border-radius: 14px; font-size: 14px; font-weight: 600; cursor: pointer; color: #1a1a1a; transition: 0.2s; }
         .amount-btn.active { border-color: #1a1a1a; box-shadow: inset 0 0 0 1px #1a1a1a; }
 
-        /* صندوق Love المعتمد بصيغة الجمع */
         .love-container { background: #f8f8f8; border-radius: 20px; padding: 18px; margin: 20px 0; border: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; text-align: left; }
         .love-info h4 { margin: 0; font-size: 14px; font-weight: 600; }
         .love-info p { margin: 4px 0 0; font-size: 11px; color: #888; }
@@ -45,13 +42,11 @@
         input:checked + .slider { background-color: #34c759; }
         input:checked + .slider:before { transform: translateX(18px); }
 
-        /* منطقة نظام الدفع Stripe */
+        /* منطقة Stripe */
         #payment-element { margin-top: 20px; }
         #submit-btn { background: #1a1a1a; color: white; border: none; width: 100%; padding: 18px; border-radius: 18px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 20px; display: none; }
-        
         .fee-info { font-size: 11px; color: #b0b0b0; text-align: center; margin-top: 10px; }
 
-        /* النجوم والتقييم */
         .rating-container { margin-top: 40px; padding-top: 25px; border-top: 1px solid #f5f5f5; text-align: center; }
         .stars { display: flex; justify-content: center; gap: 12px; direction: rtl; }
         .stars label { font-size: 34px; color: #e8e8e8; cursor: pointer; }
@@ -63,7 +58,7 @@
 
 <div class="main-card">
     <div class="back-nav">
-        <button class="back-btn" onclick="window.history.back()">
+        <button class="back-btn" onclick="window.location.href='index.html'">
             <span style="font-size: 18px;">‹</span> Back
         </button>
     </div>
@@ -71,19 +66,14 @@
     <div class="brand-header">
         <img src="logo.png" class="brand-logo" alt="Logo">
         <h1 class="brand-name">Mouneh Lebanese Gourmet Store</h1>
-        <p class="brand-bio">Authentic Lebanese flavors and gourmet products delivered to your door with love and tradition.</p>
+        <p class="brand-bio">Authentic Lebanese flavors and gourmet products delivered to your door with love and tradition in every bite.</p>
     </div>
 
     <div class="staff-header">
-        <h1 class="staff-name" id="display-name">Group Tip</h1>
-        <div class="avatar-container" id="avatar-stack">
-            <img src="shani.jpg" class="avatar-img" alt="S">
-            <img src="bustani.jpg" class="avatar-img" alt="B">
-        </div>
+        <h1 class="staff-name" id="display-name">Team</h1>
+        <div class="avatar-container" id="avatar-stack"></div>
     </div>
 
-    <div class="question">How much would you like to tip the team?</div>
-    
     <div class="grid">
         <button class="amount-btn" onclick="tap(500, this)">CA$5</button>
         <button class="amount-btn" onclick="tap(1000, this)">CA$10</button>
@@ -95,8 +85,8 @@
 
     <div class="love-container">
         <div class="love-info">
-            <h4>Show them some extra love? ♡</h4>
-            <p>Cover the processing fees so the team gets 100% of your tip.</p>
+            <h4 id="love-title">Show some love? ♡</h4>
+            <p>Cover the fees so the team gets 100% of your tip.</p>
         </div>
         <label class="switch">
             <input type="checkbox" id="feeToggle" checked onchange="updateTotal()">
@@ -105,7 +95,7 @@
     </div>
 
     <div id="payment-element"></div>
-    <button id="submit-btn">Pay Now</button>
+    <button id="submit-btn" onclick="handleSubmit()">Pay Now</button>
     <div id="fee-summary" class="fee-info"></div>
 
     <div class="rating-container">
@@ -122,30 +112,54 @@
 
 <script>
     let currentAmt = 0;
-    const FEE = 0.12;
+    const stripe = Stripe('YOUR_PUBLIC_KEY_HERE'); // ضع مفتاح Stripe الخاص بك هنا
+    let elements;
 
-    function tap(amt, btn) {
+    window.onload = function() {
+        const staffData = JSON.parse(localStorage.getItem('chosenStaff') || "[]");
+        const container = document.getElementById('avatar-stack');
+        const nameDisplay = document.getElementById('display-name');
+        const loveTitle = document.getElementById('love-title');
+
+        if (staffData.length > 0) {
+            nameDisplay.innerText = staffData.length === 1 ? staffData[0].name : "Group Tip";
+            loveTitle.innerText = staffData.length === 1 ? `Show ${staffData[0].name} some love? ♡` : "Show them some love? ♡";
+            staffData.forEach(p => {
+                container.innerHTML += `<img src="${p.img}" class="avatar-img" alt="${p.name}">`;
+            });
+        }
+    };
+
+    async function tap(amt, btn) {
         document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentAmt = amt;
         document.getElementById('submit-btn').style.display = 'block';
         updateTotal();
+
+        // نداء Stripe لإنشاء نظام الدفع
+        const response = await fetch("YOUR_BACKEND_URL/create-payment-intent", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ amount: currentAmt }),
+        });
+        const { clientSecret } = await response.json();
+        elements = stripe.elements({ clientSecret });
+        const paymentElement = elements.create("payment");
+        paymentElement.mount("#payment-element");
     }
 
     function updateTotal() {
-        if (currentAmt === 0) return;
         const isCovering = document.getElementById('feeToggle').checked;
-        const feeVal = currentAmt * FEE;
-        const total = isCovering ? (currentAmt + feeVal) : currentAmt;
-        
+        const total = isCovering ? (currentAmt * 1.12) : currentAmt;
         document.getElementById('submit-btn').innerText = `Pay CA$${(total/100).toFixed(2)} Now`;
-        
-        const info = document.getElementById('fee-summary');
-        if(isCovering) {
-            info.innerText = `Includes CA$${(feeVal/100).toFixed(2)} service fee`;
-        } else {
-            info.innerText = `The team will receive CA$${((currentAmt - feeVal)/100).toFixed(2)} after fees`;
-        }
+    }
+
+    async function handleSubmit() {
+        const { error } = await stripe.confirmPayment({
+            elements,
+            confirmParams: { return_url: "your-success-page.html" },
+        });
     }
 </script>
 </body>
