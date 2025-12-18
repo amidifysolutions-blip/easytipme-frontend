@@ -64,6 +64,7 @@
     </div>
 
     <div id="custom-container" class="custom-box">
+        <div id="amount-hint" style="font-size: 11px; margin-top: 5px; min-height: 15px;"></div>
         <span>☕</span>
         <input type="number" id="custom-val" class="custom-input" placeholder="Custom amount">
         <button class="pay-link" onclick="processCustom()">Next</button>
@@ -89,7 +90,24 @@
     const stripe = Stripe('pk_test_51QpPGt01TRhauBHP6dGYUaBYZJr9oHskEqZy9zWm8L6SPtG2kdzQS0MhPiatv3QDvzkTXvJDvbWMSIOUVOCcaswu003bDig62n'); 
     const API_URL = "https://easytipme-backend.onrender.com";
     let elements;
+function processCustom() {
+    const amtInput = document.getElementById('custom-val').value;
+    const amount = parseFloat(amtInput);
+    const hint = document.getElementById('amount-hint'); // سنضيف هذا العنصر تحت الحقل
 
+    if (amount > 0 && amount < 3) {
+        // بدلاً من التنبيه، نظهر تلميح ناعم بالرمادي
+        hint.innerText = "Minimum tip for processing is $3";
+        hint.style.color = "#a0a0a0"; // رمادي باهت لكي لا يظهر كتحذير
+        return;
+    }
+
+    if (amount >= 3) {
+        hint.innerText = ""; // اخفاء التلميح إذا كان المبلغ صحيح
+        const amountInCents = Math.round(amount * 100);
+        startPayment(amountInCents);
+    }
+}
     function showCustom() { document.getElementById('custom-container').style.display = 'flex'; }
     function processCustom() {
         const val = document.getElementById('custom-val').value;
