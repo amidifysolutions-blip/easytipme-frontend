@@ -3,69 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mouneh - Choose Team</title>
+    <title>EasyTipMe - Choose Team</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        /* الحفاظ على نفس الهوية البصرية */
         body { font-family: 'Inter', sans-serif; background-color: #fafafa; display: flex; justify-content: center; padding-top: 20px; margin: 0; color: #1a1a1a; }
-        .main-card { background: white; width: 92%; max-width: 380px; padding: 30px 20px; border-radius: 32px; border: 1px solid #f2f2f2; box-sizing: border-box; text-align: center; }
+        .main-card { background: white; width: 92%; max-width: 380px; padding: 35px 25px; border-radius: 32px; border: 1px solid #f2f2f2; box-sizing: border-box; text-align: center; }
         
-        /* هيدر المؤسسة الموحد */
-        .brand-header { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #f5f5f5; }
-        .brand-logo { width: 28px; height: 28px; border-radius: 6px; }
-        .brand-name { font-size: 16px; font-weight: 600; }
+        /* الهيدر المتفق عليه */
+        .brand-logo { width: 64px; height: 64px; border-radius: 12px; margin-bottom: 12px; }
+        .brand-name { font-size: 20px; font-weight: 600; margin: 0; max-width: 30ch; overflow: hidden; }
+        .brand-bio { font-size: 13px; color: #888; margin: 8px 0 25px; line-height: 1.4; max-width: 90ch; }
 
-        .instruction { font-size: 18px; font-weight: 600; line-height: 1.3; margin-bottom: 25px; text-align: center; }
+        /* سطر اختيار الموظفين مع التبديل لليمين */
+        .selection-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 0 5px; }
+        .selection-title { font-size: 14px; font-weight: 500; color: #1a1a1a; }
 
-        /* زر المالتيبل - التنسيق الأحمر كما في الصورة */
-        .multi-toggle-container { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 30px; }
-        .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
+        /* Apple Toggle ناعم على اليمين وبدون أحمر */
+        .switch { position: relative; display: inline-block; width: 42px; height: 24px; }
         .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ff3b30; transition: .4s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 22px; width: 22px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #e5e5ea; transition: .4s; border-radius: 24px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         input:checked + .slider { background-color: #34c759; }
-        input:checked + .slider:before { transform: translateX(22px); }
-        .toggle-label { font-size: 14px; color: #666; font-weight: 500; }
+        input:checked + .slider:before { transform: translateX(18px); }
 
         /* قائمة الموظفين */
         .staff-list { display: flex; flex-direction: column; gap: 12px; }
-        .staff-card { background: #fff; border: 1px solid #eee; border-radius: 20px; padding: 15px; display: flex; align-items: center; justify-content: space-between; text-decoration: none; color: inherit; transition: 0.2s; }
+        .staff-card { background: #fff; border: 1px solid #eee; border-radius: 20px; padding: 15px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: 0.2s; position: relative; }
         .staff-info { display: flex; align-items: center; gap: 14px; }
         .avatar { width: 55px; height: 55px; border-radius: 50%; object-fit: cover; }
         .details { text-align: left; }
         .details h3 { margin: 0; font-size: 16px; font-weight: 600; }
         .details p { margin: 2px 0 0; font-size: 13px; color: #888; }
 
-        /* مربع الاختيار المخفي الذي يظهر فقط في وضع المالتيبل */
-        .checkbox-wrapper { display: none; }
-        .custom-checkbox { width: 22px; height: 22px; border-radius: 6px; border: 2px solid #ddd; position: relative; }
-        .multi-active .checkbox-wrapper { display: block; }
+        /* المربع الصغير وعلامة الصح */
+        .checkbox-container { display: none; width: 22px; height: 22px; border-radius: 6px; border: 2px solid #ddd; position: relative; transition: 0.2s; }
+        .staff-card.selected .checkbox-container { background: #fff; border-color: #1a1a1a; }
+        .staff-card.selected .checkbox-container::after { content: "✓"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #1a1a1a; font-size: 14px; font-weight: bold; }
+        
+        .multi-active .checkbox-container { display: block; }
         .multi-active .chevron { display: none; }
+        .chevron { font-size: 18px; color: #ccc; }
 
-        /* زر "Next" الذي يظهر عند اختيار موظفين */
-        #next-btn { display: none; background: #1a1a1a; color: white; border: none; width: 100%; padding: 18px; border-radius: 18px; font-size: 16px; font-weight: 600; margin-top: 25px; cursor: pointer; }
+        #next-btn { background: #1a1a1a; color: white; border: none; width: 100%; padding: 18px; border-radius: 18px; font-size: 16px; font-weight: 600; margin-top: 25px; cursor: pointer; display: none; }
     </style>
 </head>
 <body>
 
 <div class="main-card" id="mainCard">
-    <div class="brand-header">
-        <img src="logo.png" class="brand-logo" alt="L">
-        <span class="brand-name">Mouneh</span>
-    </div>
+    <img src="logo.png" class="brand-logo" alt="Logo">
+    <h1 class="brand-name">Mouneh Lebanese Gourmet</h1>
+    <p class="brand-bio">Authentic flavors from Lebanon. Experience tradition in every bite of our gourmet selections.</p>
 
-    <div class="instruction">Please choose a member of our team you would like to tip</div>
-
-    <div class="multi-toggle-container">
+    <div class="selection-header">
+        <span class="selection-title">Select multiple specialists</span>
         <label class="switch">
-            <input type="checkbox" id="multiModeToggle" onchange="toggleMultiMode()">
+            <input type="checkbox" id="multiModeToggle" onchange="toggleMode()">
             <span class="slider"></span>
         </label>
-        <span class="toggle-label">Select multiple specialists</span>
     </div>
 
     <div class="staff-list">
-        <div class="staff-card" onclick="handleSelect('shani', this)">
+        <div class="staff-card" onclick="handleStaffClick('shani', this)">
             <div class="staff-info">
                 <img src="shani.jpg" class="avatar" alt="S">
                 <div class="details">
@@ -73,13 +71,11 @@
                     <p>Nail Technician</p>
                 </div>
             </div>
-            <div class="chevron" style="color:#ccc">›</div>
-            <div class="checkbox-wrapper">
-                <div class="custom-checkbox"></div>
-            </div>
+            <div class="chevron">›</div>
+            <div class="checkbox-container"></div>
         </div>
 
-        <div class="staff-card" onclick="handleSelect('bustani', this)">
+        <div class="staff-card" onclick="handleStaffClick('bustani', this)">
             <div class="staff-info">
                 <img src="bustani.jpg" class="avatar" alt="B">
                 <div class="details">
@@ -87,44 +83,42 @@
                     <p>Barber</p>
                 </div>
             </div>
-            <div class="chevron" style="color:#ccc">›</div>
-            <div class="checkbox-wrapper">
-                <div class="custom-checkbox"></div>
-            </div>
+            <div class="chevron">›</div>
+            <div class="checkbox-container"></div>
         </div>
     </div>
 
-    <button id="next-btn" onclick="goToMultiple()">Next</button>
+    <button id="next-btn" onclick="window.location.href='multiple.html'">Next</button>
 </div>
 
 <script>
-    let isMultiMode = false;
-    let selectedStaff = [];
+    let isMulti = false;
+    let selectedCount = 0;
 
-    function toggleMultiMode() {
-        isMultiMode = document.getElementById('multiModeToggle').checked;
+    function toggleMode() {
+        isMulti = document.getElementById('multiModeToggle').checked;
         const card = document.getElementById('mainCard');
-        if(isMultiMode) {
+        const nextBtn = document.getElementById('next-btn');
+        
+        if(isMulti) {
             card.classList.add('multi-active');
         } else {
             card.classList.remove('multi-active');
-            selectedStaff = [];
-            document.getElementById('next-btn').style.display = 'none';
+            nextBtn.style.display = 'none';
+            // إلغاء تحديد الجميع عند الإغلاق
+            document.querySelectorAll('.staff-card').forEach(c => c.classList.remove('selected'));
+            selectedCount = 0;
         }
     }
 
-    function handleSelect(id, element) {
-        if(!isMultiMode) {
-            window.location.href = id + ".html"; // يذهب لصفحة شاني مثلاً
+    function handleStaffClick(id, element) {
+        if(!isMulti) {
+            window.location.href = id + ".html";
         } else {
             element.classList.toggle('selected');
-            // هنا نضيف منطق اختيار الموظفين وتغيير لون الـ Checkbox
-            document.getElementById('next-btn').style.display = 'block';
+            selectedCount = document.querySelectorAll('.staff-card.selected').length;
+            document.getElementById('next-btn').style.display = selectedCount > 0 ? 'block' : 'none';
         }
-    }
-
-    function goToMultiple() {
-        window.location.href = "multiple.html";
     }
 </script>
 
