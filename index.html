@@ -3,182 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EasyTipMe - Shani</title>
+    <title>Mouneh</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #fafafa; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; margin: 0; color: #1a1a1a; padding-top: 20px; }
-        .main-card { background: white; width: 92%; max-width: 380px; padding: 35px 25px; border-radius: 32px; box-shadow: 0 4px 25px rgba(0,0,0,0.03); position: relative; border: 1px solid #f2f2f2; box-sizing: border-box; }
+        /* Apple Minimalist Style */
+        body { font-family: 'Inter', sans-serif; background-color: #ffffff; margin: 0; display: flex; justify-content: center; color: #1d1d1f; -webkit-font-smoothing: antialiased; }
+        .container { width: 100%; max-width: 375px; padding: 60px 20px; text-align: center; }
         
-        .staff-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .staff-name { font-size: 24px; font-weight: 600; margin: 0; }
-        .staff-img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 1px solid #eee; }
+        /* Header: الاسم والشعار فقط */
+        .brand-header { margin-bottom: 60px; }
+        .brand-logo { width: 64px; height: 64px; border-radius: 14px; margin-bottom: 15px; object-fit: contain; }
+        .brand-name { font-size: 24px; font-weight: 600; letter-spacing: -0.5px; margin: 0; }
 
-        .question { color: #888; font-size: 15px; margin-bottom: 25px; text-align: left; }
+        /* قائمة الموظفين */
+        .staff-list { display: flex; flex-direction: column; gap: 12px; }
+        .staff-card { 
+            background: #f5f5f7; 
+            padding: 16px; 
+            border-radius: 18px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            text-decoration: none; 
+            color: inherit;
+            transition: background 0.2s ease;
+        }
+        .staff-card:active { background: #e8e8ed; }
+        
+        .staff-info { display: flex; align-items: center; gap: 14px; }
+        .staff-avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background: #e8e8ed; }
+        .staff-details { text-align: left; }
+        .staff-details h3 { font-size: 17px; margin: 0; font-weight: 500; }
+        .staff-details p { font-size: 13px; color: #86868b; margin-top: 2px; }
 
-        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
-        .amount-btn { background: #fff; border: 1px solid #eeeeee; padding: 18px 5px; border-radius: 14px; font-size: 14px; font-weight: 600; cursor: pointer; color: #1a1a1a; -webkit-tap-highlight-color: transparent; }
-        .amount-btn.active { border-color: #1a1a1a; background: #fff; box-shadow: inset 0 0 0 1px #1a1a1a; }
-
-        .custom-box { display: none; align-items: center; background: #f8f8f8; border-radius: 16px; padding: 12px 15px; margin-top: 10px; border: 1px solid #eee; }
-        .custom-input { border: none; background: transparent; flex: 1; font-size: 16px; outline: none; width: 100%; }
-        .custom-input::placeholder { font-size: 11px; color: #b0b0b0; }
-        .next-btn { background: none; border: none; font-weight: 600; cursor: pointer; color: #1a1a1a; font-size: 14px; padding-left: 10px; }
-
-        #payment-element { margin-top: 20px; width: 100%; }
-        #submit-btn { background: #1a1a1a; color: white; border: none; width: 100%; padding: 18px; border-radius: 18px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 25px; display: none; }
-
-        .rating-container { margin-top: 40px; padding-top: 25px; border-top: 1px solid #f5f5f5; text-align: center; width: 100%; }
-        .rating-text { color: #1a1a1a; font-size: 16px; font-weight: 500; margin-bottom: 15px; display: block; }
-        .stars { display: flex; justify-content: center; gap: 12px; direction: rtl; }
-        .stars label { font-size: 34px; color: #e8e8e8; cursor: pointer; transition: 0.2s; }
-        .stars label:hover, .stars label:hover ~ label, .stars input:checked ~ label { color: #FFD700; }
-        .stars input { display: none; }
-
-        #success-msg { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #fff; border-radius: 28px; flex-direction: column; justify-content: center; align-items: center; z-index: 100; padding: 20px; box-sizing: border-box; }
-        .checkmark { width: 60px; height: 60px; border-radius: 50%; display: block; stroke-width: 2; stroke: #1a1a1a; stroke-miterlimit: 10; margin: 10% auto; box-shadow: inset 0px 0px 0px #1a1a1a; animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both; }
-        .checkmark__check { transform-origin: 50% 50%; stroke-dasharray: 48; stroke-dashoffset: 48; animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards; }
-        @keyframes stroke { 100% { stroke-dashoffset: 0; } }
-        @keyframes scale { 0%, 100% { transform: none; } 50% { transform: scale3d(1.1, 1.1, 1); } }
+        .chevron { color: #c7c7cc; font-size: 20px; }
     </style>
 </head>
 <body>
 
-<div class="main-card">
-    <div id="success-msg">
-        <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
-            <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
-            <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
-        </svg>
-        <h2 style="font-weight: 600; margin: 0;">Thank You</h2>
-        <p style="color: #888; text-align: center;">Your tip has been received successfully.</p>
-        <button onclick="location.reload()" style="background:none; border:none; color:#1a1a1a; font-weight:600; cursor:pointer; margin-top:30px; text-decoration: underline; font-size: 16px;">Done</button>
+<div class="container">
+    <div class="brand-header">
+        <img src="https://via.placeholder.com/64" class="brand-logo" alt="Logo">
+        <h1 class="brand-name">Mouneh</h1>
     </div>
 
-    <div class="staff-header">
-        <h1 class="staff-name">Shani</h1>
-        <img src="https://via.placeholder.com/60" class="staff-img" alt="Staff">
-    </div>
+    <div class="staff-list">
+        <a href="shani.html" class="staff-card">
+            <div class="staff-info">
+                <img src="https://via.placeholder.com/50" class="staff-avatar" alt="Shani">
+                <div class="staff-details">
+                    <h3>Shani</h3>
+                    <p>Team Member</p>
+                </div>
+            </div>
+            <div class="chevron">›</div>
+        </a>
 
-    <div class="question">Would you like to leave a tip?</div>
-    
-    <div class="grid">
-        <button class="amount-btn" onclick="tap(500, this)">CA$5</button>
-        <button class="amount-btn" onclick="tap(1000, this)">CA$10</button>
-        <button class="amount-btn" onclick="tap(1500, this)">CA$15</button>
-        <button class="amount-btn" onclick="tap(2500, this)">CA$25</button>
-        <button class="amount-btn" onclick="tap(5000, this)">CA$50</button>
-        <button class="amount-btn" id="other-btn" onclick="showOth()">Other</button>
-    </div>
-
-    <div id="custom-container" class="custom-box">
-        <input type="number" id="custom-val" class="custom-input" placeholder="Min. CA$3.00" inputmode="decimal">
-        <button class="next-btn" onclick="procOth()">Next</button>
-    </div>
-
-    <div id="payment-element"></div>
-    <button id="submit-btn">Pay Now</button>
-
-    <div class="rating-container">
-        <span class="rating-text">Rate your visit</span>
-        <div class="stars">
-            <input type="radio" id="s5" name="rating"><label for="s5">★</label>
-            <input type="radio" id="s4" name="rating"><label for="s4">★</label>
-            <input type="radio" id="s3" name="rating"><label for="s3">★</label>
-            <input type="radio" id="s2" name="rating"><label for="s2">★</label>
-            <input type="radio" id="s1" name="rating"><label for="s1">★</label>
-        </div>
+        <a href="#" class="staff-card">
+            <div class="staff-info">
+                <img src="https://via.placeholder.com/50" class="staff-avatar" alt="Staff">
+                <div class="staff-details">
+                    <h3>Ahmad</h3>
+                    <p>Team Member</p>
+                </div>
+            </div>
+            <div class="chevron">›</div>
+        </a>
     </div>
 </div>
 
-<script src="https://js.stripe.com/v3/"></script>
-<script>
-    const stripe = Stripe('pk_test_51QpPGt01TRhauBHP6dGYUaBYZJr9oHskEqZy9zWm8L6SPtG2kdzQS0MhPiatv3QDvzkTXvJDvbWMSIOUVOCcaswu003bDig62n'); 
-    const API_URL = "https://easytipme-backend.onrender.com";
-    let elements;
-
-    function tap(amt, btn) {
-        document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        document.getElementById('custom-container').style.display = 'none';
-        start(amt);
-    }
-
-    function showOth() {
-        document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('other-btn').classList.add('active');
-        document.getElementById('custom-container').style.display = 'flex';
-        resetUI();
-    }
-
-    function procOth() {
-        const v = parseFloat(document.getElementById('custom-val').value);
-        if (v >= 3) {
-            start(Math.round(v * 100));
-        } else {
-            document.getElementById('custom-val').value = "";
-            document.getElementById('custom-val').placeholder = "Minimum is CA$3.00";
-        }
-    }
-
-    function resetUI() {
-        document.getElementById("payment-element").innerHTML = "";
-        document.getElementById("submit-btn").style.display = "none";
-    }
-
-    async function start(amount) {
-        resetUI();
-        document.getElementById("payment-element").innerHTML = "<p style='color:#bbb;font-size:12px;padding:20px;'>Loading Secure CA$ Payment...</p>";
-        
-        try {
-            const res = await fetch(`${API_URL}/create-payment-intent`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ amount, currency: "cad" }),
-            });
-            
-            // إصلاح الخطأ: التأكد من تعريف البيانات قبل استخدامها
-            const data = await res.json();
-            
-            elements = stripe.elements({ 
-                clientSecret: data.clientSecret, 
-                appearance: { 
-                    theme: 'flat', 
-                    variables: { colorPrimary: '#1a1a1a', borderRadius: '14px' } 
-                } 
-            });
-            
-            const pe = elements.create("payment", { layout: "tabs" });
-            document.getElementById("payment-element").innerHTML = "";
-            pe.mount("#payment-element");
-            document.getElementById("submit-btn").style.display = "block";
-            
-        } catch (err) {
-            console.error(err);
-            document.getElementById("payment-element").innerHTML = "<p style='color:red;'>Connection Error. Please check your internet.</p>";
-        }
-    }
-
-    document.getElementById("submit-btn").onclick = async () => {
-        const b = document.getElementById("submit-btn");
-        b.disabled = true;
-        b.innerText = "Processing...";
-        
-        const { error } = await stripe.confirmPayment({
-            elements,
-            confirmParams: { return_url: window.location.href + "?status=success" },
-        });
-        
-        if (error) {
-            b.disabled = false;
-            b.innerText = "Pay Now";
-            alert(error.message);
-        }
-    };
-
-    if (new URLSearchParams(window.location.search).get('status') === 'success') {
-        document.getElementById('success-msg').style.display = 'flex';
-        window.history.replaceState({}, document.title, window.location.pathname);
-    }
-</script>
 </body>
 </html>
