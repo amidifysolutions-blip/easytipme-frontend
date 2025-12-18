@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EasyTipMe - Tipping</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        body { font-family: -apple-system, sans-serif; background-color: #f5f5f7; display: flex; justify-content: center; padding: 20px; }
+        .container { width: 100%; max-width: 400px; background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .staff-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .staff-name { font-size: 24px; font-weight: bold; }
+        .staff-img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; }
+        .tip-card { border: 1px solid #eee; border-radius: 15px; padding: 15px; margin-bottom: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
+        button.tip-btn { background: white; border: 1px solid #ddd; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        button.tip-btn:hover { border-color: #000; background: #fafafa; }
+        .input-custom { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; margin-top: 10px; box-sizing: border-box; text-align: center; }
+        .rating { text-align: center; color: #ddd; font-size: 30px; }
+        .pay-button { width: 100%; background: #000; color: white; padding: 15px; border-radius: 12px; border: none; font-size: 18px; margin-top: 20px; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="staff-info">
+        <div class="staff-name">Shani</div>
+        <img src="https://via.placeholder.com/60" class="staff-img" alt="Staff">
+    </div>
+
+    <div class="tip-card">
+        <div>Would you like to leave a tip?</div>
+        <div class="grid">
+            <button class="tip-btn" onclick="startPayment(15)">15 AED</button>
+            <button class="tip-btn" onclick="startPayment(30)">30 AED</button>
+            <button class="tip-btn" onclick="startPayment(50)">50 AED</button>
+            <button class="tip-btn" onclick="startPayment(100)">100 AED</button>
+        </div>
+        <input type="number" class="input-custom" placeholder="☕ Enter the tip amount">
+    </div>
+
+    <div class="tip-card">
+        <div style="margin-bottom: 10px;">Rate your visit</div>
+        <div class="rating">☆☆☆☆☆</div>
+    </div>
+
+    <div id="payment-element"></div>
+    <button id="submit-btn" class="pay-button">Pay Tip Now</button>
+</div>
+
+<script>
+    // استبدل هذا برابط الباك إند الخاص بك من Render
+    const API_URL = "https://easytipme-backend.onrender.com";
+    // استبدل هذا بمفتاح الـ Publishable Key من Stripe (pk_test_...)
+    const stripe = Stripe('pk_test_51QpPGt01TRhauBHP6dGYUaBYZJr9oHskEqZy9zWm8L6SPtG2kdzQS0MhPiatv3QDvzkTXvJDvbWMSIOUVOCcaswu003bDig62n'); 
+
+    async function startPayment(amount) {
+        const response = await fetch(`${API_URL}/create-payment-intent`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ amount: amount, currency: "aed" }),
+        });
+        const { clientSecret } = await response.json();
+        
+        console.log("Success! Received Secret:", clientSecret);
+        alert("Success! Link established with Render.");
+    }
+</script>
+
+</body>
+</html>
