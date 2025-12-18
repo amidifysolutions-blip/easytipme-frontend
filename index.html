@@ -9,30 +9,28 @@
         body { font-family: 'Inter', sans-serif; background-color: #f4f4f7; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
         .container { background: white; width: 100%; max-width: 400px; padding: 30px; border-radius: 28px; box-shadow: 0 15px 35px rgba(0,0,0,0.05); text-align: center; }
         
-        /* قسم صورة الموظف */
+        /* رأس الصفحة - صورة الموظف */
         .staff-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; text-align: left; }
         .staff-name { font-size: 24px; font-weight: 600; color: #111; }
-        .staff-img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; background: #eee; }
+        .staff-img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; background: #eee; border: 1px solid #ddd; }
 
         .tip-card { background: #fff; border: 1px solid #f0f0f0; border-radius: 20px; padding: 20px; margin-bottom: 20px; }
-        .instruction { color: #666; font-size: 15px; margin-bottom: 20px; }
+        .instruction { color: #666; font-size: 15px; margin-bottom: 20px; text-align: left; }
 
-        /* الأزرار */
+        /* شبكة الأزرار */
         .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
         .amount-btn { background: #fff; border: 1.5px solid #eee; padding: 15px 5px; border-radius: 14px; font-size: 15px; font-weight: 600; cursor: pointer; transition: 0.3s; color: #333; }
         .amount-btn:hover { border-color: #000; background: #f9f9f9; }
-        .amount-btn.active { border-color: #000; background: #f9f9f9; box-shadow: 0 0 0 1px #000; }
 
-        /* حقل المبلغ المخصص */
-        .custom-input-wrapper { display: none; align-items: center; background: #f3f3f5; border-radius: 14px; padding: 12px 15px; margin-top: 10px; border: 1px solid transparent; }
-        .custom-input-wrapper:focus-within { border-color: #ddd; background: #fff; }
+        /* صندوق فنجان القهوة والمبلغ المخصص */
+        .custom-box { display: none; align-items: center; background: #f3f3f5; border-radius: 14px; padding: 10px 15px; margin-top: 15px; border: 1px solid transparent; }
         .custom-input { border: none; background: transparent; flex: 1; font-size: 16px; outline: none; margin-left: 10px; }
-        
-        /* عنصر Stripe والزر النهائي */
-        #payment-element { margin-top: 25px; min-height: 50px; }
-        #submit-btn { background: #000; color: white; border: none; width: 100%; padding: 16px; border-radius: 14px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 20px; display: none; }
-        #submit-btn:disabled { background: #ccc; cursor: not-allowed; }
+        .pay-custom-btn { background: #007bff; color: white; border: none; padding: 8px 15px; border-radius: 10px; font-weight: 600; cursor: pointer; }
 
+        /* عناصر Stripe */
+        #payment-element { margin-top: 25px; }
+        .pay-button { background: #000; color: white; border: none; width: 100%; padding: 16px; border-radius: 14px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 20px; display: none; }
+        
         .rating { font-size: 28px; color: #eee; margin: 20px 0; }
     </style>
 </head>
@@ -55,15 +53,15 @@
             <button class="amount-btn" onclick="showCustom()">Other</button>
         </div>
 
-        <div id="custom-box" class="custom-input-wrapper">
+        <div id="custom-container" class="custom-box">
             <span>☕</span>
-            <input type="number" id="custom-val" class="custom-input" placeholder="Enter amount">
-            <button onclick="payCustom()" style="background: none; border: none; color: #007bff; font-weight: 600; cursor: pointer;">Pay</button>
+            <input type="number" id="custom-amount-input" class="custom-input" placeholder="Enter amount CA$">
+            <button class="pay-custom-btn" onclick="processCustomAmount()">Pay</button>
         </div>
     </div>
 
     <div id="payment-element"></div>
-    <button id="submit-btn" onclick="handleSubmit()">Pay Tip Now</button>
+    <button id="submit-btn" class="pay-button">Pay Tip Now</button>
 
     <div style="margin-top: 20px; color: #999; font-size: 13px;">Rate your visit</div>
     <div class="rating">☆☆☆☆☆</div>
@@ -71,36 +69,30 @@
 
 <script src="https://js.stripe.com/v3/"></script>
 <script>
-    const stripe = Stripe(pk_test_51QpPGt01TRhauBHP6dGYUaBYZJr9oHskEqZy9zWm8L6SPtG2kdzQS0MhPiatv3QDvzkTXvJDvbWMSIOUVOCcaswu003bDig62n'); // استبدله بمفتاح pk_test الخاص بك
+    const stripe = Stripe('pk_test_51QpPGt01TRhauBHP6dGYUaBYZJr9oHskEqZy9zWm8L6SPtG2kdzQS0MhPiatv3QDvzkTXvJDvbWMSIOUVOCcaswu003bDig62n'); 
     const API_URL = "https://easytipme-backend.onrender.com";
-    
     let elements;
 
-    function showCustom() { document.getElementById('custom-box').style.display = 'flex'; }
+    function showCustom() { document.getElementById('custom-container').style.display = 'flex'; }
 
-    function payCustom() {
-        const val = document.getElementById('custom-val').value;
-        if(val > 0) startPayment(val * 100);
+    function processCustomAmount() {
+        const amt = document.getElementById('custom-amount-input').value;
+        if (amt > 0) startPayment(Math.round(amt * 100));
     }
 
     async function startPayment(amount) {
-        // 1. طلب التشفير من السيرفر
         const response = await fetch(`${API_URL}/create-payment-intent`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ amount: amount, currency: "cad" }),
         });
-        
         const { clientSecret } = await response.json();
 
-        // 2. إعداد Stripe Element
         elements = stripe.elements({ clientSecret });
         const paymentElement = elements.create("payment");
-        
-        document.getElementById("payment-element").innerHTML = ""; // مسح أي محاولة سابقة
+        document.getElementById("payment-element").innerHTML = "";
         paymentElement.mount("#payment-element");
 
-        // 3. إظهار زر الدفع النهائي
         document.getElementById("submit-btn").style.display = "block";
     }
 
@@ -108,20 +100,13 @@
         const btn = document.getElementById("submit-btn");
         btn.disabled = true;
         btn.innerText = "Processing...";
-
         const { error } = await stripe.confirmPayment({
             elements,
-            confirmParams: {
-                return_url: window.location.href + "?status=success",
-            },
+            confirmParams: { return_url: window.location.origin + "/success.html" },
         });
-
-        if (error) {
-            alert(error.message);
-            btn.disabled = false;
-            btn.innerText = "Pay Tip Now";
-        }
+        if (error) { alert(error.message); btn.disabled = false; btn.innerText = "Pay Tip Now"; }
     }
+    document.getElementById("submit-btn").onclick = handleSubmit;
 </script>
 
 </body>
