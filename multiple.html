@@ -112,7 +112,12 @@
 
 <script>
     let currentAmt = 0;
-    const stripe = Stripe('YOUR_PUBLIC_KEY_HERE'); // ضع مفتاح Stripe الخاص بك هنا
+    // 1. ضع مفتاح Stripe العام (Publishable Key) الخاص بك هنا
+    const stripe = Stripe('pk_test_...ضع_مفتاحك_هنا...'); 
+    
+    // 2. ضع رابط الرندر (Backend) الخاص بك هنا
+    const API_URL = "https://your-backend.onrender.com"; 
+
     let elements;
 
     window.onload = function() {
@@ -122,8 +127,12 @@
         const loveTitle = document.getElementById('love-title');
 
         if (staffData.length > 0) {
+            // تحديث العنوان بناءً على الاختيار
             nameDisplay.innerText = staffData.length === 1 ? staffData[0].name : "Group Tip";
             loveTitle.innerText = staffData.length === 1 ? `Show ${staffData[0].name} some love? ♡` : "Show them some love? ♡";
+            
+            // عرض صور الموظفين المختارين فقط
+            container.innerHTML = ''; 
             staffData.forEach(p => {
                 container.innerHTML += `<img src="${p.img}" class="avatar-img" alt="${p.name}">`;
             });
@@ -131,25 +140,51 @@
     };
 
     async function tap(amt, btn) {
+        // تنسيق الأزرار
         document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentAmt = amt;
+        
+        // إظهار زر الدفع وتحديث المبلغ
         document.getElementById('submit-btn').style.display = 'block';
         updateTotal();
 
-        // نداء Stripe لإنشاء نظام الدفع
-        const response = await fetch("YOUR_BACKEND_URL/create-payment-intent", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ amount: currentAmt }),
-        });
-        const { clientSecret } = await response.json();
-        elements = stripe.elements({ clientSecret });
-        const paymentElement = elements.create("payment");
-        paymentElement.mount("#payment-element");
+        // تنظيف المربع قبل إنشاء وسيلة دفع جديدة
+        document.getElementById('payment-element').innerHTML = '';
+
+        // جلب قائمة الموظفين للتقسيم (Metadata)
+        const staffData = JSON.parse(localStorage.getItem('chosenStaff') || "[]");
+        const staffNames = staffData.map(p => p.name).join(', ');
+
+        // حساب المبلغ النهائي (مع أو بدون الرسوم)
+        const isCovering = document.getElementById('feeToggle').checked;
+        const finalAmt = isCovering ? Math.round(currentAmt * 1.12) : currentAmt;
+
+        // الاتصال بالخادم لإنشاء عملية الدفع وإرسال بيانات التقسيم
+        try {
+            const response = await fetch(`${API_URL}/create-payment-intent`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 
+                    amount: finalAmt,
+                    currency: "cad",
+                    metadata: { employees: staffNames } // إرسال الأسماء للتقسيم
+                }),
+            });
+
+            const { clientSecret } = await response.json();
+            
+            // تفعيل Stripe Elements
+            elements = stripe.elements({ clientSecret });
+            const paymentElement = elements.create("payment");
+            paymentElement.mount("#payment-element");
+        } catch (error) {
+            console.error("Error connecting to server:", error);
+        }
     }
 
     function updateTotal() {
+        if (currentAmt === 0) return;
         const isCovering = document.getElementById('feeToggle').checked;
         const total = isCovering ? (currentAmt * 1.12) : currentAmt;
         document.getElementById('submit-btn').innerText = `Pay CA$${(total/100).toFixed(2)} Now`;
@@ -158,9 +193,14 @@
     async function handleSubmit() {
         const { error } = await stripe.confirmPayment({
             elements,
-            confirmParams: { return_url: "your-success-page.html" },
+            confirmParams: { 
+                // تأكد من إنشاء صفحة success.html أو تغيير الرابط لصفحة شكر
+                return_url: window.location.origin + "/success.html" 
+            },
         });
+
+        if (error) {
+            alert(error.message);
+        }
     }
 </script>
-</body>
-</html>
