@@ -3,31 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mouneh - Choose Team</title>
+    <title>EasyTipMe - Choose Team</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #fafafa; display: flex; justify-content: center; padding-top: 20px; margin: 0; color: #1a1a1a; }
         .main-card { background: white; width: 92%; max-width: 380px; padding: 35px 25px; border-radius: 32px; border: 1px solid #f2f2f2; box-sizing: border-box; text-align: center; }
         
-        /* الهيدر الموحد: اللوجو + 30 حرف عنوان + 90 حرف بايو */
+        /* الهيدر: لوغو + 30 حرف اسم + 90 حرف بايو */
         .brand-logo { width: 64px; height: 64px; border-radius: 12px; margin-bottom: 12px; }
-        .brand-name { font-size: 20px; font-weight: 600; margin: 0; max-width: 30ch; overflow: hidden; white-space: nowrap; margin-left: auto; margin-right: auto; }
-        .brand-bio { font-size: 13px; color: #888; margin: 8px auto 25px; line-height: 1.4; max-width: 90ch; }
+        .brand-name { font-size: 20px; font-weight: 600; margin: 0; text-align: center; }
+        .brand-bio { font-size: 13px; color: #888; margin: 8px auto 25px; line-height: 1.4; text-align: center; }
 
         .selection-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 0 5px; }
-        .selection-title { font-size: 14px; font-weight: 500; color: #1a1a1a; }
+        .selection-title { font-size: 14px; font-weight: 500; }
 
-        /* Apple Toggle ناعم بدون أحمر */
+        /* Apple Switch الأخضر كما في صورتك */
         .switch { position: relative; display: inline-block; width: 42px; height: 24px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #e5e5ea; transition: .4s; border-radius: 24px; }
-        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        input:checked + .slider { background-color: #34c759; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #34c759; } /* اللون الأخضر المعتمد */
         input:checked + .slider:before { transform: translateX(18px); }
 
-        /* قائمة الموظفين */
         .staff-list { display: flex; flex-direction: column; gap: 12px; }
-        .staff-card { background: #fff; border: 1px solid #eee; border-radius: 20px; padding: 15px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: 0.2s; }
+        .staff-card { background: #fff; border: 1px solid #eee; border-radius: 20px; padding: 15px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
         .staff-info { display: flex; align-items: center; gap: 14px; }
         .avatar { width: 55px; height: 55px; border-radius: 50%; object-fit: cover; }
         .details { text-align: left; }
@@ -51,7 +50,7 @@
 <div class="main-card" id="mainCard">
     <img src="logo.png" class="brand-logo" alt="Logo">
     <h1 class="brand-name">Mouneh Lebanese Gourmet Store</h1>
-    <p class="brand-bio">Authentic flavors from Lebanon. Experience tradition in every bite of our gourmet selections delivered to you.</p>
+    <p class="brand-bio">Authentic Lebanese flavors and gourmet products delivered to your door with love and tradition in every bite.</p>
 
     <div class="selection-header">
         <span class="selection-title">Select multiple specialists</span>
@@ -62,7 +61,7 @@
     </div>
 
     <div class="staff-list">
-        <div class="staff-card" onclick="handleStaffClick('Shani', 'shani.jpg', this)">
+        <div class="staff-card" onclick="handleSelect('shani', this)">
             <div class="staff-info">
                 <img src="shani.jpg" class="avatar" alt="S">
                 <div class="details">
@@ -73,8 +72,7 @@
             <div class="chevron">›</div>
             <div class="checkbox-container"></div>
         </div>
-
-        <div class="staff-card" onclick="handleStaffClick('Bustani', 'bustani.jpg', this)">
+        <div class="staff-card" onclick="handleSelect('bustani', this)">
             <div class="staff-info">
                 <img src="bustani.jpg" class="avatar" alt="B">
                 <div class="details">
@@ -92,43 +90,38 @@
 
 <script>
     let isMulti = false;
-    let selectedStaff = [];
 
     function toggleMode() {
         isMulti = document.getElementById('multiModeToggle').checked;
         const card = document.getElementById('mainCard');
-        const nextBtn = document.getElementById('next-btn');
-        
         if(isMulti) {
             card.classList.add('multi-active');
         } else {
             card.classList.remove('multi-active');
-            nextBtn.style.display = 'none';
+            document.getElementById('next-btn').style.display = 'none';
             document.querySelectorAll('.staff-card').forEach(c => c.classList.remove('selected'));
-            selectedStaff = [];
         }
     }
 
-    function handleStaffClick(name, img, element) {
+    function handleSelect(pageId, element) {
         if(!isMulti) {
-            // اختيار فردي: نرسل الموظف الواحد فقط لصفحة الدفع
-            localStorage.setItem('chosenStaff', JSON.stringify([{name: name, img: img}]));
-            window.location.href = "multiple.html";
+            window.location.href = pageId + ".html";
         } else {
-            // وضع المالتيبل: إدارة القائمة
             element.classList.toggle('selected');
-            const index = selectedStaff.findIndex(s => s.name === name);
-            if (index > -1) {
-                selectedStaff.splice(index, 1);
-            } else {
-                selectedStaff.push({name: name, img: img});
-            }
-            document.getElementById('next-btn').style.display = selectedStaff.length > 0 ? 'block' : 'none';
+            const selectedCards = document.querySelectorAll('.staff-card.selected');
+            document.getElementById('next-btn').style.display = selectedCards.length > 0 ? 'block' : 'none';
         }
     }
 
     function goToMultiple() {
-        localStorage.setItem('chosenStaff', JSON.stringify(selectedStaff));
+        // نجمع الموظفين المختارين لإرسالهم للصفحة التالية
+        const selected = [];
+        document.querySelectorAll('.staff-card.selected').forEach(card => {
+            const name = card.querySelector('h3').innerText;
+            const img = card.querySelector('img').src;
+            selected.push({name: name, img: img});
+        });
+        localStorage.setItem('chosenStaff', JSON.stringify(selected));
         window.location.href = "multiple.html";
     }
 </script>
