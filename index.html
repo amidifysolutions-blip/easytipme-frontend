@@ -28,16 +28,19 @@
         <img src="https://via.placeholder.com/60" class="staff-img" alt="Staff">
     </div>
 
-    <div class="tip-card">
-        <div>Would you like to leave a tip?</div>
-       <div class="grid">
-    <button class="amount-btn" onclick="startPayment(1500)">$15</button>
-    <button class="amount-btn" onclick="startPayment(3000)">$30</button>
-    <button class="amount-btn" onclick="startPayment(5000)">$50</button>
-    <button class="amount-btn" onclick="startPayment(10000)">$100</button>
+<div class="grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px;">
+    <button class="amount-btn" onclick="startPayment(500)">CA$5</button>
+    <button class="amount-btn" onclick="startPayment(1000)">CA$10</button>
+    <button class="amount-btn" onclick="startPayment(1500)">CA$15</button>
+    <button class="amount-btn" onclick="startPayment(2500)">CA$25</button>
+    <button class="amount-btn" onclick="startPayment(5000)">CA$50</button>
+    <button class="amount-btn" onclick="showCustomInput()" id="custom-btn" style="background-color: #f0f0f0; color: #333;">Other</button>
 </div>
-        <input type="number" class="input-custom" placeholder="☕ Enter the tip amount">
-    </div>
+
+<div id="custom-amount-container" style="display: none; margin-top: 10px; text-align: center;">
+    <input type="number" id="custom-amount-input" placeholder="Enter amount CA$" style="padding: 10px; border: 1px solid #ccc; border-radius: 5px; width: 60%;">
+    <button onclick="processCustomAmount()" style="padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">Pay</button>
+</div>
 
     <div class="tip-card">
         <div style="margin-bottom: 10px;">Rate your visit</div>
@@ -65,6 +68,21 @@
         console.log("Success! Received Secret:", clientSecret);
         alert("Success! Link established with Render.");
     }
+    // وظيفة لإظهار حقل الإدخال عند الضغط على Other
+function showCustomInput() {
+    document.getElementById('custom-amount-container').style.display = 'block';
+}
+
+// وظيفة لمعالجة المبلغ المخصص وإرساله للسيرفر
+function processCustomAmount() {
+    const amountInput = document.getElementById('custom-amount-input').value;
+    if (amountInput && amountInput > 0) {
+        // نضرب في 100 لأن Stripe يحسب بالسنت (مثلاً 5 دولار = 500 سنت)
+        startPayment(Math.round(amountInput * 100));
+    } else {
+        alert("Please enter a valid amount");
+    }
+}
 </script>
 
 </body>
