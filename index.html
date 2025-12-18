@@ -7,70 +7,86 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #fafafa; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: #1a1a1a; }
-        .main-card { background: white; width: 100%; max-width: 380px; padding: 40px 25px; border-radius: 32px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); text-align: center; border: 1px solid #f0f0f0; position: relative; }
+        .main-card { background: white; width: 100%; max-width: 380px; padding: 30px 20px; border-radius: 32px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); position: relative; border: 1px solid #f0f0f0; }
         
-        .staff-header { display: flex; flex-direction: column; align-items: center; margin-bottom: 30px; }
-        .staff-img { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 12px; }
-        .staff-name { font-size: 22px; font-weight: 600; }
-        .instruction { color: #a0a0a0; font-size: 14px; margin-top: 5px; }
+        /* رأس الصفحة - الصورة يمين والاسم يسار */
+        .staff-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .staff-info { text-align: left; }
+        .staff-name { font-size: 22px; font-weight: 600; margin: 0; }
+        .staff-img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 1.5px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
 
-        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 25px 0; }
-        .amount-btn { background: #fff; border: 1.5px solid #eeeeee; padding: 16px 5px; border-radius: 16px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; color: #1a1a1a; }
-        .amount-btn:hover { border-color: #1a1a1a; background: #fafafa; }
-        .amount-btn.active { border-color: #1a1a1a; background: #fff; box-shadow: inset 0 0 0 1px #1a1a1a; }
+        .question { color: #888; font-size: 14px; margin-bottom: 20px; text-align: left; font-weight: 400; }
 
-        .custom-box { display: none; align-items: center; background: #f8f8f8; border-radius: 16px; padding: 12px 20px; margin-top: 10px; border: 1px solid #eee; }
-        .custom-input { border: none; background: transparent; flex: 1; font-size: 16px; outline: none; color: #1a1a1a; font-family: inherit; }
-        .next-btn { background: none; border: none; font-weight: 600; cursor: pointer; color: #1a1a1a; font-size: 14px; padding-left: 10px; }
+        /* شبكة الأزرار - CA$ */
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
+        .amount-btn { background: #fff; border: 1px solid #eeeeee; padding: 15px 5px; border-radius: 14px; font-size: 14px; font-weight: 500; cursor: pointer; transition: 0.2s; color: #1a1a1a; }
+        .amount-btn:hover { border-color: #1a1a1a; }
+        .amount-btn.active { border-color: #1a1a1a; box-shadow: inset 0 0 0 1px #1a1a1a; }
+
+        /* حقل Other وتصغير نص الحد الأدنى */
+        .custom-box { display: none; align-items: center; background: #f8f8f8; border-radius: 16px; padding: 10px 15px; margin-top: 10px; border: 1px solid #eee; }
+        .custom-input { border: none; background: transparent; flex: 1; font-size: 15px; outline: none; }
+        .custom-input::placeholder { font-size: 11px; color: #b0b0b0; } /* نص الحد الأدنى الصغير */
+        .next-btn { background: none; border: none; font-weight: 600; cursor: pointer; color: #1a1a1a; font-size: 13px; }
 
         #payment-element { margin-top: 20px; }
-        #submit-btn { background: #1a1a1a; color: white; border: none; width: 100%; padding: 18px; border-radius: 18px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 25px; display: none; }
+        #submit-btn { background: #1a1a1a; color: white; border: none; width: 100%; padding: 18px; border-radius: 18px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 20px; display: none; }
 
-        .rating-container { margin-top: 35px; padding-top: 20px; border-top: 1px solid #f5f5f5; }
-        .rating-text { font-size: 13px; color: #b0b0b0; margin-bottom: 10px; }
+        /* التقييم والنجوم */
+        .rating-container { margin-top: 30px; padding-top: 15px; border-top: 1px solid #f5f5f5; text-align: center; }
         .stars { display: flex; justify-content: center; gap: 8px; direction: rtl; }
-        .stars label { font-size: 30px; color: #e0e0e0; cursor: pointer; transition: color 0.2s; }
+        .stars label { font-size: 28px; color: #e0e0e0; cursor: pointer; transition: 0.2s; }
         .stars label:hover, .stars label:hover ~ label, .stars input:checked ~ label { color: #FFD700; }
         .stars input { display: none; }
 
+        /* شاشة النجاح الأنيقة مع علامة الصح */
         #success-msg { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #fff; border-radius: 32px; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
+        .checkmark { width: 60px; height: 60px; border-radius: 50%; display: block; stroke-width: 2; stroke: #1a1a1a; stroke-miterlimit: 10; margin: 10% auto; box-shadow: inset 0px 0px 0px #1a1a1a; animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both; }
+        .checkmark__check { transform-origin: 50% 50%; stroke-dasharray: 48; stroke-dasharray: 48; animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards; }
+        @keyframes stroke { 100% { stroke-dashoffset: 0; } }
+        @keyframes scale { 0%, 100% { transform: none; } 50% { transform: scale3d(1.1, 1.1, 1); } }
     </style>
 </head>
 <body>
 
 <div class="main-card">
     <div id="success-msg">
-        <h2 style="font-weight: 500;">Thank You</h2>
-        <p style="color: #86868b;">Your tip has been received.</p>
-        <button onclick="location.reload()" style="background:none; border:none; color:#1a1a1a; cursor:pointer; font-weight:600; margin-top:20px; text-decoration: underline;">Done</button>
+        <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+            <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+            <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+        </svg>
+        <h2 style="font-weight: 500; margin-bottom: 5px;">Thank You</h2>
+        <p style="color: #888; font-size: 14px;">Your tip was sent successfully.</p>
+        <button onclick="location.reload()" style="background:none; border:none; color:#1a1a1a; font-weight:600; cursor:pointer; margin-top:30px; text-decoration: underline;">Done</button>
     </div>
 
     <div class="staff-header">
-        <img src="https://via.placeholder.com/90" class="staff-img" alt="Staff">
-        <div class="staff-name">Shani</div>
-        <div class="instruction">Choose a tip amount</div>
+        <div class="staff-info">
+            <h1 class="staff-name">Shani</h1>
+        </div>
+        <img src="https://via.placeholder.com/60" class="staff-img" alt="Staff">
     </div>
+
+    <div class="question">Would you like to leave a tip?</div>
     
     <div class="grid">
-        <button class="amount-btn" onclick="selectFixed(500, this)">CA$5</button>
-        <button class="amount-btn" onclick="selectFixed(1000, this)">CA$10</button>
-        <button class="amount-btn" onclick="selectFixed(1500, this)">CA$15</button>
-        <button class="amount-btn" onclick="selectFixed(2500, this)">CA$25</button>
-        <button class="amount-btn" onclick="selectFixed(5000, this)">CA$50</button>
-        <button class="amount-btn" id="other-btn" onclick="showCustom()">Other</button>
+        <button class="amount-btn" onclick="tap(500, this)">CA$5</button>
+        <button class="amount-btn" onclick="tap(1000, this)">CA$10</button>
+        <button class="amount-btn" onclick="tap(1500, this)">CA$15</button>
+        <button class="amount-btn" onclick="tap(2500, this)">CA$25</button>
+        <button class="amount-btn" onclick="tap(5000, this)">CA$50</button>
+        <button class="amount-btn" id="other-btn" onclick="showOth()">Other</button>
     </div>
 
     <div id="custom-container" class="custom-box">
-        <span>☕</span>
-        <input type="number" id="custom-val" class="custom-input" placeholder="Amount CA$">
-        <button class="next-btn" onclick="processCustom()">Next</button>
+        <input type="number" id="custom-val" class="custom-input" placeholder="Min. CA$3.00">
+        <button class="next-btn" onclick="procOth()">Next</button>
     </div>
 
     <div id="payment-element"></div>
     <button id="submit-btn">Pay Now</button>
 
     <div class="rating-container">
-        <div class="rating-text">Rate your visit</div>
         <div class="stars">
             <input type="radio" id="s5" name="rating"><label for="s5">★</label>
             <input type="radio" id="s4" name="rating"><label for="s4">★</label>
@@ -87,70 +103,57 @@
     const API_URL = "https://easytipme-backend.onrender.com";
     let elements;
 
-    function selectFixed(amt, btn) {
-        // 1. مسح الهوفر والحالة من الأزرار الأخرى
+    function tap(amt, btn) {
         document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        
-        // 2. مسح خانة Other تماماً لضمان عدم اللخبطة
         document.getElementById('custom-container').style.display = 'none';
-        document.getElementById('custom-val').value = "";
-        
-        startPayment(amt);
+        start(amt);
     }
 
-    function showCustom() { 
+    function showOth() {
         document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
         document.getElementById('other-btn').classList.add('active');
         document.getElementById('custom-container').style.display = 'flex';
-        resetStripe(); // مسح أي دفع قديم
+        reset();
     }
 
-    function processCustom() {
-        const val = parseFloat(document.getElementById('custom-val').value);
-        if (val >= 3) {
-            startPayment(Math.round(val * 100));
-        } else {
-            document.getElementById('custom-val').value = "";
-            document.getElementById('custom-val').placeholder = "Min. CA$3.00";
-        }
+    function procOth() {
+        const v = parseFloat(document.getElementById('custom-val').value);
+        if (v >= 3) start(Math.round(v * 100));
+        else { document.getElementById('custom-val').value = ""; document.getElementById('custom-val').placeholder = "Minimum is CA$3.00"; }
     }
 
-    function resetStripe() {
+    function reset() {
         document.getElementById("payment-element").innerHTML = "";
         document.getElementById("submit-btn").style.display = "none";
+        document.getElementById("submit-btn").innerText = "Pay Now";
+        document.getElementById("submit-btn").disabled = false;
     }
 
-    async function startPayment(amount) {
-        resetStripe();
-        document.getElementById("payment-element").innerHTML = "<p style='color:#a0a0a0; font-size:13px;'>Connecting to CA$ Network...</p>";
-
-        const response = await fetch(`${API_URL}/create-payment-intent`, {
+    async function start(amount) {
+        reset();
+        document.getElementById("payment-element").innerHTML = "<p style='color:#bbb;font-size:12px;'>Securing...</p>";
+        const res = await fetch(`${API_URL}/create-payment-intent`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ amount, currency: "cad" }),
         });
-        const { clientSecret } = await response.json();
-
-        elements = stripe.elements({ 
-            clientSecret,
-            appearance: { theme: 'flat', variables: { colorPrimary: '#1a1a1a', borderRadius: '18px' } }
-        });
-
-        const paymentElement = elements.create("payment", { layout: "tabs" });
+        const { clientSecret } = await res.json();
+        elements = stripe.elements({ clientSecret, appearance: { theme: 'flat', variables: { colorPrimary: '#1a1a1a' } } });
+        const pe = elements.create("payment", { layout: "tabs" });
         document.getElementById("payment-element").innerHTML = "";
-        paymentElement.mount("#payment-element");
+        pe.mount("#payment-element");
         document.getElementById("submit-btn").style.display = "block";
     }
 
     document.getElementById("submit-btn").onclick = async () => {
-        const btn = document.getElementById("submit-btn");
-        btn.disabled = true;
-        btn.innerText = "Processing...";
-        await stripe.confirmPayment({
+        const b = document.getElementById("submit-btn");
+        b.disabled = true; b.innerText = "Processing...";
+        const r = await stripe.confirmPayment({
             elements,
-            confirmParams: { return_url: window.location.origin + "/?status=success" },
+            confirmParams: { return_url: window.location.href + "?status=success" },
         });
+        if (r.error) { b.disabled = false; b.innerText = "Pay Now"; }
     };
 
     if (new URLSearchParams(window.location.search).get('status') === 'success') {
