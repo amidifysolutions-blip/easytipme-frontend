@@ -3,86 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EasyTipMe - Tipping</title>
-    <script src="https://js.stripe.com/v3/"></script>
+    <title>EasyTipMe - Shani</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        body { font-family: -apple-system, sans-serif; background-color: #f5f5f7; display: flex; justify-content: center; padding: 20px; }
-        .container { width: 100%; max-width: 400px; background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .staff-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .staff-name { font-size: 24px; font-weight: bold; }
-        .staff-img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; }
-        .tip-card { border: 1px solid #eee; border-radius: 15px; padding: 15px; margin-bottom: 20px; }
-        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
-        button.tip-btn { background: white; border: 1px solid #ddd; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        button.tip-btn:hover { border-color: #000; background: #fafafa; }
-        .input-custom { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; margin-top: 10px; box-sizing: border-box; text-align: center; }
-        .rating { text-align: center; color: #ddd; font-size: 30px; }
-        .pay-button { width: 100%; background: #000; color: white; padding: 15px; border-radius: 12px; border: none; font-size: 18px; margin-top: 20px; display: none; }
+        body { font-family: 'Inter', sans-serif; background-color: #f4f4f7; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+        .container { background: white; width: 100%; max-width: 400px; padding: 30px; border-radius: 28px; box-shadow: 0 15px 35px rgba(0,0,0,0.05); text-align: center; }
+        
+        /* قسم صورة الموظف */
+        .staff-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; text-align: left; }
+        .staff-name { font-size: 24px; font-weight: 600; color: #111; }
+        .staff-img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; background: #eee; }
+
+        .tip-card { background: #fff; border: 1px solid #f0f0f0; border-radius: 20px; padding: 20px; margin-bottom: 20px; }
+        .instruction { color: #666; font-size: 15px; margin-bottom: 20px; }
+
+        /* الأزرار */
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+        .amount-btn { background: #fff; border: 1.5px solid #eee; padding: 15px 5px; border-radius: 14px; font-size: 15px; font-weight: 600; cursor: pointer; transition: 0.3s; color: #333; }
+        .amount-btn:hover { border-color: #000; background: #f9f9f9; }
+        .amount-btn.active { border-color: #000; background: #f9f9f9; box-shadow: 0 0 0 1px #000; }
+
+        /* حقل المبلغ المخصص */
+        .custom-input-wrapper { display: none; align-items: center; background: #f3f3f5; border-radius: 14px; padding: 12px 15px; margin-top: 10px; border: 1px solid transparent; }
+        .custom-input-wrapper:focus-within { border-color: #ddd; background: #fff; }
+        .custom-input { border: none; background: transparent; flex: 1; font-size: 16px; outline: none; margin-left: 10px; }
+        
+        /* عنصر Stripe والزر النهائي */
+        #payment-element { margin-top: 25px; min-height: 50px; }
+        #submit-btn { background: #000; color: white; border: none; width: 100%; padding: 16px; border-radius: 14px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 20px; display: none; }
+        #submit-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+        .rating { font-size: 28px; color: #eee; margin: 20px 0; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="staff-info">
+    <div class="staff-header">
         <div class="staff-name">Shani</div>
         <img src="https://via.placeholder.com/60" class="staff-img" alt="Staff">
     </div>
 
-<div class="grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px;">
-    <button class="amount-btn" onclick="startPayment(500)">CA$5</button>
-    <button class="amount-btn" onclick="startPayment(1000)">CA$10</button>
-    <button class="amount-btn" onclick="startPayment(1500)">CA$15</button>
-    <button class="amount-btn" onclick="startPayment(2500)">CA$25</button>
-    <button class="amount-btn" onclick="startPayment(5000)">CA$50</button>
-    <button class="amount-btn" onclick="showCustomInput()" id="custom-btn" style="background-color: #f0f0f0; color: #333;">Other</button>
-</div>
-
-<div id="custom-amount-container" style="display: none; margin-top: 10px; text-align: center;">
-    <input type="number" id="custom-amount-input" placeholder="Enter amount CA$" style="padding: 10px; border: 1px solid #ccc; border-radius: 5px; width: 60%;">
-    <button onclick="processCustomAmount()" style="padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">Pay</button>
-</div>
-
     <div class="tip-card">
-        <div style="margin-bottom: 10px;">Rate your visit</div>
-        <div class="rating">☆☆☆☆☆</div>
+        <div class="instruction">Would you like to leave a tip?</div>
+        <div class="grid">
+            <button class="amount-btn" onclick="startPayment(500)">CA$5</button>
+            <button class="amount-btn" onclick="startPayment(1000)">CA$10</button>
+            <button class="amount-btn" onclick="startPayment(1500)">CA$15</button>
+            <button class="amount-btn" onclick="startPayment(2500)">CA$25</button>
+            <button class="amount-btn" onclick="startPayment(5000)">CA$50</button>
+            <button class="amount-btn" onclick="showCustom()">Other</button>
+        </div>
+
+        <div id="custom-box" class="custom-input-wrapper">
+            <span>☕</span>
+            <input type="number" id="custom-val" class="custom-input" placeholder="Enter amount">
+            <button onclick="payCustom()" style="background: none; border: none; color: #007bff; font-weight: 600; cursor: pointer;">Pay</button>
+        </div>
     </div>
 
     <div id="payment-element"></div>
-    <button id="submit-btn" class="pay-button">Pay Tip Now</button>
+    <button id="submit-btn" onclick="handleSubmit()">Pay Tip Now</button>
+
+    <div style="margin-top: 20px; color: #999; font-size: 13px;">Rate your visit</div>
+    <div class="rating">☆☆☆☆☆</div>
 </div>
 
+<script src="https://js.stripe.com/v3/"></script>
 <script>
-    // استبدل هذا برابط الباك إند الخاص بك من Render
+    const stripe = Stripe(pk_test_51QpPGt01TRhauBHP6dGYUaBYZJr9oHskEqZy9zWm8L6SPtG2kdzQS0MhPiatv3QDvzkTXvJDvbWMSIOUVOCcaswu003bDig62n'); // استبدله بمفتاح pk_test الخاص بك
     const API_URL = "https://easytipme-backend.onrender.com";
-    // استبدل هذا بمفتاح الـ Publishable Key من Stripe (pk_test_...)
-    const stripe = Stripe('pk_test_51QpPGt01TRhauBHP6dGYUaBYZJr9oHskEqZy9zWm8L6SPtG2kdzQS0MhPiatv3QDvzkTXvJDvbWMSIOUVOCcaswu003bDig62n'); 
+    
+    let elements;
+
+    function showCustom() { document.getElementById('custom-box').style.display = 'flex'; }
+
+    function payCustom() {
+        const val = document.getElementById('custom-val').value;
+        if(val > 0) startPayment(val * 100);
+    }
 
     async function startPayment(amount) {
+        // 1. طلب التشفير من السيرفر
         const response = await fetch(`${API_URL}/create-payment-intent`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ amount: amount, currency: "cad" }),
         });
-        const { clientSecret } = await response.json();
         
-        console.log("Success! Received Secret:", clientSecret);
-        alert("Success! Link established with Render.");
-    }
-    // وظيفة لإظهار حقل الإدخال عند الضغط على Other
-function showCustomInput() {
-    document.getElementById('custom-amount-container').style.display = 'block';
-}
+        const { clientSecret } = await response.json();
 
-// وظيفة لمعالجة المبلغ المخصص وإرساله للسيرفر
-function processCustomAmount() {
-    const amountInput = document.getElementById('custom-amount-input').value;
-    if (amountInput && amountInput > 0) {
-        // نضرب في 100 لأن Stripe يحسب بالسنت (مثلاً 5 دولار = 500 سنت)
-        startPayment(Math.round(amountInput * 100));
-    } else {
-        alert("Please enter a valid amount");
+        // 2. إعداد Stripe Element
+        elements = stripe.elements({ clientSecret });
+        const paymentElement = elements.create("payment");
+        
+        document.getElementById("payment-element").innerHTML = ""; // مسح أي محاولة سابقة
+        paymentElement.mount("#payment-element");
+
+        // 3. إظهار زر الدفع النهائي
+        document.getElementById("submit-btn").style.display = "block";
     }
-}
+
+    async function handleSubmit() {
+        const btn = document.getElementById("submit-btn");
+        btn.disabled = true;
+        btn.innerText = "Processing...";
+
+        const { error } = await stripe.confirmPayment({
+            elements,
+            confirmParams: {
+                return_url: window.location.href + "?status=success",
+            },
+        });
+
+        if (error) {
+            alert(error.message);
+            btn.disabled = false;
+            btn.innerText = "Pay Tip Now";
+        }
+    }
 </script>
 
 </body>
