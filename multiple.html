@@ -3,37 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EasyTipMe - Group Payment</title>
+    <title>EasyTipMe - Payment</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        /* التنسيقات الأصلية من ملف شاني المرفق */
         body { font-family: 'Inter', sans-serif; background-color: #fafafa; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; margin: 0; color: #1a1a1a; padding-top: 20px; }
-        .main-card { background: white; width: 92%; max-width: 380px; padding: 35px 25px; border-radius: 32px; box-shadow: 0 4px 25px rgba(0,0,0,0.03); position: relative; border: 1px solid #f2f2f2; box-sizing: border-box; }
+        .main-card { background: white; width: 92%; max-width: 380px; padding: 25px 25px 35px; border-radius: 32px; box-shadow: 0 4px 25px rgba(0,0,0,0.03); position: relative; border: 1px solid #f2f2f2; box-sizing: border-box; }
         
-        /* الهيدر الموحد */
-        .brand-header-official { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #f5f5f5; }
-        .brand-logo-img { width: 28px; height: 28px; border-radius: 6px; }
-        .brand-name-text { font-size: 16px; font-weight: 600; }
+        /* زر الرجوع الناعم */
+        .back-nav { display: flex; align-items: center; margin-bottom: 15px; }
+        .back-btn { background: none; border: none; color: #888; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 0; }
 
-        /* تعديل الهيدر ليدعم صور متعددة كما طلبت */
-        .staff-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        /* الهيدر الموحد: 30 حرف للعنوان و 90 للبايو */
+        .brand-header { text-align: center; margin-bottom: 25px; border-bottom: 1px solid #f8f8f8; padding-bottom: 20px; }
+        .brand-logo { width: 64px; height: 64px; border-radius: 14px; margin-bottom: 12px; }
+        .brand-name { font-size: 20px; font-weight: 600; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 30ch; }
+        .brand-bio { font-size: 13px; color: #888; margin: 8px auto 0; line-height: 1.4; max-width: 90ch; }
+
+        /* منطقة الموظف */
+        .staff-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         .staff-name { font-size: 24px; font-weight: 600; margin: 0; }
-        
-        .avatar-stack { display: flex; align-items: center; }
-        .avatar-stack img { width: 55px; height: 55px; border-radius: 50%; border: 2px solid #fff; margin-left: -20px; object-fit: cover; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .avatar-stack img:first-child { margin-left: 0; }
+        .avatar-container { display: flex; align-items: center; }
+        .avatar-img { width: 55px; height: 55px; border-radius: 50%; border: 2px solid #fff; margin-left: -20px; object-fit: cover; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .avatar-img:first-child { margin-left: 0; }
 
-        .question { color: #888; font-size: 15px; margin-bottom: 25px; text-align: left; }
+        .question { color: #888; font-size: 15px; margin-bottom: 20px; text-align: left; }
 
-        /* شبكة القيم الستة كما في شاني تماماً */
+        /* شبكة القيم الستة */
         .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
-        .amount-btn { background: #fff; border: 1px solid #eeeeee; padding: 18px 5px; border-radius: 14px; font-size: 14px; font-weight: 600; cursor: pointer; color: #1a1a1a; -webkit-tap-highlight-color: transparent; }
-        .amount-btn.active { border-color: #1a1a1a; background: #fff; box-shadow: inset 0 0 0 1px #1a1a1a; }
+        .amount-btn { background: #fff; border: 1px solid #eeeeee; padding: 18px 5px; border-radius: 14px; font-size: 14px; font-weight: 600; cursor: pointer; color: #1a1a1a; transition: 0.2s; }
+        .amount-btn.active { border-color: #1a1a1a; box-shadow: inset 0 0 0 1px #1a1a1a; }
 
         /* صندوق Love المعتمد بصيغة الجمع */
-        .love-container { background: #f8f8f8; border-radius: 20px; padding: 15px; margin: 20px 0; border: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; text-align: left; }
+        .love-container { background: #f8f8f8; border-radius: 20px; padding: 18px; margin: 20px 0; border: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; text-align: left; }
         .love-info h4 { margin: 0; font-size: 14px; font-weight: 600; }
-        .love-info p { margin: 3px 0 0; font-size: 11px; color: #888; }
+        .love-info p { margin: 4px 0 0; font-size: 11px; color: #888; }
         
         .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
         .switch input { opacity: 0; width: 0; height: 0; }
@@ -42,35 +45,44 @@
         input:checked + .slider { background-color: #34c759; }
         input:checked + .slider:before { transform: translateX(18px); }
 
-        #submit-btn { background: #1a1a1a; color: white; border: none; width: 100%; padding: 18px; border-radius: 18px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 10px; display: none; }
+        /* منطقة نظام الدفع Stripe */
+        #payment-element { margin-top: 20px; }
+        #submit-btn { background: #1a1a1a; color: white; border: none; width: 100%; padding: 18px; border-radius: 18px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 20px; display: none; }
         
-        /* النجوم والتقييم كما هي في ملف شاني */
+        .fee-info { font-size: 11px; color: #b0b0b0; text-align: center; margin-top: 10px; }
+
+        /* النجوم والتقييم */
         .rating-container { margin-top: 40px; padding-top: 25px; border-top: 1px solid #f5f5f5; text-align: center; }
         .stars { display: flex; justify-content: center; gap: 12px; direction: rtl; }
         .stars label { font-size: 34px; color: #e8e8e8; cursor: pointer; }
         .stars label:hover, .stars label:hover ~ label, .stars input:checked ~ label { color: #FFD700; }
         .stars input { display: none; }
-
-        .fee-info-text { font-size: 11px; color: #b0b0b0; text-align: center; margin-top: 12px; }
     </style>
 </head>
 <body>
 
 <div class="main-card">
-    <div class="brand-header-official">
-        <img src="logo.png" class="brand-logo-img" alt="L">
-        <span class="brand-name-text">Mouneh</span>
+    <div class="back-nav">
+        <button class="back-btn" onclick="window.history.back()">
+            <span style="font-size: 18px;">‹</span> Back
+        </button>
+    </div>
+
+    <div class="brand-header">
+        <img src="logo.png" class="brand-logo" alt="Logo">
+        <h1 class="brand-name">Mouneh Lebanese Gourmet Store</h1>
+        <p class="brand-bio">Authentic Lebanese flavors and gourmet products delivered to your door with love and tradition.</p>
     </div>
 
     <div class="staff-header">
-        <h1 class="staff-name">Group Tip</h1>
-        <div class="avatar-stack">
-            <img src="shani.jpg" alt="S">
-            <img src="bustani.jpg" alt="B">
+        <h1 class="staff-name" id="display-name">Group Tip</h1>
+        <div class="avatar-container" id="avatar-stack">
+            <img src="shani.jpg" class="avatar-img" alt="S">
+            <img src="bustani.jpg" class="avatar-img" alt="B">
         </div>
     </div>
 
-    <div class="question">Would you like to leave a tip for the team?</div>
+    <div class="question">How much would you like to tip the team?</div>
     
     <div class="grid">
         <button class="amount-btn" onclick="tap(500, this)">CA$5</button>
@@ -78,7 +90,7 @@
         <button class="amount-btn" onclick="tap(1500, this)">CA$15</button>
         <button class="amount-btn" onclick="tap(2500, this)">CA$25</button>
         <button class="amount-btn" onclick="tap(5000, this)">CA$50</button>
-        <button class="amount-btn" id="other-btn" onclick="showOth()">Other</button>
+        <button class="amount-btn">Other</button>
     </div>
 
     <div class="love-container">
@@ -94,10 +106,10 @@
 
     <div id="payment-element"></div>
     <button id="submit-btn">Pay Now</button>
-    <div id="fee-summary" class="fee-info-text"></div>
+    <div id="fee-summary" class="fee-info"></div>
 
     <div class="rating-container">
-        <span style="font-size: 16px; font-weight: 500; display: block; margin-bottom: 15px;">Rate your visit</span>
+        <span style="display:block; margin-bottom:15px; font-weight:500;">Rate your visit</span>
         <div class="stars">
             <input type="radio" id="s5" name="rating"><label for="s5">★</label>
             <input type="radio" id="s4" name="rating"><label for="s4">★</label>
@@ -116,6 +128,7 @@
         document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentAmt = amt;
+        document.getElementById('submit-btn').style.display = 'block';
         updateTotal();
     }
 
@@ -125,9 +138,7 @@
         const feeVal = currentAmt * FEE;
         const total = isCovering ? (currentAmt + feeVal) : currentAmt;
         
-        const btn = document.getElementById('submit-btn');
-        btn.style.display = 'block';
-        btn.innerText = `Pay CA$${(total/100).toFixed(2)} Now`;
+        document.getElementById('submit-btn').innerText = `Pay CA$${(total/100).toFixed(2)} Now`;
         
         const info = document.getElementById('fee-summary');
         if(isCovering) {
