@@ -7,61 +7,82 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #ffffff; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: #1d1d1f; -webkit-font-smoothing: antialiased; }
-        .container { background: #ffffff; width: 100%; max-width: 360px; padding: 50px 24px; text-align: center; position: relative; }
-        .staff-header { display: flex; flex-direction: column; align-items: center; margin-bottom: 40px; }
-        .staff-img { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; background: #f5f5f7; margin-bottom: 16px; border: 0.5px solid #eee; }
+        .container { background: #ffffff; width: 100%; max-width: 360px; padding: 40px 24px; text-align: center; position: relative; }
+        
+        .staff-header { display: flex; flex-direction: column; align-items: center; margin-bottom: 30px; }
+        .staff-img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; background: #f5f5f7; margin-bottom: 15px; border: 0.5px solid #eee; }
         .staff-name { font-size: 24px; font-weight: 500; }
-        .instruction { color: #86868b; font-size: 15px; margin-top: 6px; }
+        .instruction { color: #86868b; font-size: 15px; margin-top: 5px; }
 
-        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 30px 0; }
-        .amount-btn { background: #f5f5f7; border: none; padding: 18px 0; border-radius: 14px; font-size: 17px; font-weight: 500; cursor: pointer; color: #1d1d1f; }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 25px 0; }
+        
+        /* تحسين الـ Hover والضغط */
+        .amount-btn { background: #f5f5f7; border: 2px solid transparent; padding: 18px 0; border-radius: 14px; font-size: 17px; font-weight: 500; cursor: pointer; transition: all 0.2s; color: #1d1d1f; }
+        .amount-btn:hover { background: #e8e8ed; border-color: #d2d2d7; }
+        .amount-btn.active { border-color: #000; background: #fff; }
         .amount-btn span { font-weight: 300; font-size: 13px; color: #a1a1a6; }
 
-        .custom-box { display: none; align-items: center; background: #f5f5f7; border-radius: 14px; padding: 14px 20px; margin-top: 12px; }
+        .custom-box { display: none; align-items: center; background: #f5f5f7; border-radius: 14px; padding: 12px 18px; margin-top: 10px; border: 1px solid #eee; }
         .custom-input { border: none; background: transparent; flex: 1; font-size: 17px; outline: none; color: #1d1d1f; font-weight: 500; width: 100%; }
-        /* تصغير حجم رسالة الخطأ لتكون أنيقة */
-        .custom-input::placeholder { font-size: 14px; color: #a1a1a6; font-weight: 400; }
-        .next-link { background: none; border: none; font-weight: 600; cursor: pointer; color: #1d1d1f; font-size: 15px; }
+        .custom-input::placeholder { font-size: 14px; color: #a1a1a6; }
+        .next-btn { background: none; border: none; font-weight: 600; cursor: pointer; color: #000; font-size: 14px; padding: 5px 10px; border-radius: 8px; }
+        .next-btn:hover { background: #e8e8ed; }
 
-        #payment-element { margin-top: 30px; min-height: 100px; }
-        #submit-btn { background: #000000; color: #ffffff; border: none; width: 100%; padding: 18px; border-radius: 16px; font-size: 17px; font-weight: 500; cursor: pointer; margin-top: 30px; display: none; }
-        
-        #success-msg { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
-        .check-icon { width: 70px; height: 70px; background: #f5f5f7; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; margin-bottom: 20px; }
+        #payment-element { margin-top: 25px; min-height: 50px; }
+        #submit-btn { background: #000; color: #fff; border: none; width: 100%; padding: 18px; border-radius: 16px; font-size: 17px; font-weight: 600; cursor: pointer; margin-top: 25px; display: none; }
+        #submit-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+        /* إعادة النجوم بتصميم أرقى */
+        .rating-container { margin-top: 40px; border-top: 1px solid #f2f2f2; padding-top: 20px; }
+        .stars { display: flex; justify-content: center; gap: 8px; direction: rtl; }
+        .stars input { display: none; }
+        .stars label { font-size: 32px; color: #e8e8ed; cursor: pointer; transition: color 0.2s; }
+        .stars label:hover, .stars label:hover ~ label, .stars input:checked ~ label { color: #FFD700; }
+
+        #success-msg { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #fff; flex-direction: column; justify-content: center; align-items: center; z-index: 100; border-radius: 32px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div id="success-msg">
-        <div class="check-icon">✓</div>
-        <h2 style="font-weight: 500; margin: 0;">Thank You</h2>
-        <p style="color: #86868b; margin-top: 8px;">Your tip has been received.</p>
-        <button onclick="location.reload()" style="background:none; border:none; color:#1d1d1f; cursor:pointer; font-size:16px; font-weight:600; margin-top:30px; text-decoration: underline;">Done</button>
+        <h2 style="font-weight: 500;">Thank You</h2>
+        <p style="color: #86868b;">Your tip has been received.</p>
+        <button onclick="location.reload()" style="background:none; border:none; color:#000; cursor:pointer; font-weight:600; margin-top:20px; text-decoration: underline;">Done</button>
     </div>
 
     <div class="staff-header">
-        <img src="https://via.placeholder.com/84" class="staff-img" alt="Staff">
+        <img src="https://via.placeholder.com/80" class="staff-img" alt="Staff">
         <div class="staff-name">Shani</div>
         <div class="instruction">Choose a tip amount</div>
     </div>
     
     <div class="grid">
-        <button class="amount-btn" onclick="startPayment(500)"><span>$</span>5</button>
-        <button class="amount-btn" onclick="startPayment(1000)"><span>$</span>10</button>
-        <button class="amount-btn" onclick="startPayment(1500)"><span>$</span>15</button>
-        <button class="amount-btn" onclick="startPayment(2500)"><span>$</span>25</button>
-        <button class="amount-btn" onclick="startPayment(5000)"><span>$</span>50</button>
-        <button class="amount-btn" onclick="showCustom()" style="color: #a1a1a6; font-weight: 400;">Other</button>
+        <button class="amount-btn" onclick="selectAmount(500, this)"><span>$</span>5</button>
+        <button class="amount-btn" onclick="selectAmount(1000, this)"><span>$</span>10</button>
+        <button class="amount-btn" onclick="selectAmount(1500, this)"><span>$</span>15</button>
+        <button class="amount-btn" onclick="selectAmount(2500, this)"><span>$</span>25</button>
+        <button class="amount-btn" onclick="selectAmount(5000, this)"><span>$</span>50</button>
+        <button class="amount-btn" onclick="showCustom()">Other</button>
     </div>
 
     <div id="custom-container" class="custom-box">
-        <input type="number" id="custom-val" class="custom-input" placeholder="Amount">
-        <button class="next-link" id="next-btn" onclick="processCustom()">Next</button>
+        <input type="number" id="custom-val" class="custom-input" placeholder="Min. $3.00">
+        <button class="next-btn" onclick="processCustom()">Next</button>
     </div>
 
     <div id="payment-element"></div>
     <button id="submit-btn">Pay Now</button>
+
+    <div class="rating-container">
+        <div class="stars">
+            <input type="radio" id="s5" name="rating"><label for="s5">★</label>
+            <input type="radio" id="s4" name="rating"><label for="s4">★</label>
+            <input type="radio" id="s3" name="rating"><label for="s3">★</label>
+            <input type="radio" id="s2" name="rating"><label for="s2">★</label>
+            <input type="radio" id="s1" name="rating"><label for="s1">★</label>
+        </div>
+    </div>
 </div>
 
 <script src="https://js.stripe.com/v3/"></script>
@@ -70,25 +91,37 @@
     const API_URL = "https://easytipme-backend.onrender.com";
     let elements;
 
-    function showCustom() { document.getElementById('custom-container').style.display = 'flex'; }
-    
+    function showCustom() { 
+        document.getElementById('custom-container').style.display = 'flex'; 
+        resetPayment(); // مسح أي عملية سابقة لضمان عدم اللخبطة
+    }
+
+    function selectAmount(amt, btn) {
+        // تمييز الزر المختار (Hover effect fix)
+        document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('custom-container').style.display = 'none';
+        startPayment(amt);
+    }
+
     function processCustom() {
-        const inputField = document.getElementById('custom-val');
-        const val = parseFloat(inputField.value);
-        
-        // منع المبالغ أقل من 3 دولار بطريقة أنيقة
-        if (isNaN(val) || val < 3) {
-            inputField.value = "";
-            inputField.placeholder = "Minimum $3.00"; // حجم الخط هنا أصبح أصغر ومناسب
-            return;
+        const val = parseFloat(document.getElementById('custom-val').value);
+        if (val >= 3) {
+            startPayment(Math.round(val * 100));
+        } else {
+            document.getElementById('custom-val').value = "";
+            document.getElementById('custom-val').placeholder = "Minimum $3.00";
         }
-        startPayment(Math.round(val * 100));
+    }
+
+    function resetPayment() {
+        document.getElementById("payment-element").innerHTML = "";
+        document.getElementById("submit-btn").style.display = "none";
     }
 
     async function startPayment(amount) {
-        // إخفاء الزر إذا كان ظاهراً من محاولة سابقة
-        document.getElementById("submit-btn").style.display = "none";
-        document.getElementById("payment-element").innerHTML = "<p style='color:#86868b; font-size:14px;'>Loading...</p>";
+        resetPayment();
+        document.getElementById("payment-element").innerHTML = "<p style='color:#86868b; font-size:13px;'>Securely connecting...</p>";
 
         try {
             const response = await fetch(`${API_URL}/create-payment-intent`, {
@@ -111,12 +144,11 @@
             document.getElementById("payment-element").innerHTML = "";
             paymentElement.mount("#payment-element");
             
-            const payBtn = document.getElementById("submit-btn");
-            payBtn.style.display = "block";
-            payBtn.disabled = false;
-            payBtn.innerText = "Pay Now";
+            document.getElementById("submit-btn").style.display = "block";
+            document.getElementById("submit-btn").innerText = "Pay Now";
+            document.getElementById("submit-btn").disabled = false;
         } catch (e) {
-            document.getElementById("payment-element").innerHTML = "Error loading. Try again.";
+            document.getElementById("payment-element").innerHTML = "Connection error. Try again.";
         }
     }
 
@@ -130,10 +162,10 @@
             confirmParams: { return_url: window.location.href + "?status=success" },
         });
 
-        // إذا فشلت العملية أو ألغاها الزبون، نعيد الزر لحالته الطبيعية
         if (result.error) {
             btn.disabled = false;
             btn.innerText = "Pay Now";
+            alert(result.error.message);
         }
     };
 
