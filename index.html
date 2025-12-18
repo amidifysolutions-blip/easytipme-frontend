@@ -90,23 +90,20 @@
     const stripe = Stripe('pk_test_51QpPGt01TRhauBHP6dGYUaBYZJr9oHskEqZy9zWm8L6SPtG2kdzQS0MhPiatv3QDvzkTXvJDvbWMSIOUVOCcaswu003bDig62n'); 
     const API_URL = "https://easytipme-backend.onrender.com";
     let elements;
-function processCustom() {
-    const amtInput = document.getElementById('custom-val').value;
-    const amount = parseFloat(amtInput);
-    const hint = document.getElementById('amount-hint'); // سنضيف هذا العنصر تحت الحقل
+function processCustomAmount() {
+    const amtInput = document.getElementById('custom-amount-input').value;
+    const amount = parseFloat(amtInput); // يقرأ الأرقام بدقة (1 يبقى 1 و 1.5 يبقى 1.5)
 
-    if (amount > 0 && amount < 3) {
-        // بدلاً من التنبيه، نظهر تلميح ناعم بالرمادي
-        hint.innerText = "Minimum tip for processing is $3";
-        hint.style.color = "#a0a0a0"; // رمادي باهت لكي لا يظهر كتحذير
+    // فحص الحد الأدنى بأسلوب ناعم
+    if (isNaN(amount) || amount < 3) {
+        // بدلاً من رسالة حمراء، نغير Placeholder مؤقتاً أو نظهر تنبيه بسيط
+        alert("To cover processing fees, minimum tip is $3. Thank you!");
         return;
     }
 
-    if (amount >= 3) {
-        hint.innerText = ""; // اخفاء التلميح إذا كان المبلغ صحيح
-        const amountInCents = Math.round(amount * 100);
-        startPayment(amountInCents);
-    }
+    // التحويل لسنتات (3 دولار تصبح 300 سنت)
+    const amountInCents = Math.round(amount * 100);
+    startPayment(amountInCents);
 }
     function showCustom() { document.getElementById('custom-container').style.display = 'flex'; }
     function processCustom() {
