@@ -104,53 +104,94 @@
     </div>
 </div>
 
+<script src="https://js.stripe.com/v3/"></script>
 <script>
-    let currentAmt = 0;
-    let elements;
-    // ضع بياناتك هنا تماماً كما فعلت في صفحة شاني
     const stripe = Stripe('pk_test_51QpPGt01TRhauBHP6dGYUaBYZJr9oHskEqZy9zWm8L6SPtG2kdzQS0MhPiatv3QDvzkTXvJDvbWMSIOUVOCcaswu003bDig62n'); 
-    const API_URL = "https://your-backend.onrender.com"; 
+    const API_URL = "https://easytipme-backend.onrender.com";
+    let elements;
+    let selectedBaseAmount = 0; 
+    const FEE_PERCENT = 0.12;
 
     function tap(amt, btn) {
         document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        currentAmt = amt;
-        document.getElementById('payment-element').innerHTML = ''; // تفريغ الخانة لضمان عدم التكرار
-        startPayment(amt);
-        document.getElementById('submit-btn').style.display = 'block';
+        document.getElementById('custom-container').style.display = 'none';
+        selectedBaseAmount = amt;
+        refreshCalculations();
     }
 
-    async function startPayment(amt) {
+    function refreshCalculations() {
+        if (selectedBaseAmount === 0) return;
         const isCovering = document.getElementById('feeToggle').checked;
-        const finalAmt = isCovering ? Math.round(amt * 1.12) : amt;
-
-        const response = await fetch(`${API_URL}/create-payment-intent`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ 
-                amount: finalAmt, 
-                currency: "cad",
-                metadata: { staff: "Bustani" } 
-            }),
-        });
-        const { clientSecret } = await response.json();
-        elements = stripe.elements({ clientSecret });
-        const paymentElement = elements.create("payment");
-        paymentElement.mount("#payment-element");
-        updateTotal();
+        const fee = selectedBaseAmount * FEE_PERCENT;
+        const finalTotal = isCovering ? Math.round(selectedBaseAmount + fee) : selectedBaseAmount;
+        
+        const summary = document.getElementById('fee-summary');
+        if(isCovering) {
+            summary.innerText = `Includes CA$${(fee/100).toFixed(2)} service fee`;
+        } else {
+            summary.innerText = `Shani will receive CA$${((selectedBaseAmount - fee)/100).toFixed(2)} after fees`;
+        }
+        start(finalTotal);
     }
 
-    function updateTotal() {
-        const isCovering = document.getElementById('feeToggle').checked;
-        const total = isCovering ? (currentAmt * 1.12) : currentAmt;
-        document.getElementById('submit-btn').innerText = `Pay CA$${(total/100).toFixed(2)} Now`;
+    function showOth() {
+        document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('other-btn').classList.add('active');
+        document.getElementById('custom-container').style.display = 'flex';
+        resetUI();
     }
 
-    async function handleSubmit() {
-        const { error } = await stripe.confirmPayment({
-            elements,
-            confirmParams: { return_url: window.location.origin + "/success.html" },
-        });
+    function procOth() {
+        const v = parseFloat(document.getElementById('custom-val').value);
+        if (v >= 3) {
+            selectedBaseAmount = Math.round(v * 100);
+            refreshCalculations();
+        } else {
+            document.getElementById('custom-val').value = "";
+            document.getElementById('custom-val').placeholder = "Minimum is CA$3.00";
+        }
+    }
+
+    function resetUI() {
+        document.getElementById("payment-element").innerHTML = "";
+        document.getElementById("submit-btn").style.display = "none";
+        document.getElementById("fee-summary").innerText = "";
+    }
+
+    async function start(amount) {
+        resetUI();
+        document.getElementById("payment-element").innerHTML = "<p style='color:#bbb;font-size:12px;padding:20px;'>Loading Secure CA$ Payment...</p>";
+        try {
+            const res = await fetch(`${API_URL}/create-payment-intent`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ amount, currency: "cad" }),
+            });
+            const data = await res.json();
+            elements = stripe.elements({ clientSecret: data.clientSecret, appearance: { theme: 'flat', variables: { colorPrimary: '#1a1a1a', borderRadius: '14px' } } });
+            const pe = elements.create("payment", { layout: "tabs" });
+            document.getElementById("payment-element").innerHTML = "";
+            pe.mount("#payment-element");
+            document.getElementById("submit-btn").style.display = "block";
+            document.getElementById("submit-btn").innerText = `Pay CA$${(amount/100).toFixed(2)} Now`;
+        } catch (err) {
+            console.error(err);
+            document.getElementById("payment-element").innerHTML = "<p style='color:red;'>Connection Error.</p>";
+        }
+    }
+
+    document.getElementById("submit-btn").onclick = async () => {
+        const b = document.getElementById("submit-btn");
+        b.disabled = true;
+        b.innerText = "Processing...";
+        const { error } = await stripe.confirmPayment({ elements, confirmParams: { return_url: window.location.href + "?status=success" }, });
+        if (error) { b.disabled = false; b.innerText = "Pay Now"; alert(error.message); }
+    };
+
+    if (new URLSearchParams(window.location.search).get('status') === 'success') {
+        document.getElementById('success-msg').style.display = 'flex';
+        window.history.replaceState({}, document.title, window.location.pathname);
     }
 </script>
 </body>
