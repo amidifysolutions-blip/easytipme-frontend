@@ -4,38 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EasyTipMe</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #fafafa; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: #1a1a1a; }
-        .container { background: white; width: 100%; max-width: 360px; padding: 40px 25px; border-radius: 32px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); text-align: center; border: 1px solid #f0f0f0; position: relative; }
+        body { font-family: 'Inter', sans-serif; background-color: #ffffff; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: #1d1d1f; -webkit-font-smoothing: antialiased; }
+        .container { background: #ffffff; width: 100%; max-width: 360px; padding: 50px 24px; text-align: center; position: relative; }
         
-        .staff-header { display: flex; flex-direction: column; align-items: center; margin-bottom: 30px; }
-        .staff-img { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 12px; }
-        .staff-name { font-size: 22px; font-weight: 600; }
-        .instruction { color: #a0a0a0; font-size: 14px; margin-top: 5px; }
+        /* Header Section */
+        .staff-header { display: flex; flex-direction: column; align-items: center; margin-bottom: 40px; }
+        .staff-img { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; background: #f5f5f7; margin-bottom: 16px; }
+        .staff-name { font-size: 24px; font-weight: 500; letter-spacing: -0.5px; }
+        .instruction { color: #86868b; font-size: 15px; margin-top: 6px; font-weight: 400; }
 
-        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 25px 0; }
-        .amount-btn { background: #fff; border: 1px solid #eeeeee; padding: 16px 5px; border-radius: 16px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; color: #1a1a1a; }
-        .amount-btn:hover { border-color: #1a1a1a; background: #fafafa; }
+        /* Grid Layout */
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 30px 0; }
+        .amount-btn { background: #f5f5f7; border: none; padding: 18px 0; border-radius: 14px; font-size: 16px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; color: #1d1d1f; }
+        .amount-btn span { font-weight: 300; font-size: 12px; color: #86868b; margin-right: 2px; } /* شعار العملة خفيف */
+        .amount-btn:active { transform: scale(0.96); background: #e8e8ed; }
 
-        .custom-box { display: none; align-items: center; background: #f8f8f8; border-radius: 16px; padding: 12px 20px; margin-top: 10px; border: 1px solid #eee; }
-        .custom-input { border: none; background: transparent; flex: 1; font-size: 16px; outline: none; color: #1a1a1a; }
-        .pay-link { background: none; border: none; font-weight: 600; cursor: pointer; color: #1a1a1a; font-size: 14px; }
+        /* Custom Box (Apple Style) */
+        .custom-box { display: none; align-items: center; background: #f5f5f7; border-radius: 14px; padding: 14px 20px; margin-top: 12px; }
+        .custom-input { border: none; background: transparent; flex: 1; font-size: 17px; outline: none; color: #1d1d1f; font-family: inherit; font-weight: 500; }
+        .custom-input::placeholder { color: #a1a1a6; font-weight: 400; }
+        .next-link { background: none; border: none; font-weight: 600; cursor: pointer; color: #0066cc; font-size: 15px; padding-left: 10px; }
 
-        #payment-element { margin-top: 20px; }
-        #submit-btn { background: #1a1a1a; color: white; border: none; width: 100%; padding: 18px; border-radius: 18px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 25px; display: none; }
+        /* Stripe Element */
+        #payment-element { margin-top: 30px; }
+        #submit-btn { background: #000000; color: #ffffff; border: none; width: 100%; padding: 18px; border-radius: 14px; font-size: 17px; font-weight: 500; cursor: pointer; margin-top: 30px; display: none; -webkit-tap-highlight-color: transparent; }
+        #submit-btn:active { opacity: 0.8; }
 
         /* Rating Stars */
-        .rating-container { margin-top: 35px; padding-top: 20px; border-top: 1px solid #f5f5f5; }
-        .rating-text { font-size: 13px; color: #b0b0b0; margin-bottom: 10px; }
-        .stars { display: flex; justify-content: center; gap: 8px; direction: rtl; }
+        .rating-container { margin-top: 45px; }
+        .stars { display: flex; justify-content: center; gap: 10px; direction: rtl; }
         .stars input { display: none; }
-        .stars label { font-size: 30px; color: #e0e0e0; cursor: pointer; transition: color 0.2s; }
-        .stars label:hover, .stars label:hover ~ label, .stars input:checked ~ label { color: #FFD700; } 
+        .stars label { font-size: 28px; color: #e8e8ed; cursor: pointer; transition: color 0.2s; }
+        .stars label:hover, .stars label:hover ~ label, .stars input:checked ~ label { color: #ffcc00; }
 
         /* Success Message Overlay */
-        #success-msg { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; border-radius: 32px; flex-direction: column; justify-content: center; align-items: center; z-index: 10; }
-        .check-icon { font-size: 60px; color: #1a1a1a; margin-bottom: 15px; }
+        #success-msg { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
+        .check-icon { width: 70px; height: 70px; background: #f5f5f7; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
@@ -43,38 +49,35 @@
 <div class="container">
     <div id="success-msg">
         <div class="check-icon">✓</div>
-        <h2 style="margin: 0;">Thank You!</h2>
-        <p style="color: #888;">Your tip has been sent successfully.</p>
-        <button onclick="location.reload()" style="background:none; border:none; color:#1a1a1a; cursor:pointer; font-weight:600; margin-top:20px;">Done</button>
+        <h2 style="font-weight: 500; margin: 0;">Thank You</h2>
+        <p style="color: #86868b; margin-top: 8px;">Your tip has been sent.</p>
+        <button onclick="location.reload()" style="background:none; border:none; color:#0066cc; cursor:pointer; font-size:16px; font-weight:500; margin-top:30px;">Done</button>
     </div>
 
     <div class="staff-header">
-        <img src="https://via.placeholder.com/90" class="staff-img" alt="Staff">
+        <img src="https://via.placeholder.com/84" class="staff-img" alt="Staff">
         <div class="staff-name">Shani</div>
-        <div class="instruction">Would you like to leave a tip?</div>
+        <div class="instruction">Choose a tip amount</div>
     </div>
     
     <div class="grid">
-        <button class="amount-btn" onclick="startPayment(500)">$5</button>
-        <button class="amount-btn" onclick="startPayment(1000)">$10</button>
-        <button class="amount-btn" onclick="startPayment(1500)">$15</button>
-        <button class="amount-btn" onclick="startPayment(2500)">$25</button>
-        <button class="amount-btn" onclick="startPayment(5000)">$50</button>
-        <button class="amount-btn" onclick="showCustom()">Other</button>
+        <button class="amount-btn" onclick="startPayment(500)"><span>$</span>5</button>
+        <button class="amount-btn" onclick="startPayment(1000)"><span>$</span>10</button>
+        <button class="amount-btn" onclick="startPayment(1500)"><span>$</span>15</button>
+        <button class="amount-btn" onclick="startPayment(2500)"><span>$</span>25</button>
+        <button class="amount-btn" onclick="startPayment(5000)"><span>$</span>50</button>
+        <button class="amount-btn" onclick="showCustom()" style="color: #86868b; font-weight: 400;">Other</button>
     </div>
 
     <div id="custom-container" class="custom-box">
-        <div id="amount-hint" style="font-size: 11px; margin-top: 5px; min-height: 15px;"></div>
-        <span>☕</span>
         <input type="number" id="custom-val" class="custom-input" placeholder="Custom amount">
-        <button class="pay-link" onclick="processCustom()">Next</button>
+        <button class="next-link" onclick="processCustom()">Next</button>
     </div>
 
     <div id="payment-element"></div>
     <button id="submit-btn">Pay Now</button>
 
     <div class="rating-container">
-        <div class="rating-text">Rate your visit</div>
         <div class="stars">
             <input type="radio" id="s5" name="rating"><label for="s5">★</label>
             <input type="radio" id="s4" name="rating"><label for="s4">★</label>
@@ -90,25 +93,17 @@
     const stripe = Stripe('pk_test_51QpPGt01TRhauBHP6dGYUaBYZJr9oHskEqZy9zWm8L6SPtG2kdzQS0MhPiatv3QDvzkTXvJDvbWMSIOUVOCcaswu003bDig62n'); 
     const API_URL = "https://easytipme-backend.onrender.com";
     let elements;
-function processCustomAmount() {
-    const amtInput = document.getElementById('custom-amount-input').value;
-    const amount = parseFloat(amtInput); // يقرأ الأرقام بدقة (1 يبقى 1 و 1.5 يبقى 1.5)
 
-    // فحص الحد الأدنى بأسلوب ناعم
-    if (isNaN(amount) || amount < 3) {
-        // بدلاً من رسالة حمراء، نغير Placeholder مؤقتاً أو نظهر تنبيه بسيط
-        alert("To cover processing fees, minimum tip is $3. Thank you!");
-        return;
-    }
-
-    // التحويل لسنتات (3 دولار تصبح 300 سنت)
-    const amountInCents = Math.round(amount * 100);
-    startPayment(amountInCents);
-}
     function showCustom() { document.getElementById('custom-container').style.display = 'flex'; }
     function processCustom() {
-        const val = document.getElementById('custom-val').value;
-        if (val > 0) startPayment(Math.round(val * 100));
+        const val = parseFloat(document.getElementById('custom-val').value);
+        if (val >= 3) {
+            startPayment(Math.round(val * 100));
+        } else {
+            // تلميح ناعم بدلاً من رسالة منبثقة مزعجة
+            document.getElementById('custom-val').value = "";
+            document.getElementById('custom-val').placeholder = "Min. amount $3";
+        }
     }
 
     async function startPayment(amount) {
@@ -121,14 +116,23 @@ function processCustomAmount() {
 
         elements = stripe.elements({ 
             clientSecret,
-            appearance: { theme: 'flat', variables: { colorPrimary: '#1a1a1a', borderRadius: '18px' } }
+            appearance: {
+                theme: 'none', // تخصيص كامل يدوي ليشبه أبل
+                variables: {
+                    fontFamily: 'Inter, system-ui, sans-serif',
+                    colorText: '#1d1d1f',
+                    colorBackground: '#f5f5f7',
+                    borderRadius: '14px',
+                    colorInputText: '#1d1d1f'
+                },
+                rules: {
+                    '.Input': { border: 'none', padding: '16px' },
+                    '.Label': { fontWeight: '500', marginBottom: '8px' }
+                }
+            }
         });
 
-        const paymentElement = elements.create("payment", {
-            layout: "tabs",
-            paymentMethodOrder: ['apple_pay', 'google_pay']
-        });
-
+        const paymentElement = elements.create("payment", { layout: "tabs" });
         document.getElementById("payment-element").innerHTML = "";
         paymentElement.mount("#payment-element");
         document.getElementById("submit-btn").style.display = "block";
@@ -144,7 +148,6 @@ function processCustomAmount() {
         });
     };
 
-    // التحقق من النجاح لإظهار رسالة الشكر الأنيقة
     if (new URLSearchParams(window.location.search).get('status') === 'success') {
         document.getElementById('success-msg').style.display = 'flex';
         window.history.replaceState({}, document.title, window.location.pathname);
