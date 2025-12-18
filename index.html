@@ -3,86 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EasyTipMe</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <title>EasyTipMe - V1.0</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #ffffff; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: #1d1d1f; -webkit-font-smoothing: antialiased; }
-        .container { background: #ffffff; width: 100%; max-width: 360px; padding: 40px 24px; text-align: center; position: relative; }
+        body { font-family: 'Inter', sans-serif; background-color: #f9f9fb; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: #1a1a1a; }
+        .main-card { background: white; width: 100%; max-width: 380px; padding: 25px; border-radius: 28px; box-shadow: 0 10px 40px rgba(0,0,0,0.03); position: relative; }
         
-        .staff-header { display: flex; flex-direction: column; align-items: center; margin-bottom: 30px; }
-        .staff-img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; background: #f5f5f7; margin-bottom: 15px; border: 0.5px solid #eee; }
-        .staff-name { font-size: 24px; font-weight: 500; }
-        .instruction { color: #86868b; font-size: 15px; margin-top: 5px; }
+        /* القسم العلوي */
+        .staff-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .staff-info h1 { font-size: 24px; font-weight: 600; margin: 0; }
+        .staff-img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; background: #eee; border: 2px solid #fff; }
 
-        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 25px 0; }
-        
-        /* تحسين الـ Hover والضغط */
-        .amount-btn { background: #f5f5f7; border: 2px solid transparent; padding: 18px 0; border-radius: 14px; font-size: 17px; font-weight: 500; cursor: pointer; transition: all 0.2s; color: #1d1d1f; }
-        .amount-btn:hover { background: #e8e8ed; border-color: #d2d2d7; }
-        .amount-btn.active { border-color: #000; background: #fff; }
-        .amount-btn span { font-weight: 300; font-size: 13px; color: #a1a1a6; }
+        /* صندوق المبالغ */
+        .content-box { border: 1.5px solid #f0f0f2; border-radius: 24px; padding: 20px; margin-bottom: 15px; }
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 15px; }
+        .amount-btn { background: #fff; border: 1.5px solid #efeff2; padding: 18px 0; border-radius: 16px; font-size: 18px; font-weight: 600; cursor: pointer; transition: 0.2s; color: #1a1a1a; }
+        .amount-btn:hover { border-color: #1a1a1a; }
+        .amount-btn.active { border-color: #1a1a1a; box-shadow: inset 0 0 0 1px #1a1a1a; }
 
-        .custom-box { display: none; align-items: center; background: #f5f5f7; border-radius: 14px; padding: 12px 18px; margin-top: 10px; border: 1px solid #eee; }
-        .custom-input { border: none; background: transparent; flex: 1; font-size: 17px; outline: none; color: #1d1d1f; font-weight: 500; width: 100%; }
-        .custom-input::placeholder { font-size: 14px; color: #a1a1a6; }
-        .next-btn { background: none; border: none; font-weight: 600; cursor: pointer; color: #000; font-size: 14px; padding: 5px 10px; border-radius: 8px; }
-        .next-btn:hover { background: #e8e8ed; }
+        /* حقل Other */
+        .custom-field { display: flex; align-items: center; background: #fff; border: 1.5px solid #efeff2; border-radius: 16px; padding: 14px 18px; }
+        .custom-input { border: none; background: transparent; flex: 1; font-size: 16px; outline: none; font-weight: 500; }
 
-        #payment-element { margin-top: 25px; min-height: 50px; }
-        #submit-btn { background: #000; color: #fff; border: none; width: 100%; padding: 18px; border-radius: 16px; font-size: 17px; font-weight: 600; cursor: pointer; margin-top: 25px; display: none; }
-        #submit-btn:disabled { background: #ccc; cursor: not-allowed; }
-
-        /* إعادة النجوم بتصميم أرقى */
-        .rating-container { margin-top: 40px; border-top: 1px solid #f2f2f2; padding-top: 20px; }
-        .stars { display: flex; justify-content: center; gap: 8px; direction: rtl; }
+        /* التقييم */
+        .rating-card { border: 1.5px solid #f0f0f2; border-radius: 20px; padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .stars label { font-size: 28px; color: #e5e5e7; cursor: pointer; transition: 0.2s; }
+        .stars input:checked ~ label, .stars label:hover, .stars label:hover ~ label { color: #FFD700; }
+        .stars { display: flex; gap: 4px; direction: rtl; }
         .stars input { display: none; }
-        .stars label { font-size: 32px; color: #e8e8ed; cursor: pointer; transition: color 0.2s; }
-        .stars label:hover, .stars label:hover ~ label, .stars input:checked ~ label { color: #FFD700; }
 
-        #success-msg { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #fff; flex-direction: column; justify-content: center; align-items: center; z-index: 100; border-radius: 32px; }
+        /* أزرار Stripe */
+        #payment-element { margin-top: 20px; }
+        #submit-btn { background: #1a1a1a; color: white; border: none; width: 100%; padding: 18px; border-radius: 18px; font-size: 17px; font-weight: 600; cursor: pointer; margin-top: 20px; display: none; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div id="success-msg">
-        <h2 style="font-weight: 500;">Thank You</h2>
-        <p style="color: #86868b;">Your tip has been received.</p>
-        <button onclick="location.reload()" style="background:none; border:none; color:#000; cursor:pointer; font-weight:600; margin-top:20px; text-decoration: underline;">Done</button>
-    </div>
-
+<div class="main-card">
     <div class="staff-header">
-        <img src="https://via.placeholder.com/80" class="staff-img" alt="Staff">
-        <div class="staff-name">Shani</div>
-        <div class="instruction">Choose a tip amount</div>
-    </div>
-    
-    <div class="grid">
-        <button class="amount-btn" onclick="selectAmount(500, this)"><span>$</span>5</button>
-        <button class="amount-btn" onclick="selectAmount(1000, this)"><span>$</span>10</button>
-        <button class="amount-btn" onclick="selectAmount(1500, this)"><span>$</span>15</button>
-        <button class="amount-btn" onclick="selectAmount(2500, this)"><span>$</span>25</button>
-        <button class="amount-btn" onclick="selectAmount(5000, this)"><span>$</span>50</button>
-        <button class="amount-btn" onclick="showCustom()">Other</button>
+        <div class="staff-info"><h1>Shani</h1></div>
+        <img src="https://via.placeholder.com/70" class="staff-img" alt="Staff">
     </div>
 
-    <div id="custom-container" class="custom-box">
-        <input type="number" id="custom-val" class="custom-input" placeholder="Min. $3.00">
-        <button class="next-btn" onclick="processCustom()">Next</button>
+    <div class="content-box">
+        <div class="grid">
+            <button class="amount-btn" onclick="tap(5, this)">5</button>
+            <button class="amount-btn" onclick="tap(10, this)">10</button>
+            <button class="amount-btn" onclick="tap(15, this)">15</button>
+            <button class="amount-btn" onclick="tap(20, this)">20</button>
+        </div>
+        <div class="custom-field">
+            <input type="number" id="custom-in" class="custom-input" placeholder="Enter amount" oninput="manual()">
+        </div>
+    </div>
+
+    <div class="rating-card">
+        <span>Rate visit</span>
+        <div class="stars">
+            <input type="radio" id="s5" name="r"><label for="s5">★</label>
+            <input type="radio" id="s4" name="r"><label for="s4">★</label>
+            <input type="radio" id="s3" name="r"><label for="s3">★</label>
+            <input type="radio" id="s2" name="r"><label for="s2">★</label>
+            <input type="radio" id="s1" name="r"><label for="s1">★</label>
+        </div>
     </div>
 
     <div id="payment-element"></div>
     <button id="submit-btn">Pay Now</button>
-
-    <div class="rating-container">
-        <div class="stars">
-            <input type="radio" id="s5" name="rating"><label for="s5">★</label>
-            <input type="radio" id="s4" name="rating"><label for="s4">★</label>
-            <input type="radio" id="s3" name="rating"><label for="s3">★</label>
-            <input type="radio" id="s2" name="rating"><label for="s2">★</label>
-            <input type="radio" id="s1" name="rating"><label for="s1">★</label>
-        </div>
-    </div>
 </div>
 
 <script src="https://js.stripe.com/v3/"></script>
@@ -91,88 +78,35 @@
     const API_URL = "https://easytipme-backend.onrender.com";
     let elements;
 
-    function showCustom() { 
-        document.getElementById('custom-container').style.display = 'flex'; 
-        resetPayment(); // مسح أي عملية سابقة لضمان عدم اللخبطة
-    }
-
-    function selectAmount(amt, btn) {
-        // تمييز الزر المختار (Hover effect fix)
+    function tap(amt, btn) {
         document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        document.getElementById('custom-container').style.display = 'none';
-        startPayment(amt);
+        pay(amt * 100);
     }
 
-    function processCustom() {
-        const val = parseFloat(document.getElementById('custom-val').value);
-        if (val >= 3) {
-            startPayment(Math.round(val * 100));
-        } else {
-            document.getElementById('custom-val').value = "";
-            document.getElementById('custom-val').placeholder = "Minimum $3.00";
-        }
+    function manual() {
+        const val = parseFloat(document.getElementById('custom-in').value);
+        if (val >= 3) pay(Math.round(val * 100));
     }
 
-    function resetPayment() {
+    async function pay(amount) {
+        document.getElementById("payment-element").innerHTML = "Loading...";
+        const res = await fetch(`${API_URL}/create-payment-intent`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ amount, currency: "cad" }),
+        });
+        const { clientSecret } = await res.json();
+        elements = stripe.elements({ clientSecret, appearance: { theme: 'flat' } });
+        const pe = elements.create("payment", { layout: "tabs" });
         document.getElementById("payment-element").innerHTML = "";
-        document.getElementById("submit-btn").style.display = "none";
-    }
-
-    async function startPayment(amount) {
-        resetPayment();
-        document.getElementById("payment-element").innerHTML = "<p style='color:#86868b; font-size:13px;'>Securely connecting...</p>";
-
-        try {
-            const response = await fetch(`${API_URL}/create-payment-intent`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ amount, currency: "cad" }),
-            });
-            const { clientSecret } = await response.json();
-
-            elements = stripe.elements({ 
-                clientSecret,
-                appearance: {
-                    theme: 'none',
-                    variables: { fontFamily: 'Inter, sans-serif', colorText: '#1d1d1f', colorBackground: '#f5f5f7', borderRadius: '14px' },
-                    rules: { '.Input': { border: 'none', padding: '16px' } }
-                }
-            });
-
-            const paymentElement = elements.create("payment", { layout: "tabs" });
-            document.getElementById("payment-element").innerHTML = "";
-            paymentElement.mount("#payment-element");
-            
-            document.getElementById("submit-btn").style.display = "block";
-            document.getElementById("submit-btn").innerText = "Pay Now";
-            document.getElementById("submit-btn").disabled = false;
-        } catch (e) {
-            document.getElementById("payment-element").innerHTML = "Connection error. Try again.";
-        }
+        pe.mount("#payment-element");
+        document.getElementById("submit-btn").style.display = "block";
     }
 
     document.getElementById("submit-btn").onclick = async () => {
-        const btn = document.getElementById("submit-btn");
-        btn.disabled = true;
-        btn.innerText = "Processing...";
-        
-        const result = await stripe.confirmPayment({
-            elements,
-            confirmParams: { return_url: window.location.href + "?status=success" },
-        });
-
-        if (result.error) {
-            btn.disabled = false;
-            btn.innerText = "Pay Now";
-            alert(result.error.message);
-        }
+        await stripe.confirmPayment({ elements, confirmParams: { return_url: window.location.href + "?status=success" } });
     };
-
-    if (new URLSearchParams(window.location.search).get('status') === 'success') {
-        document.getElementById('success-msg').style.display = 'flex';
-        window.history.replaceState({}, document.title, window.location.pathname);
-    }
 </script>
 </body>
 </html>
