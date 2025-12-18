@@ -3,124 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EasyTipMe - Choose Team</title>
+    <title>EasyTipMe - Secure Payment</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #fafafa; display: flex; justify-content: center; padding-top: 20px; margin: 0; color: #1a1a1a; }
-        .main-card { background: white; width: 92%; max-width: 380px; padding: 35px 25px; border-radius: 32px; border: 1px solid #f2f2f2; box-sizing: border-box; text-align: center; }
+        /* التنسيقات الأصلية المعتمدة في صورتك */
+        body { font-family: 'Inter', sans-serif; background-color: #fafafa; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; margin: 0; color: #1a1a1a; padding-top: 20px; }
+        .main-card { background: white; width: 92%; max-width: 380px; padding: 25px 25px 35px; border-radius: 32px; box-shadow: 0 4px 25px rgba(0,0,0,0.03); position: relative; border: 1px solid #f2f2f2; box-sizing: border-box; }
         
-        /* الهيدر المتفق عليه */
-        .brand-logo { width: 64px; height: 64px; border-radius: 12px; margin-bottom: 12px; }
-        .brand-name { font-size: 20px; font-weight: 600; margin: 0; max-width: 30ch; overflow: hidden; }
-        .brand-bio { font-size: 13px; color: #888; margin: 8px 0 25px; line-height: 1.4; max-width: 90ch; }
+        /* زر الرجوع الناعم (Apple Style) */
+        .back-nav { display: flex; align-items: center; margin-bottom: 15px; }
+        .back-btn { background: none; border: none; color: #888; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 0; }
 
-        /* سطر اختيار الموظفين مع التبديل لليمين */
-        .selection-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 0 5px; }
-        .selection-title { font-size: 14px; font-weight: 500; color: #1a1a1a; }
+        /* الهيدر الموحد: 30 حرف و 90 حرف */
+        .brand-header { text-align: center; margin-bottom: 25px; border-bottom: 1px solid #f8f8f8; padding-bottom: 20px; }
+        .brand-logo { width: 64px; height: 64px; border-radius: 14px; margin-bottom: 12px; }
+        .brand-name { font-size: 20px; font-weight: 600; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 30ch; margin-left: auto; margin-right: auto; }
+        .brand-bio { font-size: 13px; color: #888; margin: 8px auto 0; line-height: 1.4; max-width: 90ch; }
 
-        /* Apple Toggle ناعم على اليمين وبدون أحمر */
-        .switch { position: relative; display: inline-block; width: 42px; height: 24px; }
+        /* منطقة الموظفين: تعرض الصور حسب الاختيار */
+        .staff-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .staff-name { font-size: 24px; font-weight: 600; margin: 0; }
+        .avatar-container { display: flex; align-items: center; }
+        .avatar-img { width: 55px; height: 55px; border-radius: 50%; border: 2px solid #fff; margin-left: -20px; object-fit: cover; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .avatar-img:first-child { margin-left: 0; }
+
+        .question { color: #888; font-size: 15px; margin-bottom: 20px; text-align: left; }
+
+        /* شبكة القيم الستة كما في شاني */
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
+        .amount-btn { background: #fff; border: 1px solid #eeeeee; padding: 18px 5px; border-radius: 14px; font-size: 14px; font-weight: 600; cursor: pointer; color: #1a1a1a; transition: 0.2s; }
+        .amount-btn.active { border-color: #1a1a1a; box-shadow: inset 0 0 0 1px #1a1a1a; }
+
+        /* صندوق Love المعتمد */
+        .love-container { background: #f8f8f8; border-radius: 20px; padding: 18px; margin: 20px 0; border: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; text-align: left; }
+        .love-info h4 { margin: 0; font-size: 14px; font-weight: 600; }
+        .love-info p { margin: 4px 0 0; font-size: 11px; color: #888; }
+        
+        .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #e5e5ea; transition: .4s; border-radius: 24px; }
-        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
         input:checked + .slider { background-color: #34c759; }
         input:checked + .slider:before { transform: translateX(18px); }
 
-        /* قائمة الموظفين */
-        .staff-list { display: flex; flex-direction: column; gap: 12px; }
-        .staff-card { background: #fff; border: 1px solid #eee; border-radius: 20px; padding: 15px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: 0.2s; position: relative; }
-        .staff-info { display: flex; align-items: center; gap: 14px; }
-        .avatar { width: 55px; height: 55px; border-radius: 50%; object-fit: cover; }
-        .details { text-align: left; }
-        .details h3 { margin: 0; font-size: 16px; font-weight: 600; }
-        .details p { margin: 2px 0 0; font-size: 13px; color: #888; }
-
-        /* المربع الصغير وعلامة الصح */
-        .checkbox-container { display: none; width: 22px; height: 22px; border-radius: 6px; border: 2px solid #ddd; position: relative; transition: 0.2s; }
-        .staff-card.selected .checkbox-container { background: #fff; border-color: #1a1a1a; }
-        .staff-card.selected .checkbox-container::after { content: "✓"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #1a1a1a; font-size: 14px; font-weight: bold; }
+        /* منطقة نظام الدفع Stripe */
+        #payment-element { margin-top: 20px; min-height: 150px; }
+        #submit-btn { background: #1a1a1a; color: white; border: none; width: 100%; padding: 18px; border-radius: 18px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 20px; display: none; }
         
-        .multi-active .checkbox-container { display: block; }
-        .multi-active .chevron { display: none; }
-        .chevron { font-size: 18px; color: #ccc; }
+        /* النجوم والتقييم */
+        .rating-container { margin-top: 40px; padding-top: 25px; border-top: 1px solid #f5f5f5; text-align: center; }
+        .stars { display: flex; justify-content: center; gap: 12px; direction: rtl; }
+        .stars label { font-size: 34px; color: #e8e8e8; cursor: pointer; }
+        .stars label:hover, .stars label:hover ~ label, .stars input:checked ~ label { color: #FFD700; }
+        .stars input { display: none; }
 
-        #next-btn { background: #1a1a1a; color: white; border: none; width: 100%; padding: 18px; border-radius: 18px; font-size: 16px; font-weight: 600; margin-top: 25px; cursor: pointer; display: none; }
+        .fee-info-box { font-size: 11px; color: #b0b0b0; text-align: center; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-<div class="main-card" id="mainCard">
-    <img src="logo.png" class="brand-logo" alt="Logo">
-    <h1 class="brand-name">Mouneh Lebanese Gourmet</h1>
-    <p class="brand-bio">Authentic flavors from Lebanon. Experience tradition in every bite of our gourmet selections.</p>
+<div class="main-card">
+    <div class="back-nav">
+        <button class="back-btn" onclick="window.history.back()"><span>‹</span> Back</button>
+    </div>
 
-    <div class="selection-header">
-        <span class="selection-title">Select multiple specialists</span>
+    <div class="brand-header">
+        <img src="logo.png" class="brand-logo" alt="Logo">
+        <h1 class="brand-name">Mouneh Lebanese Gourmet Store</h1>
+        <p class="brand-bio">Authentic Lebanese flavors and gourmet products delivered to your door with tradition in every bite.</p>
+    </div>
+
+    <div class="staff-header">
+        <h1 class="staff-name">Payment</h1>
+        <div class="avatar-container" id="avatarStack">
+            <img src="shani.jpg" class="avatar-img" alt="Staff">
+        </div>
+    </div>
+
+    <div class="question">How much would you like to tip?</div>
+    
+    <div class="grid">
+        <button class="amount-btn" onclick="tap(500, this)">CA$5</button>
+        <button class="amount-btn" onclick="tap(1000, this)">CA$10</button>
+        <button class="amount-btn" onclick="tap(1500, this)">CA$15</button>
+        <button class="amount-btn" onclick="tap(2500, this)">CA$25</button>
+        <button class="amount-btn" onclick="tap(5000, this)">CA$50</button>
+        <button class="amount-btn">Other</button>
+    </div>
+
+    <div class="love-container">
+        <div class="love-info">
+            <h4>Show some extra love? ♡</h4>
+            <p>Cover the processing fees so the team gets 100% of your tip.</p>
+        </div>
         <label class="switch">
-            <input type="checkbox" id="multiModeToggle" onchange="toggleMode()">
+            <input type="checkbox" id="feeToggle" checked onchange="updateTotal()">
             <span class="slider"></span>
         </label>
     </div>
 
-    <div class="staff-list">
-        <div class="staff-card" onclick="handleStaffClick('shani', this)">
-            <div class="staff-info">
-                <img src="shani.jpg" class="avatar" alt="S">
-                <div class="details">
-                    <h3>Shani</h3>
-                    <p>Nail Technician</p>
-                </div>
-            </div>
-            <div class="chevron">›</div>
-            <div class="checkbox-container"></div>
-        </div>
+    <div id="payment-element"></div>
+    <button id="submit-btn">Pay Now</button>
+    <div id="fee-summary" class="fee-info-box"></div>
 
-        <div class="staff-card" onclick="handleStaffClick('bustani', this)">
-            <div class="staff-info">
-                <img src="bustani.jpg" class="avatar" alt="B">
-                <div class="details">
-                    <h3>Bustani</h3>
-                    <p>Barber</p>
-                </div>
-            </div>
-            <div class="chevron">›</div>
-            <div class="checkbox-container"></div>
+    <div class="rating-container">
+        <span style="display:block; margin-bottom:15px; font-weight:500;">Rate your visit</span>
+        <div class="stars">
+            <input type="radio" id="s5" name="rating"><label for="s5">★</label>
+            <input type="radio" id="s4" name="rating"><label for="s4">★</label>
+            <input type="radio" id="s3" name="rating"><label for="s3">★</label>
+            <input type="radio" id="s2" name="rating"><label for="s2">★</label>
+            <input type="radio" id="s1" name="rating"><label for="s1">★</label>
         </div>
     </div>
-
-    <button id="next-btn" onclick="window.location.href='multiple.html'">Next</button>
 </div>
 
 <script>
-    let isMulti = false;
-    let selectedCount = 0;
+    let currentAmt = 0;
+    const FEE = 0.12;
 
-    function toggleMode() {
-        isMulti = document.getElementById('multiModeToggle').checked;
-        const card = document.getElementById('mainCard');
-        const nextBtn = document.getElementById('next-btn');
-        
-        if(isMulti) {
-            card.classList.add('multi-active');
-        } else {
-            card.classList.remove('multi-active');
-            nextBtn.style.display = 'none';
-            // إلغاء تحديد الجميع عند الإغلاق
-            document.querySelectorAll('.staff-card').forEach(c => c.classList.remove('selected'));
-            selectedCount = 0;
-        }
+    function tap(amt, btn) {
+        document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentAmt = amt;
+        document.getElementById('submit-btn').style.display = 'block';
+        updateTotal();
     }
 
-    function handleStaffClick(id, element) {
-        if(!isMulti) {
-            window.location.href = id + ".html";
+    function updateTotal() {
+        if (currentAmt === 0) return;
+        const isCovering = document.getElementById('feeToggle').checked;
+        const total = isCovering ? (currentAmt * (1 + FEE)) : currentAmt;
+        document.getElementById('submit-btn').innerText = `Pay CA$${(total/100).toFixed(2)} Now`;
+        
+        const feeVal = currentAmt * FEE;
+        const info = document.getElementById('fee-summary');
+        if(isCovering) {
+            info.innerText = `Includes CA$${(feeVal/100).toFixed(2)} service fee`;
         } else {
-            element.classList.toggle('selected');
-            selectedCount = document.querySelectorAll('.staff-card.selected').length;
-            document.getElementById('next-btn').style.display = selectedCount > 0 ? 'block' : 'none';
+            info.innerText = `The team will receive CA$${((currentAmt - feeVal)/100).toFixed(2)} after fees`;
         }
     }
 </script>
-
 </body>
 </html>
