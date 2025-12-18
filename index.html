@@ -30,12 +30,12 @@
 
     <div class="tip-card">
         <div>Would you like to leave a tip?</div>
-        <div class="grid">
-            <button class="tip-btn" onclick="startPayment(15)">15 AED</button>
-            <button class="tip-btn" onclick="startPayment(30)">30 AED</button>
-            <button class="tip-btn" onclick="startPayment(50)">50 AED</button>
-            <button class="tip-btn" onclick="startPayment(100)">100 AED</button>
-        </div>
+       <div class="grid">
+    <button class="amount-btn" onclick="startPayment(1500)">$15</button>
+    <button class="amount-btn" onclick="startPayment(3000)">$30</button>
+    <button class="amount-btn" onclick="startPayment(5000)">$50</button>
+    <button class="amount-btn" onclick="startPayment(10000)">$100</button>
+</div>
         <input type="number" class="input-custom" placeholder="☕ Enter the tip amount">
     </div>
 
@@ -58,7 +58,7 @@
         const response = await fetch(`${API_URL}/create-payment-intent`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ amount: amount, currency: "aed" }),
+            body: JSON.stringify({ amount: amount, currency: "cad" }),
         });
         const { clientSecret } = await response.json();
         
