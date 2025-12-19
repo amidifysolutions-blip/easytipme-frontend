@@ -3,34 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - EasyTip</title>
+    <title>EasyTip - Smart Admin</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary-black: #000000; --bg-white: #ffffff; --light-gray: #f9f9f9; --border: #eeeeee; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg-white); margin: 0; display: flex; color: var(--primary-black); }
+        :root { --black: #000; --white: #fff; --gray: #f2f2f7; --border: #e5e5e5; }
+        body { font-family: 'Inter', sans-serif; background: var(--white); margin: 0; display: flex; color: var(--black); }
         
-        .sidebar { width: 260px; height: 100vh; border-right: 1px solid var(--border); padding: 30px; box-sizing: border-box; }
-        .sidebar h2 { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 50px; }
-        .nav-item { padding: 12px 0; margin: 5px 0; cursor: pointer; font-weight: 500; color: #666; transition: 0.2s; }
-        .nav-item:hover, .nav-item.active { color: var(--primary-black); font-weight: 700; }
+        /* Sidebar */
+        .sidebar { width: 240px; height: 100vh; border-right: 1px solid var(--border); padding: 30px; position: fixed; }
+        .sidebar h2 { font-weight: 800; font-size: 22px; margin-bottom: 40px; }
+        .nav-item { padding: 10px 0; font-weight: 500; color: #888; cursor: pointer; }
+        .nav-item.active { color: var(--black); font-weight: 700; }
 
-        .main-content { flex: 1; padding: 50px; max-width: 1000px; }
-        .card { border: 1px solid var(--border); border-radius: 16px; padding: 30px; margin-bottom: 30px; }
+        /* Content */
+        .main { margin-left: 240px; padding: 50px; width: 100%; max-width: 1100px; }
+        .card { border: 1px solid var(--border); border-radius: 12px; padding: 25px; margin-bottom: 20px; }
         
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .input-group { display: flex; flex-direction: column; gap: 8px; }
-        label { font-size: 12px; font-weight: 700; text-transform: uppercase; color: #999; }
-        input, select { padding: 14px; border: 1px solid var(--border); border-radius: 10px; font-size: 14px; outline: none; background: var(--light-gray); }
+        /* Inputs Area */
+        .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .input-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 15px; }
+        label { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #999; }
+        input { padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; outline: none; }
         
-        /* تصميم زر رفع الصورة */
-        .file-upload { border: 2px dashed var(--border); padding: 20px; text-align: center; border-radius: 12px; cursor: pointer; }
-        
-        button.btn-black { background: var(--primary-black); color: #fff; border: none; padding: 16px 32px; border-radius: 12px; cursor: pointer; font-weight: 600; width: 100%; margin-top: 20px; }
-        
+        /* Action Buttons */
+        .btn { padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; border: none; transition: 0.2s; }
+        .btn-black { background: var(--black); color: var(--white); width: 100%; }
+        .btn-outline { background: transparent; border: 1px solid var(--black); font-size: 12px; margin-right: 5px; }
+
+        /* Table */
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { text-align: left; padding: 15px; color: #999; font-size: 11px; border-bottom: 2px solid var(--primary-black); }
-        td { padding: 20px 15px; border-bottom: 1px solid var(--border); font-size: 14px; }
-        .status-toggle { cursor: pointer; padding: 5px 10px; border-radius: 6px; font-size: 12px; background: #eee; }
+        th { text-align: left; padding: 12px; font-size: 11px; color: #999; border-bottom: 2px solid var(--black); }
+        td { padding: 15px 12px; border-bottom: 1px solid #f9f9f9; font-size: 14px; }
+        .check-col { width: 30px; }
+        .bulk-actions { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: none; }
     </style>
 </head>
 <body>
@@ -38,58 +43,41 @@
 <div class="sidebar">
     <h2>EasyTip.</h2>
     <div class="nav-item active">Management</div>
-    <div class="nav-item">Operations Log</div>
-    <div class="nav-item">Business Profile</div>
+    <div class="nav-item">Transactions</div>
+    <div class="nav-item">Settings</div>
 </div>
 
-<div class="main-content">
-    <h1>Team Management</h1>
-    
+<div class="main">
+    <h1>Team Registry</h1>
+
     <div class="card">
-        <h3 style="margin-top:0">Add New Member</h3>
         <div class="form-grid">
-            <div class="input-group">
-                <label>Full Name</label>
-                <input type="text" id="empName" placeholder="John Doe">
-            </div>
-            <div class="input-group">
-                <label>Email Address</label>
-                <input type="email" id="empEmail" placeholder="john@example.com">
-            </div>
-            <div class="input-group">
-                <label>Phone Number</label>
-                <input type="text" id="empPhone" placeholder="+1 234...">
-            </div>
-            <div class="input-group">
-                <label>Shift Schedule</label>
-                <select id="empShift">
-                    <option>Morning (9AM - 5PM)</option>
-                    <option>Evening (5PM - 12AM)</option>
-                    <option>On Leave / Off</option>
-                </select>
-            </div>
+            <div class="input-group"><label>Real Name</label><input type="text" id="rName"></div>
+            <div class="input-group"><label>Nickname (Public)</label><input type="text" id="nName"></div>
+            <div class="input-group"><label>Job Title</label><input type="text" id="job"></div>
+            <div class="input-group"><label>Shift Details (Free Text)</label><input type="text" id="shift"></div>
+            <div class="input-group"><label>Email</label><input type="email" id="email"></div>
+            <div class="input-group"><label>Phone</label><input type="text" id="phone"></div>
         </div>
+        <button class="btn btn-black" onclick="addStaff()">Add Member</button>
+    </div>
 
-        <div class="input-group" style="margin-top:20px;">
-            <label>Profile Picture</label>
-            <div class="file-upload" onclick="document.getElementById('fileInput').click()">
-                <span id="fileName">Click to upload photo</span>
-                <input type="file" id="fileInput" hidden onchange="handleImage(this)">
-            </div>
-        </div>
-
-        <button class="btn-black" onclick="saveToSystem()">Register Staff</button>
+    <div id="bulkBar" class="bulk-actions">
+        <span id="countText" style="font-weight: 700; margin-right: 15px;">0 Selected</span>
+        <button class="btn btn-outline" onclick="bulkStatus(false)">Set Active</button>
+        <button class="btn btn-outline" onclick="bulkStatus(true)">Set On Vacation</button>
+        <button class="btn btn-outline" style="color:red; border-color:red;" onclick="bulkDelete()">Delete Selected</button>
     </div>
 
     <div class="card">
-        <h3>Active Registry</h3>
         <table>
             <thead>
                 <tr>
-                    <th>Member</th>
-                    <th>Contact</th>
-                    <th>Schedule</th>
-                    <th>Availability</th>
+                    <th class="check-col"><input type="checkbox" onclick="toggleAll(this)"></th>
+                    <th>Staff (Public)</th>
+                    <th>Job</th>
+                    <th>Shift</th>
+                    <th>Status</th>
                 </tr>
             </thead>
             <tbody id="staffTable"></tbody>
@@ -98,46 +86,59 @@
 </div>
 
 <script>
-    let tempImageData = "";
+    let staff = JSON.parse(localStorage.getItem('master_staff') || '[]');
 
-    function handleImage(input) {
-        const file = input.files[0];
-        if (file) {
-            document.getElementById('fileName').innerText = file.name;
-            const reader = new FileReader();
-            reader.onload = (e) => { tempImageData = e.target.result; };
-            reader.readAsDataURL(file);
-        }
+    function addStaff() {
+        const data = {
+            id: Date.now(),
+            rName: document.getElementById('rName').value,
+            nName: document.getElementById('nName').value,
+            job: document.getElementById('job').value,
+            shift: document.getElementById('shift').value,
+            onVacation: false
+        };
+        staff.push(data);
+        save();
     }
 
-    function saveToSystem() {
-        const name = document.getElementById('empName').value;
-        const email = document.getElementById('empEmail').value;
-        const shift = document.getElementById('empShift').value;
+    function save() {
+        localStorage.setItem('master_staff', JSON.stringify(staff));
+        render();
+    }
 
-        if (name && email) {
-            let employees = JSON.parse(localStorage.getItem('master_employees') || '[]');
-            employees.push({
-                id: Date.now(),
-                name, email, shift,
-                img: tempImageData || 'default.png',
-                onVacation: false
-            });
-            localStorage.setItem('master_employees', JSON.stringify(employees));
-            render();
+    function toggleAll(source) {
+        document.querySelectorAll('.staff-check').forEach(c => c.checked = source.checked);
+        updateBulkBar();
+    }
+
+    function updateBulkBar() {
+        const selected = document.querySelectorAll('.staff-check:checked').length;
+        document.getElementById('bulkBar').style.display = selected > 0 ? 'block' : 'none';
+        document.getElementById('countText').innerText = selected + " Selected";
+    }
+
+    function bulkStatus(val) {
+        const selectedIds = Array.from(document.querySelectorAll('.staff-check:checked')).map(c => parseInt(c.value));
+        staff.forEach(s => { if(selectedIds.includes(s.id)) s.onVacation = val; });
+        save();
+    }
+
+    function bulkDelete() {
+        if(confirm('Are you sure?')) {
+            const selectedIds = Array.from(document.querySelectorAll('.staff-check:checked')).map(c => parseInt(c.value));
+            staff = staff.filter(s => !selectedIds.includes(s.id));
+            save();
         }
     }
 
     function render() {
-        const list = JSON.parse(localStorage.getItem('master_employees') || '[]');
-        document.getElementById('staffTable').innerHTML = list.map(e => `
+        document.getElementById('staffTable').innerHTML = staff.map(s => `
             <tr>
-                <td><b>${e.name}</b></td>
-                <td>${e.email}</td>
-                <td>${e.shift}</td>
-                <td><span class="status-toggle" onclick="toggleVacation(${e.id})">
-                    ${e.onVacation ? '🚫 Off' : '✅ Active'}
-                </span></td>
+                <td><input type="checkbox" class="staff-check" value="${s.id}" onclick="updateBulkBar()"></td>
+                <td><b>${s.nName}</b><br><small style="color:#999">${s.rName}</small></td>
+                <td>${s.job}</td>
+                <td>${s.shift}</td>
+                <td>${s.onVacation ? '🚫 Off' : '✅ Active'}</td>
             </tr>
         `).join('');
     }
