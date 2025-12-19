@@ -3,46 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EasyTipMe - Choose Team</title>
+    <title>Mouneh - Team Selection</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #fafafa; display: flex; justify-content: center; padding-top: 20px; margin: 0; color: #1a1a1a; }
-        .main-card { background: white; width: 92%; max-width: 380px; padding: 35px 25px; border-radius: 32px; border: 1px solid #f2f2f2; box-sizing: border-box; text-align: center; }
+        body { font-family: 'Inter', sans-serif; background-color: #fafafa; display: flex; justify-content: center; padding: 20px 0; margin: 0; color: #1a1a1a; }
+        .main-card { background: white; width: 92%; max-width: 380px; padding: 35px 25px; border-radius: 32px; border: 1px solid #f2f2f2; box-sizing: border-box; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.02); }
         
-        /* الهيدر: لوغو + 30 حرف اسم + 90 حرف بايو */
-        .brand-logo { width: 64px; height: 64px; border-radius: 12px; margin-bottom: 12px; }
-        .brand-name { font-size: 20px; font-weight: 600; margin: 0; text-align: center; }
-        .brand-bio { font-size: 13px; color: #888; margin: 8px auto 25px; line-height: 1.4; text-align: center; }
+        /* الهيدر */
+        .brand-logo { width: 64px; height: 64px; border-radius: 14px; margin-bottom: 12px; }
+        .brand-name { font-size: 20px; font-weight: 600; margin: 0; }
+        .brand-bio { font-size: 13px; color: #888; margin: 8px auto 25px; line-height: 1.4; }
 
+        /* شريط البحث الجديد */
+        .search-box { margin-bottom: 20px; width: 100%; position: relative; }
+        .search-input { width: 100%; padding: 14px 18px; border-radius: 16px; border: 1px solid #eee; font-size: 14px; outline: none; box-sizing: border-box; background-color: #f9f9f9; transition: 0.2s; }
+        .search-input:focus { border-color: #1a1a1a; background-color: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+
+        /* قسم اختيار المتعدد */
         .selection-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 0 5px; }
-        .selection-title { font-size: 14px; font-weight: 500; }
+        .selection-title { font-size: 14px; font-weight: 500; color: #444; }
 
-        /* Apple Switch الأخضر كما في صورتك */
+        /* Apple Switch الأخضر */
         .switch { position: relative; display: inline-block; width: 42px; height: 24px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #e5e5ea; transition: .4s; border-radius: 24px; }
         .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: #34c759; } /* اللون الأخضر المعتمد */
+        input:checked + .slider { background-color: #34c759; }
         input:checked + .slider:before { transform: translateX(18px); }
 
+        /* قائمة الموظفين */
         .staff-list { display: flex; flex-direction: column; gap: 12px; }
-        .staff-card { background: #fff; border: 1px solid #eee; border-radius: 20px; padding: 15px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+        .staff-card { background: #fff; border: 1px solid #eee; border-radius: 20px; padding: 15px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: 0.2s; }
+        .staff-card:hover { border-color: #ddd; }
         .staff-info { display: flex; align-items: center; gap: 14px; }
         .avatar { width: 55px; height: 55px; border-radius: 50%; object-fit: cover; }
         .details { text-align: left; }
         .details h3 { margin: 0; font-size: 16px; font-weight: 600; }
-        .details p { margin: 2px 0 0; font-size: 13px; color: #888; }
+        .details p { margin: 2px 0 0; font-size: 12px; color: #888; }
 
-        /* المربع الصغير وعلامة الصح السوداء */
-        .checkbox-container { display: none; width: 22px; height: 22px; border-radius: 6px; border: 2px solid #ddd; position: relative; }
-        .staff-card.selected .checkbox-container { background: #fff; border-color: #1a1a1a; }
-        .staff-card.selected .checkbox-container::after { content: "✓"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #1a1a1a; font-size: 14px; font-weight: bold; }
+        /* علامة الصح والوضع المتعدد */
+        .checkbox-container { display: none; width: 22px; height: 22px; border-radius: 7px; border: 2px solid #ddd; position: relative; transition: 0.2s; }
+        .staff-card.selected .checkbox-container { background: #1a1a1a; border-color: #1a1a1a; }
+        .staff-card.selected .checkbox-container::after { content: "✓"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 14px; }
         
         .multi-active .checkbox-container { display: block; }
         .multi-active .chevron { display: none; }
         .chevron { font-size: 18px; color: #ccc; }
 
-        #next-btn { background: #1a1a1a; color: white; border: none; width: 100%; padding: 18px; border-radius: 18px; font-size: 16px; font-weight: 600; margin-top: 25px; cursor: pointer; display: none; }
+        #next-btn { background: #1a1a1a; color: white; border: none; width: 100%; padding: 18px; border-radius: 18px; font-size: 16px; font-weight: 600; margin-top: 25px; cursor: pointer; display: none; transition: 0.2s; }
+        #next-btn:active { transform: scale(0.98); }
+
+        /* التوقيع المطلوب */
+        .footer-credit { margin-top: 40px; font-size: 11px; color: #bbb; text-align: center; border-top: 1px solid #f9f9f9; padding-top: 20px; }
+        .footer-credit b { color: #999; }
     </style>
 </head>
 <body>
@@ -50,7 +63,11 @@
 <div class="main-card" id="mainCard">
     <img src="logo.png" class="brand-logo" alt="Logo">
     <h1 class="brand-name">Mouneh Lebanese Gourmet Store</h1>
-    <p class="brand-bio">Authentic Lebanese flavors and gourmet products delivered to your door with love and tradition in every bite.</p>
+    <p class="brand-bio">Authentic flavors delivered with love and tradition in every bite.</p>
+
+    <div class="search-box">
+        <input type="text" id="staffSearch" onkeyup="filterStaff()" placeholder="Search for your specialist..." class="search-input">
+    </div>
 
     <div class="selection-header">
         <span class="selection-title">Select multiple specialists</span>
@@ -60,8 +77,8 @@
         </label>
     </div>
 
-    <div class="staff-list">
-        <div class="staff-card" onclick="handleSelect('shani', this)">
+    <div class="staff-list" id="staffList">
+        <div class="staff-card" onclick="handleSelect('shani', 'shani.jpg', this)">
             <div class="staff-info">
                 <img src="shani.jpg" class="avatar" alt="S">
                 <div class="details">
@@ -72,7 +89,8 @@
             <div class="chevron">›</div>
             <div class="checkbox-container"></div>
         </div>
-        <div class="staff-card" onclick="handleSelect('bustani', this)">
+
+        <div class="staff-card" onclick="handleSelect('bustani', 'bustani.jpg', this)">
             <div class="staff-info">
                 <img src="bustani.jpg" class="avatar" alt="B">
                 <div class="details">
@@ -83,14 +101,21 @@
             <div class="chevron">›</div>
             <div class="checkbox-container"></div>
         </div>
-    </div>
+        
+        </div>
 
     <button id="next-btn" onclick="goToMultiple()">Next</button>
+
+    <div class="footer-credit">
+        Powered by <b>Amidify Solutions Inc.</b>
+    </div>
 </div>
 
 <script>
     let isMulti = false;
+    let selectedStaff = [];
 
+    // تفعيل وضع الاختيار المتعدد
     function toggleMode() {
         isMulti = document.getElementById('multiModeToggle').checked;
         const card = document.getElementById('mainCard');
@@ -100,28 +125,43 @@
             card.classList.remove('multi-active');
             document.getElementById('next-btn').style.display = 'none';
             document.querySelectorAll('.staff-card').forEach(c => c.classList.remove('selected'));
+            selectedStaff = [];
         }
     }
 
-    function handleSelect(pageId, element) {
+    // فلترة الموظفين (البحث)
+    function filterStaff() {
+        let input = document.getElementById('staffSearch').value.toLowerCase();
+        let cards = document.getElementsByClassName('staff-card');
+        for (let i = 0; i < cards.length; i++) {
+            let name = cards[i].querySelector('h3').innerText.toLowerCase();
+            cards[i].style.display = name.includes(input) ? "flex" : "none";
+        }
+    }
+
+    // معالجة اختيار الموظف
+    function handleSelect(id, img, element) {
+        const name = element.querySelector('h3').innerText;
         if(!isMulti) {
-            window.location.href = pageId + ".html";
+            // انتقال فردي فوري
+            localStorage.setItem('chosenStaff', JSON.stringify([{name: name, img: img}]));
+            window.location.href = id + ".html";
         } else {
+            // إضافة للقمة الاختيار المتعدد
             element.classList.toggle('selected');
-            const selectedCards = document.querySelectorAll('.staff-card.selected');
-            document.getElementById('next-btn').style.display = selectedCards.length > 0 ? 'block' : 'none';
+            const index = selectedStaff.findIndex(s => s.name === name);
+            if (index > -1) {
+                selectedStaff.splice(index, 1);
+            } else {
+                selectedStaff.push({name: name, img: img});
+            }
+            document.getElementById('next-btn').style.display = selectedStaff.length > 0 ? 'block' : 'none';
         }
     }
 
+    // الانتقال لصفحة الدفع الجماعي
     function goToMultiple() {
-        // نجمع الموظفين المختارين لإرسالهم للصفحة التالية
-        const selected = [];
-        document.querySelectorAll('.staff-card.selected').forEach(card => {
-            const name = card.querySelector('h3').innerText;
-            const img = card.querySelector('img').src;
-            selected.push({name: name, img: img});
-        });
-        localStorage.setItem('chosenStaff', JSON.stringify(selected));
+        localStorage.setItem('chosenStaff', JSON.stringify(selectedStaff));
         window.location.href = "multiple.html";
     }
 </script>
