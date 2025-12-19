@@ -3,81 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EasyTip - Smart Admin</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>EasyTip - Admin Core</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --black: #000; --white: #fff; --gray: #f2f2f7; --border: #e5e5e5; }
-        body { font-family: 'Inter', sans-serif; background: var(--white); margin: 0; display: flex; color: var(--black); }
-        
-        /* Sidebar */
+        :root { --black: #000; --border: #e5e5e5; --gray: #999; }
+        body { font-family: 'Inter', sans-serif; margin: 0; background: #fff; display: flex; color: var(--black); }
         .sidebar { width: 240px; height: 100vh; border-right: 1px solid var(--border); padding: 30px; position: fixed; }
-        .sidebar h2 { font-weight: 800; font-size: 22px; margin-bottom: 40px; }
-        .nav-item { padding: 10px 0; font-weight: 500; color: #888; cursor: pointer; }
-        .nav-item.active { color: var(--black); font-weight: 700; }
-
-        /* Content */
-        .main { margin-left: 240px; padding: 50px; width: 100%; max-width: 1100px; }
-        .card { border: 1px solid var(--border); border-radius: 12px; padding: 25px; margin-bottom: 20px; }
+        .main { margin-left: 240px; padding: 50px; width: calc(100% - 340px); }
+        .card { border: 1px solid var(--border); border-radius: 12px; padding: 25px; margin-bottom: 25px; }
         
-        /* Inputs Area */
         .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
         .input-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 15px; }
-        label { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #999; }
-        input { padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; outline: none; }
-        
-        /* Action Buttons */
-        .btn { padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; border: none; transition: 0.2s; }
-        .btn-black { background: var(--black); color: var(--white); width: 100%; }
-        .btn-outline { background: transparent; border: 1px solid var(--black); font-size: 12px; margin-right: 5px; }
+        label { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--gray); }
+        input, select { padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; outline: none; }
 
-        /* Table */
+        /* منطقة تحميل الصورة */
+        .photo-upload-box { border: 2px dashed var(--border); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; margin-bottom: 20px; }
+        .preview-img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; display: none; margin: 0 auto 10px; border: 1px solid #eee; }
+
+        .btn { padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: 600; border: none; transition: 0.2s; }
+        .btn-black { background: var(--black); color: #fff; width: 100%; }
+        .btn-edit { background: #f0f0f0; font-size: 12px; padding: 5px 10px; }
+
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { text-align: left; padding: 12px; font-size: 11px; color: #999; border-bottom: 2px solid var(--black); }
+        th { text-align: left; padding: 12px; font-size: 11px; color: var(--gray); border-bottom: 2px solid var(--black); }
         td { padding: 15px 12px; border-bottom: 1px solid #f9f9f9; font-size: 14px; }
-        .check-col { width: 30px; }
-        .bulk-actions { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: none; }
+        .status-active { color: #34c759; font-weight: 600; }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
-    <h2>EasyTip.</h2>
-    <div class="nav-item active">Management</div>
-    <div class="nav-item">Transactions</div>
-    <div class="nav-item">Settings</div>
+    <h2 style="font-weight: 800;">EasyTip.</h2>
+    <div style="font-weight: 700; margin-top: 40px;">Team Registry</div>
+    <div style="color: var(--gray); margin-top: 20px; cursor: pointer;">Transactions</div>
 </div>
 
 <div class="main">
-    <h1>Team Registry</h1>
+    <h1 id="formTitle">Register Team Member</h1>
 
     <div class="card">
+        <div class="photo-upload-box" onclick="document.getElementById('imgInput').click()">
+            <img id="preview" class="preview-img">
+            <span id="uploadText" style="font-size: 13px; color: var(--gray);">Click to Upload Member Photo</span>
+            <input type="file" id="imgInput" hidden onchange="previewImage(this)">
+        </div>
+
         <div class="form-grid">
+            <input type="hidden" id="editId">
             <div class="input-group"><label>Real Name</label><input type="text" id="rName"></div>
             <div class="input-group"><label>Nickname (Public)</label><input type="text" id="nName"></div>
             <div class="input-group"><label>Job Title</label><input type="text" id="job"></div>
-            <div class="input-group"><label>Shift Details (Free Text)</label><input type="text" id="shift"></div>
+            
+            <div class="input-group"><label>Start Hour</label><input type="time" id="sTime"></div>
+            <div class="input-group"><label>End Hour</label><input type="time" id="eTime"></div>
+            
             <div class="input-group"><label>Email</label><input type="email" id="email"></div>
-            <div class="input-group"><label>Phone</label><input type="text" id="phone"></div>
         </div>
-        <button class="btn btn-black" onclick="addStaff()">Add Member</button>
-    </div>
-
-    <div id="bulkBar" class="bulk-actions">
-        <span id="countText" style="font-weight: 700; margin-right: 15px;">0 Selected</span>
-        <button class="btn btn-outline" onclick="bulkStatus(false)">Set Active</button>
-        <button class="btn btn-outline" onclick="bulkStatus(true)">Set On Vacation</button>
-        <button class="btn btn-outline" style="color:red; border-color:red;" onclick="bulkDelete()">Delete Selected</button>
+        <button class="btn btn-black" id="saveBtn" onclick="saveStaff()">Add/Update Member</button>
     </div>
 
     <div class="card">
+        <h3>Active System Registry</h3>
         <table>
             <thead>
                 <tr>
-                    <th class="check-col"><input type="checkbox" onclick="toggleAll(this)"></th>
-                    <th>Staff (Public)</th>
+                    <th>Photo</th>
+                    <th>Name (Public)</th>
                     <th>Job</th>
-                    <th>Shift</th>
-                    <th>Status</th>
+                    <th>Shift Hours</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody id="staffTable"></tbody>
@@ -87,58 +82,88 @@
 
 <script>
     let staff = JSON.parse(localStorage.getItem('master_staff') || '[]');
+    let currentImgData = "";
 
-    function addStaff() {
+    function previewImage(input) {
+        const file = input.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                currentImgData = e.target.result;
+                document.getElementById('preview').src = currentImgData;
+                document.getElementById('preview').style.display = 'block';
+                document.getElementById('uploadText').style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function saveStaff() {
+        const id = document.getElementById('editId').value;
         const data = {
-            id: Date.now(),
+            id: id ? parseInt(id) : Date.now(),
             rName: document.getElementById('rName').value,
             nName: document.getElementById('nName').value,
             job: document.getElementById('job').value,
-            shift: document.getElementById('shift').value,
-            onVacation: false
+            sTime: document.getElementById('sTime').value,
+            eTime: document.getElementById('eTime').value,
+            email: document.getElementById('email').value,
+            img: currentImgData || 'default.jpg'
         };
-        staff.push(data);
-        save();
-    }
 
-    function save() {
+        if(id) {
+            const index = staff.findIndex(s => s.id === parseInt(id));
+            staff[index] = data;
+        } else {
+            staff.push(data);
+        }
+        
         localStorage.setItem('master_staff', JSON.stringify(staff));
+        resetForm();
         render();
     }
 
-    function toggleAll(source) {
-        document.querySelectorAll('.staff-check').forEach(c => c.checked = source.checked);
-        updateBulkBar();
-    }
-
-    function updateBulkBar() {
-        const selected = document.querySelectorAll('.staff-check:checked').length;
-        document.getElementById('bulkBar').style.display = selected > 0 ? 'block' : 'none';
-        document.getElementById('countText').innerText = selected + " Selected";
-    }
-
-    function bulkStatus(val) {
-        const selectedIds = Array.from(document.querySelectorAll('.staff-check:checked')).map(c => parseInt(c.value));
-        staff.forEach(s => { if(selectedIds.includes(s.id)) s.onVacation = val; });
-        save();
-    }
-
-    function bulkDelete() {
-        if(confirm('Are you sure?')) {
-            const selectedIds = Array.from(document.querySelectorAll('.staff-check:checked')).map(c => parseInt(c.value));
-            staff = staff.filter(s => !selectedIds.includes(s.id));
-            save();
+    function editStaff(id) {
+        const s = staff.find(s => s.id === id);
+        document.getElementById('editId').value = s.id;
+        document.getElementById('rName').value = s.rName;
+        document.getElementById('nName').value = s.nName;
+        document.getElementById('job').value = s.job;
+        document.getElementById('sTime').value = s.sTime;
+        document.getElementById('eTime').value = s.eTime;
+        document.getElementById('email').value = s.email;
+        document.getElementById('formTitle').innerText = "Edit Member: " + s.nName;
+        
+        if(s.img) {
+            document.getElementById('preview').src = s.img;
+            document.getElementById('preview').style.display = 'block';
+            document.getElementById('uploadText').style.display = 'none';
+            currentImgData = s.img;
         }
+    }
+
+    function resetForm() {
+        document.getElementById('editId').value = "";
+        document.getElementById('rName').value = "";
+        document.getElementById('nName').value = "";
+        document.getElementById('job').value = "";
+        document.getElementById('sTime').value = "";
+        document.getElementById('eTime').value = "";
+        document.getElementById('email').value = "";
+        document.getElementById('preview').style.display = 'none';
+        document.getElementById('uploadText').style.display = 'block';
+        document.getElementById('formTitle').innerText = "Register Team Member";
+        currentImgData = "";
     }
 
     function render() {
         document.getElementById('staffTable').innerHTML = staff.map(s => `
             <tr>
-                <td><input type="checkbox" class="staff-check" value="${s.id}" onclick="updateBulkBar()"></td>
-                <td><b>${s.nName}</b><br><small style="color:#999">${s.rName}</small></td>
+                <td><img src="${s.img}" style="width:35px; height:35px; border-radius:50%; object-fit:cover;"></td>
+                <td><b>${s.nName}</b></td>
                 <td>${s.job}</td>
-                <td>${s.shift}</td>
-                <td>${s.onVacation ? '🚫 Off' : '✅ Active'}</td>
+                <td>${s.sTime} - ${s.eTime}</td>
+                <td><button class="btn btn-edit" onclick="editStaff(${s.id})">Edit</button></td>
             </tr>
         `).join('');
     }
