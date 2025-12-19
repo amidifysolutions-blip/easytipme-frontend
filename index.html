@@ -11,22 +11,22 @@
         
         /* الهيدر */
         .brand-logo { width: 64px; height: 64px; border-radius: 14px; margin-bottom: 12px; }
-        .brand-name { font-size: 20px; font-weight: 600; margin: 0; }
-        .brand-bio { font-size: 13px; color: #888; margin: 8px auto 25px; line-height: 1.4; }
+        .brand-name { font-size: 18px; font-weight: 600; margin: 0; color: #1a1a1a; }
+        .brand-bio { font-size: 12px; color: #888; margin: 6px auto 20px; line-height: 1.4; max-width: 280px; }
 
-        /* السؤال الجديد من الصورة */
-        .main-question { font-size: 19px; font-weight: 700; color: #1a1a1a; margin: 10px 0 20px; line-height: 1.3; text-align: center; }
+        /* السؤال الرئيسي من الصورة */
+        .main-question { font-size: 20px; font-weight: 700; color: #1a1a1a; margin: 10px 0 25px; line-height: 1.3; text-align: center; }
 
         /* شريط البحث الانسيابي (Apple Style) */
-        .search-box { margin-bottom: 20px; width: 100%; position: relative; }
+        .search-box { margin-bottom: 15px; width: 100%; position: relative; }
         .search-input { width: 100%; padding: 12px 16px; border-radius: 12px; border: none; font-size: 15px; outline: none; box-sizing: border-box; background-color: #f2f2f7; transition: 0.2s; }
         .search-input::placeholder { color: #8e8e93; }
 
         /* قسم التبديل الصغير الانسيابي */
-        .selection-header { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 25px; }
+        .selection-header { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 25px; background: transparent; padding: 0; }
         .selection-title { font-size: 14px; font-weight: 500; color: #3a3a3c; }
 
-        /* Apple Switch المصغر */
+        /* Apple Switch المصغر الدقيق */
         .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #e5e5ea; transition: .3s; border-radius: 22px; }
@@ -34,7 +34,7 @@
         input:checked + .slider { background-color: #34c759; }
         input:checked + .slider:before { transform: translateX(18px); }
 
-        /* قائمة الموظفين - بدون تغيير */
+        /* قائمة الموظفين */
         .staff-list { display: flex; flex-direction: column; gap: 12px; }
         .staff-card { background: #fff; border: 1px solid #eee; border-radius: 20px; padding: 15px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: 0.2s; }
         .staff-info { display: flex; align-items: center; gap: 14px; }
@@ -59,6 +59,7 @@
 <div class="main-card" id="mainCard">
     <img src="logo.png" class="brand-logo" alt="Logo">
     <h1 class="brand-name">Mouneh Lebanese Gourmet Store</h1>
+    <p class="brand-bio">Authentic flavors delivered with love and tradition in every bite.</p>
     
     <h2 class="main-question">Please choose a member of our team you would like to tip</h2>
 
@@ -108,7 +109,7 @@
 </div>
 
 <script>
-    // جميع السكربتات بقيت كما هي دون أي تغيير لضمان عمل الصفحة
+    // تم الحفاظ على كافة الوظائف البرمجية الأصلية كما هي
     let isMulti = false;
     let selectedStaff = [];
 
