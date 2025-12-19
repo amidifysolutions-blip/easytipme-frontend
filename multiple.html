@@ -58,15 +58,18 @@
 <body>
 
 <div class="main-card" id="card-content">
-    <div class="back-nav">
-        <button class="back-btn" onclick="window.location.href='index.html'"><span>‹</span> Back</button>
+    
+    <div class="back-nav" style="display: flex; align-items: center; margin-bottom: 15px; padding: 0 5px;">
+        <button class="back-btn" onclick="window.location.href='index.html'" 
+            style="background: none; border: none; color: #888; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 0;">
+            <span style="font-size: 20px; line-height: 0;">‹</span> Back
+        </button>
     </div>
 
     <div class="brand-header">
         <img src="logo.png" class="brand-logo" alt="Logo">
         <h1 class="brand-name">Mouneh Lebanese Gourmet Store</h1>
     </div>
-
     <div class="staff-header">
         <h1 class="staff-name" id="display-name">Team</h1>
         <div class="avatar-stack" id="avatar-stack"></div>
