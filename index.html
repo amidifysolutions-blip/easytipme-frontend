@@ -13,13 +13,11 @@
         .brand-name { font-size: 24px; font-weight: 700; margin: 0; color: #1a1a1a; }
         .brand-bio { font-size: 14px; color: #666; margin: 8px 0 20px; line-height: 1.4; }
 
-        /* السؤال الذي طلبته من الصورة */
         .main-question { font-size: 18px; font-weight: 700; color: #1a1a1a; margin: 25px 0 15px; line-height: 1.3; }
 
         .search-box { background: #f2f2f7; border-radius: 12px; padding: 10px 15px; display: flex; align-items: center; margin-bottom: 15px; }
         .search-input { border: none; background: transparent; outline: none; width: 100%; font-size: 16px; color: #000; }
 
-        /* تنسيق زر ابل الصغير والسؤال */
         .selection-header { background: #f2f2f7; padding: 10px 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .selection-title { font-size: 14px; font-weight: 500; color: #3a3a3c; }
 
@@ -30,7 +28,6 @@
         input:checked + .slider { background-color: #34c759; }
         input:checked + .slider:before { transform: translateX(18px); }
 
-        /* قائمة الموظفين */
         .staff-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
         .staff-card { background: white; border: 1px solid #f2f2f2; border-radius: 20px; padding: 15px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: 0.2s; }
         .staff-card:hover { border-color: #1a1a1a; }
@@ -39,6 +36,9 @@
         .details h3 { font-size: 16px; font-weight: 600; margin: 0; text-align: left; }
         .details p { font-size: 13px; color: #888; margin: 2px 0 0; text-align: left; }
         
+        /* السهم (Chevron) المفقود */
+        .chevron { color: #c7c7cc; font-size: 20px; font-weight: 300; }
+
         .checkbox-container { width: 22px; height: 22px; border: 2px solid #ddd; border-radius: 6px; display: none; align-items: center; justify-content: center; }
         .staff-card.selected .checkbox-container { background: #1a1a1a; border-color: #1a1a1a; }
         .staff-card.selected .checkbox-container::after { content: '✓'; color: white; font-size: 14px; }
@@ -49,7 +49,7 @@
 </head>
 <body>
 
-<div class="main-card" id="mainCard">
+<div class="main-card">
     <img src="logo.png" class="brand-logo" alt="Logo">
     <h1 class="brand-name">Mouneh Lebanese Gourmet Store</h1>
     <p class="brand-bio">Authentic flavors delivered with love and tradition in every bite.</p>
@@ -68,12 +68,13 @@
         </label>
     </div>
 
-    <div class="staff-list" id="stafflist">
+    <div class="staff-list">
         <div class="staff-card" onclick="handleSelect('shani', 'shani.jpg', this)">
             <div class="staff-info">
                 <img src="shani.jpg" class="avatar" alt="S">
                 <div class="details"><h3>Shani</h3><p>Nail Technician</p></div>
             </div>
+            <div class="chevron">›</div>
             <div class="checkbox-container"></div>
         </div>
 
@@ -82,12 +83,12 @@
                 <img src="bustani.jpg" class="avatar" alt="B">
                 <div class="details"><h3>Bustani</h3><p>Barber</p></div>
             </div>
+            <div class="chevron">›</div>
             <div class="checkbox-container"></div>
         </div>
     </div>
 
     <button id="next-btn" onclick="goToMultiple()" style="display:none;">Next</button>
-    
     <div class="footer-credit">Powered by <b>Amidify Solutions Inc.</b></div>
 </div>
 
@@ -101,24 +102,22 @@
         document.querySelectorAll('.staff-card').forEach(c => {
             c.classList.remove('selected');
             c.querySelector('.checkbox-container').style.display = isMulti ? 'flex' : 'none';
+            c.querySelector('.chevron').style.display = isMulti ? 'none' : 'block';
         });
         document.getElementById('next-btn').style.display = 'none';
     }
 
     function handleSelect(id, img, element) {
         if (!isMulti) {
+            // حفظ البيانات بشكل صحيح لضمان ظهور الصور في الصفحة التالية
             localStorage.setItem('selectedStaff', JSON.stringify([{name: id, image: img}]));
             window.location.href = id + '.html';
             return;
         }
-        
         element.classList.toggle('selected');
         const index = selectedStaff.findIndex(s => s.name === id);
-        if (index > -1) {
-            selectedStaff.splice(index, 1);
-        } else {
-            selectedStaff.push({name: id, image: img});
-        }
+        if (index > -1) { selectedStaff.splice(index, 1); } 
+        else { selectedStaff.push({name: id, image: img}); }
         document.getElementById('next-btn').style.display = selectedStaff.length > 0 ? 'block' : 'none';
     }
 
@@ -136,6 +135,5 @@
         }
     }
 </script>
-
 </body>
 </html>
