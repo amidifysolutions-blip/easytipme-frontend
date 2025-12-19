@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - EasyTip Admin</title>
+    <style>
+        :root { --apple-blue: #0071e3; --bg: #f5f5f7; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; display: flex; text-align: right; }
+        
+        /* Sidebar */
+        .sidebar { width: 260px; background: #fff; height: 100vh; border-left: 1px solid #d2d2d7; padding: 20px; }
+        .nav-item { padding: 12px; margin: 8px 0; border-radius: 10px; cursor: pointer; color: #1d1d1f; transition: 0.3s; }
+        .nav-item:hover, .nav-item.active { background: var(--apple-blue); color: white; }
+
+        /* Content */
+        .main-content { flex: 1; padding: 40px; }
+        .card { background: #fff; border-radius: 20px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 25px; }
+        
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+        .input-group { display: flex; flex-direction: column; gap: 8px; }
+        input, select { padding: 12px; border: 1px solid #d2d2d7; border-radius: 10px; font-size: 14px; outline: none; }
+        
+        button.btn-main { background: var(--apple-blue); color: #fff; border: none; padding: 15px 30px; border-radius: 12px; cursor: pointer; font-weight: 600; margin-top: 20px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; border-radius: 15px; overflow: hidden; }
+        th, td { padding: 15px; text-align: right; border-bottom: 1px solid #eee; }
+        .status-badge { background: #eafaf0; color: #34c759; padding: 5px 10px; border-radius: 8px; font-size: 12px; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <h2 style="color: var(--apple-blue)">EasyTip Admin</h2>
+    <div class="nav-item active">إعدادات الشركة</div>
+    <div class="nav-item">إدارة الموظفين</div>
+    <div class="nav-item">الرصيد والمدفوعات</div>
+    <div class="nav-item">سجلات الحضور</div>
+</div>
+
+<div class="main-content">
+    <h1 style="font-weight: 700;">لوحة إدارة المنشأة</h1>
+
+    <div class="card">
+        <h3>هوية المنشأة والباركود</h3>
+        <div class="form-grid">
+            <div class="input-group">
+                <label>كود الشركة الفريد</label>
+                <input type="text" id="companyCode" value="BARBER-7788" readonly>
+            </div>
+            <div class="input-group">
+                <label>رابط Stripe Connect</label>
+                <input type="text" placeholder="سيتم الربط لاحقاً..." disabled>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>إضافة موظف جديد (يدوياً)</h3>
+        <div class="form-grid">
+            <div class="input-group">
+                <label>اسم الموظف</label>
+                <input type="text" id="empName" placeholder="مثال: شاني">
+            </div>
+            <div class="input-group">
+                <label>المسمى الوظيفي</label>
+                <input type="text" id="empJob" placeholder="حلاق / نادل">
+            </div>
+            <div class="input-group">
+                <label>وقت الدوام (من - إلى)</label>
+                <input type="text" id="empShift" placeholder="9:00 AM - 5:00 PM">
+            </div>
+            <div class="input-group">
+                <label>رابط الصورة</label>
+                <input type="text" id="empImg" placeholder="shani.jpg">
+            </div>
+            <div class="input-group">
+                <label>الحساب البنكي (Stripe ID)</label>
+                <input type="text" id="empStripe" placeholder="acct_xxxxxxxx">
+            </div>
+        </div>
+        <button class="btn-main" onclick="addNewEmployee()">إضافة الموظف للنظام</button>
+    </div>
+
+    <div class="card">
+        <h3>إدارة الموظفين الحالية</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>الموظف</th>
+                    <th>الدوام</th>
+                    <th>الرصيد الحالي</th>
+                    <th>Stripe Connect</th>
+                    <th>الحالة</th>
+                </tr>
+            </thead>
+            <tbody id="employeesTable">
+                </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    let employeesList = JSON.parse(localStorage.getItem('master_employees') || '[]');
+
+    function addNewEmployee() {
+        const name = document.getElementById('empName').value;
+        const job = document.getElementById('empJob').value;
+        const shift = document.getElementById('empShift').value;
+        const stripe = document.getElementById('empStripe').value;
+        const img = document.getElementById('empImg').value;
+
+        if (name && job) {
+            const newEntry = {
+                id: Date.now(),
+                name, job, shift, stripe, img: img || 'avatar.png',
+                balance: 0 // الرصيد يبدأ بصفر
+            };
+            employeesList.push(newEntry);
+            localStorage.setItem('master_employees', JSON.stringify(employeesList));
+            updateUI();
+            alert('تم تسجيل الموظف بنجاح');
+        }
+    }
+
+    function updateUI() {
+        const table = document.getElementById('employeesTable');
+        table.innerHTML = employeesList.map(e => `
+            <tr>
+                <td><b>${e.name}</b><br><small>${e.job}</small></td>
+                <td>${e.shift}</td>
+                <td>CA$${e.balance.toFixed(2)}</td>
+                <td><small>${e.stripe || 'غير مربوط'}</small></td>
+                <td><span class="status-badge">نشط</span></td>
+            </tr>
+        `).join('');
+    }
+
+    updateUI();
+</script>
+
+</body>
+</html>
