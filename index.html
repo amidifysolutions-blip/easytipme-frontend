@@ -53,22 +53,23 @@
 <script>
     let isMulti = false;
     let selectedStaff = [];
-    // جلب البيانات من الداشبورد
-    let staffData = JSON.parse(localStorage.getItem('master_staff') || '[]');
+   // جلب الموظفين من الداشبورد
+let staffData = JSON.parse(localStorage.getItem('master_staff') || '[]');
 
-    function renderStaff() {
-        const list = document.getElementById('stafflist');
-        list.innerHTML = staffData.map(s => `
-            <div class="staff-card" onclick="handleSelect('${s.id}', this)">
-                <div style="display:flex; align-items:center; gap:12px;">
-                    <img src="${s.img}" class="avatar">
-                    <div class="details"><h3>${s.nName}</h3><p>${s.job}</p></div>
-                </div>
-                <div class="chevron">›</div>
-                <div class="checkbox-container"></div>
+function renderStaff() {
+    const list = document.getElementById('stafflist');
+    list.innerHTML = staffData.map(s => `
+        <div class="staff-card" onclick="handleSelect('${s.id}', '${s.img}', this)">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <img src="${s.img}" class="avatar">
+                <div class="details"><h3>${s.nName}</h3><p>${s.job}</p></div>
             </div>
-        `).join('');
-    }
+            <div class="chevron">›</div>
+            <div class="checkbox-container"></div>
+        </div>
+    `).join('');
+}
+renderStaff(); // تشغيل العرض فوراً
 
     function toggleMode() {
         isMulti = document.getElementById('multiModeToggle').checked;
