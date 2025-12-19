@@ -42,6 +42,14 @@
     <h2 class="main-question">Please choose a member of our team you would like to tip</h2>
     <div class="search-box"><input type="text" id="staffSearch" onkeyup="filterStaff()" placeholder="Search..." class="search-input"></div>
     <div class="selection-header">
+        <div class="selection-header">
+    <span style="font-size: 14px;">Select multiple specialists</span>
+    <label class="switch"><input type="checkbox" id="multiModeToggle" onchange="toggleMode()"><span class="slider"></span></label>
+</div>
+
+<div id="select-all-container" style="display:none; justify-content: flex-end; margin-bottom: 10px;">
+    <button onclick="selectAll()" style="background:none; border:none; color:#0071e3; font-weight:600; cursor:pointer; font-size:13px;">Select All Members</button>
+</div>
         <span style="font-size: 14px;">Select multiple specialists</span>
         <label class="switch"><input type="checkbox" id="multiModeToggle" onchange="toggleMode()"><span class="slider"></span></label>
     </div>
@@ -51,63 +59,83 @@
 </div>
 
 <script>
-    let isMulti = false;
-    let selectedStaff = [];
-   // جلب الموظفين من الداشبورد
+   let isMulti = false;
+let selectedStaff = [];
+// جلب البيانات من الداشبورد
 let staffData = JSON.parse(localStorage.getItem('master_staff') || '[]');
 
 function renderStaff() {
     const list = document.getElementById('stafflist');
+    if (staffData.length === 0) {
+        list.innerHTML = "<p style='text-align:center; color:#888;'>No staff members found.</p>";
+        return;
+    }
+    
     list.innerHTML = staffData.map(s => `
-        <div class="staff-card" onclick="handleSelect('${s.id}', '${s.img}', this)">
+        <div class="staff-card" id="card-${s.id}" onclick="handleSelect('${s.id}', this)">
             <div style="display:flex; align-items:center; gap:12px;">
-                <img src="${s.img}" class="avatar">
-                <div class="details"><h3>${s.nName}</h3><p>${s.job}</p></div>
+                <img src="${s.img}" class="avatar" onerror="this.src='logo.png'">
+                <div class="details">
+                    <h3>${s.nName}</h3>
+                    <p>${s.job}</p>
+                </div>
             </div>
-            <div class="chevron">›</div>
-            <div class="checkbox-container"></div>
+            <div class="chevron" id="chevron-${s.id}" style="display: ${isMulti ? 'none' : 'block'}">›</div>
+            <div class="checkbox-container" id="check-${s.id}" style="display: ${isMulti ? 'flex' : 'none'}"></div>
         </div>
     `).join('');
 }
-renderStaff(); // تشغيل العرض فوراً
 
-    function toggleMode() {
-        isMulti = document.getElementById('multiModeToggle').checked;
-        selectedStaff = [];
-        renderStaff();
-        document.getElementById('next-btn').style.display = 'none';
-        document.querySelectorAll('.checkbox-container').forEach(el => el.style.display = isMulti ? 'flex' : 'none');
-        document.querySelectorAll('.chevron').forEach(el => el.style.display = isMulti ? 'none' : 'block');
+function toggleMode() {
+    isMulti = document.getElementById('multiModeToggle').checked;
+    selectedStaff = []; // تصفير الاختيارات
+    
+    // إظهار/إخفاء زر Select All
+    document.getElementById('select-all-container').style.display = isMulti ? 'flex' : 'none';
+    
+    renderStaff(); // إعادة رسم القائمة لتحديث المربعات
+    document.getElementById('next-btn').style.display = 'none';
+}
+
+function handleSelect(id, element) {
+    const person = staffData.find(s => s.id == id);
+    
+    if (!isMulti) {
+        localStorage.setItem('selectedStaff', JSON.stringify([{name: person.nName, image: person.img}]));
+        window.location.href = 'multiple.html'; 
+        return;
     }
 
-    function handleSelect(id, element) {
+    element.classList.toggle('selected');
+    const idx = selectedStaff.findIndex(s => s.id == id);
+    
+    if (idx > -1) {
+        selectedStaff.splice(idx, 1);
+    } else {
+        selectedStaff.push({name: person.nName, image: person.img, id: id});
+    }
+
+    document.getElementById('next-btn').style.display = selectedStaff.length > 0 ? 'block' : 'none';
+}
+
+function selectAll() {
+    selectedStaff = [];
+    const cards = document.querySelectorAll('.staff-card');
+    cards.forEach(card => {
+        card.classList.add('selected');
+        const id = card.id.replace('card-', '');
         const person = staffData.find(s => s.id == id);
-        if (!isMulti) {
-            localStorage.setItem('selectedStaff', JSON.stringify([{name: person.nName, image: person.img}]));
-            window.location.href = 'multiple.html'; // توجيه لصفحة دفع واحدة ذكية
-            return;
-        }
-        element.classList.toggle('selected');
-        const idx = selectedStaff.findIndex(s => s.id == id);
-        if (idx > -1) selectedStaff.splice(idx, 1);
-        else selectedStaff.push({name: person.nName, image: person.img, id: id});
-        document.getElementById('next-btn').style.display = selectedStaff.length > 0 ? 'block' : 'none';
-    }
+        selectedStaff.push({name: person.nName, image: person.img, id: id});
+    });
+    document.getElementById('next-btn').style.display = 'block';
+}
 
-    function goToMultiple() {
-        localStorage.setItem('selectedStaff', JSON.stringify(selectedStaff));
-        window.location.href = 'multiple.html';
-    }
+function goToMultiple() {
+    localStorage.setItem('selectedStaff', JSON.stringify(selectedStaff));
+    window.location.href = 'multiple.html';
+}
 
-    function filterStaff() {
-        let input = document.getElementById('staffSearch').value.toLowerCase();
-        document.querySelectorAll('.staff-card').forEach(card => {
-            let name = card.querySelector('h3').innerText.toLowerCase();
-            card.style.display = name.includes(input) ? "flex" : "none";
-        });
-    }
-
-    renderStaff();
+renderStaff();
 </script>
 </body>
 </html>
