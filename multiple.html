@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EasyTipMe - Complete Payment</title>
+    <title>EasyTipMe - Team Payment</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://js.stripe.com/v3/"></script>
     <style>
@@ -20,18 +20,16 @@
         .staff-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-top: 15px; }
         .staff-name { font-size: 24px; font-weight: 600; margin: 0; }
         
-        /* حاوية صور الموظفين (التقسيم) */
         .avatar-stack { display: flex; align-items: center; }
         .avatar-img { width: 55px; height: 55px; border-radius: 50%; border: 2px solid #fff; margin-left: -20px; object-fit: cover; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         .avatar-img:first-child { margin-left: 0; }
 
         .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
-        .amount-btn { background: #fff; border: 1px solid #eeeeee; padding: 18px 5px; border-radius: 14px; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .amount-btn { background: #fff; border: 1px solid #eeeeee; padding: 18px 5px; border-radius: 14px; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s; color: #1a1a1a; }
         .amount-btn.active { border-color: #1a1a1a; box-shadow: inset 0 0 0 1px #1a1a1a; }
 
         .love-container { background: #f8f8f8; border-radius: 20px; padding: 18px; margin: 20px 0; border: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
         
-        /* Apple Switch */
         .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #e5e5ea; transition: .4s; border-radius: 24px; }
@@ -42,13 +40,24 @@
         #payment-element { margin-top: 20px; min-height: 100px; }
         #submit-btn { background: #1a1a1a; color: white; border: none; width: 100%; padding: 18px; border-radius: 18px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 20px; display: none; }
 
-        /* التوقيع المطلوب */
+        /* النجوم والتقييم */
+        .rating-container { margin-top: 30px; padding-top: 20px; border-top: 1px solid #f5f5f5; text-align: center; }
+        .stars { display: flex; justify-content: center; gap: 10px; direction: rtl; }
+        .stars label { font-size: 30px; color: #eee; cursor: pointer; transition: 0.2s; }
+        .stars input { display: none; }
+        .stars label:hover, .stars label:hover ~ label, .stars input:checked ~ label { color: #FFD700; }
+
+        /* رسالة النجاح */
+        .success-message { text-align: center; padding: 30px 10px; animation: fadeIn 0.5s ease; }
+        .success-message h2 { color: #1a1a1a; margin-bottom: 10px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
         .footer-credit { margin-top: 40px; font-size: 11px; color: #bbb; text-align: center; border-top: 1px solid #f9f9f9; padding-top: 20px; }
     </style>
 </head>
 <body>
 
-<div class="main-card">
+<div class="main-card" id="card-content">
     <div class="back-nav">
         <button class="back-btn" onclick="window.location.href='index.html'"><span>‹</span> Back</button>
     </div>
@@ -86,6 +95,17 @@
     <div id="payment-element"></div>
     <button id="submit-btn" onclick="handleSubmit()">Pay Now</button>
 
+    <div class="rating-container">
+        <span style="display:block; margin-bottom:12px; font-size:14px; font-weight:500;">Rate the team's service</span>
+        <div class="stars">
+            <input type="radio" id="st5" name="rate"><label for="st5">★</label>
+            <input type="radio" id="st4" name="rate"><label for="st4">★</label>
+            <input type="radio" id="st3" name="rate"><label for="st3">★</label>
+            <input type="radio" id="st2" name="rate"><label for="st2">★</label>
+            <input type="radio" id="st1" name="rate"><label for="st1">★</label>
+        </div>
+    </div>
+
     <div class="footer-credit">
         Powered by <b>Amidify Solutions Inc.</b>
     </div>
@@ -94,7 +114,6 @@
 <script>
     let currentAmt = 0;
     let elements;
-    // رابط الرندر الخاص بك من الصورة
     const API_URL = "https://easytipme-backend.onrender.com"; 
     const stripe = Stripe('pk_test_51QpPGt01TRhauBHP6dGYUaBYZJr9oHskEqZy9zWm8L6SPtG2kdzQS0MhPiatv3QDvzkTXvJDvbWMSIOUVOCcaswu003bDig62n'); 
 
@@ -107,7 +126,6 @@
             nameDisplay.innerText = staffData.length === 1 ? staffData[0].name : "Team Tip";
             container.innerHTML = staffData.map(p => `<img src="${p.img}" class="avatar-img">`).join('');
         }
-        // تنبيه السيرفر للعمل فوراً (Wake up)
         fetch(API_URL).catch(()=>{});
     };
 
@@ -134,11 +152,7 @@
             const res = await fetch(`${API_URL}/create-payment-intent`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ 
-                    amount: finalAmt, 
-                    currency: "cad", 
-                    metadata: { staff: names } // إرسال الأسماء للتقسيم في لوحة التحكم
-                })
+                body: JSON.stringify({ amount: finalAmt, currency: "cad", metadata: { staff: names } })
             });
             const { clientSecret } = await res.json();
             elements = stripe.elements({ clientSecret });
@@ -150,7 +164,7 @@
                 updateTotal();
             });
         } catch (e) {
-            document.getElementById('payment-element').innerHTML = '<p style="color:red;">Failed to connect. Please try again.</p>';
+            document.getElementById('payment-element').innerHTML = '<p style="color:red;">Failed to connect.</p>';
         }
     }
 
@@ -160,10 +174,27 @@
     }
 
     async function handleSubmit() {
-        const { error } = await stripe.confirmPayment({
+        const { error, paymentIntent } = await stripe.confirmPayment({
             elements,
-            confirmParams: { return_url: window.location.origin + "/success.html" }
+            redirect: 'if_required'
         });
+
+        if (error) {
+            alert(error.message);
+        } else if (paymentIntent && paymentIntent.status === 'succeeded') {
+            document.getElementById('card-content').innerHTML = `
+                <div class="success-message">
+                    <div style="font-size: 50px; margin-bottom: 15px;">✅</div>
+                    <h2>Thank You!</h2>
+                    <p>Your tip has been received and shared with the team. We appreciate your support!</p>
+                    <button onclick="window.location.href='index.html'" 
+                        style="margin-top:20px; background:#1a1a1a; color:white; border:none; padding:12px 25px; border-radius:12px; cursor:pointer; font-weight:600;">
+                        Back to Home
+                    </button>
+                </div>
+                <div class="footer-credit">Powered by <b>Amidify Solutions Inc.</b></div>
+            `;
+        }
     }
 </script>
 </body>
