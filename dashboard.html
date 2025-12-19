@@ -97,7 +97,37 @@
 </div>
 
 <script>
-    let staff = JSON.parse(localStorage.getItem('master_staff') || '[]');
+    // استبدل أول سطر في السكريبت بهذا الكود لضمان استدعاء شاني وبستاني
+let staff = JSON.parse(localStorage.getItem('master_staff') || '[]');
+
+// كود الاستدعاء التلقائي إذا كانت القائمة فارغة
+if (staff.length === 0) {
+    staff = [
+        {
+            id: 101,
+            rName: "Shani Employee",
+            nName: "Shani",
+            job: "Nail Technician",
+            sTime: "09:00",
+            eTime: "17:00",
+            days: ["Mon", "Tue", "Wed", "Thu", "Fri"],
+            email: "shani@example.com",
+            img: "shani.jpg"
+        },
+        {
+            id: 102,
+            rName: "Bustani Employee",
+            nName: "Bustani",
+            job: "Barber",
+            sTime: "10:00",
+            eTime: "19:00",
+            days: ["Tue", "Wed", "Thu", "Fri", "Sat"],
+            email: "bustani@example.com",
+            img: "bustani.jpg"
+        }
+    ];
+    localStorage.setItem('master_staff', JSON.stringify(staff));
+}
     let currentImgData = "";
 
     function previewImage(input) {
