@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://js.stripe.com/v3/"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #fafafa; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; margin: 0; color: #1a1a1a; padding-top: 20px; }
+        body { font-family: 'Inter', sans-serif; background-color: #fafafa; display: flex; justify-content: center; padding-top: 20px; margin: 0; color: #1a1a1a; }
         .main-card { background: white; width: 92%; max-width: 380px; padding: 25px 25px 35px; border-radius: 32px; box-shadow: 0 4px 25px rgba(0,0,0,0.03); border: 1px solid #f2f2f2; box-sizing: border-box; min-height: 600px; position: relative; }
         
         .back-nav { display: flex; align-items: center; margin-bottom: 15px; }
@@ -24,15 +24,16 @@
         .amount-btn { background: #fff; border: 1px solid #eeeeee; padding: 18px 5px; border-radius: 14px; font-size: 14px; font-weight: 600; cursor: pointer; color: #1a1a1a; transition: 0.2s; }
         .amount-btn.active { border-color: #1a1a1a; box-shadow: inset 0 0 0 1px #1a1a1a; }
 
-        /* تنسيق الـ Other (المربع الأنيق) */
+        /* Other Box - In-page style */
         .custom-box { display: none; background: #f9f9f9; border-radius: 20px; padding: 20px; margin-top: 15px; border: 1px dashed #ddd; }
         .custom-input-wrapper { display: flex; align-items: center; background: white; border: 1px solid #eee; border-radius: 12px; padding: 10px 15px; }
         .custom-input-wrapper span { font-weight: 600; color: #1a1a1a; margin-right: 5px; }
         .custom-input-wrapper input { border: none; outline: none; width: 100%; font-size: 16px; font-weight: 600; }
+        .min-tip-text { font-size: 11px; color: #999; margin-top: 8px; text-align: left; }
         #confirm-custom-btn { background: #1a1a1a; color: white; border: none; width: 100%; padding: 12px; border-radius: 12px; margin-top: 12px; cursor: pointer; font-weight: 600; }
 
-        /* Apple Style Toggle الأخضر */
-        .love-box { background: #f8f8f8; padding: 18px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; margin: 20px 0; border: 1px solid #eee; }
+        /* Green Apple Toggle */
+        .love-box { background: #f8f8f8; padding: 18px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; margin: 20px 0; border: 1px solid #eee; text-align: left; }
         .switch { position: relative; display: inline-block; width: 42px; height: 24px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #e5e5ea; transition: .4s; border-radius: 24px; }
@@ -40,11 +41,12 @@
         input:checked + .slider { background-color: #34c759; }
         input:checked + .slider:before { transform: translateX(18px); }
 
-        /* النجوم والتقييم */
-        .stars-container { display: inline-flex; flex-direction: row-reverse; gap: 8px; justify-content: center; width: 100%; margin-top: 10px; }
+        /* Gold Stars Styling */
+        .rating-section { text-align: center; margin-top: 30px; }
+        .stars-container { display: inline-flex; flex-direction: row-reverse; gap: 10px; }
         .stars-container input { display: none; }
-        .stars-container label { font-size: 32px; color: #e5e5e5; cursor: pointer; }
-        .stars-container input:checked ~ label, .stars-container label:hover, .stars-container label:hover ~ label { color: #1a1a1a; }
+        .stars-container label { font-size: 32px; color: #e5e5e5; cursor: pointer; transition: 0.2s; }
+        .stars-container label:hover, .stars-container label:hover ~ label, .stars-container input:checked ~ label { color: #FFD700 !important; }
 
         #submit-btn { background: #1a1a1a; color: white; border: none; width: 100%; padding: 18px; border-radius: 18px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 20px; display: none; }
         #success-msg { display: none; text-align: center; padding: 60px 10px; }
@@ -76,26 +78,26 @@
 
         <div id="custom-container" class="custom-box">
             <div class="custom-input-wrapper"><span>CA$</span><input type="number" id="custom-val" placeholder="0.00"></div>
-            <p style="font-size: 11px; color: #999; margin-top: 8px;">Minimum tip is CA$3.00</p>
-            <button id="confirm-custom-btn" onclick="applyOth()">Confirm Amount</button>
+            <p class="min-tip-text">Minimum tip is CA$3.00</p>
+            <button id="confirm-custom-btn" onclick="applyOth()">Confirm</button>
         </div>
 
         <div class="love-box">
-            <div style="text-align: left;"><h4 style="margin:0; font-size:14px;">Show some love? ♡</h4><p style="margin:4px 0 0; font-size:11px; color:#888;">Cover fees so Bustani gets 100%.</p></div>
+            <div style="text-align:left;"><h4 style="margin:0; font-size:14px;">Show some love? ♡</h4><p style="margin:4px 0 0; font-size:11px; color:#888;">Cover fees so Bustani gets 100%.</p></div>
             <label class="switch"><input type="checkbox" id="feeToggle" checked onchange="refreshAmount()"><span class="slider"></span></label>
         </div>
 
         <div id="payment-element"></div>
         <button id="submit-btn" onclick="handleSubmit()">Pay Now</button>
         
-        <div class="rating-container">
-            <span style="display:block; margin-bottom:10px; font-size:13px; color:#888;">Rate Shani's service</span>
-            <div class="stars">
-                <input type="radio" id="st5" name="rate"><label for="st5">★</label>
-                <input type="radio" id="st4" name="rate"><label for="st4">★</label>
-                <input type="radio" id="st3" name="rate"><label for="st3">★</label>
-                <input type="radio" id="st2" name="rate"><label for="st2">★</label>
-                <input type="radio" id="st1" name="rate"><label for="st1">★</label>
+        <div class="rating-section">
+            <p style="font-size: 13px; color: #888;">Rate your visit</p>
+            <div class="stars-container">
+                <input type="radio" id="s5" name="rating" value="5"><label for="s5">★</label>
+                <input type="radio" id="s4" name="rating" value="4"><label for="s4">★</label>
+                <input type="radio" id="s3" name="rating" value="3"><label for="s3">★</label>
+                <input type="radio" id="s2" name="rating" value="2"><label for="s2">★</label>
+                <input type="radio" id="s1" name="rating" value="1"><label for="s1">★</label>
             </div>
         </div>
     </div>
@@ -104,13 +106,13 @@
         <div style="font-size: 55px; margin-bottom: 15px;">✅</div>
         <h2>Thank You!</h2>
         <p style="color: #888; font-size: 14px;">Your tip has been received. We appreciate your support!</p>
-        <button onclick="window.location.href='index.html'" style="margin-top:25px; background:#1a1a1a; color:white; border:none; padding:15px 30px; border-radius:15px; cursor:pointer; font-weight:600;">Done</button>
+        <button onclick="window.location.href='index.html'" style="margin-top:25px; background:#1a1a1a; color:white; border:none; padding:15px 30px; border-radius:15px; cursor:pointer;">Done</button>
     </div>
     <div class="footer-credit">Powered by <b>Amidify Solutions Inc.</b></div>
 </div>
 
 <script>
-    let currentBaseAmount = 0; let elements; const FEE_PERCENT = 0.12;
+    let currentBaseAmount = 0; const FEE_PERCENT = 0.12; let elements;
     const API_URL = "https://easytipme-backend.onrender.com";
     const stripe = Stripe('pk_test_51QpPGt01TRhauBHP6dGYUaBYZJr9oHskEqZy9zWm8L6SPtG2kdzQS0MhPiatv3QDvzkTXvJDvbWMSIOUVOCcaswu003bDig62n'); 
 
@@ -127,7 +129,7 @@
         const isCoveringFees = document.getElementById('feeToggle').checked;
         const finalAmount = isCoveringFees ? Math.round(baseAmt * (1 + FEE_PERCENT)) : baseAmt;
         document.getElementById('submit-btn').innerText = `Pay CA$${(finalAmount/100).toFixed(2)} Now`;
-        document.getElementById('payment-element').innerHTML = 'Loading...';
+        document.getElementById('payment-element').innerHTML = 'Loading secure payment...';
         try {
             const res = await fetch(`${API_URL}/create-payment-intent`, { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({ amount: finalAmount, currency: "cad", metadata: { staff: "Bustani" } }) });
             const { clientSecret } = await res.json();
