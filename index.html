@@ -9,29 +9,40 @@
         body { font-family: 'Inter', sans-serif; background-color: #fafafa; display: flex; justify-content: center; padding: 20px 0; margin: 0; color: #1a1a1a; }
         .main-card { background: white; width: 92%; max-width: 380px; padding: 35px 25px; border-radius: 32px; border: 1px solid #f2f2f2; box-sizing: border-box; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.02); }
         
-        /* الهيدر */
         .brand-logo { width: 64px; height: 64px; border-radius: 14px; margin-bottom: 12px; }
         .brand-name { font-size: 20px; font-weight: 600; margin: 0; }
         .brand-bio { font-size: 13px; color: #888; margin: 8px auto 25px; line-height: 1.4; }
 
-        /* شريط البحث الجديد */
         .search-box { margin-bottom: 20px; width: 100%; position: relative; }
         .search-input { width: 100%; padding: 14px 18px; border-radius: 16px; border: 1px solid #eee; font-size: 14px; outline: none; box-sizing: border-box; background-color: #f9f9f9; transition: 0.2s; }
         .search-input:focus { border-color: #1a1a1a; background-color: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
 
-        /* قسم اختيار المتعدد */
-        .selection-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 0 5px; }
-        .selection-title { font-size: 14px; font-weight: 500; color: #444; }
+        /* التعديل الجديد: Apple Style Fee Box */
+        .love-box { 
+            background: #f8f8f8; 
+            padding: 18px; 
+            border-radius: 20px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin: 0 0 20px 0; 
+            border: 1px solid #eee; 
+            text-align: left;
+        }
+        .love-text h4 { margin: 0; font-size: 14px; font-weight: 600; }
+        .love-text p { margin: 4px 0 0; font-size: 11px; color: #888; line-height: 1.4; }
 
         /* Apple Switch الأخضر */
         .switch { position: relative; display: inline-block; width: 42px; height: 24px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #e5e5ea; transition: .4s; border-radius: 24px; }
-        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         input:checked + .slider { background-color: #34c759; }
         input:checked + .slider:before { transform: translateX(18px); }
 
-        /* قائمة الموظفين */
+        .selection-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 0 5px; }
+        .selection-title { font-size: 14px; font-weight: 500; color: #444; }
+
         .staff-list { display: flex; flex-direction: column; gap: 12px; }
         .staff-card { background: #fff; border: 1px solid #eee; border-radius: 20px; padding: 15px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: 0.2s; }
         .staff-card:hover { border-color: #ddd; }
@@ -41,7 +52,6 @@
         .details h3 { margin: 0; font-size: 16px; font-weight: 600; }
         .details p { margin: 2px 0 0; font-size: 12px; color: #888; }
 
-        /* علامة الصح والوضع المتعدد */
         .checkbox-container { display: none; width: 22px; height: 22px; border-radius: 7px; border: 2px solid #ddd; position: relative; transition: 0.2s; }
         .staff-card.selected .checkbox-container { background: #1a1a1a; border-color: #1a1a1a; }
         .staff-card.selected .checkbox-container::after { content: "✓"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 14px; }
@@ -51,11 +61,7 @@
         .chevron { font-size: 18px; color: #ccc; }
 
         #next-btn { background: #1a1a1a; color: white; border: none; width: 100%; padding: 18px; border-radius: 18px; font-size: 16px; font-weight: 600; margin-top: 25px; cursor: pointer; display: none; transition: 0.2s; }
-        #next-btn:active { transform: scale(0.98); }
-
-        /* التوقيع المطلوب */
         .footer-credit { margin-top: 40px; font-size: 11px; color: #bbb; text-align: center; border-top: 1px solid #f9f9f9; padding-top: 20px; }
-        .footer-credit b { color: #999; }
     </style>
 </head>
 <body>
@@ -67,6 +73,17 @@
 
     <div class="search-box">
         <input type="text" id="staffSearch" onkeyup="filterStaff()" placeholder="Search for your specialist..." class="search-input">
+    </div>
+
+    <div class="love-box">
+        <div class="love-text">
+            <h4>Cover processing fees? ♡</h4>
+            <p>Ensure 100% of your tip reaches the team.</p>
+        </div>
+        <label class="switch">
+            <input type="checkbox" id="feeToggle" checked onchange="saveFeeState()">
+            <span class="slider"></span>
+        </label>
     </div>
 
     <div class="selection-header">
@@ -81,10 +98,7 @@
         <div class="staff-card" onclick="handleSelect('shani', 'shani.jpg', this)">
             <div class="staff-info">
                 <img src="shani.jpg" class="avatar" alt="S">
-                <div class="details">
-                    <h3>Shani</h3>
-                    <p>Nail Technician</p>
-                </div>
+                <div class="details"><h3>Shani</h3><p>Nail Technician</p></div>
             </div>
             <div class="chevron">›</div>
             <div class="checkbox-container"></div>
@@ -93,29 +107,27 @@
         <div class="staff-card" onclick="handleSelect('bustani', 'bustani.jpg', this)">
             <div class="staff-info">
                 <img src="bustani.jpg" class="avatar" alt="B">
-                <div class="details">
-                    <h3>Bustani</h3>
-                    <p>Barber</p>
-                </div>
+                <div class="details"><h3>Bustani</h3><p>Barber</p></div>
             </div>
             <div class="chevron">›</div>
             <div class="checkbox-container"></div>
         </div>
-        
-        </div>
+    </div>
 
     <button id="next-btn" onclick="goToMultiple()">Next</button>
-
-    <div class="footer-credit">
-        Powered by <b>Amidify Solutions Inc.</b>
-    </div>
+    <div class="footer-credit">Powered by <b>Amidify Solutions Inc.</b></div>
 </div>
 
 <script>
     let isMulti = false;
     let selectedStaff = [];
 
-    // تفعيل وضع الاختيار المتعدد
+    // حفظ حالة الرسوم لنقلها للصفحات الأخرى
+    function saveFeeState() {
+        const isCovering = document.getElementById('feeToggle').checked;
+        localStorage.setItem('coverFeesGlobal', isCovering);
+    }
+
     function toggleMode() {
         isMulti = document.getElementById('multiModeToggle').checked;
         const card = document.getElementById('mainCard');
@@ -129,7 +141,6 @@
         }
     }
 
-    // فلترة الموظفين (البحث)
     function filterStaff() {
         let input = document.getElementById('staffSearch').value.toLowerCase();
         let cards = document.getElementsByClassName('staff-card');
@@ -139,31 +150,29 @@
         }
     }
 
-    // معالجة اختيار الموظف
     function handleSelect(id, img, element) {
         const name = element.querySelector('h3').innerText;
+        saveFeeState(); // حفظ حالة الرسوم قبل الانتقال
         if(!isMulti) {
-            // انتقال فردي فوري
             localStorage.setItem('chosenStaff', JSON.stringify([{name: name, img: img}]));
             window.location.href = id + ".html";
         } else {
-            // إضافة للقمة الاختيار المتعدد
             element.classList.toggle('selected');
             const index = selectedStaff.findIndex(s => s.name === name);
-            if (index > -1) {
-                selectedStaff.splice(index, 1);
-            } else {
-                selectedStaff.push({name: name, img: img});
-            }
+            if (index > -1) { selectedStaff.splice(index, 1); } 
+            else { selectedStaff.push({name: name, img: img}); }
             document.getElementById('next-btn').style.display = selectedStaff.length > 0 ? 'block' : 'none';
         }
     }
 
-    // الانتقال لصفحة الدفع الجماعي
     function goToMultiple() {
+        saveFeeState();
         localStorage.setItem('chosenStaff', JSON.stringify(selectedStaff));
         window.location.href = "multiple.html";
     }
+
+    // تعيين الحالة الافتراضية عند التحميل
+    window.onload = saveFeeState;
 </script>
 </body>
 </html>
