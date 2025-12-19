@@ -8,16 +8,15 @@
     <script src="https://js.stripe.com/v3/"></script>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #fafafa; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; margin: 0; color: #1a1a1a; padding-top: 20px; }
-        .main-card { background: white; width: 92%; max-width: 380px; padding: 25px 25px 35px; border-radius: 32px; box-shadow: 0 4px 25px rgba(0,0,0,0.03); border: 1px solid #f2f2f2; box-sizing: border-box; min-height: 500px; }
+        .main-card { background: white; width: 92%; max-width: 380px; padding: 25px 25px 35px; border-radius: 32px; box-shadow: 0 4px 25px rgba(0,0,0,0.03); border: 1px solid #f2f2f2; box-sizing: border-box; min-height: 600px; position: relative; }
         
-        /* تنسيق زر الرجوع */
         .back-nav { display: flex; align-items: center; margin-bottom: 15px; }
         .back-btn { background: none; border: none; color: #888; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 0; }
         
-        .brand-header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid #f8f8f8; padding-bottom: 15px; }
-        .brand-logo { width: 64px; height: 64px; border-radius: 12px; margin-bottom: 10px; }
+        .brand-header { text-align: center; margin-bottom: 25px; border-bottom: 1px solid #f8f8f8; padding-bottom: 20px; }
+        .brand-logo { width: 64px; height: 64px; border-radius: 14px; margin-bottom: 12px; }
         
-        .staff-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-top: 10px; }
+        .staff-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         .staff-name { font-size: 24px; font-weight: 600; margin: 0; }
         .avatar-img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; }
 
@@ -26,19 +25,22 @@
         .amount-btn.active { border-color: #1a1a1a; box-shadow: inset 0 0 0 1px #1a1a1a; }
 
         .love-container { background: #f8f8f8; border-radius: 20px; padding: 18px; margin: 20px 0; border: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-        .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #e5e5ea; border-radius: 24px; transition: .4s; }
-        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; border-radius: 50%; transition: .4s; }
-        input:checked + .slider { background-color: #34c759; }
-        input:checked + .slider:before { transform: translateX(18px); }
+        
+        /* النجوم الأنيقة - مطابقة لشاني */
+        .rating-section { text-align: center; margin-top: 30px; }
+        .stars-container { display: inline-flex; flex-direction: row-reverse; gap: 10px; }
+        .stars-container input { display: none; }
+        .stars-container label { font-size: 32px; color: #e5e5e5; cursor: pointer; transition: color 0.2s; }
+        .stars-container input:checked ~ label,
+        .stars-container label:hover,
+        .stars-container label:hover ~ label { color: #d4d4d4; }
+        .stars-container input:checked ~ label { color: #1a1a1a; }
 
         #payment-element { margin-top: 20px; }
         #submit-btn { background: #1a1a1a; color: white; border: none; width: 100%; padding: 18px; border-radius: 18px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 20px; display: none; }
-
-        /* رسالة النجاح - تم تعديلها لتغطي المساحة بالكامل بشكل صحيح */
-        #success-msg { display: none; text-align: center; padding: 40px 10px; }
-        .footer-credit { margin-top: 35px; font-size: 11px; color: #ccc; text-align: center; border-top: 1px solid #f9f9f9; padding-top: 15px; }
+        
+        #success-msg { display: none; text-align: center; padding: 60px 10px; }
+        .footer-credit { margin-top: 40px; font-size: 11px; color: #bbb; text-align: center; border-top: 1px solid #f9f9f9; padding-top: 20px; }
     </style>
 </head>
 <body>
@@ -48,17 +50,14 @@
         <div class="back-nav">
             <button class="back-btn" onclick="window.location.href='index.html'"><span>‹</span> Back</button>
         </div>
-
         <div class="brand-header">
             <img src="logo.png" class="brand-logo" alt="Logo">
-            <h1 class="brand-name" style="font-size: 18px; margin: 0;">Mouneh Lebanese Gourmet Store</h1>
+            <h1 style="font-size: 18px; margin: 0;">Mouneh Lebanese Gourmet Store</h1>
         </div>
-
         <div class="staff-header">
             <h1 class="staff-name">Bustani</h1>
             <img src="bustani.jpg" class="avatar-img" alt="Bustani">
         </div>
-
         <div class="grid">
             <button class="amount-btn" onclick="tap(500, this)">CA$5</button>
             <button class="amount-btn" onclick="tap(1000, this)">CA$10</button>
@@ -67,66 +66,50 @@
             <button class="amount-btn" onclick="tap(5000, this)">CA$50</button>
             <button class="amount-btn" onclick="handleOther(this)">Other</button>
         </div>
-
         <div class="love-container">
-            <div style="text-align:left;">
-                <h4 style="margin:0; font-size:14px;">Show Bustani some love? ♡</h4>
-                <p style="font-size:11px; color:#888; margin:4px 0 0;">Cover fees so they get 100%.</p>
-            </div>
-            <label class="switch">
-                <input type="checkbox" id="feeToggle" checked onchange="updateTotal()">
-                <span class="slider"></span>
-            </label>
+            <div style="text-align:left;"><h4 style="margin:0; font-size:14px;">Show Bustani love? ♡</h4><p style="font-size:11px; color:#888; margin:4px 0 0;">Cover fees so they get 100%.</p></div>
+            <label class="switch"><input type="checkbox" id="feeToggle" checked onchange="updateTotal()"><span class="slider"></span></label>
         </div>
-
         <div id="payment-element"></div>
         <button id="submit-btn" onclick="handleSubmit()">Pay Now</button>
-    </div>
-<div class="rating-container">
-            <span style="display:block; margin-bottom:10px; font-size:13px; color:#888;">Rate Shani's service</span>
-            <div class="stars">
-                <input type="radio" id="st5" name="rate"><label for="st5">★</label>
-                <input type="radio" id="st4" name="rate"><label for="st4">★</label>
-                <input type="radio" id="st3" name="rate"><label for="st3">★</label>
-                <input type="radio" id="st2" name="rate"><label for="st2">★</label>
-                <input type="radio" id="st1" name="rate"><label for="st1">★</label>
+        
+        <div class="rating-section">
+            <p style="font-size: 14px; margin-bottom: 12px; color: #444;">Rate your visit</p>
+            <div class="stars-container">
+                <input type="radio" id="s5" name="rating" value="5"><label for="s5">★</label>
+                <input type="radio" id="s4" name="rating" value="4"><label for="s4">★</label>
+                <input type="radio" id="s3" name="rating" value="3"><label for="s3">★</label>
+                <input type="radio" id="s2" name="rating" value="2"><label for="s2">★</label>
+                <input type="radio" id="s1" name="rating" value="1"><label for="s1">★</label>
             </div>
         </div>
     </div>
+
     <div id="success-msg">
-        <div style="font-size: 60px; margin-bottom: 20px;">✅</div>
-        <h2 style="margin-bottom: 10px;">Thank You!</h2>
-        <p style="color: #888; font-size: 14px; line-height: 1.5;">Your tip has been received successfully. We appreciate your support for Bustani!</p>
-        <button onclick="window.location.href='index.html'" style="margin-top: 25px; background: #1a1a1a; color: white; border: none; padding: 15px 30px; border-radius: 15px; font-weight: 600; cursor: pointer;">Back to Home</button>
+        <div style="font-size: 55px; margin-bottom: 15px;">✅</div>
+        <h2>Thank You!</h2>
+        <p style="color: #888; font-size: 14px;">Your tip has been received. We appreciate your support!</p>
+        <button onclick="window.location.href='index.html'" style="margin-top:25px; background:#1a1a1a; color:white; border:none; padding:15px 30px; border-radius:15px; cursor:pointer;">Back to Home</button>
     </div>
 
-    <div class="footer-credit">
-        Powered by <b>Amidify Solutions Inc.</b>
-    </div>
+    <div class="footer-credit">Powered by <b>Amidify Solutions Inc.</b></div>
 </div>
 
 <script>
-    let currentAmt = 0;
-    let elements;
-    const API_URL = "https://easytipme-backend.onrender.com"; //
+    let currentAmt = 0; let elements;
+    const API_URL = "https://easytipme-backend.onrender.com";
     const stripe = Stripe('pk_test_51QpPGt01TRhauBHP6dGYUaBYZJr9oHskEqZy9zWm8L6SPtG2kdzQS0MhPiatv3QDvzkTXvJDvbWMSIOUVOCcaswu003bDig62n'); 
 
-    function handleOther(btn) {
-        let val = prompt("Enter amount in CA$:");
-        if (val && !isNaN(val)) { tap(parseFloat(val) * 100, btn); btn.innerText = "CA$" + val; }
-    }
+    function handleOther(btn) { let val = prompt("Enter amount CA$:"); if(val && !isNaN(val)) tap(parseFloat(val)*100, btn); }
 
     async function tap(amt, btn) {
         document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentAmt = amt;
-        document.getElementById('payment-element').innerHTML = 'Loading...';
+        btn.classList.add('active'); currentAmt = amt;
+        document.getElementById('payment-element').innerHTML = '<p style="font-size:13px; color:#888;">Loading...</p>';
         const finalAmt = document.getElementById('feeToggle').checked ? Math.round(amt * 1.12) : amt;
-
         try {
             const res = await fetch(`${API_URL}/create-payment-intent`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
+                method: "POST", headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({ amount: finalAmt, currency: "cad", metadata: { staff: "Bustani" } })
             });
             const { clientSecret } = await res.json();
@@ -134,7 +117,7 @@
             const paymentElement = elements.create("payment");
             paymentElement.mount("#payment-element");
             paymentElement.on('ready', () => { document.getElementById('submit-btn').style.display = 'block'; updateTotal(); });
-        } catch (e) { document.getElementById('payment-element').innerHTML = 'Error.'; }
+        } catch (e) { document.getElementById('payment-element').innerHTML = 'Error loading payment.'; }
     }
 
     function updateTotal() {
@@ -144,10 +127,7 @@
 
     async function handleSubmit() {
         const { error, paymentIntent } = await stripe.confirmPayment({ elements, redirect: 'if_required' });
-        if (error) {
-            alert(error.message);
-        } else if (paymentIntent && paymentIntent.status === 'succeeded') {
-            // إخفاء المحتوى وإظهار رسالة النجاح (حل مشكلة التداخل)
+        if (!error && paymentIntent.status === 'succeeded') {
             document.getElementById('payment-content').style.display = 'none';
             document.getElementById('success-msg').style.display = 'block';
         }
