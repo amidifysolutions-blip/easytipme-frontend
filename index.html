@@ -2,78 +2,59 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mouneh - Select Specialist</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mouneh - Tip Team</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #fafafa; display: flex; justify-content: center; padding: 20px 0; margin: 0; color: #1a1a1a; }
-        .main-card { background: white; width: 92%; max-width: 380px; padding: 25px; border-radius: 32px; box-shadow: 0 4px 25px rgba(0,0,0,0.03); border: 1px solid #f2f2f2; box-sizing: border-box; text-align: center; }
-        .brand-logo { width: 64px; height: 64px; border-radius: 14px; margin-bottom: 12px; }
-        .brand-name { font-size: 24px; font-weight: 700; margin: 0; }
-        .brand-bio { font-size: 14px; color: #666; margin: 8px 0 20px; line-height: 1.4; }
-        .main-question { font-size: 18px; font-weight: 700; margin: 25px 0 15px; }
+        body { font-family: 'Inter', sans-serif; background-color: #f5f5f7; display: flex; justify-content: center; padding: 20px; margin: 0; }
+        .main-card { background: white; width: 100%; max-width: 400px; padding: 30px; border-radius: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; }
+        .brand-logo { width: 60px; height: 60px; border-radius: 12px; margin-bottom: 10px; object-fit: contain; }
+        h1 { font-size: 20px; font-weight: 700; margin: 0; color: #1d1d1f; }
+        .sub-text { font-size: 13px; color: #86868b; margin: 5px 0 20px; }
         
-        /* Selection Header */
-        .selection-header { background: #f2f2f7; padding: 12px 15px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .switch { position: relative; width: 42px; height: 24px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #e5e5ea; transition: .3s; border-radius: 22px; }
-        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 2px; bottom: 2px; background-color: white; transition: .3s; border-radius: 50%; }
-        input:checked + .slider { background-color: #34c759; }
-        input:checked + .slider:before { transform: translateX(18px); }
+        /* السؤال الرسمي الذي طلبته */
+        .main-question { font-size: 17px; font-weight: 600; margin: 20px 0; color: #1d1d1f; line-height: 1.4; }
 
-        /* Select All Link */
-        #select-all-btn { display: none; text-align: right; margin-bottom: 15px; padding-right: 5px; }
-        #select-all-btn span { color: #0071e3; font-size: 13px; font-weight: 600; cursor: pointer; }
+        /* خانة البحث الرسمية */
+        .search-container { position: relative; margin-bottom: 20px; }
+        .search-container input { width: 100%; padding: 12px 15px 12px 40px; border-radius: 12px; border: 1px solid #e5e5ea; background: #f5f5f7; outline: none; box-sizing: border-box; font-size: 15px; }
+        .search-icon { position: absolute; left: 14px; top: 12px; color: #999; }
 
-        /* Staff List */
-        .staff-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
-        .staff-card { background: white; border: 1px solid #f2f2f2; border-radius: 20px; padding: 15px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: 0.2s; }
-        .staff-card.selected { border-color: #000; background-color: #f9f9f9; }
+        .selection-header { display: flex; justify-content: space-between; align-items: center; background: #f5f5f7; padding: 12px 15px; border-radius: 12px; margin-bottom: 15px; font-size: 14px; }
+        .staff-list { display: flex; flex-direction: column; gap: 12px; }
+        .staff-card { display: flex; align-items: center; justify-content: space-between; padding: 15px; border: 1px solid #f2f2f2; border-radius: 16px; cursor: pointer; transition: 0.2s; }
+        .staff-card:hover { background: #fafafa; }
+        .staff-card.selected { border-color: #000; background: #f9f9f9; }
+        .avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; }
         
-        .avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 1px solid #eee; }
-        .details h3 { font-size: 16px; font-weight: 600; margin: 0; text-align: left; }
-        .details p { font-size: 13px; color: #888; margin: 2px 0 0; text-align: left; }
-        
-        .chevron { color: #c7c7cc; font-size: 20px; }
-        
-        /* Checkbox Appearance */
-        .checkbox-container { width: 22px; height: 22px; border: 2px solid #ddd; border-radius: 7px; display: none; align-items: center; justify-content: center; transition: 0.2s; }
-        .staff-card.selected .checkbox-container { background: #000; border-color: #000; }
-        .staff-card.selected .checkbox-container::after { content: '✓'; color: white; font-size: 14px; font-weight: bold; }
+        .check-box { width: 22px; height: 22px; border: 2px solid #d2d2d7; border-radius: 6px; display: none; }
+        .staff-card.selected .check-box { background: #000; border-color: #000; position: relative; }
+        .staff-card.selected .check-box::after { content: '✓'; color: white; position: absolute; left: 4px; top: -1px; font-weight: bold; }
 
-        #next-btn { background: #1a1a1a; color: white; border: none; width: 100%; padding: 18px; border-radius: 18px; font-weight: 600; font-size: 16px; display: none; cursor: pointer; }
+        #next-btn { background: #000; color: #fff; border: none; width: 100%; padding: 16px; border-radius: 14px; font-weight: 600; margin-top: 20px; cursor: pointer; display: none; }
     </style>
 </head>
 <body>
 
 <div class="main-card">
-    <img src="logo.png" class="brand-logo" alt="Logo" onerror="this.style.display='none'">
-    <h1 style="font-size: 22px; font-weight: 700;">Mouneh Lebanese Gourmet Store</h1>
-    
-    <h2 style="font-size: 18px; font-weight: 700; margin: 25px 0 10px; color: #1a1a1b;">
-        Please choose a member of our team you would like to tip
-    </h2>
+    <img src="logo.png" class="brand-logo" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png'">
+    <h1>Mouneh Lebanese Gourmet Store</h1>
+    <p class="sub-text">Authentic flavors delivered with tradition.</p>
 
-    <div style="margin: 15px 0; position: relative;">
-        <input type="text" id="staffSearch" onkeyup="filterStaff()" placeholder="Search by name..." 
-            style="width: 100%; padding: 12px 15px 12px 40px; border-radius: 12px; border: 1px solid #eee; background: #f5f5f7; outline: none;">
-        <span style="position: absolute; left: 12px; top: 12px;">🔍</span>
+    <div class="main-question">Please choose a member of our team you would like to tip</div>
+
+    <div class="search-container">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="staffSearch" onkeyup="filterStaff()" placeholder="Search by name...">
     </div>
 
     <div class="selection-header">
         <span>Select multiple specialists</span>
-        <label class="switch"><input type="checkbox" id="multiModeToggle" onchange="toggleMode()"><span class="slider"></span></label>
-    </div>
-    
-    <div id="select-all-btn" style="display:none; text-align:right; margin-bottom:10px;">
-        <span onclick="selectAll()" style="color:#0071e3; cursor:pointer; font-weight:600; font-size:13px;">Select All</span>
+        <input type="checkbox" id="multiModeToggle" onchange="toggleMode()">
     </div>
 
     <div class="staff-list" id="stafflist"></div>
-    <button id="next-btn" onclick="goToMultiple()" style="display:none; background:#000; color:#fff; width:100%; padding:15px; border-radius:12px; border:none; font-weight:600;">Next</button>
-</div>
-    <div style="margin-top:30px; font-size:11px; color:#bbb;">Powered by <b>Amidify Solutions Inc.</b></div>
+    <button id="next-btn" onclick="goToMultiple()">Next</button>
 </div>
 
 <script>
@@ -83,70 +64,58 @@
     let staffData = JSON.parse(localStorage.getItem('master_staff') || '[]');
 
     function renderStaff() {
-    const list = document.getElementById('stafflist');
-    list.innerHTML = staffData.map(s => `
-        <div class="staff-card" id="card-${s.id}" onclick="handleSelect('${s.id}', this)" style="display:flex; justify-content:space-between; align-items:center; padding:15px; border:1px solid #eee; border-radius:15px; margin-bottom:10px; cursor:pointer;">
-            <div style="display:flex; align-items:center; gap:12px;">
-                <img src="${s.img}" style="width:50px; height:50px; border-radius:50%; object-fit:cover;" onerror="this.src='default-avatar.png'">
-                <div style="text-align:left;">
-                    <h3 style="margin:0; font-size:16px;">${s.nName}</h3>
-                    <p style="margin:0; font-size:13px; color:#888;">${s.job}</p>
-                </div>
-            </div>
-            <div class="checkbox-container" style="display: ${isMulti ? 'block' : 'none'}; width:20px; height:20px; border:2px solid #ddd; border-radius:5px;"></div>
-        </div>
-    `).join('');
-
-   function toggleMode() {
-    isMulti = document.getElementById('multiModeToggle').checked;
-    document.getElementById('select-all-btn').style.display = isMulti ? 'block' : 'none';
-    renderStaff();
-}
-   function filterStaff() {
-    let val = document.getElementById('staffSearch').value.toLowerCase();
-    document.querySelectorAll('.staff-card').forEach(card => {
-        let name = card.querySelector('h3').innerText.toLowerCase();
-        card.style.display = name.includes(val) ? 'flex' : 'none';
-    });
-}
-    function handleSelect(id, element) {
-        const person = staffData.find(s => s.id == id);
-        
-        if (!isMulti) {
-            localStorage.setItem('selectedStaff', JSON.stringify([{name: person.nName, image: person.img}]));
-            window.location.href = 'multiple.html'; 
+        const list = document.getElementById('stafflist');
+        if (staffData.length === 0) {
+            list.innerHTML = "<p style='color:#999; font-size:13px;'>No staff members added yet.</p>";
             return;
         }
+        list.innerHTML = staffData.map(s => `
+            <div class="staff-card" id="card-${s.id}" onclick="handleSelect('${s.id}', this)">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <img src="${s.img}" class="avatar" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
+                    <div style="text-align:left;">
+                        <h3 style="margin:0; font-size:15px;">${s.nName}</h3>
+                        <p style="margin:2px 0 0; font-size:12px; color:#86868b;">${s.job}</p>
+                    </div>
+                </div>
+                <div class="check-box" style="display: ${isMulti ? 'block' : 'none'}"></div>
+                <div class="chevron" style="display: ${isMulti ? 'none' : 'block'}; color:#c7c7cc;">›</div>
+            </div>
+        `).join('');
+    }
 
+    function filterStaff() {
+        let val = document.getElementById('staffSearch').value.toLowerCase();
+        document.querySelectorAll('.staff-card').forEach(card => {
+            let name = card.querySelector('h3').innerText.toLowerCase();
+            card.style.display = name.includes(val) ? 'flex' : 'none';
+        });
+    }
+
+    function toggleMode() {
+        isMulti = document.getElementById('multiModeToggle').checked;
+        selectedStaff = [];
+        document.getElementById('next-btn').style.display = 'none';
+        renderStaff();
+    }
+
+    function handleSelect(id, element) {
+        const person = staffData.find(s => s.id == id);
+        if (!isMulti) {
+            localStorage.setItem('selectedStaff', JSON.stringify([{name: person.nName, image: person.img}]));
+            window.location.href = 'multiple.html';
+            return;
+        }
         element.classList.toggle('selected');
         const idx = selectedStaff.findIndex(s => s.id == id);
-        
-        if (idx > -1) {
-            selectedStaff.splice(idx, 1);
-        } else {
-            selectedStaff.push({name: person.nName, image: person.img, id: id});
-        }
-
+        if (idx > -1) selectedStaff.splice(idx, 1);
+        else selectedStaff.push({name: person.nName, image: person.img, id: id});
         document.getElementById('next-btn').style.display = selectedStaff.length > 0 ? 'block' : 'none';
     }
 
-    function selectAll() {
-        selectedStaff = [];
-        const cards = document.querySelectorAll('.staff-card');
-        cards.forEach(card => {
-            card.classList.add('selected');
-            const id = card.id.replace('card-', '');
-            const person = staffData.find(s => s.id == id);
-            selectedStaff.push({name: person.nName, image: person.img, id: id});
-        });
-        document.getElementById('next-btn').style.display = 'block';
-    }
-
     function goToMultiple() {
-        if(selectedStaff.length > 0) {
-            localStorage.setItem('selectedStaff', JSON.stringify(selectedStaff));
-            window.location.href = 'multiple.html';
-        }
+        localStorage.setItem('selectedStaff', JSON.stringify(selectedStaff));
+        window.location.href = 'multiple.html';
     }
 
     renderStaff();
