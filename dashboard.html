@@ -211,7 +211,26 @@ if (staff.length === 0) {
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         event.currentTarget.classList.add('active');
     }
-
+async function loadTransactions() {
+    const transContainer = document.getElementById('transaction-list');
+    transContainer.innerHTML = "<p>Loading transactions...</p>";
+    
+    try {
+        // هذا الرابط يجب أن يكون رابط الـ API الخاص بك
+        const response = await fetch('https://easytipme-backend.onrender.com/transactions');
+        const data = await response.json();
+        
+        transContainer.innerHTML = data.map(t => `
+            <div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid #eee;">
+                <div><b>${t.staffName}</b><br><small>${new Date(t.date).toLocaleDateString()}</small></div>
+                <div style="color:green; font-weight:700;">+ $${t.amount}</div>
+            </div>
+        `).join('');
+    } catch (e) {
+        transContainer.innerHTML = "<p style='color:red;'>Failed to load. Connect to Stripe/Backend first.</p>";
+    }
+}
+// استدعاء الدالة عند فتح قسم الترانزكشن
     render();
 </script>
 </body>
