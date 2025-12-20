@@ -184,18 +184,23 @@ if (staff.length === 0) {
         document.getElementById('uploadText').style.display = 'none';
     }
 
-    function render() {
-        document.getElementById('staffTable').innerHTML = staff.map(s => `
-            <tr>
-                <td><img src="${s.img}" style="width:35px; height:35px; border-radius:50%; object-fit:cover;"></td>
-                <td><b>${s.nName}</b></td>
-                <td>${s.job}</td>
-                <td>${s.sTime}-${s.eTime}</td>
-                <td>${s.days.join(', ')}</td>
-                <td><button class="btn-edit" onclick="editStaff(${s.id})">Edit</button></td>
-            </tr>
-        `).join('');
-    }
+   function render() {
+    const list = JSON.parse(localStorage.getItem('master_staff') || '[]');
+    const tableBody = document.getElementById('staffTable');
+    
+    tableBody.innerHTML = list.map(s => `
+        <tr>
+            <td><img src="${s.img}" style="width:40px; height:40px; border-radius:50%; object-fit:cover;"></td>
+            <td><b>${s.nName}</b><br><small>${s.rName}</small></td>
+            <td>${s.job}</td>
+            <td>${s.sTime} - ${s.eTime}</td>
+            <td>
+                <button class="btn-edit" onclick="editStaff(${s.id})">Edit</button>
+                <button class="btn-edit" style="background:#000; color:#fff;" onclick="generateQR(${s.id})">QR</button>
+            </td>
+        </tr>
+    `).join('');
+}
 
     function showSection(sec) {
         document.getElementById('section-reg').style.display = sec === 'reg' ? 'block' : 'none';
