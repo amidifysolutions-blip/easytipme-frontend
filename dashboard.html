@@ -3,22 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Business Admin - EazyTipMe</title>
+    <title>EazyTipMe | Management Hub</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root { --apple-bg: #F5F5F7; --apple-blue: #007AFF; --apple-red: #FF3B30; --apple-green: #34C759; }
-        body { font-family: 'Inter', -apple-system, sans-serif; margin: 0; display: flex; height: 100vh; background: var(--apple-bg); color: #1D1D1F; overflow: hidden; }
+        body { font-family: 'Inter', sans-serif; margin: 0; display: flex; height: 100vh; background: var(--apple-bg); color: #1D1D1F; overflow: hidden; }
         
         /* Sidebar */
         .sidebar { width: 260px; background: #000; color: white; padding: 30px 20px; display: flex; flex-direction: column; }
         .nav-item { padding: 14px 18px; cursor: pointer; border-radius: 12px; margin-bottom: 8px; transition: 0.3s; opacity: 0.6; font-size: 14px; }
-        .nav-item:hover { background: #222; opacity: 1; transform: translateX(5px); }
         .nav-item.active { background: #333; opacity: 1; font-weight: 600; }
+        .nav-item:hover { opacity: 1; background: #222; }
 
         .main { flex: 1; padding: 40px; overflow-y: auto; }
-        .section { display: none; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
         .card { background: #FFF; padding: 30px; border-radius: 24px; box-shadow: 0 4px 24px rgba(0,0,0,0.04); margin-bottom: 25px; border: 1px solid #E5E5E7; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
         
@@ -29,52 +26,46 @@
         .day-btn { padding: 8px 12px; border: 1px solid #D2D2D7; border-radius: 10px; cursor: pointer; font-size: 11px; background: #FFF; transition: 0.2s; }
         .day-btn.selected { background: #000; color: #FFF; border-color: #000; }
 
-        .switch { position: relative; display: inline-block; width: 42px; height: 22px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
-        input:checked + .slider { background-color: var(--apple-green); }
-
         .btn-main { background: #000; color: #FFF; border: none; padding: 16px; border-radius: 14px; width: 100%; cursor: pointer; font-weight: 600; font-size: 16px; transition: 0.3s; }
-        .btn-main:hover { background: #333; }
-
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th { text-align: left; color: #86868B; font-size: 10px; padding: 15px; border-bottom: 1px solid #E5E5E7; }
-        td { padding: 15px; border-bottom: 1px solid #F5F5F7; font-size: 13px; }
         
-        .img-prev { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background: #f0f0f2; margin-top: 5px; border: 1px solid #eee; }
-        .logo-prev { width: 80px; height: 80px; border-radius: 15px; object-fit: contain; background: #fff; border: 1px solid #eee; }
-        .footer-sig { margin-top: auto; padding: 20px; font-size: 10px; color: #666; text-align: center; letter-spacing: 1px; font-weight: 600; text-transform: uppercase; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { text-align: left; color: #86868B; font-size: 10px; padding: 15px; border-bottom: 1px solid #E5E5E7; text-transform: uppercase; }
+        td { padding: 15px; border-bottom: 1px solid #F5F5F7; font-size: 13px; }
+
+        .img-prev { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background: #f0f0f2; margin-top: 5px; }
+        .signature { margin-top: auto; padding: 20px 10px; border-top: 1px solid #333; font-size: 10px; color: #636366; letter-spacing: 1px; font-weight: 700; text-transform: uppercase; }
+        .status-badge { padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; }
+        .pending { background: #FFF9E6; color: #FFB800; }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
     <div style="text-align: center; margin-bottom: 40px;">
-        <img id="sideLogo" src="" style="width: 55px; border-radius: 14px; display: none; margin: 0 auto 10px;">
+        <img id="sideLogo" src="" style="width: 55px; border-radius: 14px; display: none; margin: 0 auto 10px; background: #fff;">
         <h2 id="sideStoreName" style="font-size: 18px; margin: 0;">Business Admin</h2>
     </div>
+    
     <div class="nav-item active" onclick="showTab('reg')">Team Management</div>
     <div class="nav-item" onclick="showTab('set')">Company Profile</div>
-    
-    <div class="footer-sig">Power by amidify solutions inc</div>
+
+    <div class="signature">Power by amidify solutions inc</div>
 </div>
 
 <div class="main">
-    <div id="section-reg" class="section" style="display:block;">
+    <div id="section-reg" class="section">
         <div class="card">
-            <h3 style="margin-top:0;">Register New Specialist</h3>
+            <h3>Register New Specialist</h3>
             <div class="grid">
                 <div>
-                    <label>Public Nickname</label> <input type="text" id="nName" placeholder="e.g. Shani">
+                    <label>Public Nickname</label> <input type="text" id="nName" placeholder="e.g. Alex">
                     <label>Official Real Name</label> <input type="text" id="rName">
-                    <label>Contact Email</label> <input type="email" id="email">
-                    <label>Phone Number</label> <input type="text" id="phone">
                     <label>Specialist Photo</label> 
                     <input type="file" id="staffImg" accept="image/*" onchange="preview(this, 'sPrev')">
                     <img id="sPrev" class="img-prev" src="">
                 </div>
                 <div>
-                    <label>Job Title</label> <input type="text" id="job" placeholder="e.g. Nail Technician">
+                    <label>Job Title</label> <input type="text" id="job" placeholder="e.g. Senior Barber">
                     <label>Working Days</label>
                     <div class="days-row" id="daysPicker">
                         <div class="day-btn" onclick="this.classList.toggle('selected')">Mon</div>
@@ -85,184 +76,74 @@
                         <div class="day-btn" onclick="this.classList.toggle('selected')">Sat</div>
                         <div class="day-btn" onclick="this.classList.toggle('selected')">Sun</div>
                     </div>
-                    <label>Shift 1 (Standard)</label>
+                    <label>Standard Shift</label>
                     <div style="display:flex; gap:10px;">
                         <input type="time" id="s1_s"> <input type="time" id="s1_e">
                     </div>
-                    <label>Shift 2 (Optional)</label>
-                    <div style="display:flex; gap:10px;">
-                        <input type="time" id="s2_s"> <input type="time" id="s2_e">
-                    </div>
                 </div>
             </div>
-            <button class="btn-main" onclick="saveStaff()">Register Specialist</button>
+            <button class="btn-main" onclick="saveStaff()">Add to Team</button>
         </div>
 
         <div class="card">
             <table>
                 <thead>
-                    <tr><th>Photo</th><th>Name & Job</th><th>Schedule & Shifts</th><th>Publish</th><th>Actions</th></tr>
+                    <tr><th>Photo</th><th>Specialist</th><th>Payments</th><th>Status</th><th>Action</th></tr>
                 </thead>
                 <tbody id="staffTable"></tbody>
             </table>
         </div>
     </div>
 
-    <div id="section-set" class="section">
+    <div id="section-set" class="section" style="display:none;">
         <div class="card">
-            <h3>Public Business Identity</h3>
+            <h3>Company Branding</h3>
             <div class="grid">
                 <div>
-                    <label>Business Name</label> <input type="text" id="set_name">
+                    <label>Business Display Name</label> <input type="text" id="set_name">
                     <label>Slogan (Max 90 chars)</label> <textarea id="set_slogan" maxlength="90"></textarea>
                 </div>
                 <div>
-                    <label>Official Company Logo</label>
-                    <input type="file" id="logoFile" accept="image/*" onchange="preview(this, 'lPrev')">
-                    <img id="lPrev" class="logo-prev" src="">
+                    <label>Business Logo</label>
+                    <input type="file" onchange="preview(this, 'lPrev')">
+                    <img id="lPrev" style="width:80px; height:80px; object-fit:contain; border-radius:12px; margin-top:10px;">
                 </div>
             </div>
-        </div>
-
-        <div class="card" style="border-left: 5px solid #000;">
-            <h3>Official Admin Info (Private)</h3>
-            <div class="grid">
-                <div>
-                    <label>Legal Address</label> <input type="text" id="set_address">
-                    <label>Business Email</label> <input type="email" id="set_bEmail">
-                </div>
-                <div>
-                    <label>Business Phone</label> <input type="text" id="set_bPhone">
-                    <label>Operating Hours</label> <input type="text" id="set_hours" placeholder="e.g. 9 AM - 10 PM">
-                </div>
-            </div>
-            <button class="btn-main" onclick="saveCompany()">Update Global Profile</button>
+            <button class="btn-main" onclick="saveCompany()">Update Identity</button>
         </div>
     </div>
 </div>
 
 <script>
-    // نظام الربط الديناميكي بناءً على ID العميل
+    // جلب المعرف الفريد من الرابط
     const params = new URLSearchParams(window.location.search);
-    const bizId = params.get('id');
+    const bizId = params.get('id') || 'demo';
 
-    // إذا لم يكن هناك ID، نعيده لصفحة التسجيل (حماية)
-    if(!bizId) { window.location.href = 'signup.html'; }
+    // مفاتيح تخزين معزولة لكل شركة
+    const STAFF_KEY = `staff_${bizId}`;
+    const CONFIG_KEY = `config_${bizId}`;
 
-    // تحميل قائمة الموظفين الخاصة بهذا الـ ID فقط
-    let staffList = JSON.parse(localStorage.getItem('staff_' + bizId) || '[]');
-    let sImg = "", lImg = "";
+    let staffList = JSON.parse(localStorage.getItem(STAFF_KEY) || '[]');
+    let currentStaffImg = "";
+    let currentLogoImg = "";
 
-    function preview(input, id) {
-        const r = new FileReader();
-        r.onload = (e) => {
-            document.getElementById(id).src = e.target.result;
-            if(id === 'sPrev') sImg = e.target.result;
-            if(id === 'lPrev') lImg = e.target.result;
+    function preview(input, targetId) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            document.getElementById(targetId).src = e.target.result;
+            if(targetId === 'sPrev') currentStaffImg = e.target.result;
+            if(targetId === 'lPrev') currentLogoImg = e.target.result;
         };
-        if(input.files[0]) r.readAsDataURL(input.files[0]);
+        if(input.files[0]) reader.readAsDataURL(input.files[0]);
     }
 
     function saveStaff() {
         const name = document.getElementById('nName').value;
-        if(!name) { alert("Please enter a name"); return; }
+        if(!name) return;
+
         const member = {
             id: Date.now(),
-            nName: name, 
-            rName: document.getElementById('rName').value,
-            email: document.getElementById('email').value, 
-            phone: document.getElementById('phone').value,
+            nName: name,
             job: document.getElementById('job').value,
-            days: Array.from(document.querySelectorAll('#daysPicker .day-btn.selected')).map(d => d.innerText),
-            s1: { s: document.getElementById('s1_s').value, e: document.getElementById('s1_e').value },
-            s2: { s: document.getElementById('s2_s').value, e: document.getElementById('s2_e').value },
-            img: sImg || 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
-            published: false
-        };
-        staffList.push(member);
-        localStorage.setItem('staff_' + bizId, JSON.stringify(staffList));
-        sImg = ""; document.getElementById('sPrev').src = "";
-        render();
-        alert("Staff Registered Successfully!");
-    }
-
-    function render() {
-        const table = document.getElementById('staffTable');
-        table.innerHTML = staffList.map(s => `
-            <tr>
-                <td><img src="${s.img}" style="width:40px; height:40px; border-radius:50%; object-fit:cover;"></td>
-                <td><b>${s.nName}</b><br><small>${s.job}</small></td>
-                <td><small>${s.days.join(', ')}<br>S1: ${s.s1.s || '--'} to ${s.s1.e || '--'}</small></td>
-                <td>
-                    <label class="switch">
-                        <input type="checkbox" ${s.published ? 'checked' : ''} onchange="togglePublish(${s.id})">
-                        <span class="slider"></span>
-                    </label>
-                </td>
-                <td><button onclick="del(${s.id})" style="color:red; border:none; background:none; cursor:pointer;">Delete</button></td>
-            </tr>
-        `).join('');
-    }
-
-    function togglePublish(id) {
-        const i = staffList.findIndex(s => s.id === id);
-        staffList[i].published = !staffList[i].published;
-        localStorage.setItem('staff_' + bizId, JSON.stringify(staffList));
-    }
-
-    function del(id) {
-        if(confirm("Delete?")){
-            staffList = staffList.filter(s => s.id !== id);
-            localStorage.setItem('staff_' + bizId, JSON.stringify(staffList));
-            render();
-        }
-    }
-
-    function saveCompany() {
-        const comp = {
-            name: document.getElementById('set_name').value,
-            slogan: document.getElementById('set_slogan').value,
-            logo: lImg || document.getElementById('lPrev').src,
-            address: document.getElementById('set_address').value,
-            email: document.getElementById('set_bEmail').value,
-            phone: document.getElementById('set_bPhone').value,
-            hours: document.getElementById('set_hours').value
-        };
-        localStorage.setItem('config_' + bizId, JSON.stringify(comp));
-        updateSidebar(comp);
-        alert("Business Profile Updated!");
-    }
-
-    function updateSidebar(comp) {
-        document.getElementById('sideStoreName').innerText = comp.name;
-        if(comp.logo) {
-            document.getElementById('sideLogo').src = comp.logo;
-            document.getElementById('sideLogo').style.display = 'block';
-        }
-    }
-
-    function showTab(t) {
-        document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
-        document.getElementById('section-' + t).style.display = 'block';
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        event.currentTarget.classList.add('active');
-    }
-
-    window.onload = () => {
-        render();
-        // تحميل بيانات الشركة بناءً على الـ ID المسجل
-        const cp = JSON.parse(localStorage.getItem('config_' + bizId) || '{}');
-        if(cp.name) {
-            document.getElementById('set_name').value = cp.name;
-            document.getElementById('set_slogan').value = cp.slogan || '';
-            document.getElementById('lPrev').src = cp.logo || '';
-            document.getElementById('set_address').value = cp.address || '';
-            document.getElementById('set_bEmail').value = cp.email || '';
-            document.getElementById('set_bPhone').value = cp.phone || '';
-            document.getElementById('set_hours').value = cp.hours || '';
-            updateSidebar(cp);
-        }
-    };
-</script>
-</body>
-</html>
+            img: currentStaffImg || 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
+            stripeConnected: false, // الخطوة القادمة هي الموظف وسترايب
