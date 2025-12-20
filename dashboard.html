@@ -3,46 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mouneh Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>Master Dashboard - Global Tipping System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; margin: 0; display: flex; height: 100vh; background: #f9f9fb; }
-        .sidebar { width: 250px; background: #000; color: white; padding: 30px 20px; box-sizing: border-box; }
-        .nav-item { padding: 12px 15px; cursor: pointer; border-radius: 8px; margin-bottom: 8px; font-size: 14px; }
-        .nav-item.active { background: #222; font-weight: 600; }
+        :root { --primary: #000; --bg: #f5f5f7; --card: #ffffff; }
+        body { font-family: 'Inter', sans-serif; margin: 0; display: flex; height: 100vh; background: var(--bg); color: #1d1d1f; }
+        
+        /* Sidebar */
+        .sidebar { width: 260px; background: var(--primary); color: white; padding: 30px 20px; display: flex; flex-direction: column; }
+        .nav-item { padding: 14px 18px; cursor: pointer; border-radius: 10px; margin-bottom: 5px; transition: 0.3s; font-size: 14px; opacity: 0.8; }
+        .nav-item:hover, .nav-item.active { background: #333; opacity: 1; font-weight: 600; }
+
+        /* Main Content */
         .main { flex: 1; padding: 40px; overflow-y: auto; }
         .section { display: none; }
-        .card { background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
-        .days-grid { display: flex; gap: 8px; margin: 10px 0 20px; }
-        .day-btn { padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; font-size: 12px; }
-        .day-btn.selected { background: #000; color: #fff; border-color: #000; }
-        input, select { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 15px; }
-        .btn-main { background: #000; color: #fff; border: none; padding: 15px; border-radius: 10px; width: 100%; cursor: pointer; font-weight: 600; }
-        table { width: 100%; border-collapse: collapse; margin-top: 25px; }
-        th, td { text-align: left; padding: 15px; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
+        .card { background: var(--card); padding: 30px; border-radius: 20px; box-shadow: 0 4px 24px rgba(0,0,0,0.04); margin-bottom: 25px; }
+        
+        /* Form Styling */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+        label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: #86868b; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #d2d2d7; border-radius: 10px; font-size: 15px; box-sizing: border-box; outline: none; transition: 0.2s; }
+        input:focus { border-color: var(--primary); }
+
+        /* Working Days Buttons */
+        .days-row { display: flex; gap: 8px; margin: 10px 0; }
+        .day-btn { padding: 10px 14px; border: 1px solid #d2d2d7; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 500; }
+        .day-btn.selected { background: var(--primary); color: white; border-color: var(--primary); }
+
+        /* Shift Styling */
+        .shift-box { background: #fbfbfd; padding: 15px; border-radius: 12px; border: 1px solid #e5e5e7; margin-top: 10px; }
+        
+        /* Table */
+        table { width: 100%; border-collapse: collapse; margin-top: 30px; }
+        th { text-align: left; color: #86868b; font-size: 12px; text-transform: uppercase; padding: 15px; border-bottom: 1px solid #e5e5e7; }
+        td { padding: 15px; border-bottom: 1px solid #f5f5f7; font-size: 14px; }
+        
+        .btn-save { background: var(--primary); color: white; border: none; padding: 15px 40px; border-radius: 12px; cursor: pointer; font-weight: 600; width: 100%; margin-top: 20px; }
+        .btn-master { background: #ff3b30; color: white; padding: 5px 10px; border-radius: 5px; font-size: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
-    <h2 style="margin-bottom:40px; font-size:20px;">Mouneh Admin</h2>
-    <div class="nav-item active" onclick="showTab('reg')">Staff Registry</div>
-    <div class="nav-item" onclick="showTab('trans')">Transactions Log</div>
-    <div class="nav-item" onclick="showTab('set')">Store Profile</div>
+    <h2 style="font-size: 22px; margin-bottom: 40px; letter-spacing: -1px;">Mouneh Admin</h2>
+    <div class="nav-item active" onclick="showTab('reg')">Team Management</div>
+    <div id="master-nav" class="nav-item" style="display:none;" onclick="showTab('master')">Master Finance</div>
+    <div class="nav-item" onclick="showTab('set')">Global Settings</div>
+    <div style="margin-top: auto;">
+        <span class="btn-master" onclick="unlockMaster()">Unlock Master View</span>
+    </div>
 </div>
 
 <div class="main">
     <div id="tab-reg" class="section" style="display:block;">
         <div class="card">
-            <h3>Register New Staff</h3>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+            <h3>Staff Onboarding</h3>
+            <div class="grid">
                 <div>
-                    <label>Nickname</label>
-                    <input type="text" id="nName" placeholder="e.g. Shani">
+                    <label>Real Name (Official)</label>
+                    <input type="text" id="rName">
+                    <label>Nickname (Public Display)</label>
+                    <input type="text" id="nName">
+                    <label>Email Address (For Automation)</label>
+                    <input type="email" id="email">
+                    <label>Phone Number</label>
+                    <input type="text" id="phone">
+                </div>
+                <div>
                     <label>Job Title</label>
-                    <input type="text" id="job" placeholder="Barber">
+                    <input type="text" id="job">
                     <label>Working Days</label>
-                    <div class="days-grid">
+                    <div class="days-row">
                         <div class="day-btn" onclick="this.classList.toggle('selected')">Mon</div>
                         <div class="day-btn" onclick="this.classList.toggle('selected')">Tue</div>
                         <div class="day-btn" onclick="this.classList.toggle('selected')">Wed</div>
@@ -51,97 +82,135 @@
                         <div class="day-btn" onclick="this.classList.toggle('selected')">Sat</div>
                         <div class="day-btn" onclick="this.classList.toggle('selected')">Sun</div>
                     </div>
-                </div>
-                <div>
-                    <label>Shift Time</label>
-                    <input type="text" id="shift" placeholder="9:00 AM - 5:00 PM">
-                    <label>Staff Photo</label>
-                    <input type="file" id="photoIn" onchange="preview(this)">
-                    <img id="prev" style="width:50px; height:50px; border-radius:50%; display:none; margin-top:10px;">
+                    <label>Shift Management (Double Shift Supported)</label>
+                    <div class="shift-box">
+                        <div style="display:flex; gap:10px; align-items:center;">
+                            <input type="time" id="s1_start"> <span>to</span> <input type="time" id="s1_end">
+                        </div>
+                        <div style="display:flex; gap:10px; align-items:center; margin-top:10px;">
+                            <input type="time" id="s2_start"> <span>to</span> <input type="time" id="s2_end">
+                            <small>(Optional Shift 2)</small>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <button class="btn-main" onclick="addStaff()">Register & Generate Link</button>
+            <button class="btn-save" onclick="registerAndNotify()">Register & Send Onboarding Email</button>
 
             <table>
                 <thead>
-                    <tr><th>Staff</th><th>Job</th><th>Schedule</th><th>Direct Link</th><th>Action</th></tr>
+                    <tr><th>Staff Member</th><th>Job</th><th>Shift Details</th><th>Status</th><th>Action</th></tr>
                 </thead>
-                <tbody id="sTable"></tbody>
+                <tbody id="staffTable"></tbody>
             </table>
         </div>
     </div>
 
-    <div id="tab-trans" class="section">
-        <div class="card">
-            <h3>Recent Tipping Activities</h3>
-            <div id="t-list"><p style="color:#999; text-align:center;">No activity yet.</p></div>
+    <div id="tab-master" class="section">
+        <div class="card" style="border-left: 5px solid #ff3b30;">
+            <h3>Master Global Analytics (Confidential)</h3>
+            <p>Total Revenue Across All Staff: <b id="totalRevenue">$0.00</b></p>
+            <div id="financeList"></div>
         </div>
     </div>
 
     <div id="tab-set" class="section">
         <div class="card">
-            <h3>Store Profile</h3>
-            <label>Business Name</label>
-            <input type="text" id="bName" value="Mouneh Lebanese Gourmet Store">
-            <button class="btn-main" onclick="alert('Profile Updated')">Save Changes</button>
+            <h3>Global System Configuration</h3>
+            <label>Global Currency</label>
+            <select id="globalCurrency">
+                <option value="$">USD ($)</option>
+                <option value="€">EUR (€)</option>
+                <option value="AED">AED (د.إ)</option>
+                <option value="£">GBP (£)</option>
+            </select>
+            <label>Automation: Email Provider</label>
+            <select><option>Built-in SMTP (Auto)</option></select>
+            <button class="btn-save" onclick="saveSettings()">Save Configuration</button>
         </div>
     </div>
 </div>
 
 <script>
-    let pic = "";
-    function preview(input) {
-        const reader = new FileReader();
-        reader.onload = (e) => { 
-            pic = e.target.result; 
-            document.getElementById('prev').src = pic; 
-            document.getElementById('prev').style.display = "block";
-        };
-        reader.readAsDataURL(input.files[0]);
+    let staffList = JSON.parse(localStorage.getItem('master_staff') || '[]');
+    let isMaster = false;
+
+    function unlockMaster() {
+        let pass = prompt("Enter Master Password:");
+        if(pass === "1234") { // غير الباسوورد هنا
+            isMaster = true;
+            document.getElementById('master-nav').style.display = 'block';
+            alert("Master Finance View Unlocked.");
+        }
     }
 
     function showTab(t) {
-        document.querySelectorAll('.section').forEach(s => s.style.display='none');
-        document.getElementById('tab-'+t).style.display='block';
+        document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+        document.getElementById('tab-' + t).style.display = 'block';
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         event.currentTarget.classList.add('active');
     }
 
-    function addStaff() {
-        let staff = JSON.parse(localStorage.getItem('master_staff') || '[]');
+    function registerAndNotify() {
         let days = Array.from(document.querySelectorAll('.day-btn.selected')).map(d => d.innerText);
-        let name = document.getElementById('nName').value;
-        
-        staff.push({
+        let newStaff = {
             id: Date.now(),
-            name: name,
+            rName: document.getElementById('rName').value,
+            nName: document.getElementById('nName').value,
+            email: document.getElementById('email').value,
+            phone: document.getElementById('phone').value,
             job: document.getElementById('job').value,
-            shift: document.getElementById('shift').value,
             days: days,
-            img: pic || 'logo.png'
-        });
-        localStorage.setItem('master_staff', JSON.stringify(staff));
+            s1: {start: document.getElementById('s1_start').value, end: document.getElementById('s1_end').value},
+            s2: {start: document.getElementById('s2_start').value, end: document.getElementById('s2_end').value},
+            revenue: Math.floor(Math.random() * 1000) // داتا وهمية للماستر فقط
+        };
+        
+        staffList.push(newStaff);
+        localStorage.setItem('master_staff', JSON.stringify(staffList));
+        
+        // محاكاة إرسال إيميل
+        let mailLink = `mailto:${newStaff.email}?subject=Complete Your Onboarding&body=Welcome ${newStaff.rName}, please click here to set up your Stripe account: https://easytipme.com/onboard?id=${newStaff.id}`;
+        window.location.href = mailLink;
+        
         render();
     }
 
     function render() {
-        const staff = JSON.parse(localStorage.getItem('master_staff') || '[]');
-        document.getElementById('sTable').innerHTML = staff.map(s => `
+        const table = document.getElementById('staffTable');
+        table.innerHTML = staffList.map(s => `
             <tr>
-                <td><img src="${s.img}" style="width:35px;height:35px;border-radius:50%;vertical-align:middle;margin-right:10px;"><b>${s.name}</b></td>
+                <td><b>${s.nName}</b><br><small>${s.email}</small></td>
                 <td>${s.job}</td>
-                <td><small>${s.days.join(', ')}</small><br>${s.shift}</td>
-                <td><a href="/tip.html?id=${s.id}" target="_blank" style="color:blue;font-size:12px;">Open Tip Page</a></td>
-                <td><button onclick="delS(${s.id})" style="color:red;border:none;background:none;cursor:pointer;">Delete</button></td>
+                <td>
+                    <div style="font-size:11px;">Days: ${s.days.join(', ')}</div>
+                    <div style="font-size:11px; color:green;">S1: ${s.s1.start}-${s.s1.end}</div>
+                    ${s.s2.start ? `<div style="font-size:11px; color:blue;">S2: ${s.s2.start}-${s.s2.end}</div>` : ''}
+                </td>
+                <td><span style="color:orange;">● Awaiting Stripe</span></td>
+                <td><button onclick="deleteStaff(${s.id})" style="color:red; background:none; border:none; cursor:pointer;">Remove</button></td>
             </tr>
         `).join('');
+
+        if(isMaster) {
+            let total = 0;
+            const finance = document.getElementById('financeList');
+            finance.innerHTML = staffList.map(s => {
+                total += s.revenue;
+                return `<div style="padding:10px; border-bottom:1px solid #eee;">${s.rName}: <b>$${s.revenue}</b></div>`;
+            }).join('');
+            document.getElementById('totalRevenue').innerText = "$" + total;
+        }
     }
 
-    function delS(id) {
-        let staff = JSON.parse(localStorage.getItem('master_staff') || '[]');
-        staff = staff.filter(x => x.id !== id);
-        localStorage.setItem('master_staff', JSON.stringify(staff));
+    function deleteStaff(id) {
+        staffList = staffList.filter(s => s.id !== id);
+        localStorage.setItem('master_staff', JSON.stringify(staffList));
         render();
+    }
+
+    function saveSettings() {
+        localStorage.setItem('currency', document.getElementById('globalCurrency').value);
+        alert('Global Settings Applied.');
     }
 
     window.onload = render;
