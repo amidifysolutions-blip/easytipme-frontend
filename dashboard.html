@@ -12,18 +12,20 @@
         .nav-item:hover, .nav-item.active { background: #333; }
         .main-content { flex: 1; padding: 40px; overflow-y: auto; }
         .section { display: none; }
-        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 20px;}
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #eee; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; }
         input, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; margin-bottom: 15px; }
         .btn-black { background: #000; color: #fff; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+        .upload-box { border: 2px dashed #ddd; padding: 20px; text-align: center; border-radius: 10px; cursor: pointer; margin-bottom: 15px; }
+        .preview-img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; display: none; margin: 10px auto; }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
     <h2 style="font-size: 20px; margin-bottom: 30px;">EasyTipMe</h2>
-    <div class="nav-item" onclick="showSection('reg')">Registry</div>
+    <div class="nav-item" onclick="showSection('reg')">Staff Registry</div>
     <div class="nav-item" onclick="showSection('trans')">Transactions</div>
     <div class="nav-item" onclick="showSection('set')">Settings</div>
 </div>
@@ -31,14 +33,17 @@
 <div class="main-content">
     <div id="section-reg" class="section">
         <div class="card">
-            <h2>Staff Registry (Mouneh)</h2>
+            <h2 id="form-title">Add New Staff Member</h2>
+            <input type="hidden" id="edit-id">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                 <div>
-                    <label>Nickname</label>
+                    <label>Full Name</label>
+                    <input type="text" id="rName" placeholder="Real Name">
+                    <label>Nickname (Display Name)</label>
                     <input type="text" id="nName" placeholder="e.g. Shani">
                     <label>Job Title</label>
                     <input type="text" id="job" placeholder="Barber">
-                    <label>Days (Comma separated)</label>
+                    <label>Working Days (e.g. Mon, Tue, Wed)</label>
                     <input type="text" id="days" placeholder="Mon, Tue, Wed">
                 </div>
                 <div>
@@ -46,20 +51,25 @@
                     <input type="time" id="sTime">
                     <label>Shift End</label>
                     <input type="time" id="eTime">
-                    <label>Image URL</label>
-                    <input type="text" id="img" placeholder="image-link.jpg">
+                    <label>Staff Photo</label>
+                    <div class="upload-box" onclick="document.getElementById('fileInput').click()">
+                        <span id="upload-text">Click to upload photo</span>
+                        <input type="file" id="fileInput" hidden accept="image/*" onchange="handleImage(event)">
+                        <img id="preview" class="preview-img">
+                    </div>
                 </div>
             </div>
-            <button class="btn-black" onclick="saveStaff()">Register Staff</button>
+            <button class="btn-black" id="save-btn" onclick="saveStaff()">Save Staff Member</button>
+            <button class="btn-black" id="cancel-btn" style="background:#888; display:none;" onclick="resetForm()">Cancel</button>
 
             <table>
                 <thead>
                     <tr>
-                        <th>Avatar</th>
+                        <th>Photo</th>
                         <th>Name</th>
                         <th>Job</th>
-                        <th>Schedule (Days & Time)</th>
-                        <th>Action</th>
+                        <th>Schedule</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="staffTable"></tbody>
@@ -69,7 +79,7 @@
 
     <div id="section-trans" class="section">
         <div class="card">
-            <h2>Transaction Log</h2>
+            <h2>Transaction Log (Mouneh)</h2>
             <div id="transaction-list">
                 <p style="color:#888; text-align:center; padding:20px;">No transactions recorded yet.</p>
             </div>
@@ -81,77 +91,122 @@
             <h2>Store Settings</h2>
             <label>Store Name</label>
             <input type="text" id="store_name_val" value="Mouneh Lebanese Gourmet Store">
-            <label>Currency</label>
-            <select><option>CAD ($)</option><option>USD ($)</option></select>
             <button class="btn-black" onclick="saveSettings()">Save Settings</button>
         </div>
     </div>
 </div>
 
 <script>
-    // دالة التنقل وإصلاح مشكلة الريفرش
+    let currentImgData = "";
+
+    function handleImage(e) {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            currentImgData = event.target.result;
+            document.getElementById('preview').src = currentImgData;
+            document.getElementById('preview').style.display = 'block';
+            document.getElementById('upload-text').style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    }
+
     function showSection(sec) {
         document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
         document.getElementById('section-' + sec).style.display = 'block';
-        
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         const activeNav = document.querySelector(`[onclick="showSection('${sec}')"]`);
         if(activeNav) activeNav.classList.add('active');
-
-        localStorage.setItem('activeTab', sec);
-        if(sec === 'trans') renderTransactions();
+        localStorage.setItem('dashboardTab', sec);
     }
 
-    // حفظ الموظف
     function saveStaff() {
         let staff = JSON.parse(localStorage.getItem('master_staff') || '[]');
-        const newMember = {
-            id: Date.now(),
+        const editId = document.getElementById('edit-id').value;
+        
+        const memberData = {
+            id: editId ? parseInt(editId) : Date.now(),
+            rName: document.getElementById('rName').value,
             nName: document.getElementById('nName').value,
             job: document.getElementById('job').value,
-            days: document.getElementById('days').value.split(','),
+            days: document.getElementById('days').value.split(',').map(d => d.trim()),
             sTime: document.getElementById('sTime').value,
             eTime: document.getElementById('eTime').value,
-            img: document.getElementById('img').value || 'logo.png'
+            img: currentImgData || 'logo.png'
         };
-        staff.push(newMember);
+
+        if(editId) {
+            const index = staff.findIndex(s => s.id === parseInt(editId));
+            staff[index] = memberData;
+        } else {
+            staff.push(memberData);
+        }
+
         localStorage.setItem('master_staff', JSON.stringify(staff));
+        resetForm();
         render();
-        alert('Staff Added!');
     }
 
-    // عرض جدول الموظفين مع التاريخ
     function render() {
         const staff = JSON.parse(localStorage.getItem('master_staff') || '[]');
         const table = document.getElementById('staffTable');
         table.innerHTML = staff.map(s => `
             <tr>
-                <td><img src="${s.img}" style="width:35px; height:35px; border-radius:50%; object-fit:cover;"></td>
-                <td><b>${s.nName}</b></td>
+                <td><img src="${s.img}" style="width:40px; height:40px; border-radius:50%; object-fit:cover;"></td>
+                <td><b>${s.nName}</b><br><small>${s.rName}</small></td>
                 <td>${s.job}</td>
                 <td><small>${s.days.join(', ')}</small><br><b>${s.sTime} - ${s.eTime}</b></td>
-                <td><button onclick="deleteStaff(${s.id})" style="color:red; background:none; border:none; cursor:pointer;">Delete</button></td>
+                <td>
+                    <button onclick="editStaff(${s.id})" style="color:blue; border:none; background:none; cursor:pointer; font-weight:600;">Edit</button>
+                    <button onclick="deleteStaff(${s.id})" style="color:red; border:none; background:none; cursor:pointer; font-weight:600; margin-left:10px;">Delete</button>
+                </td>
             </tr>
         `).join('');
     }
 
-    function deleteStaff(id) {
-        let staff = JSON.parse(localStorage.getItem('master_staff') || '[]');
-        staff = staff.filter(s => s.id !== id);
-        localStorage.setItem('master_staff', JSON.stringify(staff));
-        render();
+    function editStaff(id) {
+        const staff = JSON.parse(localStorage.getItem('master_staff') || '[]');
+        const s = staff.find(x => x.id === id);
+        
+        document.getElementById('edit-id').value = s.id;
+        document.getElementById('rName').value = s.rName;
+        document.getElementById('nName').value = s.nName;
+        document.getElementById('job').value = s.job;
+        document.getElementById('days').value = s.days.join(', ');
+        document.getElementById('sTime').value = s.sTime;
+        document.getElementById('eTime').value = s.eTime;
+        currentImgData = s.img;
+        document.getElementById('preview').src = s.img;
+        document.getElementById('preview').style.display = 'block';
+        document.getElementById('upload-text').style.display = 'none';
+        
+        document.getElementById('form-title').innerText = "Edit Staff Member";
+        document.getElementById('cancel-btn').style.display = "inline-block";
+        window.scrollTo(0,0);
     }
 
-    function renderTransactions() {
-        const logs = JSON.parse(localStorage.getItem('transactions') || '[]');
-        const container = document.getElementById('transaction-list');
-        if(logs.length === 0) return;
-        container.innerHTML = logs.map(l => `
-            <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;">
-                <span><b>${l.staffName}</b></span>
-                <span style="color:green;">+$${l.amount}</span>
-            </div>
-        `).join('');
+    function resetForm() {
+        document.getElementById('edit-id').value = "";
+        document.getElementById('rName').value = "";
+        document.getElementById('nName').value = "";
+        document.getElementById('job').value = "";
+        document.getElementById('days').value = "";
+        document.getElementById('sTime').value = "";
+        document.getElementById('eTime').value = "";
+        currentImgData = "";
+        document.getElementById('preview').style.display = 'none';
+        document.getElementById('upload-text').style.display = 'block';
+        document.getElementById('form-title').innerText = "Add New Staff Member";
+        document.getElementById('cancel-btn').style.display = "none";
+    }
+
+    function deleteStaff(id) {
+        if(confirm('Are you sure you want to delete this member?')) {
+            let staff = JSON.parse(localStorage.getItem('master_staff') || '[]');
+            staff = staff.filter(s => s.id !== id);
+            localStorage.setItem('master_staff', JSON.stringify(staff));
+            render();
+        }
     }
 
     function saveSettings() {
@@ -159,13 +214,11 @@
         alert('Settings Saved!');
     }
 
-    // تشغيل عند التحميل لمنع الريفرش من العودة للبداية
     window.onload = () => {
-        const lastTab = localStorage.getItem('activeTab') || 'reg';
+        const lastTab = localStorage.getItem('dashboardTab') || 'reg';
         showSection(lastTab);
         render();
     };
 </script>
-
 </body>
 </html>
