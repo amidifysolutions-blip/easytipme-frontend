@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Start Your Journey | EasyTipMe Registration</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --apple-bg: #F5F5F7; --apple-blue: #007AFF; }
+        body { font-family: 'Inter', sans-serif; background: var(--apple-bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        
+        .reg-card { background: #FFF; padding: 45px; border-radius: 30px; box-shadow: 0 15px 50px rgba(0,0,0,0.05); width: 100%; max-width: 500px; text-align: center; }
+        .logo-placeholder { width: 80px; height: 80px; background: #F2F2F7; border-radius: 20px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px dashed #D2D2D7; }
+        .logo-placeholder img { width: 100%; height: 100%; object-fit: cover; }
+        
+        h1 { font-size: 26px; font-weight: 700; margin-bottom: 10px; letter-spacing: -0.5px; }
+        p { color: #86868B; font-size: 15px; margin-bottom: 30px; }
+        
+        label { display: block; text-align: left; font-size: 11px; font-weight: 700; color: #86868B; text-transform: uppercase; margin-bottom: 8px; margin-left: 5px; }
+        input, select, textarea { width: 100%; padding: 14px; border: 1px solid #D2D2D7; border-radius: 12px; margin-bottom: 20px; font-size: 15px; outline: none; box-sizing: border-box; background: #FBFBFD; transition: 0.2s; }
+        input:focus { border-color: var(--apple-blue); background: #FFF; }
+
+        .btn-register { background: #000; color: #FFF; border: none; padding: 18px; border-radius: 16px; width: 100%; cursor: pointer; font-weight: 600; font-size: 16px; margin-top: 10px; transition: 0.3s; }
+        .btn-register:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+
+<div class="reg-card">
+    <div class="logo-placeholder" id="logoCircle">
+        <img id="preview" src="" style="display:none;">
+        <span id="plusIcon" style="font-size: 24px; color: #C7C7CC;">+</span>
+    </div>
+    <h1>Register Your Business</h1>
+    <p>Create your tipping dashboard in seconds.</p>
+
+    <form id="regForm">
+        <label>Upload Store Logo</label>
+        <input type="file" id="bizLogo" accept="image/*" onchange="handleLogo(this)">
+
+        <label>Business Name</label>
+        <input type="text" id="bizName" placeholder="e.g. Mouneh Store" required>
+
+        <label>Slogan (Max 90 chars)</label>
+        <textarea id="bizSlogan" maxlength="90" placeholder="e.g. The best quality in town"></textarea>
+
+        <label>Select Currency</label>
+        <select id="bizCurr">
+            <option value="CAD">Canada (CAD $)</option>
+            <option value="USD">USA (USD $)</option>
+            <option value="EUR">Europe (€)</option>
+        </select>
+
+        <label>Admin Email</label>
+        <input type="email" id="bizEmail" placeholder="name@company.com" required>
+
+        <button type="button" class="btn-register" onclick="submitToMaster()">Create My Dashboard</button>
+    </form>
+</div>
+
+<script>
+    let logoBase64 = "";
+
+    function handleLogo(input) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            logoBase64 = e.target.result;
+            document.getElementById('preview').src = logoBase64;
+            document.getElementById('preview').style.display = 'block';
+            document.getElementById('plusIcon').style.display = 'none';
+        };
+        if(input.files[0]) reader.readAsDataURL(input.files[0]);
+    }
+
+    function submitToMaster() {
+        const name = document.getElementById('bizName').value;
+        const email = document.getElementById('bizEmail').value;
+
+        if(!name || !email) {
+            alert("Business Name and Email are required!");
+            return;
+        }
+
+        // 1. جلب البيانات الحالية من الماستر
+        let entities = JSON.parse(localStorage.getItem('global_entities') || '[]');
+
+        // 2. إضافة الشركة الجديدة
+        const newBiz = {
+            id: "biz_" + Date.now(),
+            name: name,
+            slogan: document.getElementById('bizSlogan').value,
+            logo: logoBase64 || 'logo.png',
+            currency: document.getElementById('bizCurr').value,
+            email: email,
+            status: 'Active',
+            regDate: new Date().toLocaleDateString()
+        };
+
+        entities.push(newBiz);
+        localStorage.setItem('global_entities', JSON.stringify(entities));
+
+        // 3. تخزين "آخر شركة سجلت" لكي يفتح الداشبورد عليها مباشرة (للتجربة)
+        localStorage.setItem('current_session_biz', JSON.stringify(newBiz));
+
+        alert("Registration Successful! Redirecting to your dashboard...");
+        
+        // الانتقال للداشبورد فوراً
+        window.location.href = 'dashboard.html';
+    }
+</script>
+</body>
+</html>
