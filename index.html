@@ -6,77 +6,89 @@
     <title>Customer Page | EazyTipMe</title>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f5f5f7; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        .main-card { background: #fff; border-radius: 35px; padding: 40px; width: 90%; max-width: 450px; margin-top: 50px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); text-align: center; }
-        .biz-logo { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; background: #eee; }
-        .biz-name { font-size: 22px; font-weight: 800; color: #1d1d1f; margin-bottom: 10px; }
-        .subtitle { color: #86868b; font-size: 14px; margin-bottom: 30px; line-height: 1.5; }
+        .main-container { background: #fff; border-radius: 35px; padding: 40px; width: 90%; max-width: 450px; margin-top: 50px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); text-align: center; }
         
-        /* تصميم الموظفين (Triple View) كما في المود الخاص بك */
-        .staff-grid { display: grid; grid-template-columns: 1fr; gap: 15px; width: 100%; }
-        .staff-item { background: #fbfbfd; border: 1px solid #e5e5e7; border-radius: 20px; padding: 15px; display: flex; align-items: center; cursor: pointer; transition: 0.2s; }
-        .staff-item:hover { border-color: #007aff; background: #fff; }
-        .staff-avatar { width: 50px; height: 50px; border-radius: 50%; margin-right: 15px; object-fit: cover; }
-        .staff-info { text-align: left; }
-        .staff-n { font-weight: 700; font-size: 15px; }
-        .staff-j { color: #86868b; font-size: 12px; }
+        /* تصميم اللوجو */
+        .biz-logo { width: 85px; height: 85px; border-radius: 22px; object-fit: cover; margin-bottom: 15px; background: #eee; display: none; margin-left: auto; margin-right: auto; }
+        
+        /* اسم الشركة والسلوجن */
+        .biz-name { font-size: 24px; font-weight: 800; color: #1d1d1f; margin: 10px 0; }
+        .biz-slogan { color: #86868b; font-size: 14px; margin-bottom: 30px; line-height: 1.4; }
 
-        .footer-text { margin-top: auto; padding-bottom: 30px; font-size: 10px; color: #aeaeb2; font-weight: 700; letter-spacing: 1px; }
+        /* تصميم الموظفين (Triple View) */
+        .staff-list { display: grid; grid-template-columns: 1fr; gap: 12px; width: 100%; }
+        .staff-card { background: #fbfbfd; border: 1px solid #e5e5e7; border-radius: 20px; padding: 15px; display: flex; align-items: center; cursor: pointer; transition: 0.2s; }
+        .staff-card:hover { border-color: #007aff; transform: scale(1.02); }
+        .staff-img { width: 55px; height: 55px; border-radius: 50%; object-fit: cover; margin-right: 15px; background: #eee; }
+        .staff-info { text-align: left; }
+        .staff-name { font-weight: 700; font-size: 16px; color: #1d1d1f; }
+        .staff-job { color: #86868b; font-size: 12px; }
+
+        .footer-sig { margin-top: auto; padding: 30px; font-size: 10px; color: #aeaeb2; font-weight: 700; letter-spacing: 1.5px; }
     </style>
 </head>
 <body>
 
-    <div class="main-card">
-        <img id="renderLogo" src="" class="biz-logo" style="display:none;">
-        <h1 id="renderBizName" class="biz-name">Loading...</h1>
-        <p id="renderSlogan" class="subtitle">Please choose a member of our team you would like to tip</p>
+    <div class="main-container">
+        <img id="logoDisp" src="" class="biz-logo">
+        <h1 id="nameDisp" class="biz-name">Loading Business...</h1>
+        <p id="sloganDisp" class="biz-slogan">Please choose a member of our team you would like to tip</p>
         
-        <div class="staff-grid" id="renderStaff">
+        <div class="staff-list" id="staffDisp">
             </div>
     </div>
 
-    <div class="footer-text">POWER BY AMIDIFY SOLUTIONS INC</div>
+    <div class="footer-sig">POWER BY AMIDIFY SOLUTIONS INC</div>
 
     <script>
         window.onload = function() {
-            // 1. جلب الـ ID من الرابط
+            // 1. التقاط الـ ID من الرابط (مثلاً Eazy_tfaqa11)
             const urlParams = new URLSearchParams(window.location.search);
             const bizId = urlParams.get('id');
 
             if (!bizId) {
-                document.getElementById('renderBizName').innerText = "Business Not Found";
+                document.getElementById('nameDisp').innerText = "Business Not Found";
                 return;
             }
 
-            // 2. جلب البيانات من الذاكرة (تأكد أن الداشبورد يحفظ بنفس هذه الأسماء)
+            // 2. جلب البيانات المخزنة التي حفظها الداشبورد
+            // ملاحظة: الداشبورد يحفظ بيانات البروفايل في 'config_ID' والموظفين في 'staff_ID'
             const config = JSON.parse(localStorage.getItem('config_' + bizId) || '{}');
             const staff = JSON.parse(localStorage.getItem('staff_' + bizId) || '[]');
 
-            // 3. عرض بيانات المؤسسة
-            if (config.name) {
-                document.getElementById('renderBizName').innerText = config.name;
-            }
-            if (config.slogan) {
-                document.getElementById('renderSlogan').innerText = config.slogan;
-            }
-            if (config.logo) {
-                document.getElementById('renderLogo').src = config.logo;
-                document.getElementById('renderLogo').style.display = 'inline-block';
+            // 3. تحديث واجهة المستخدم بالبيانات "الحقيقية" من الداشبورد
+            // اسم المؤسسة
+            const finalName = config.name || config.businessName; 
+            if (finalName) {
+                document.getElementById('nameDisp').innerText = finalName;
             }
 
-            // 4. عرض الموظفين
-            const container = document.getElementById('renderStaff');
-            container.innerHTML = ""; // تنظيف
+            // السلوجن
+            if (config.slogan) {
+                document.getElementById('sloganDisp').innerText = config.slogan;
+            }
+
+            // اللوجو
+            if (config.logo) {
+                const logoImg = document.getElementById('logoDisp');
+                logoImg.src = config.logo;
+                logoImg.style.display = 'block';
+            }
+
+            // 4. عرض قائمة الموظفين
+            const container = document.getElementById('staffDisp');
+            container.innerHTML = ""; 
 
             if (staff.length === 0) {
-                container.innerHTML = "<p style='color:#86868b; font-size:13px;'>No staff added yet.</p>";
+                container.innerHTML = "<p style='color:#86868b; font-size:13px;'>No team members available.</p>";
             } else {
                 staff.forEach(s => {
                     container.innerHTML += `
-                        <div class="staff-item">
-                            <img src="${s.photo || 'https://via.placeholder.com/50'}" class="staff-avatar">
+                        <div class="staff-card">
+                            <img src="${s.photo || ''}" class="staff-img" onerror="this.src='https://via.placeholder.com/50'">
                             <div class="staff-info">
-                                <div class="staff-n">${s.nName}</div>
-                                <div class="staff-j">${s.job}</div>
+                                <div class="staff-name">${s.nName || s.name}</div>
+                                <div class="staff-job">${s.job || 'Team Member'}</div>
                             </div>
                         </div>
                     `;
