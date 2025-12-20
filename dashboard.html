@@ -3,54 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mouneh Admin - Apple Elite</title>
+    <title>Mouneh Admin - Apple Elite Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --apple-bg: #F5F5F7; --apple-card: #FFFFFF; --apple-blue: #007AFF; --apple-gray: #86868B; }
-        body { font-family: 'Inter', -apple-system, sans-serif; margin: 0; display: flex; height: 100vh; background: var(--apple-bg); color: #1D1D1F; }
+        :root { --apple-bg: #F5F5F7; --apple-blue: #007AFF; --apple-red: #FF3B30; }
+        body { font-family: 'Inter', sans-serif; margin: 0; display: flex; height: 100vh; background: var(--apple-bg); color: #1D1D1F; overflow: hidden; }
+        
+        /* Sidebar & Hover Fix */
         .sidebar { width: 260px; background: #000; color: white; padding: 30px 20px; display: flex; flex-direction: column; }
-        .nav-item { padding: 14px 18px; cursor: pointer; border-radius: 12px; margin-bottom: 6px; transition: 0.2s; font-size: 14px; opacity: 0.7; }
+        .nav-item { padding: 14px 18px; cursor: pointer; border-radius: 12px; margin-bottom: 8px; transition: all 0.3s ease; opacity: 0.6; font-size: 14px; }
+        .nav-item:hover { background: #222; opacity: 1; transform: translateX(5px); }
         .nav-item.active { background: #333; opacity: 1; font-weight: 600; }
-        .main { flex: 1; padding: 40px; overflow-y: auto; }
-        .section { display: none; animation: fadeIn 0.3s ease; }
+
+        .main { flex: 1; padding: 40px; overflow-y: auto; position: relative; }
+        .section { display: none; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .card { background: var(--apple-card); padding: 30px; border-radius: 24px; box-shadow: 0 4px 24px rgba(0,0,0,0.04); margin-bottom: 25px; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
-        label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--apple-gray); }
-        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #D2D2D7; border-radius: 12px; font-size: 15px; box-sizing: border-box; background: #FBFBFD; transition: 0.2s; }
-        .days-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 15px; }
-        .day-btn { padding: 8px 14px; border: 1px solid #D2D2D7; border-radius: 10px; cursor: pointer; font-size: 12px; background: #FFF; }
+
+        .card { background: #FFF; padding: 30px; border-radius: 24px; box-shadow: 0 4px 24px rgba(0,0,0,0.04); margin-bottom: 25px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+        
+        /* Input & Days Styling */
+        label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 8px; color: #86868B; text-transform: uppercase; }
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #D2D2D7; border-radius: 12px; font-size: 15px; margin-bottom: 15px; background: #FBFBFD; outline: none; transition: 0.2s; }
+        input:focus { border-color: var(--apple-blue); background: #FFF; }
+
+        .days-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px; }
+        .day-btn { padding: 8px 14px; border: 1px solid #D2D2D7; border-radius: 10px; cursor: pointer; font-size: 12px; background: #FFF; transition: 0.2s; }
         .day-btn.selected { background: #000; color: #FFF; border-color: #000; }
-        .btn-action { background: #000; color: #FFF; border: none; padding: 16px; border-radius: 14px; width: 100%; cursor: pointer; font-weight: 600; font-size: 16px; margin-top: 10px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 30px; }
-        th { text-align: left; color: var(--apple-gray); font-size: 11px; padding: 15px; border-bottom: 1px solid #E5E5E7; }
+
+        /* Status Toggle */
+        .status-pill { padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; cursor: pointer; border: none; }
+        .status-active { background: #E1F5FE; color: #0288D1; }
+        .status-off { background: #FFEBEE; color: #C62828; }
+
+        .btn-main { background: #000; color: #FFF; border: none; padding: 16px; border-radius: 14px; width: 100%; cursor: pointer; font-weight: 600; font-size: 16px; transition: 0.3s; }
+        .btn-main:hover { background: #333; transform: translateY(-2px); }
+
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; color: #86868B; font-size: 11px; padding: 15px; border-bottom: 1px solid #E5E5E7; }
         td { padding: 15px; border-bottom: 1px solid #F5F5F7; font-size: 14px; }
-        .avatar-img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: #EEE; }
-        .status-toggle { cursor: pointer; padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+        
+        .logout-btn { margin-top: auto; color: var(--apple-red); font-weight: 600; cursor: pointer; padding: 10px; font-size: 14px; }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
-    <h2 id="sideStoreName" style="font-size: 18px; margin-bottom: 40px;">Mouneh</h2>
+    <div style="text-align: center; margin-bottom: 40px;">
+        <img id="sideLogo" src="logo.png" style="width: 50px; border-radius: 12px; margin-bottom: 10px;" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png'">
+        <h2 id="sideStoreName" style="font-size: 18px; margin: 0;">Mouneh</h2>
+    </div>
     <div class="nav-item active" onclick="showTab('reg')">Team Management</div>
-    <div class="nav-item" onclick="showTab('set')">Company & Settings</div>
+    <div class="nav-item" onclick="showTab('set')">Company Profile</div>
+    <div class="logout-btn" onclick="logout()">Log Out</div>
 </div>
 
 <div class="main">
     <div id="section-reg" class="section" style="display:block;">
         <div class="card">
-            <h3 id="formTitle">Add Specialist</h3>
+            <h3 id="formTitle">Register Specialist</h3>
             <div class="grid">
                 <div>
-                    <label>Nickname (Display)</label> <input type="text" id="nName">
-                    <label>Real Name</label> <input type="text" id="rName">
-                    <label>Email (For Stripe)</label> <input type="email" id="email">
-                    <label>Phone</label> <input type="text" id="phone">
+                    <label>Nickname (Public Display)</label> <input type="text" id="nName">
+                    <label>Real Name (Official)</label> <input type="text" id="rName">
+                    <label>Contact Email</label> <input type="email" id="email">
+                    <label>Phone Number</label> <input type="text" id="phone">
                 </div>
                 <div>
                     <label>Job Title</label> <input type="text" id="job">
-                    <label>Working Days</label>
+                    <label>Select Working Days</label>
                     <div class="days-row" id="daysPicker">
                         <div class="day-btn" onclick="this.classList.toggle('selected')">Mon</div>
                         <div class="day-btn" onclick="this.classList.toggle('selected')">Tue</div>
@@ -60,17 +81,23 @@
                         <div class="day-btn" onclick="this.classList.toggle('selected')">Sat</div>
                         <div class="day-btn" onclick="this.classList.toggle('selected')">Sun</div>
                     </div>
-                    <label>Photo</label> <input type="file" onchange="handleImg(this)">
+                    <label>Double Shift (S1 & S2)</label>
+                    <div style="display:flex; gap:10px; margin-bottom:15px;">
+                        <input type="time" id="s1_s" placeholder="S1 Start"> <input type="time" id="s1_e">
+                    </div>
+                    <div style="display:flex; gap:10px;">
+                        <input type="time" id="s2_s"> <input type="time" id="s2_e">
+                    </div>
                 </div>
             </div>
             <input type="hidden" id="editId">
-            <button class="btn-action" onclick="saveStaff()">Save Specialist</button>
+            <button class="btn-main" onclick="saveStaff()">Save & Generate Link</button>
         </div>
+
         <div class="card">
-            <h3>Staff List (<span id="staffCount">0</span>)</h3>
             <table>
                 <thead>
-                    <tr><th>Photo</th><th>Specialist</th><th>Schedule</th><th>Status</th><th>Actions</th></tr>
+                    <tr><th>Specialist</th><th>Contact</th><th>Schedule & Shifts</th><th>Status</th><th>Actions</th></tr>
                 </thead>
                 <tbody id="staffTable"></tbody>
             </table>
@@ -79,29 +106,45 @@
 
     <div id="section-set" class="section">
         <div class="card">
-            <h3>Company Profile (Mouneh)</h3>
-            <label>Business Name</label> <input type="text" id="set_bName">
-            <label>Slogan (Max 90 chars)</label> <textarea id="set_slogan" maxlength="90"></textarea>
-            <label>Global Currency</label>
-            <select id="set_curr"><option value="CAD">CAD ($)</option><option value="USD">USD ($)</option></select>
-            <button class="btn-action" onclick="saveCompany()">Update Profile</button>
+            <h3>Company Identity (Public Info)</h3>
+            <div class="grid">
+                <div>
+                    <label>Business Name</label> <input type="text" id="set_bName" placeholder="Mouneh Store">
+                    <label>Slogan (Max 90 characters)</label> <textarea id="set_slogan" maxlength="90" style="height:80px;"></textarea>
+                    <label>Company Logo URL</label> <input type="text" id="set_logo" onchange="document.getElementById('sideLogo').src=this.value">
+                </div>
+                <div>
+                    <label>Global Currency</label>
+                    <select id="set_curr"><option value="CAD">Canada (CAD $)</option><option value="USD">USA (USD $)</option></select>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="border-left: 5px solid #000;">
+            <h3>Official Business Data (Private - Admin Only)</h3>
+            <div class="grid">
+                <div>
+                    <label>Legal Address</label> <input type="text" id="set_address">
+                    <label>Official Business Email</label> <input type="email" id="set_bEmail">
+                </div>
+                <div>
+                    <label>Business Phone</label> <input type="text" id="set_bPhone">
+                    <label>Business Hours</label> <input type="text" id="set_hours" placeholder="e.g. 9 AM - 10 PM">
+                </div>
+            </div>
+            <button class="btn-main" onclick="saveCompany()">Update Global Profile</button>
         </div>
     </div>
 </div>
 
 <script>
     let staff = JSON.parse(localStorage.getItem('master_staff') || '[]');
-    let currentImg = "";
-
-    function handleImg(i) {
-        const r = new FileReader();
-        r.onload = (e) => currentImg = e.target.result;
-        r.readAsDataURL(i.files[0]);
-    }
 
     function showTab(t) {
         document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
         document.getElementById('section-' + t).style.display = 'block';
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        event.currentTarget.classList.add('active');
     }
 
     function saveStaff() {
@@ -114,9 +157,13 @@
             phone: document.getElementById('phone').value,
             job: document.getElementById('job').value,
             days: Array.from(document.querySelectorAll('.day-btn.selected')).map(d => d.innerText),
-            img: currentImg || 'logo.png',
-            active: true
+            s1: { s: document.getElementById('s1_s').value, e: document.getElementById('s1_e').value },
+            s2: { s: document.getElementById('s2_s').value, e: document.getElementById('s2_e').value },
+            active: true,
+            regDate: new Date().toLocaleDateString()
         };
+
+        if(!data.nName || !data.email) { alert("Please fill mandatory fields!"); return; }
 
         if(id) {
             const idx = staff.findIndex(s => s.id === parseInt(id));
@@ -126,51 +173,78 @@
         }
 
         localStorage.setItem('master_staff', JSON.stringify(staff));
-        location.reload();
+        alert("Success! Link generated for " + data.nName);
+        render();
+        location.reload(); 
     }
 
     function render() {
         const table = document.getElementById('staffTable');
-        document.getElementById('staffCount').innerText = staff.length;
         table.innerHTML = staff.map(s => `
             <tr>
-                <td><img src="${s.img}" class="avatar-img"></td>
-                <td><b>${s.nName || s.name}</b><br><small>${s.job}</small></td>
-                <td><small>${(s.days || []).join(', ')}</small></td>
-                <td><span class="status-toggle" style="background:${s.active?'#E1F5FE':'#FFEBEE'}; color:${s.active?'#0288D1':'#C62828'}" onclick="toggleActive(${s.id})">${s.active?'ACTIVE':'ON LEAVE'}</span></td>
+                <td><b>${s.nName}</b><br><small>${s.regDate}</small></td>
+                <td>${s.email}<br><small>${s.phone}</small></td>
                 <td>
-                    <button onclick="edit(${s.id})" style="border:none; background:none; color:blue; cursor:pointer;">Edit</button>
-                    <button onclick="del(${s.id})" style="border:none; background:none; color:red; cursor:pointer; margin-left:10px;">Del</button>
+                    <div style="font-size:11px;">${s.days.join(', ')}</div>
+                    <span style="color:var(--apple-blue); font-size:12px;">S1: ${s.s1.s}-${s.s1.e}</span> | 
+                    <span style="color:#5856D6; font-size:12px;">S2: ${s.s2.s}-${s.s2.e}</span>
+                </td>
+                <td><button class="status-pill ${s.active?'status-active':'status-off'}" onclick="toggleStatus(${s.id})">${s.active?'ACTIVE':'ON LEAVE'}</button></td>
+                <td>
+                    <button onclick="editS(${s.id})" style="color:blue; border:none; background:none; cursor:pointer;">Edit</button>
+                    <button onclick="delS(${s.id})" style="color:red; border:none; background:none; cursor:pointer; margin-left:10px;">Delete</button>
                 </td>
             </tr>
         `).join('');
     }
 
-    function toggleActive(id) {
+    function delS(id) {
+        if(confirm("Are you sure? This cannot be undone.")) {
+            staff = staff.filter(x => x.id !== id);
+            localStorage.setItem('master_staff', JSON.stringify(staff));
+            render();
+        }
+    }
+
+    function toggleStatus(id) {
         const idx = staff.findIndex(s => s.id === id);
         staff[idx].active = !staff[idx].active;
         localStorage.setItem('master_staff', JSON.stringify(staff));
         render();
     }
 
-    function edit(id) {
-        const s = staff.find(x => x.id === id);
-        document.getElementById('editId').value = s.id;
-        document.getElementById('nName').value = s.nName || s.name;
-        document.getElementById('rName').value = s.rName || '';
-        document.getElementById('email').value = s.email || '';
-        document.getElementById('job').value = s.job;
-        document.getElementById('formTitle').innerText = "Edit Specialist";
-        window.scrollTo(0,0);
-    }
-
     function saveCompany() {
-        localStorage.setItem('company_name', document.getElementById('set_bName').value);
-        localStorage.setItem('company_slogan', document.getElementById('set_slogan').value);
-        alert('Company Profile Updated!');
+        const company = {
+            name: document.getElementById('set_bName').value,
+            slogan: document.getElementById('set_slogan').value,
+            logo: document.getElementById('set_logo').value,
+            address: document.getElementById('set_address').value,
+            email: document.getElementById('set_bEmail').value,
+            phone: document.getElementById('set_bPhone').value,
+            hours: document.getElementById('set_hours').value,
+            currency: document.getElementById('set_curr').value
+        };
+        localStorage.setItem('company_profile', JSON.stringify(company));
+        alert('Global Profile Updated!');
     }
 
-    window.onload = render;
+    function logout() {
+        if(confirm("Logout from Dashboard?")) {
+            window.location.href = "login.html";
+        }
+    }
+
+    window.onload = () => {
+        render();
+        const cp = JSON.parse(localStorage.getItem('company_profile') || '{}');
+        if(cp.name) {
+            document.getElementById('set_bName').value = cp.name;
+            document.getElementById('sideStoreName').innerText = cp.name;
+            document.getElementById('set_slogan').value = cp.slogan;
+            document.getElementById('set_logo').value = cp.logo;
+            document.getElementById('sideLogo').src = cp.logo;
+        }
+    };
 </script>
 </body>
 </html>
