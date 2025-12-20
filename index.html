@@ -2,130 +2,138 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="dynamicTitle">Loading Store...</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mouneh - Select Specialist</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --apple-bg: #F5F5F7; --apple-blue: #007AFF; --apple-gray: #86868B; }
-        body { font-family: 'Inter', -apple-system, sans-serif; background: var(--apple-bg); margin: 0; padding: 20px; display: flex; justify-content: center; color: #1D1D1F; }
+        body { font-family: 'Inter', sans-serif; background-color: #fafafa; display: flex; justify-content: center; padding-top: 20px; margin: 0; color: #1a1a1a; }
+        .main-card { background: white; width: 92%; max-width: 380px; padding: 25px; border-radius: 32px; box-shadow: 0 4px 25px rgba(0,0,0,0.03); border: 1px solid #f2f2f2; box-sizing: border-box; text-align: center; }
         
-        .triple-view-container { width: 100%; max-width: 450px; display: flex; flex-direction: column; gap: 20px; }
+        .brand-logo { width: 64px; height: 64px; border-radius: 14px; margin-bottom: 12px; }
+        .brand-name { font-size: 24px; font-weight: 700; margin: 0; color: #1a1a1a; }
+        .brand-bio { font-size: 14px; color: #666; margin: 8px 0 20px; line-height: 1.4; }
 
-        /* Section 1: Business Identity Card */
-        .identity-card { background: #FFF; border-radius: 32px; padding: 40px 20px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.04); }
-        .biz-logo { width: 90px; height: 90px; border-radius: 24px; object-fit: contain; background: #FBFBFD; margin-bottom: 20px; border: 1px solid #F2F2F7; }
-        h1 { font-size: 26px; font-weight: 700; margin: 0; letter-spacing: -0.8px; }
-        .biz-slogan { color: var(--apple-gray); font-size: 15px; margin-top: 10px; line-height: 1.4; }
+        .main-question { font-size: 18px; font-weight: 700; color: #1a1a1a; margin: 25px 0 15px; line-height: 1.3; }
 
-        /* Section 2: Search & Quick Selection */
-        .interaction-box { background: #FFF; border-radius: 28px; padding: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.02); }
-        .search-wrapper { position: relative; }
-        .search-input { width: 100%; padding: 16px 20px; border-radius: 18px; border: 1px solid #D2D2D7; background: #FBFBFD; outline: none; font-size: 16px; box-sizing: border-box; transition: 0.3s; }
-        .search-input:focus { border-color: var(--apple-blue); background: #FFF; }
+        .search-box { background: #f2f2f7; border-radius: 12px; padding: 10px 15px; display: flex; align-items: center; margin-bottom: 15px; }
+        .search-input { border: none; background: transparent; outline: none; width: 100%; font-size: 16px; color: #000; }
 
-        /* Section 3: Staff Registry (The Core Feature) */
-        .staff-registry { background: #FFF; border-radius: 32px; padding: 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.04); }
-        .staff-card { display: flex; align-items: center; padding: 18px; border-radius: 24px; text-decoration: none; color: inherit; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); margin-bottom: 8px; border: 1px solid transparent; }
-        .staff-card:hover { transform: translateY(-4px); background: #FBFBFD; border-color: #E5E5E7; box-shadow: 0 8px 20px rgba(0,0,0,0.05); }
+        .selection-header { background: #f2f2f7; padding: 10px 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .selection-title { font-size: 14px; font-weight: 500; color: #3a3a3c; }
+
+        .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #e5e5ea; transition: .3s; border-radius: 22px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 2px; bottom: 2px; background-color: white; transition: .3s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        input:checked + .slider { background-color: #34c759; }
+        input:checked + .slider:before { transform: translateX(18px); }
+
+        .staff-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+        .staff-card { background: white; border: 1px solid #f2f2f2; border-radius: 20px; padding: 15px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: 0.2s; }
+        .staff-card:hover { border-color: #1a1a1a; }
+        .staff-info { display: flex; align-items: center; gap: 12px; }
+        .avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
+        .details h3 { font-size: 16px; font-weight: 600; margin: 0; text-align: left; }
+        .details p { font-size: 13px; color: #888; margin: 2px 0 0; text-align: left; }
         
-        .staff-photo { width: 65px; height: 65px; border-radius: 50%; object-fit: cover; margin-right: 18px; border: 2px solid #FFF; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .staff-info { flex: 1; }
-        .staff-name { font-weight: 600; font-size: 17px; margin: 0; }
-        .staff-job { font-size: 13px; color: var(--apple-gray); margin-top: 4px; font-weight: 500; }
-        
-        /* Working Days Pills (The 9-hour work result) */
-        .days-container { display: flex; gap: 4px; margin-top: 10px; flex-wrap: wrap; }
-        .day-pill { font-size: 10px; padding: 4px 10px; background: #F2F2F7; border-radius: 8px; color: #1D1D1F; font-weight: 600; text-transform: uppercase; }
-        
-        .arrow-icon { color: #C7C7CC; font-size: 22px; margin-left: 10px; }
+        /* السهم (Chevron) المفقود */
+        .chevron { color: #c7c7cc; font-size: 20px; font-weight: 300; }
 
-        /* Global Currency & Hours Footer */
-        .footer-info { text-align: center; color: var(--apple-gray); font-size: 12px; margin-top: 10px; }
+        .checkbox-container { width: 22px; height: 22px; border: 2px solid #ddd; border-radius: 6px; display: none; align-items: center; justify-content: center; }
+        .staff-card.selected .checkbox-container { background: #1a1a1a; border-color: #1a1a1a; }
+        .staff-card.selected .checkbox-container::after { content: '✓'; color: white; font-size: 14px; }
+
+        #next-btn { background: #1a1a1a; color: white; border: none; width: 100%; padding: 18px; border-radius: 18px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 10px; }
+        .footer-credit { margin-top: 30px; font-size: 11px; color: #bbb; border-top: 1px solid #f9f9f9; padding-top: 20px; }
     </style>
 </head>
 <body>
 
-<div class="triple-view-container">
-    <div class="identity-card">
-        <img id="storeLogo" src="" class="biz-logo" style="display:none;">
-        <h1 id="storeName">Welcome</h1>
-        <p id="storeSlogan" class="biz-slogan"></p>
+<div class="main-card">
+    <img src="logo.png" class="brand-logo" alt="Logo">
+    <h1 class="brand-name">Mouneh Lebanese Gourmet Store</h1>
+    <p class="brand-bio">Authentic flavors delivered with love and tradition in every bite.</p>
+
+    <h2 class="main-question">Please choose a member of our team you would like to tip</h2>
+
+    <div class="search-box">
+        <input type="text" id="staffSearch" onkeyup="filterStaff()" placeholder="Search for your specialist..." class="search-input">
     </div>
 
-    <div class="interaction-box">
-        <div class="search-wrapper">
-            <input type="text" id="staffSearch" class="search-input" placeholder="Find your specialist..." onkeyup="doSearch()">
+    <div class="selection-header">
+        <span class="selection-title">Select multiple specialists</span>
+        <label class="switch">
+            <input type="checkbox" id="multiModeToggle" onchange="toggleMode()">
+            <span class="slider"></span>
+        </label>
+    </div>
+
+    <div class="staff-list">
+        <div class="staff-card" onclick="handleSelect('shani', 'shani.jpg', this)">
+            <div class="staff-info">
+                <img src="shani.jpg" class="avatar" alt="S">
+                <div class="details"><h3>Shani</h3><p>Nail Technician</p></div>
+            </div>
+            <div class="chevron">›</div>
+            <div class="checkbox-container"></div>
+        </div>
+
+        <div class="staff-card" onclick="handleSelect('bustani', 'bustani.jpg', this)">
+            <div class="staff-info">
+                <img src="bustani.jpg" class="avatar" alt="B">
+                <div class="details"><h3>Bustani</h3><p>Barber</p></div>
+            </div>
+            <div class="chevron">›</div>
+            <div class="checkbox-container"></div>
         </div>
     </div>
 
-    <div class="staff-registry">
-        <div id="staffList">
-            </div>
-    </div>
-
-    <div class="footer-info">
-        <span id="storeHours"></span> • <span id="storeLocation"></span>
-    </div>
+    <button id="next-btn" onclick="goToMultiple()" style="display:none;">Next</button>
+    <div class="footer-credit">Powered by <b>Amidify Solutions Inc.</b></div>
 </div>
 
 <script>
-    function renderApp() {
-        // Fetching Master Data
-        const company = JSON.parse(localStorage.getItem('company_profile') || '{}');
-        const team = JSON.parse(localStorage.getItem('master_staff') || '[]');
+    let isMulti = false;
+    let selectedStaff = [];
 
-        // 1. Setup Branding
-        if(company.name) {
-            document.getElementById('storeName').innerText = company.name;
-            document.getElementById('dynamicTitle').innerText = company.name;
-            document.getElementById('storeSlogan').innerText = company.slogan || "Select a professional to proceed";
-            document.getElementById('storeHours').innerText = company.hours || "Open Daily";
-            document.getElementById('storeLocation').innerText = company.address || "Contact for address";
-            
-            if(company.logo) {
-                const logoEl = document.getElementById('storeLogo');
-                logoEl.src = company.logo;
-                logoEl.style.display = 'inline-block';
-            }
-        }
+    function toggleMode() {
+        isMulti = document.getElementById('multiModeToggle').checked;
+        selectedStaff = [];
+        document.querySelectorAll('.staff-card').forEach(c => {
+            c.classList.remove('selected');
+            c.querySelector('.checkbox-container').style.display = isMulti ? 'flex' : 'none';
+            c.querySelector('.chevron').style.display = isMulti ? 'none' : 'block';
+        });
+        document.getElementById('next-btn').style.display = 'none';
+    }
 
-        // 2. Setup Staff List with Triple-View Features
-        const listContainer = document.getElementById('staffList');
-        // Only show PUBLISHED staff
-        const activeTeam = team.filter(m => m.published === true);
-
-        if(activeTeam.length === 0) {
-            listContainer.innerHTML = `<div style="padding:40px; text-align:center; color:#86868B;">No specialists currently available.</div>`;
+    function handleSelect(id, img, element) {
+        if (!isMulti) {
+            // حفظ البيانات بشكل صحيح لضمان ظهور الصور في الصفحة التالية
+            localStorage.setItem('selectedStaff', JSON.stringify([{name: id, image: img}]));
+            window.location.href = id + '.html';
             return;
         }
-
-        listContainer.innerHTML = activeTeam.map(member => `
-            <a href="payment.html?id=${member.id}" class="staff-card" data-search="${member.nName.toLowerCase()}">
-                <img src="${member.img}" class="staff-photo">
-                <div class="staff-info">
-                    <p class="staff-name">${member.nName}</p>
-                    <p class="staff-job">${member.job}</p>
-                    <div class="days-container">
-                        ${(member.days || []).map(d => `<span class="day-pill">${d}</span>`).join('')}
-                    </div>
-                </div>
-                <span class="arrow-icon">›</span>
-            </a>
-        `).join('');
+        element.classList.toggle('selected');
+        const index = selectedStaff.findIndex(s => s.name === id);
+        if (index > -1) { selectedStaff.splice(index, 1); } 
+        else { selectedStaff.push({name: id, image: img}); }
+        document.getElementById('next-btn').style.display = selectedStaff.length > 0 ? 'block' : 'none';
     }
 
-    // Fast Search Functionality
-    function doSearch() {
-        const query = document.getElementById('staffSearch').value.toLowerCase();
-        const cards = document.querySelectorAll('.staff-card');
-        cards.forEach(card => {
-            const name = card.getAttribute('data-search');
-            card.style.display = name.includes(query) ? 'flex' : 'none';
-        });
+    function goToMultiple() {
+        localStorage.setItem('selectedStaff', JSON.stringify(selectedStaff));
+        window.location.href = 'multiple.html';
     }
 
-    // Auto-load
-    window.onload = renderApp;
+    function filterStaff() {
+        let input = document.getElementById('staffSearch').value.toLowerCase();
+        let cards = document.getElementsByClassName('staff-card');
+        for (let card of cards) {
+            let name = card.querySelector('h3').innerText.toLowerCase();
+            card.style.display = name.includes(input) ? "flex" : "none";
+        }
+    }
 </script>
 </body>
 </html>
