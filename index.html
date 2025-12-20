@@ -3,85 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EazyTipMe | Welcome</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --apple-bg: #F5F5F7; }
-        body { font-family: 'Inter', sans-serif; background: var(--apple-bg); margin: 0; padding: 20px; text-align: center; }
+        /* أنا أستخدم هنا نفس التنسيق الذي ظهر في صورتك */
+        body { font-family: 'Inter', sans-serif; background-color: #f5f5f7; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        .biz-name-header { margin-top: 50px; font-size: 24px; font-weight: bold; color: #000; }
+        .staff-container { margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; width: 90%; max-width: 1000px; }
         
-        /* الهيدر الديناميكي */
-        .header-biz { margin-bottom: 40px; padding-top: 20px; }
-        .logo-frame { width: 100px; height: 100px; border-radius: 25px; object-fit: cover; margin-bottom: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        .biz-title { font-size: 28px; font-weight: 700; color: #1D1D1F; margin: 0; }
-        .biz-slogan { font-size: 15px; color: #86868B; margin-top: 8px; max-width: 400px; margin-inline: auto; }
-
-        /* حاوية الموظفين (Triple View) */
-        .specialist-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; max-width: 900px; margin: 40px auto; }
-        .staff-card { background: #FFF; padding: 25px 15px; border-radius: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: 0.3s; cursor: pointer; border: 1px solid transparent; }
-        .staff-card:hover { transform: translateY(-5px); border-color: #000; }
-        .staff-img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; margin-bottom: 12px; border: 2px solid #F5F5F7; }
+        /* هذا هو "المود" الخاص بك للكارت */
+        .specialist-card { background: #fff; border-radius: 20px; padding: 20px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .specialist-img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; background: #eee; }
+        .specialist-name { font-weight: 700; margin-top: 10px; font-size: 14px; }
+        .specialist-job { color: #86868b; font-size: 12px; }
         
-        .footer-sign { margin-top: 80px; font-size: 10px; color: #AEAEB2; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+        .footer-sig { margin-top: 100px; font-size: 10px; color: #aeaeb2; text-transform: uppercase; letter-spacing: 1px; }
     </style>
 </head>
 <body>
 
-<div class="header-biz">
-    <img id="bizLogo" src="" class="logo-frame" style="display:none;">
-    <h1 id="bizName" class="biz-title">Welcome</h1>
-    <p id="bizSlogan" class="biz-slogan"></p>
-</div>
+    <div class="biz-name-header" id="businessName">Loading...</div>
 
-<div class="specialist-grid" id="staffList">
-    </div>
+    <div class="staff-container" id="staffGrid">
+        </div>
 
-<div class="footer-sign">Power by amidify solutions inc</div>
+    <div class="footer-sig">POWER BY AMIDIFY SOLUTIONS INC</div>
 
 <script>
-    // 1. التقاط الـ ID من الرابط (مثلاً index.html?id=Eazy_123)
-    const urlParams = new URLSearchParams(window.location.search);
-    const bizId = urlParams.get('id');
-
-    // 2. جلب البيانات المخزنة لهذا الـ ID تحديداً
-    const companyData = JSON.parse(localStorage.getItem('config_' + bizId) || '{}');
-    const staffData = JSON.parse(localStorage.getItem('staff_' + bizId) || '[]');
-
+    // هذا هو الجزء الذي يقرأ "المود" ويجعله يسحب البيانات
     window.onload = () => {
-        if (!bizId) {
-            document.body.innerHTML = "<h2>Error: Business ID is missing.</h2>";
-            return;
-        }
+        const params = new URLSearchParams(window.location.search);
+        const bizId = params.get('id');
 
-        // عرض بيانات الشركة في الهيدر
-        document.getElementById('bizName').innerText = companyData.name || "Our Specialists";
-        document.getElementById('bizSlogan').innerText = companyData.slogan || "";
-        if (companyData.logo) {
-            document.getElementById('bizLogo').src = companyData.logo;
-            document.getElementById('bizLogo').style.display = 'inline-block';
-        }
+        if (bizId) {
+            const config = JSON.parse(localStorage.getItem('config_' + bizId) || '{}');
+            const staff = JSON.parse(localStorage.getItem('staff_' + bizId) || '[]');
 
-        renderStaff();
+            // سحب اسم الشركة للسرفر
+            document.getElementById('businessName').innerText = config.name || "Business Name";
+
+            const grid = document.getElementById('staffGrid');
+            grid.innerHTML = ""; // تفريغ المكان لبدء السحب
+
+            staff.forEach(s => {
+                // صنع الكارت بنفس "المود" والتصميم الخاص بك
+                grid.innerHTML += `
+                    <div class="specialist-card">
+                        <img src="${s.photo || ''}" class="specialist-img">
+                        <div class="specialist-name">${s.nName}</div>
+                        <div class="specialist-job">${s.job}</div>
+                    </div>
+                `;
+            });
+        }
     };
-
-    function renderStaff() {
-        const container = document.getElementById('staffList');
-        container.innerHTML = "";
-
-        if (staffData.length === 0) {
-            container.innerHTML = "<p style='grid-column: 1/-1; color: #86868B;'>No specialists added yet.</p>";
-            return;
-        }
-
-        staffData.forEach(staff => {
-            container.innerHTML += `
-                <div class="staff-card" onclick="alert('Going to Payment for ${staff.nName}')">
-                    <img src="${staff.photo || 'https://via.placeholder.com/100'}" class="staff-img">
-                    <div style="font-weight:700; font-size:15px; color:#1D1D1F;">${staff.nName}</div>
-                    <div style="font-size:12px; color:#86868B; margin-top:4px;">${staff.job}</div>
-                </div>
-            `;
-        });
-    }
 </script>
 </body>
 </html>
