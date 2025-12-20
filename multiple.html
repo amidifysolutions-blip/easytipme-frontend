@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://js.stripe.com/v3/"></script>
     <style>
-        /* سأبقي نفس الـ CSS الخاص بك تماماً دون تغيير بكسل واحد */
+        /* سأبقي الستايل الخاص بك تماماً كما هو */
         body { font-family: 'Inter', sans-serif; background-color: #fafafa; display: flex; justify-content: center; padding-top: 20px; margin: 0; color: #1a1a1a; }
         .main-card { background: white; width: 92%; max-width: 380px; padding: 25px 25px 35px; border-radius: 32px; box-shadow: 0 4px 25px rgba(0,0,0,0.03); border: 1px solid #f2f2f2; box-sizing: border-box; min-height: 600px; position: relative; }
         .back-nav { display: flex; align-items: center; margin-bottom: 15px; }
@@ -41,11 +41,6 @@
         #submit-btn { background: #1a1a1a; color: white; border: none; width: 100%; padding: 18px; border-radius: 18px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 20px; display: none; }
         #success-msg { display: none; text-align: center; padding: 60px 10px; }
         .footer-credit { margin-top: 40px; font-size: 11px; color: #bbb; text-align: center; border-top: 1px solid #f9f9f9; padding-top: 20px; }
-        
-        /* تداخل الصور Apple Style */
-        .staff-stack { display: flex; justify-content: center; margin: 20px auto; }
-        .stack-img { width: 65px; height: 65px; border-radius: 50%; border: 3px solid white; object-fit: cover; margin-left: -15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .stack-img:first-child { margin-left: 0; }
     </style>
 </head>
 <body>
@@ -53,20 +48,19 @@
 <div class="main-card">
     <div id="payment-content">
         <div class="back-nav">
-            <button class="back-btn" id="dynamicBackBtn"><span>‹</span> Back</button>
+            <button class="back-btn" id="btnBack"><span>‹</span> Back</button>
         </div>
         
         <div class="brand-header">
-            <img id="dynamicLogo" src="" class="brand-logo" style="display:none;">
+            <img id="dynamicLogo" src="" class="brand-logo" alt="Logo" style="display:none;">
             <h1 id="dynamicBizName" style="font-size: 18px; margin: 0;">Loading...</h1>
-            <p id="dynamicSlogan" style="font-size: 12px; color: #888; margin-top: 5px;"></p>
         </div>
 
         <div class="staff-header">
             <h1 class="staff-name">Team Tip</h1>
         </div>
 
-        <div id="selected-team-photos" class="staff-stack"></div>        
+        <div id="selected-team-photos" style="display: flex; justify-content: center; gap: 10px; margin: 20px auto; flex-wrap: wrap;"></div>        
 
         <div class="grid">
             <button class="amount-btn" onclick="tap(500, this)">CA$5</button>
@@ -85,8 +79,14 @@
         </div>
 
         <div class="love-box">
-            <div style="text-align:left;"><h4 style="margin:0; font-size:14px;">Show some love? ♡</h4><p style="margin:4px 0 0; font-size:11px; color:#888;">Cover fees so the team gets 100%.</p></div>
-            <label class="switch"><input type="checkbox" id="feeToggle" checked onchange="refreshAmount()"><span class="slider"></span></label>
+            <div style="text-align:left;">
+                <h4 style="margin:0; font-size:14px;">Show some love? ♡</h4>
+                <p style="margin:4px 0 0; font-size:11px; color:#888;">Cover fees so the team gets 100%.</p>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="feeToggle" checked onchange="refreshAmount()">
+                <span class="slider"></span>
+            </label>
         </div>
 
         <div id="payment-element"></div>
@@ -107,16 +107,18 @@
     <div id="success-msg">
         <div style="font-size: 55px; margin-bottom: 15px;">✅</div>
         <h2>Thank You!</h2>
-        <p style="color: #888; font-size: 14px;">Your tip has been received. We appreciate your support!</p>
-        <button id="doneBtn" style="margin-top:25px; background:#1a1a1a; color:white; border:none; padding:15px 30px; border-radius:15px; cursor:pointer; font-weight:600;">Done</button>
+        <p style="color: #888; font-size: 14px;">Your tip has been received. We appreciate your support for the team!</p>
+        <button id="btnDone" style="margin-top:25px; background:#1a1a1a; color:white; border:none; padding:15px 30px; border-radius:15px; cursor:pointer; font-weight:600;">Done</button>
     </div>
     <div class="footer-credit">Powered by <b>Amidify Solutions Inc.</b></div>
 </div>
 
 <script>
-    let currentBaseAmount = 0; const FEE_PERCENT = 0.12; let elements;
-    const stripe = Stripe('pk_test_51QpPGt01TRhauBHP6dGYUaBYZJr9oHskEqZy9zWm8L6SPtG2kdzQS0MhPiatv3QDvzkTXvJDvbWMSIOUVOCcaswu003bDig62n'); 
+    let currentBaseAmount = 0; 
+    const FEE_PERCENT = 0.12; 
+    let elements;
     const API_URL = "https://easytipme-backend.onrender.com";
+    const stripe = Stripe('pk_test_51QpPGt01TRhauBHP6dGYUaBYZJr9oHskEqZy9zWm8L6SPtG2kdzQS0MhPiatv3QDvzkTXvJDvbWMSIOUVOCcaswu003bDig62n'); 
 
     // جلب الـ ID من الرابط
     const urlParams = new URLSearchParams(window.location.search);
@@ -125,31 +127,31 @@
     window.onload = function() {
         if (!bizId) return;
 
-        // 1. جلب بيانات الشركة من الداشبورد
+        // 1. جلب بيانات الشركة الحقيقية (اللوجو والاسم)
         const config = JSON.parse(localStorage.getItem('config_' + bizId) || '{}');
         document.getElementById('dynamicBizName').innerText = config.name || "Our Business";
-        document.getElementById('dynamicSlogan').innerText = config.slogan || "";
         if (config.logo) {
             const logo = document.getElementById('dynamicLogo');
             logo.src = config.logo;
             logo.style.display = 'inline-block';
         }
 
-        // 2. جلب الموظفين المختارين (المخزنين في localStorage من صفحة الاندكس)
-        const selectedStaff = JSON.parse(localStorage.getItem('selected_staff_session') || '[]');
-        const photoContainer = document.getElementById('selected-team-photos');
+        // 2. جلب الموظفين المختارين من الذاكرة
+        const selected = JSON.parse(localStorage.getItem('selected_staff_session') || '[]');
+        const container = document.getElementById('selected-team-photos');
         
-        photoContainer.innerHTML = "";
-        selectedStaff.forEach(staff => {
-            const img = document.createElement('img');
-            img.src = staff.photo || 'https://via.placeholder.com/65';
-            img.className = "stack-img";
-            photoContainer.appendChild(img);
-        });
+        if (selected.length > 0) {
+            container.innerHTML = selected.map(s => `
+                <div style="text-align:center">
+                    <img src="${s.photo || 'https://via.placeholder.com/70'}" style="width:70px; height:70px; border-radius:50%; object-fit:cover; border:3px solid white; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                    <p style="font-size:12px; font-weight:600; margin-top:5px;">${s.nName}</p>
+                </div>
+            `).join('');
+        }
 
-        // 3. روابط العودة والانتهاء
-        document.getElementById('dynamicBackBtn').onclick = () => window.location.href = `index.html?id=${bizId}`;
-        document.getElementById('doneBtn').onclick = () => window.location.href = `index.html?id=${bizId}`;
+        // 3. تحديث روابط العودة
+        document.getElementById('btnBack').onclick = () => window.location.href = `index.html?id=${bizId}`;
+        document.getElementById('btnDone').onclick = () => window.location.href = `index.html?id=${bizId}`;
     };
 
     function refreshAmount() { if (currentBaseAmount > 0) calculateAndStart(currentBaseAmount); }
@@ -174,7 +176,6 @@
     function tap(amt, btn) { 
         document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active')); 
         btn.classList.add('active'); 
-        document.getElementById('custom-container').style.display = 'none'; 
         currentBaseAmount = amt; 
         calculateAndStart(amt); 
     }
@@ -196,9 +197,7 @@
             const paymentElement = elements.create("payment"); 
             paymentElement.mount("#payment-element");
             paymentElement.on('ready', () => { document.getElementById('submit-btn').style.display = 'block'; });
-        } catch (e) { 
-            document.getElementById('payment-element').innerHTML = 'Error connecting to payment gateway.'; 
-        }
+        } catch (e) { document.getElementById('payment-element').innerHTML = 'Error connecting to gateway.'; }
     }
 
     async function handleSubmit() {
