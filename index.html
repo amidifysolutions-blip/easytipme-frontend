@@ -3,98 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Customer Page | EazyTipMe</title>
+    <title>Select Team | EazyTipMe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f5f5f7; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        .main-container { background: #fff; border-radius: 35px; padding: 40px; width: 90%; max-width: 450px; margin-top: 50px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); text-align: center; }
-        
-        /* تصميم اللوجو */
-        .biz-logo { width: 85px; height: 85px; border-radius: 22px; object-fit: cover; margin-bottom: 15px; background: #eee; display: none; margin-left: auto; margin-right: auto; }
-        
-        /* اسم الشركة والسلوجن */
-        .biz-name { font-size: 24px; font-weight: 800; color: #1d1d1f; margin: 10px 0; }
-        .biz-slogan { color: #86868b; font-size: 14px; margin-bottom: 30px; line-height: 1.4; }
-
-        /* تصميم الموظفين (Triple View) */
-        .staff-list { display: grid; grid-template-columns: 1fr; gap: 12px; width: 100%; }
-        .staff-card { background: #fbfbfd; border: 1px solid #e5e5e7; border-radius: 20px; padding: 15px; display: flex; align-items: center; cursor: pointer; transition: 0.2s; }
-        .staff-card:hover { border-color: #007aff; transform: scale(1.02); }
-        .staff-img { width: 55px; height: 55px; border-radius: 50%; object-fit: cover; margin-right: 15px; background: #eee; }
-        .staff-info { text-align: left; }
-        .staff-name { font-weight: 700; font-size: 16px; color: #1d1d1f; }
-        .staff-job { color: #86868b; font-size: 12px; }
-
-        .footer-sig { margin-top: auto; padding: 30px; font-size: 10px; color: #aeaeb2; font-weight: 700; letter-spacing: 1.5px; }
+        /* ستايلك الأصلي كما هو 100% */
+        body { font-family: 'Inter', sans-serif; background-color: #f5f5f7; display: flex; justify-content: center; padding: 20px; margin: 0; flex-direction: column; align-items: center; }
+        .main-card { background: white; width: 100%; max-width: 400px; padding: 30px; border-radius: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; box-sizing: border-box; position: relative; }
+        .brand-logo { width: 60px; height: 60px; border-radius: 12px; margin-bottom: 10px; object-fit: cover; background: #eee; }
+        h1 { font-size: 20px; font-weight: 700; margin: 0; color: #1d1d1f; }
+        .sub-text { font-size: 13px; color: #86868b; margin: 5px 0 20px; }
+        .main-question { font-size: 17px; font-weight: 600; margin: 25px 0 15px; color: #1d1d1f; line-height: 1.4; }
+        .search-container { position: relative; margin-bottom: 20px; }
+        .search-container input { width: 100%; padding: 12px 15px 12px 40px; border-radius: 12px; border: 1px solid #e5e5ea; background: #f5f5f7; outline: none; box-sizing: border-box; font-size: 15px; }
+        .search-icon { position: absolute; left: 14px; top: 12px; color: #999; }
+        .selection-header { display: flex; justify-content: space-between; align-items: center; background: #f5f5f7; padding: 12px 15px; border-radius: 12px; margin-bottom: 10px; font-size: 14px; }
+        .switch { position: relative; width: 42px; height: 24px; display: inline-block; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #e5e5ea; transition: .3s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 2px; bottom: 2px; background-color: white; transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background-color: #34c759; }
+        input:checked + .slider:before { transform: translateX(18px); }
+        #select-all-btn { display: none; text-align: right; margin-bottom: 15px; }
+        #select-all-btn span { color: #0071e3; font-size: 13px; font-weight: 600; cursor: pointer; }
+        .staff-list { display: flex; flex-direction: column; gap: 12px; }
+        .staff-card { display: flex; align-items: center; justify-content: space-between; padding: 15px; border: 1px solid #f2f2f2; border-radius: 16px; cursor: pointer; transition: 0.2s; }
+        .staff-card.selected { border-color: #000; background: #f9f9f9; }
+        .avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 1px solid #eee; }
+        .check-box { width: 22px; height: 22px; border: 2px solid #d2d2d7; border-radius: 6px; display: none; }
+        .staff-card.selected .check-box { background: #000; border-color: #000; display: block; position: relative; }
+        .staff-card.selected .check-box::after { content: '✓'; color: white; position: absolute; left: 4px; top: -1px; font-size: 14px; }
+        .chevron { color: #c7c7cc; font-size: 20px; }
+        #next-btn { background: #000; color: #fff; border: none; width: 100%; padding: 16px; border-radius: 14px; font-weight: 600; margin-top: 20px; cursor: pointer; display: none; }
+        .footer-sig { margin-top: 40px; font-size: 10px; color: #aeaeb2; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; text-align: center; }
     </style>
 </head>
 <body>
 
-    <div class="main-container">
-        <img id="logoDisp" src="" class="biz-logo">
-        <h1 id="nameDisp" class="biz-name">Loading Business...</h1>
-        <p id="sloganDisp" class="biz-slogan">Please choose a member of our team you would like to tip</p>
-        
-        <div class="staff-list" id="staffDisp">
-            </div>
+<div class="main-card">
+    <img id="bizLogo" src="" class="brand-logo" style="display:none;">
+    <h1 id="bizName">Welcome</h1>
+    <p class="sub-text" id="bizSlogan"></p>
+
+    <div class="main-question">Please choose a member of our team you would like to tip</div>
+
+    <div class="search-container">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="staffSearch" onkeyup="filterStaff()" placeholder="Search by name...">
     </div>
 
-    <div class="footer-sig">POWER BY AMIDIFY SOLUTIONS INC</div>
+    <div class="selection-header">
+        <span style="font-weight: 500;">Select multiple specialists</span>
+        <label class="switch">
+            <input type="checkbox" id="multiModeToggle" onchange="toggleMode()">
+            <span class="slider"></span>
+        </label>
+    </div>
 
-    <script>
-        window.onload = function() {
-            // 1. التقاط الـ ID من الرابط (مثلاً Eazy_tfaqa11)
-            const urlParams = new URLSearchParams(window.location.search);
-            const bizId = urlParams.get('id');
+    <div id="select-all-btn"><span onclick="selectAll()">Select All</span></div>
 
-            if (!bizId) {
-                document.getElementById('nameDisp').innerText = "Business Not Found";
-                return;
-            }
+    <div class="staff-list" id="stafflist"></div>
+    <button id="next-btn" onclick="goToMultiple()">Next</button>
+</div>
 
-            // 2. جلب البيانات المخزنة التي حفظها الداشبورد
-            // ملاحظة: الداشبورد يحفظ بيانات البروفايل في 'config_ID' والموظفين في 'staff_ID'
-            const config = JSON.parse(localStorage.getItem('config_' + bizId) || '{}');
-            const staff = JSON.parse(localStorage.getItem('staff_' + bizId) || '[]');
+<div class="footer-sig">POWER BY AMIDIFY SOLUTIONS INC</div>
 
-            // 3. تحديث واجهة المستخدم بالبيانات "الحقيقية" من الداشبورد
-            // اسم المؤسسة
-            const finalName = config.name || config.businessName; 
-            if (finalName) {
-                document.getElementById('nameDisp').innerText = finalName;
-            }
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const bizId = params.get('id');
 
-            // السلوجن
-            if (config.slogan) {
-                document.getElementById('sloganDisp').innerText = config.slogan;
-            }
+    let isMulti = false;
+    let selectedStaff = [];
+    
+    // سحب البيانات المخزنة من الداشبورد
+    let staffData = JSON.parse(localStorage.getItem('staff_' + bizId) || '[]');
+    let companyConfig = JSON.parse(localStorage.getItem('config_' + bizId) || '{}');
 
-            // اللوجو
-            if (config.logo) {
-                const logoImg = document.getElementById('logoDisp');
-                logoImg.src = config.logo;
-                logoImg.style.display = 'block';
-            }
+    window.onload = () => {
+        if (!bizId) {
+            document.getElementById('bizName').innerText = "Business Not Found";
+            return;
+        }
 
-            // 4. عرض قائمة الموظفين
-            const container = document.getElementById('staffDisp');
-            container.innerHTML = ""; 
+        // تحديث بروفايل الشركة (الاسم، السلوجن، اللوجو)
+        // أضفت احتمالية وجود المفتاح باسم name أو businessName لضمان القراءة
+        document.getElementById('bizName').innerText = companyConfig.name || companyConfig.businessName || "Our Store";
+        document.getElementById('bizSlogan').innerText = companyConfig.slogan || "Happy to serve you.";
+        
+        if (companyConfig.logo) {
+            document.getElementById('bizLogo').src = companyConfig.logo;
+            document.getElementById('bizLogo').style.display = 'inline-block';
+        }
 
-            if (staff.length === 0) {
-                container.innerHTML = "<p style='color:#86868b; font-size:13px;'>No team members available.</p>";
-            } else {
-                staff.forEach(s => {
-                    container.innerHTML += `
-                        <div class="staff-card">
-                            <img src="${s.photo || ''}" class="staff-img" onerror="this.src='https://via.placeholder.com/50'">
-                            <div class="staff-info">
-                                <div class="staff-name">${s.nName || s.name}</div>
-                                <div class="staff-job">${s.job || 'Team Member'}</div>
-                            </div>
-                        </div>
-                    `;
-                });
-            }
-        };
-    </script>
+        renderStaff();
+    };
+
+    function renderStaff() {
+        const list = document.getElementById('stafflist');
+        if (!list) return;
+        
+        if (staffData.length === 0) {
+            list.innerHTML = "<p style='color:#86868b; font-size:13px;'>No team members added yet.</p>";
+            return;
+        }
+
+        list.innerHTML = staffData.map(s => `
+            <div class="staff-card" id="card-${s.id}" onclick="handleSelect('${s.id}', this)">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <img src="${s.photo || s.img || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="avatar">
+                    <div style="text-align:left;">
+                        <h3 style="margin:0; font-size:15px; font-weight:600;">${s.nName || s.name}</h3>
+                        <p style="margin:2px 0 0; font-size:12px; color:#86868b;">${s.job || 'Specialist'}</p>
+                    </div>
+                </div>
+                <div class="check-box" style="display: ${isMulti ? 'block' : 'none'}"></div>
+                <div class="chevron" style="display: ${isMulti ? 'none' : 'block'}">›</div>
+            </div>
+        `).join('');
+    }
+
+    function toggleMode() {
+        isMulti = document.getElementById('multiModeToggle').checked;
+        selectedStaff = [];
+        document.getElementById('select-all-btn').style.display = isMulti ? 'block' : 'none';
+        document.getElementById('next-btn').style.display = 'none';
+        renderStaff();
+    }
+
+    function filterStaff() {
+        let val = document.getElementById('staffSearch').value.toLowerCase();
+        document.querySelectorAll('.staff-card').forEach(card => {
+            let name = card.querySelector('h3').innerText.toLowerCase();
+            card.style.display = name.includes(val) ? 'flex' : 'none';
+        });
+    }
+
+    function handleSelect(id, element) {
+        const person = staffData.find(s => s.id == id);
+        if (!isMulti) {
+            localStorage.setItem('selectedStaff', JSON.stringify([{name: person.nName || person.name, image: person.photo || person.img}]));
+            window.location.href = 'multiple.html?id=' + bizId;
+            return;
+        }
+        element.classList.toggle('selected');
+        const idx = selectedStaff.findIndex(s => s.id == id);
+        if (idx > -1) selectedStaff.splice(idx, 1);
+        else selectedStaff.push({name: person.nName || person.name, image: person.photo || person.img, id: id});
+        document.getElementById('next-btn').style.display = selectedStaff.length > 0 ? 'block' : 'none';
+    }
+
+    function selectAll() {
+        selectedStaff = [...staffData.map(s => ({name: s.nName || s.name, image: s.photo || s.img, id: s.id}))];
+        renderStaff();
+        document.querySelectorAll('.staff-card').forEach(card => card.classList.add('selected'));
+        document.getElementById('next-btn').style.display = 'block';
+    }
+
+    function goToMultiple() {
+        localStorage.setItem('selectedStaff', JSON.stringify(selectedStaff));
+        window.location.href = 'multiple.html?id=' + bizId;
+    }
+</script>
 </body>
 </html>
