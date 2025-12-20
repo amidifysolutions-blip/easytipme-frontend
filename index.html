@@ -3,102 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="pTitle">Welcome</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>Mouneh - Select Team</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --apple-bg: #F5F5F7; --apple-blue: #007AFF; }
-        body { font-family: 'Inter', sans-serif; background: var(--apple-bg); margin: 0; padding: 20px; display: flex; justify-content: center; color: #1D1D1F; }
-        .triple-container { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 15px; }
+        body { font-family: 'Inter', sans-serif; background-color: #f5f5f7; display: flex; justify-content: center; padding: 20px; margin: 0; }
+        .main-card { background: white; width: 100%; max-width: 400px; padding: 30px; border-radius: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; box-sizing: border-box; }
+        .brand-logo { width: 60px; height: 60px; border-radius: 12px; margin-bottom: 10px; object-fit: contain; }
+        h1 { font-size: 20px; font-weight: 700; margin: 0; color: #1d1d1f; }
+        .sub-text { font-size: 13px; color: #86868b; margin: 5px 0 20px; }
+        
+        /* السؤال الرسمي */
+        .main-question { font-size: 17px; font-weight: 600; margin: 25px 0 15px; color: #1d1d1f; line-height: 1.4; }
 
-        /* 1. Header (Identity) */
-        .card-header { background: #FFF; border-radius: 30px; padding: 35px 20px; text-align: center; box-shadow: 0 8px 30px rgba(0,0,0,0.04); }
-        .logo-img { width: 85px; height: 85px; border-radius: 20px; margin-bottom: 15px; object-fit: contain; background: #FBFBFD; border: 1px solid #eee; }
-        h1 { font-size: 24px; margin: 0; font-weight: 700; }
-        .slogan { color: #86868B; font-size: 14px; margin-top: 8px; line-height: 1.4; }
+        /* خانة البحث */
+        .search-container { position: relative; margin-bottom: 20px; }
+        .search-container input { width: 100%; padding: 12px 15px 12px 40px; border-radius: 12px; border: 1px solid #e5e5ea; background: #f5f5f7; outline: none; box-sizing: border-box; font-size: 15px; }
+        .search-icon { position: absolute; left: 14px; top: 12px; color: #999; }
 
-        /* 2. Search & Select All (Features) */
-        .card-search { background: #FFF; border-radius: 25px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
-        .search-input { width: 100%; padding: 14px 18px; border-radius: 15px; border: 1px solid #D2D2D7; outline: none; box-sizing: border-box; font-size: 15px; background: #FBFBFD; }
+        /* تصميم زر التبديل (Switch) الأخضر */
+        .selection-header { display: flex; justify-content: space-between; align-items: center; background: #f5f5f7; padding: 12px 15px; border-radius: 12px; margin-bottom: 10px; font-size: 14px; }
+        .switch { position: relative; width: 42px; height: 24px; display: inline-block; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #e5e5ea; transition: .3s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 2px; bottom: 2px; background-color: white; transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background-color: #34c759; }
+        input:checked + .slider:before { transform: translateX(18px); }
 
-        /* 3. Staff List (Triple View) */
-        .card-list { background: #FFF; border-radius: 30px; padding: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.04); }
-        .staff-item { display: flex; align-items: center; padding: 15px; border-radius: 22px; text-decoration: none; color: inherit; transition: 0.2s; margin-bottom: 5px; }
-        .staff-item:hover { background: #FBFBFD; transform: scale(1.01); }
-        .photo { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-right: 15px; border: 2px solid #FFF; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .info { flex: 1; text-align: left; }
-        .name { font-weight: 600; font-size: 16px; margin: 0; }
-        .job { font-size: 12px; color: #86868B; margin-top: 2px; }
-        .pills { display: flex; gap: 4px; margin-top: 8px; flex-wrap: wrap; }
-        .pill { font-size: 9px; padding: 3px 8px; background: #F2F2F7; border-radius: 6px; font-weight: 600; text-transform: uppercase; }
-        .chevron { color: #C7C7CC; font-size: 20px; }
+        /* زر Select All */
+        #select-all-btn { display: none; text-align: right; margin-bottom: 15px; }
+        #select-all-btn span { color: #0071e3; font-size: 13px; font-weight: 600; cursor: pointer; }
+
+        /* قائمة الموظفين */
+        .staff-list { display: flex; flex-direction: column; gap: 12px; }
+        .staff-card { display: flex; align-items: center; justify-content: space-between; padding: 15px; border: 1px solid #f2f2f2; border-radius: 16px; cursor: pointer; transition: 0.2s; }
+        .staff-card.selected { border-color: #000; background: #f9f9f9; }
+        .avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 1px solid #eee; }
+        
+        /* إشارة الصح (Check-box) */
+        .check-box { width: 22px; height: 22px; border: 2px solid #d2d2d7; border-radius: 6px; display: none; transition: 0.2s; }
+        .staff-card.selected .check-box { background: #000 !important; border-color: #000 !important; position: relative; }
+        .staff-card.selected .check-box::after { content: '✓'; color: white; position: absolute; left: 4px; top: -1px; font-weight: bold; font-size: 14px; }
+        .chevron { color: #c7c7cc; font-size: 20px; }
+
+        #next-btn { background: #000; color: #fff; border: none; width: 100%; padding: 16px; border-radius: 14px; font-weight: 600; margin-top: 20px; cursor: pointer; display: none; }
     </style>
 </head>
 <body>
 
-<div class="triple-container">
-    <div class="card-header">
-        <img id="bLogo" src="" class="logo-img" style="display:none;">
-        <h1 id="bName">Loading...</h1>
-        <p id="bSlogan" class="slogan"></p>
+<div class="main-card">
+    <img src="logo.png" class="brand-logo" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png'">
+    <h1>Mouneh Lebanese Gourmet Store</h1>
+    <p class="sub-text">Authentic flavors delivered with tradition.</p>
+
+    <div class="main-question">Please choose a member of our team you would like to tip</div>
+
+    <div class="search-container">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="staffSearch" onkeyup="filterStaff()" placeholder="Search by name...">
     </div>
 
-    <div class="card-search">
-        <input type="text" id="sIn" class="search-input" placeholder="Search for a specialist..." onkeyup="filter()">
+    <div class="selection-header">
+        <span style="font-weight: 500;">Select multiple specialists</span>
+        <label class="switch">
+            <input type="checkbox" id="multiModeToggle" onchange="toggleMode()">
+            <span class="slider"></span>
+        </label>
     </div>
 
-    <div class="card-list">
-        <div id="sList"></div>
-    </div>
+    <div id="select-all-btn"><span onclick="selectAll()">Select All</span></div>
+
+    <div class="staff-list" id="stafflist"></div>
+    <button id="next-btn" onclick="goToMultiple()">Next</button>
 </div>
 
 <script>
-    function load() {
-        const cp = JSON.parse(localStorage.getItem('company_profile') || '{}');
-        const st = JSON.parse(localStorage.getItem('master_staff') || '[]');
+    let isMulti = false;
+    let selectedStaff = [];
+    let staffData = JSON.parse(localStorage.getItem('master_staff') || '[]');
 
-        if(cp.name) {
-            document.getElementById('bName').innerText = cp.name;
-            document.getElementById('pTitle').innerText = cp.name;
-            document.getElementById('bSlogan').innerText = cp.slogan || "Select a professional";
-            if(cp.logo) {
-                const img = document.getElementById('bLogo');
-                img.src = cp.logo;
-                img.style.display = 'inline-block';
-            }
-        }
-
-        const list = document.getElementById('sList');
-        const published = st.filter(s => s.published === true);
-
-        if(published.length === 0) {
-            list.innerHTML = '<p style="padding:20px; color:#999; text-align:center;">No specialists found.</p>';
-            return;
-        }
-
-        list.innerHTML = published.map(s => `
-            <a href="payment.html?id=${s.id}" class="staff-item" data-name="${s.nName.toLowerCase()}">
-                <img src="${s.img}" class="photo">
-                <div class="info">
-                    <p class="name">${s.nName}</p>
-                    <p class="job">${s.job}</p>
-                    <div class="pills">
-                        ${(s.days || []).map(d => `<span class="pill">${d}</span>`).join('')}
+    function renderStaff() {
+        const list = document.getElementById('stafflist');
+        if (!list) return; // منع خطأ properties of null
+        
+        list.innerHTML = staffData.map(s => `
+            <div class="staff-card" id="card-${s.id}" onclick="handleSelect('${s.id}', this)">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <img src="${s.img}" class="avatar" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
+                    <div style="text-align:left;">
+                        <h3 style="margin:0; font-size:15px; font-weight:600;">${s.nName}</h3>
+                        <p style="margin:2px 0 0; font-size:12px; color:#86868b;">${s.job}</p>
                     </div>
                 </div>
-                <span class="chevron">›</span>
-            </a>
+                <div class="check-box" style="display: ${isMulti ? 'block' : 'none'}"></div>
+                <div class="chevron" style="display: ${isMulti ? 'none' : 'block'}">›</div>
+            </div>
         `).join('');
     }
 
-    function filter() {
-        const val = document.getElementById('sIn').value.toLowerCase();
-        document.querySelectorAll('.staff-item').forEach(card => {
-            const name = card.getAttribute('data-name');
+    function toggleMode() {
+        isMulti = document.getElementById('multiModeToggle').checked;
+        selectedStaff = [];
+        document.getElementById('select-all-btn').style.display = isMulti ? 'block' : 'none';
+        document.getElementById('next-btn').style.display = 'none';
+        renderStaff();
+    }
+
+    function filterStaff() {
+        let val = document.getElementById('staffSearch').value.toLowerCase();
+        document.querySelectorAll('.staff-card').forEach(card => {
+            let name = card.querySelector('h3').innerText.toLowerCase();
             card.style.display = name.includes(val) ? 'flex' : 'none';
         });
     }
 
-    window.onload = load;
+    function handleSelect(id, element) {
+        const person = staffData.find(s => s.id == id);
+        if (!isMulti) {
+            localStorage.setItem('selectedStaff', JSON.stringify([{name: person.nName, image: person.img}]));
+            window.location.href = 'multiple.html';
+            return;
+        }
+        element.classList.toggle('selected');
+        const idx = selectedStaff.findIndex(s => s.id == id);
+        if (idx > -1) selectedStaff.splice(idx, 1);
+        else selectedStaff.push({name: person.nName, image: person.img, id: id});
+        document.getElementById('next-btn').style.display = selectedStaff.length > 0 ? 'block' : 'none';
+    }
+
+    function selectAll() {
+        selectedStaff = [...staffData.map(s => ({name: s.nName, image: s.img, id: s.id}))];
+        renderStaff();
+        document.querySelectorAll('.staff-card').forEach(card => card.classList.add('selected'));
+        document.getElementById('next-btn').style.display = 'block';
+    }
+
+    function goToMultiple() {
+        localStorage.setItem('selectedStaff', JSON.stringify(selectedStaff));
+        window.location.href = 'multiple.html';
+    }
+
+    window.onload = renderStaff;
 </script>
 </body>
 </html>
