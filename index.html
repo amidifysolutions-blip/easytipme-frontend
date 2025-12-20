@@ -3,146 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mouneh - Select Team</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title id="pageTitle">Welcome | EasyTipMe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f5f5f7; display: flex; justify-content: center; padding: 20px; margin: 0; }
-        .main-card { background: white; width: 100%; max-width: 400px; padding: 30px; border-radius: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; box-sizing: border-box; }
-        .brand-logo { width: 60px; height: 60px; border-radius: 12px; margin-bottom: 10px; object-fit: contain; }
-        h1 { font-size: 20px; font-weight: 700; margin: 0; color: #1d1d1f; }
-        .sub-text { font-size: 13px; color: #86868b; margin: 5px 0 20px; }
-        
-        /* السؤال الرسمي */
-        .main-question { font-size: 17px; font-weight: 600; margin: 25px 0 15px; color: #1d1d1f; line-height: 1.4; }
-
-        /* خانة البحث */
-        .search-container { position: relative; margin-bottom: 20px; }
-        .search-container input { width: 100%; padding: 12px 15px 12px 40px; border-radius: 12px; border: 1px solid #e5e5ea; background: #f5f5f7; outline: none; box-sizing: border-box; font-size: 15px; }
-        .search-icon { position: absolute; left: 14px; top: 12px; color: #999; }
-
-        /* تصميم زر التبديل (Switch) الأخضر */
-        .selection-header { display: flex; justify-content: space-between; align-items: center; background: #f5f5f7; padding: 12px 15px; border-radius: 12px; margin-bottom: 10px; font-size: 14px; }
-        .switch { position: relative; width: 42px; height: 24px; display: inline-block; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #e5e5ea; transition: .3s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 2px; bottom: 2px; background-color: white; transition: .3s; border-radius: 50%; }
-        input:checked + .slider { background-color: #34c759; }
-        input:checked + .slider:before { transform: translateX(18px); }
-
-        /* زر Select All */
-        #select-all-btn { display: none; text-align: right; margin-bottom: 15px; }
-        #select-all-btn span { color: #0071e3; font-size: 13px; font-weight: 600; cursor: pointer; }
-
-        /* قائمة الموظفين */
-        .staff-list { display: flex; flex-direction: column; gap: 12px; }
-        .staff-card { display: flex; align-items: center; justify-content: space-between; padding: 15px; border: 1px solid #f2f2f2; border-radius: 16px; cursor: pointer; transition: 0.2s; }
-        .staff-card.selected { border-color: #000; background: #f9f9f9; }
-        .avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 1px solid #eee; }
-        
-        /* إشارة الصح (Check-box) */
-        .check-box { width: 22px; height: 22px; border: 2px solid #d2d2d7; border-radius: 6px; display: none; transition: 0.2s; }
-        .staff-card.selected .check-box { background: #000 !important; border-color: #000 !important; position: relative; }
-        .staff-card.selected .check-box::after { content: '✓'; color: white; position: absolute; left: 4px; top: -1px; font-weight: bold; font-size: 14px; }
-        .chevron { color: #c7c7cc; font-size: 20px; }
-
-        #next-btn { background: #000; color: #fff; border: none; width: 100%; padding: 16px; border-radius: 14px; font-weight: 600; margin-top: 20px; cursor: pointer; display: none; }
+        :root { --apple-bg: #F5F5F7; --apple-blue: #007AFF; }
+        body { font-family: 'Inter', -apple-system, sans-serif; background: var(--apple-bg); margin: 0; display: flex; justify-content: center; padding: 20px; color: #1D1D1F; }
+        .container { width: 100%; max-width: 400px; background: #FFF; border-radius: 35px; padding: 40px 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); text-align: center; }
+        .logo { width: 85px; height: 85px; border-radius: 22px; margin-bottom: 20px; object-fit: contain; background: #f9f9fb; }
+        h1 { font-size: 24px; font-weight: 700; margin: 0; letter-spacing: -0.5px; }
+        .slogan { color: #86868B; font-size: 14px; margin: 10px 0 30px; line-height: 1.5; }
+        .staff-grid { display: flex; flex-direction: column; gap: 12px; }
+        .staff-card { display: flex; align-items: center; padding: 18px; background: #FBFBFD; border-radius: 22px; border: 1px solid #F2F2F7; cursor: pointer; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); text-decoration: none; color: inherit; }
+        .staff-card:hover { transform: translateY(-3px); border-color: #D2D2D7; background: #FFF; box-shadow: 0 5px 15px rgba(0,0,0,0.03); }
+        .avatar { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-right: 18px; border: 2px solid #FFF; }
+        .info { text-align: left; }
+        .name { font-weight: 600; font-size: 16px; margin: 0; }
+        .job { font-size: 12px; color: #86868B; margin-top: 3px; }
+        .chevron { margin-left: auto; color: #C7C7CC; font-size: 20px; }
+        #errorMsg { display:none; text-align:center; padding: 50px 20px; color: #86868B; }
     </style>
 </head>
 <body>
 
-<div class="main-card">
-    <img src="logo.png" class="brand-logo" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png'">
-    <h1>Mouneh Lebanese Gourmet Store</h1>
-    <p class="sub-text">Authentic flavors delivered with tradition.</p>
+<div class="container" id="mainContainer" style="display:none;">
+    <img id="bizLogo" src="" class="logo">
+    <h1 id="bizName">...</h1>
+    <p id="bizSlogan" class="slogan"></p>
+    <div class="staff-grid" id="staffList"></div>
+</div>
 
-    <div class="main-question">Please choose a member of our team you would like to tip</div>
-
-    <div class="search-container">
-        <span class="search-icon">🔍</span>
-        <input type="text" id="staffSearch" onkeyup="filterStaff()" placeholder="Search by name...">
-    </div>
-
-    <div class="selection-header">
-        <span style="font-weight: 500;">Select multiple specialists</span>
-        <label class="switch">
-            <input type="checkbox" id="multiModeToggle" onchange="toggleMode()">
-            <span class="slider"></span>
-        </label>
-    </div>
-
-    <div id="select-all-btn"><span onclick="selectAll()">Select All</span></div>
-
-    <div class="staff-list" id="stafflist"></div>
-    <button id="next-btn" onclick="goToMultiple()">Next</button>
+<div id="errorMsg">
+    <h1>Business Not Found</h1>
+    <p>Please use a valid business link to view specialists.</p>
 </div>
 
 <script>
-    let isMulti = false;
-    let selectedStaff = [];
-    let staffData = JSON.parse(localStorage.getItem('master_staff') || '[]');
+    function loadSmartTemplate() {
+        const params = new URLSearchParams(window.location.search);
+        const bizId = params.get('id'); // يقرأ المعرف من الرابط
 
-    function renderStaff() {
-        const list = document.getElementById('stafflist');
-        if (!list) return; // منع خطأ properties of null
-        
-        list.innerHTML = staffData.map(s => `
-            <div class="staff-card" id="card-${s.id}" onclick="handleSelect('${s.id}', this)">
-                <div style="display:flex; align-items:center; gap:12px;">
-                    <img src="${s.img}" class="avatar" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
-                    <div style="text-align:left;">
-                        <h3 style="margin:0; font-size:15px; font-weight:600;">${s.nName}</h3>
-                        <p style="margin:2px 0 0; font-size:12px; color:#86868b;">${s.job}</p>
-                    </div>
-                </div>
-                <div class="check-box" style="display: ${isMulti ? 'block' : 'none'}"></div>
-                <div class="chevron" style="display: ${isMulti ? 'none' : 'block'}">›</div>
-            </div>
-        `).join('');
-    }
+        // جلب البيانات من الماستر
+        const entities = JSON.parse(localStorage.getItem('global_entities') || '[]');
+        const business = entities.find(b => b.id === bizId);
 
-    function toggleMode() {
-        isMulti = document.getElementById('multiModeToggle').checked;
-        selectedStaff = [];
-        document.getElementById('select-all-btn').style.display = isMulti ? 'block' : 'none';
-        document.getElementById('next-btn').style.display = 'none';
-        renderStaff();
-    }
-
-    function filterStaff() {
-        let val = document.getElementById('staffSearch').value.toLowerCase();
-        document.querySelectorAll('.staff-card').forEach(card => {
-            let name = card.querySelector('h3').innerText.toLowerCase();
-            card.style.display = name.includes(val) ? 'flex' : 'none';
-        });
-    }
-
-    function handleSelect(id, element) {
-        const person = staffData.find(s => s.id == id);
-        if (!isMulti) {
-            localStorage.setItem('selectedStaff', JSON.stringify([{name: person.nName, image: person.img}]));
-            window.location.href = 'multiple.html';
+        if (!business) {
+            document.getElementById('errorMsg').style.display = 'block';
             return;
         }
-        element.classList.toggle('selected');
-        const idx = selectedStaff.findIndex(s => s.id == id);
-        if (idx > -1) selectedStaff.splice(idx, 1);
-        else selectedStaff.push({name: person.nName, image: person.img, id: id});
-        document.getElementById('next-btn').style.display = selectedStaff.length > 0 ? 'block' : 'none';
-    }
 
-    function selectAll() {
-        selectedStaff = [...staffData.map(s => ({name: s.nName, image: s.img, id: s.id}))];
-        renderStaff();
-        document.querySelectorAll('.staff-card').forEach(card => card.classList.add('selected'));
-        document.getElementById('next-btn').style.display = 'block';
-    }
+        // تعبئة هوية الشركة
+        document.getElementById('bizName').innerText = business.name;
+        document.getElementById('pageTitle').innerText = business.name + " | EasyTipMe";
+        document.getElementById('bizSlogan').innerText = business.slogan || "Choose a specialist to tip";
+        document.getElementById('bizLogo').src = business.logo;
+        document.getElementById('mainContainer').style.display = 'block';
 
-    function goToMultiple() {
-        localStorage.setItem('selectedStaff', JSON.stringify(selectedStaff));
-        window.location.href = 'multiple.html';
-    }
+        // عرض الموظفين التابعين لهذه الشركة فقط
+        const allStaff = JSON.parse(localStorage.getItem('master_staff') || '[]');
+        // ملاحظة: الموظف يظهر فقط إذا كان Published ومربوط بالشركة
+        const publishedStaff = allStaff.filter(s => s.published === true);
 
-    window.onload = renderStaff;
+        const listDiv = document.getElementById('staffList');
+        if (publishedStaff.length === 0) {
+            listDiv.innerHTML = '<p style="color:#C7C7CC; margin-top:20px;">No specialists available right now.</p>';
+        } else {
+            listDiv.innerHTML = publishedStaff.map(s => `
+                <a href="payment.html?staff=${s.id}&biz=${business.id}" class="staff-card">
+                    <img src="${s.img}" class="avatar">
+                    <div class="info">
+                        <p class="name">${s.nName}</p>
+                        <p class="job">${s.job}</p>
+                    </div>
+                    <span class="chevron">›</span>
+                </a>
+            `).join('');
+        }
+    }
+    window.onload = loadSmartTemplate;
 </script>
 </body>
 </html>
