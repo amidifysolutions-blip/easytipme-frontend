@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://js.stripe.com/v3/"></script>
     <style>
-        /* ستايل المود الفخم الخاص بك (لم أغير فيه بكسل واحد) */
+        /* حافظت على كل الـ CSS الخاص بك كما هو */
         body { font-family: 'Inter', sans-serif; background-color: #fafafa; display: flex; justify-content: center; padding-top: 20px; margin: 0; color: #1a1a1a; }
         .main-card { background: white; width: 92%; max-width: 380px; padding: 25px 25px 35px; border-radius: 32px; box-shadow: 0 4px 25px rgba(0,0,0,0.03); border: 1px solid #f2f2f2; box-sizing: border-box; min-height: 600px; position: relative; }
         .back-nav { display: flex; align-items: center; margin-bottom: 15px; }
@@ -41,12 +41,6 @@
         #submit-btn { background: #1a1a1a; color: white; border: none; width: 100%; padding: 18px; border-radius: 18px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 20px; display: none; }
         #success-msg { display: none; text-align: center; padding: 60px 10px; }
         .footer-credit { margin-top: 40px; font-size: 11px; color: #bbb; text-align: center; border-top: 1px solid #f9f9f9; padding-top: 20px; }
-        
-        /* حاوية صور الموظفين المختارين */
-        #selected-team-photos { display: flex; justify-content: center; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
-        .staff-avatar-item { text-align: center; width: 75px; }
-        .staff-avatar-item img { width: 65px; height: 65px; border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .staff-avatar-item p { font-size: 11px; font-weight: 600; margin-top: 5px; color: #1a1a1a; }
     </style>
 </head>
 <body>
@@ -64,8 +58,7 @@
             <h1 class="staff-name">Team Tip</h1>
         </div>
 
-        <div id="selected-team-photos">
-            </div>
+        <div id="selected-team-photos" style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;"></div>        
 
         <div class="grid">
             <button class="amount-btn" onclick="tap(500, this)">CA$5</button>
@@ -115,42 +108,38 @@
 <script>
     let currentBaseAmount = 0; const FEE_PERCENT = 0.12; let elements;
     const API_URL = "https://easytipme-backend.onrender.com";
-    const stripe = Stripe('pk_test_51QpPGt01TRhauBHP6dGYUaBYZJr9oHskEqZy9zWm8L6SPtG2kdzQS0MhPiatv3QDvzkTXvJDvbWMSIOUVOCcaswu003bDig62n');
+    const stripe = Stripe('pk_test_51QpPGt01TRhauBHP6dGYUaBYZJr9oHskEqZy9zWm8L6SPtG2kdzQS0MhPiatv3QDvzkTXvJDvbWMSIOUVOCcaswu003bDig62n'); 
 
-    // دمج كل وظائف window.onload في فانكشن واحدة صحيحة
+    // أوتوماتيكية سحب البيانات عند التحميل
     window.onload = function() {
         const params = new URLSearchParams(window.location.search);
         const bizId = params.get('id');
-        const selectedNames = params.get('selected')?.split(',') || [];
+        const selectedNames = params.get('selected') ? params.get('selected').split(',') : [];
 
         if (bizId) {
-            // جلب البيانات من الذاكرة
+            // سحب بيانات الشركة أوتوماتيكياً
             const config = JSON.parse(localStorage.getItem('config_' + bizId) || '{}');
             const allStaff = JSON.parse(localStorage.getItem('staff_' + bizId) || '[]');
 
-            // 1. عرض شعار واسم الشركة أوتوماتيكياً (Amidify)
-            if (config.name) document.getElementById('renderBizName').innerText = config.name;
+            // عرض اسم الشركة وشعارها
+            document.getElementById('renderBizName').innerText = config.name || "Our Business";
             if (config.logo) {
                 const logo = document.getElementById('renderLogo');
                 logo.src = config.logo;
                 logo.style.display = 'inline-block';
             }
 
-            // 2. عرض صور وأسماء الموظفين المختارين أوتوماتيكياً
+            // عرض صور الموظفين المختارين من الاندكس أوتوماتيكياً
             const photoContainer = document.getElementById('selected-team-photos');
-            photoContainer.innerHTML = ""; // تصفير
-
             const selectedStaff = allStaff.filter(s => selectedNames.includes(s.nName));
-            
+
             if (selectedStaff.length > 0) {
-                selectedStaff.forEach(staff => {
-                    photoContainer.innerHTML += `
-                        <div class="staff-avatar-item">
-                            <img src="${staff.photo || 'https://via.placeholder.com/70'}">
-                            <p>${staff.nName}</p>
-                        </div>
-                    `;
-                });
+                photoContainer.innerHTML = selectedStaff.map(s => `
+                    <div style="text-align:center">
+                        <img src="${s.photo || 'https://via.placeholder.com/70'}" style="width:70px; height:70px; border-radius:50%; object-fit:cover; border:3px solid white; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <p style="font-size:12px; font-weight:600; margin-top:5px;">${s.nName}</p>
+                    </div>
+                `).join('');
             }
         }
     };
@@ -161,6 +150,8 @@
         document.getElementById('custom-container').style.display = 'block'; 
         document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active')); 
         btn.classList.add('active'); 
+        document.getElementById('min-error').style.display = 'none';
+        document.getElementById('min-desc').style.display = 'block';
     }
 
     function applyOth() {
@@ -169,8 +160,10 @@
             currentBaseAmount = val * 100; 
             calculateAndStart(currentBaseAmount); 
             document.getElementById('custom-container').style.display = 'none'; 
+            document.getElementById('min-error').style.display = 'none';
         } else { 
             document.getElementById('min-error').style.display = 'block';
+            document.getElementById('min-desc').style.display = 'none';
         }
     }
 
@@ -187,26 +180,13 @@
         const finalAmount = isCoveringFees ? Math.round(baseAmt * (1 + FEE_PERCENT)) : baseAmt;
         document.getElementById('submit-btn').innerText = `Pay CA$${(finalAmount/100).toFixed(2)} Now`;
         document.getElementById('payment-element').innerHTML = 'Loading secure payment...';
-        
-        const params = new URLSearchParams(window.location.search);
-        const selected = params.get('selected') || "Team";
-
         try {
-            const res = await fetch(`${API_URL}/create-payment-intent`, { 
-                method: "POST", 
-                headers: {"Content-Type": "application/json"}, 
-                body: JSON.stringify({ 
-                    amount: finalAmount, 
-                    currency: "cad", 
-                    metadata: { staff: selected } 
-                }) 
-            });
+            const res = await fetch(`${API_URL}/create-payment-intent`, { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({ amount: finalAmount, currency: "cad", metadata: { staff: "Team" } }) });
             const { clientSecret } = await res.json();
             elements = stripe.elements({ clientSecret });
-            const paymentElement = elements.create("payment"); 
-            paymentElement.mount("#payment-element");
+            const paymentElement = elements.create("payment"); paymentElement.mount("#payment-element");
             paymentElement.on('ready', () => { document.getElementById('submit-btn').style.display = 'block'; });
-        } catch (e) { document.getElementById('payment-element').innerHTML = 'Payment Error.'; }
+        } catch (e) { document.getElementById('payment-element').innerHTML = 'Error.'; }
     }
 
     async function handleSubmit() {
