@@ -3,222 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Mouneh Store</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Mouneh Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; margin: 0; display: flex; height: 100vh; background: #f4f7f6; }
-        .sidebar { width: 260px; background: #000; color: white; display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; }
-        .nav-item { padding: 15px; cursor: pointer; border-radius: 8px; margin-bottom: 5px; transition: 0.3s; font-weight: 500; }
-        .nav-item:hover, .nav-item.active { background: #333; }
-        .main-content { flex: 1; padding: 40px; overflow-y: auto; }
+        body { font-family: 'Inter', sans-serif; margin: 0; display: flex; height: 100vh; background: #f9f9fb; }
+        .sidebar { width: 250px; background: #000; color: white; padding: 30px 20px; box-sizing: border-box; }
+        .nav-item { padding: 12px 15px; cursor: pointer; border-radius: 8px; margin-bottom: 8px; font-size: 14px; }
+        .nav-item.active { background: #222; font-weight: 600; }
+        .main { flex: 1; padding: 40px; overflow-y: auto; }
         .section { display: none; }
-        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 20px;}
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; }
-        input, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; margin-bottom: 15px; }
-        .btn-black { background: #000; color: #fff; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: 600; }
-        .upload-box { border: 2px dashed #ddd; padding: 20px; text-align: center; border-radius: 10px; cursor: pointer; margin-bottom: 15px; }
-        .preview-img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; display: none; margin: 10px auto; }
+        .card { background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .days-grid { display: flex; gap: 8px; margin: 10px 0 20px; }
+        .day-btn { padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; font-size: 12px; }
+        .day-btn.selected { background: #000; color: #fff; border-color: #000; }
+        input, select { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 15px; }
+        .btn-main { background: #000; color: #fff; border: none; padding: 15px; border-radius: 10px; width: 100%; cursor: pointer; font-weight: 600; }
+        table { width: 100%; border-collapse: collapse; margin-top: 25px; }
+        th, td { text-align: left; padding: 15px; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
-    <h2 style="font-size: 20px; margin-bottom: 30px;">EasyTipMe</h2>
-    <div class="nav-item" onclick="showSection('reg')">Staff Registry</div>
-    <div class="nav-item" onclick="showSection('trans')">Transactions</div>
-    <div class="nav-item" onclick="showSection('set')">Settings</div>
+    <h2 style="margin-bottom:40px; font-size:20px;">Mouneh Admin</h2>
+    <div class="nav-item active" onclick="showTab('reg')">Staff Registry</div>
+    <div class="nav-item" onclick="showTab('trans')">Transactions Log</div>
+    <div class="nav-item" onclick="showTab('set')">Store Profile</div>
 </div>
 
-<div class="main-content">
-    <div id="section-reg" class="section">
+<div class="main">
+    <div id="tab-reg" class="section" style="display:block;">
         <div class="card">
-            <h2 id="form-title">Add New Staff Member</h2>
-            <input type="hidden" id="edit-id">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <h3>Register New Staff</h3>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
                 <div>
-                    <label>Full Name</label>
-                    <input type="text" id="rName" placeholder="Real Name">
-                    <label>Nickname (Display Name)</label>
+                    <label>Nickname</label>
                     <input type="text" id="nName" placeholder="e.g. Shani">
                     <label>Job Title</label>
                     <input type="text" id="job" placeholder="Barber">
-                    <label>Working Days (e.g. Mon, Tue, Wed)</label>
-                    <input type="text" id="days" placeholder="Mon, Tue, Wed">
-                </div>
-                <div>
-                    <label>Shift Start</label>
-                    <input type="time" id="sTime">
-                    <label>Shift End</label>
-                    <input type="time" id="eTime">
-                    <label>Staff Photo</label>
-                    <div class="upload-box" onclick="document.getElementById('fileInput').click()">
-                        <span id="upload-text">Click to upload photo</span>
-                        <input type="file" id="fileInput" hidden accept="image/*" onchange="handleImage(event)">
-                        <img id="preview" class="preview-img">
+                    <label>Working Days</label>
+                    <div class="days-grid">
+                        <div class="day-btn" onclick="this.classList.toggle('selected')">Mon</div>
+                        <div class="day-btn" onclick="this.classList.toggle('selected')">Tue</div>
+                        <div class="day-btn" onclick="this.classList.toggle('selected')">Wed</div>
+                        <div class="day-btn" onclick="this.classList.toggle('selected')">Thu</div>
+                        <div class="day-btn" onclick="this.classList.toggle('selected')">Fri</div>
+                        <div class="day-btn" onclick="this.classList.toggle('selected')">Sat</div>
+                        <div class="day-btn" onclick="this.classList.toggle('selected')">Sun</div>
                     </div>
                 </div>
+                <div>
+                    <label>Shift Time</label>
+                    <input type="text" id="shift" placeholder="9:00 AM - 5:00 PM">
+                    <label>Staff Photo</label>
+                    <input type="file" id="photoIn" onchange="preview(this)">
+                    <img id="prev" style="width:50px; height:50px; border-radius:50%; display:none; margin-top:10px;">
+                </div>
             </div>
-            <button class="btn-black" id="save-btn" onclick="saveStaff()">Save Staff Member</button>
-            <button class="btn-black" id="cancel-btn" style="background:#888; display:none;" onclick="resetForm()">Cancel</button>
+            <button class="btn-main" onclick="addStaff()">Register & Generate Link</button>
 
             <table>
                 <thead>
-                    <tr>
-                        <th>Photo</th>
-                        <th>Name</th>
-                        <th>Job</th>
-                        <th>Schedule</th>
-                        <th>Actions</th>
-                    </tr>
+                    <tr><th>Staff</th><th>Job</th><th>Schedule</th><th>Direct Link</th><th>Action</th></tr>
                 </thead>
-                <tbody id="staffTable"></tbody>
+                <tbody id="sTable"></tbody>
             </table>
         </div>
     </div>
 
-    <div id="section-trans" class="section">
+    <div id="tab-trans" class="section">
         <div class="card">
-            <h2>Transaction Log (Mouneh)</h2>
-            <div id="transaction-list">
-                <p style="color:#888; text-align:center; padding:20px;">No transactions recorded yet.</p>
-            </div>
+            <h3>Recent Tipping Activities</h3>
+            <div id="t-list"><p style="color:#999; text-align:center;">No activity yet.</p></div>
         </div>
     </div>
 
-    <div id="section-set" class="section">
+    <div id="tab-set" class="section">
         <div class="card">
-            <h2>Store Settings</h2>
-            <label>Store Name</label>
-            <input type="text" id="store_name_val" value="Mouneh Lebanese Gourmet Store">
-            <button class="btn-black" onclick="saveSettings()">Save Settings</button>
+            <h3>Store Profile</h3>
+            <label>Business Name</label>
+            <input type="text" id="bName" value="Mouneh Lebanese Gourmet Store">
+            <button class="btn-main" onclick="alert('Profile Updated')">Save Changes</button>
         </div>
     </div>
 </div>
 
 <script>
-    let currentImgData = "";
-
-    function handleImage(e) {
-        const file = e.target.files[0];
+    let pic = "";
+    function preview(input) {
         const reader = new FileReader();
-        reader.onload = function(event) {
-            currentImgData = event.target.result;
-            document.getElementById('preview').src = currentImgData;
-            document.getElementById('preview').style.display = 'block';
-            document.getElementById('upload-text').style.display = 'none';
+        reader.onload = (e) => { 
+            pic = e.target.result; 
+            document.getElementById('prev').src = pic; 
+            document.getElementById('prev').style.display = "block";
         };
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(input.files[0]);
     }
 
-    function showSection(sec) {
-        document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
-        document.getElementById('section-' + sec).style.display = 'block';
+    function showTab(t) {
+        document.querySelectorAll('.section').forEach(s => s.style.display='none');
+        document.getElementById('tab-'+t).style.display='block';
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        const activeNav = document.querySelector(`[onclick="showSection('${sec}')"]`);
-        if(activeNav) activeNav.classList.add('active');
-        localStorage.setItem('dashboardTab', sec);
+        event.currentTarget.classList.add('active');
     }
 
-    function saveStaff() {
+    function addStaff() {
         let staff = JSON.parse(localStorage.getItem('master_staff') || '[]');
-        const editId = document.getElementById('edit-id').value;
+        let days = Array.from(document.querySelectorAll('.day-btn.selected')).map(d => d.innerText);
+        let name = document.getElementById('nName').value;
         
-        const memberData = {
-            id: editId ? parseInt(editId) : Date.now(),
-            rName: document.getElementById('rName').value,
-            nName: document.getElementById('nName').value,
+        staff.push({
+            id: Date.now(),
+            name: name,
             job: document.getElementById('job').value,
-            days: document.getElementById('days').value.split(',').map(d => d.trim()),
-            sTime: document.getElementById('sTime').value,
-            eTime: document.getElementById('eTime').value,
-            img: currentImgData || 'logo.png'
-        };
-
-        if(editId) {
-            const index = staff.findIndex(s => s.id === parseInt(editId));
-            staff[index] = memberData;
-        } else {
-            staff.push(memberData);
-        }
-
+            shift: document.getElementById('shift').value,
+            days: days,
+            img: pic || 'logo.png'
+        });
         localStorage.setItem('master_staff', JSON.stringify(staff));
-        resetForm();
         render();
     }
 
     function render() {
         const staff = JSON.parse(localStorage.getItem('master_staff') || '[]');
-        const table = document.getElementById('staffTable');
-        table.innerHTML = staff.map(s => `
+        document.getElementById('sTable').innerHTML = staff.map(s => `
             <tr>
-                <td><img src="${s.img}" style="width:40px; height:40px; border-radius:50%; object-fit:cover;"></td>
-                <td><b>${s.nName}</b><br><small>${s.rName}</small></td>
+                <td><img src="${s.img}" style="width:35px;height:35px;border-radius:50%;vertical-align:middle;margin-right:10px;"><b>${s.name}</b></td>
                 <td>${s.job}</td>
-                <td><small>${s.days.join(', ')}</small><br><b>${s.sTime} - ${s.eTime}</b></td>
-                <td>
-                    <button onclick="editStaff(${s.id})" style="color:blue; border:none; background:none; cursor:pointer; font-weight:600;">Edit</button>
-                    <button onclick="deleteStaff(${s.id})" style="color:red; border:none; background:none; cursor:pointer; font-weight:600; margin-left:10px;">Delete</button>
-                </td>
+                <td><small>${s.days.join(', ')}</small><br>${s.shift}</td>
+                <td><a href="/tip.html?id=${s.id}" target="_blank" style="color:blue;font-size:12px;">Open Tip Page</a></td>
+                <td><button onclick="delS(${s.id})" style="color:red;border:none;background:none;cursor:pointer;">Delete</button></td>
             </tr>
         `).join('');
     }
 
-    function editStaff(id) {
-        const staff = JSON.parse(localStorage.getItem('master_staff') || '[]');
-        const s = staff.find(x => x.id === id);
-        
-        document.getElementById('edit-id').value = s.id;
-        document.getElementById('rName').value = s.rName;
-        document.getElementById('nName').value = s.nName;
-        document.getElementById('job').value = s.job;
-        document.getElementById('days').value = s.days.join(', ');
-        document.getElementById('sTime').value = s.sTime;
-        document.getElementById('eTime').value = s.eTime;
-        currentImgData = s.img;
-        document.getElementById('preview').src = s.img;
-        document.getElementById('preview').style.display = 'block';
-        document.getElementById('upload-text').style.display = 'none';
-        
-        document.getElementById('form-title').innerText = "Edit Staff Member";
-        document.getElementById('cancel-btn').style.display = "inline-block";
-        window.scrollTo(0,0);
-    }
-
-    function resetForm() {
-        document.getElementById('edit-id').value = "";
-        document.getElementById('rName').value = "";
-        document.getElementById('nName').value = "";
-        document.getElementById('job').value = "";
-        document.getElementById('days').value = "";
-        document.getElementById('sTime').value = "";
-        document.getElementById('eTime').value = "";
-        currentImgData = "";
-        document.getElementById('preview').style.display = 'none';
-        document.getElementById('upload-text').style.display = 'block';
-        document.getElementById('form-title').innerText = "Add New Staff Member";
-        document.getElementById('cancel-btn').style.display = "none";
-    }
-
-    function deleteStaff(id) {
-        if(confirm('Are you sure you want to delete this member?')) {
-            let staff = JSON.parse(localStorage.getItem('master_staff') || '[]');
-            staff = staff.filter(s => s.id !== id);
-            localStorage.setItem('master_staff', JSON.stringify(staff));
-            render();
-        }
-    }
-
-    function saveSettings() {
-        localStorage.setItem('store_name', document.getElementById('store_name_val').value);
-        alert('Settings Saved!');
-    }
-
-    window.onload = () => {
-        const lastTab = localStorage.getItem('dashboardTab') || 'reg';
-        showSection(lastTab);
+    function delS(id) {
+        let staff = JSON.parse(localStorage.getItem('master_staff') || '[]');
+        staff = staff.filter(x => x.id !== id);
+        localStorage.setItem('master_staff', JSON.stringify(staff));
         render();
-    };
+    }
+
+    window.onload = render;
 </script>
 </body>
 </html>
