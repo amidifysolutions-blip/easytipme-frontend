@@ -166,7 +166,7 @@ if (staff.length === 0) {
         } else { staff.push(data); }
         
         localStorage.setItem('master_staff', JSON.stringify(staff));
-        location.reload(); 
+        render();
     }
 
     function editStaff(id) {
