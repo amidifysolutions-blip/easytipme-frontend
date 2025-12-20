@@ -3,86 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Business Dashboard | Smart Portal</title>
+    <title>Master Hub - EasyTipMe</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --apple-bg: #F5F5F7; --apple-blue: #007AFF; --apple-green: #34C759; }
-        body { font-family: 'Inter', sans-serif; margin: 0; display: flex; height: 100vh; background: var(--apple-bg); overflow: hidden; }
+        :root { --apple-bg: #F5F5F7; --apple-blue: #007AFF; --apple-green: #34C759; --apple-red: #FF3B30; }
+        body { font-family: 'Inter', sans-serif; margin: 0; background: var(--apple-bg); color: #1D1D1F; display: flex; height: 100vh; overflow: hidden; }
         
-        .sidebar { width: 260px; background: #000; color: white; padding: 30px 20px; display: flex; flex-direction: column; }
+        .sidebar { width: 260px; background: #000; color: white; padding: 30px 20px; display: flex; flex-direction: column; flex-shrink: 0; }
         .nav-item { padding: 14px 18px; cursor: pointer; border-radius: 12px; margin-bottom: 8px; transition: 0.3s; opacity: 0.6; font-size: 14px; }
-        .nav-item.active, .nav-item:hover { background: #333; opacity: 1; font-weight: 600; }
+        .nav-item.active { background: #333; opacity: 1; font-weight: 600; }
+        .nav-item:hover { opacity: 1; background: #222; }
 
         .main { flex: 1; padding: 40px; overflow-y: auto; }
-        .card { background: #FFF; padding: 30px; border-radius: 24px; box-shadow: 0 4px 24px rgba(0,0,0,0.04); margin-bottom: 25px; }
+        .card { background: #FFF; padding: 30px; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); margin-bottom: 25px; border: 1px solid #E5E5E7; }
+        .section { display: none; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
-        
         label { display: block; font-size: 11px; font-weight: 700; color: #86868B; text-transform: uppercase; margin-bottom: 8px; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #D2D2D7; border-radius: 12px; margin-bottom: 15px; outline: none; box-sizing: border-box; }
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #D2D2D7; border-radius: 12px; font-size: 14px; margin-bottom: 15px; outline: none; box-sizing: border-box; }
 
-        .day-btn { padding: 8px 12px; border: 1px solid #D2D2D7; border-radius: 8px; cursor: pointer; font-size: 11px; margin-right: 4px; background: #FFF; }
-        .day-btn.selected { background: #000; color: #FFF; }
+        .day-btn { padding: 8px 12px; border: 1px solid #D2D2D7; border-radius: 8px; cursor: pointer; font-size: 11px; margin: 0 4px 8px 0; background: #FFF; display: inline-block; }
+        .day-btn.selected { background: #000; color: #FFF; border-color: #000; }
 
-        .btn-save { background: #000; color: #FFF; border: none; padding: 16px; border-radius: 14px; width: 100%; cursor: pointer; font-weight: 600; }
+        .btn-black { background: #000; color: #FFF; border: none; padding: 16px; border-radius: 14px; width: 100%; cursor: pointer; font-weight: 600; transition: 0.3s; }
+        .btn-black:hover { background: #333; transform: translateY(-2px); }
+
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; color: #86868B; font-size: 11px; padding: 15px; border-bottom: 1px solid #E5E5E7; }
+        td { padding: 15px; border-bottom: 1px solid #F5F5F7; font-size: 14px; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th { text-align: left; color: #86868B; font-size: 10px; padding: 12px; border-bottom: 1px solid #E5E5E7; }
-        td { padding: 12px; border-bottom: 1px solid #F5F5F7; font-size: 13px; }
-        
-        .avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: #eee; }
-        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 20px; }
-        input:checked + .slider { background-color: var(--apple-green); }
+        .avatar-box { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: #eee; }
+        .toggle-btn { padding: 6px 12px; border-radius: 20px; font-size: 10px; font-weight: 700; border: none; cursor: pointer; }
+        .status-on { background: #E1F5FE; color: #0288D1; }
+        .status-off { background: #FFEBEE; color: #C62828; }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
     <div style="text-align: center; margin-bottom: 40px;">
-        <img id="displayLogo" src="" style="width: 50px; border-radius: 12px; display:none; margin: 0 auto 10px;">
-        <h2 id="displayName" style="font-size: 18px; margin: 0;">Business</h2>
+        <img id="sideLogo" src="" style="width: 55px; border-radius: 14px; display: none; margin: 0 auto 10px;">
+        <h2 id="sideName" style="font-size: 18px; margin: 0;">EasyTipMe</h2>
     </div>
-    <div class="nav-item active">Team Management</div>
-    <div class="nav-item">Settings & Profile</div>
-    <div style="margin-top:auto; color:red; cursor:pointer; font-size:12px;" onclick="location.href='master-control.html'">← Back to Master Panel</div>
+    <div class="nav-item active" onclick="showTab('staff')">Team Management</div>
+    <div class="nav-item" onclick="showTab('company')">Company Profile</div>
+    <div class="nav-item" onclick="showTab('master')">Master (Settings)</div>
+    <div style="margin-top:auto; color:var(--apple-red); cursor:pointer; font-size:12px; padding:10px;" onclick="resetAll()">Reset System</div>
 </div>
 
 <div class="main">
-    <div class="card">
-        <h3>Register Specialist for <span id="targetStore">Store</span></h3>
-        <div class="grid">
-            <div>
-                <label>Photo</label>
-                <input type="file" onchange="handleImg(this)">
-                <label>Nickname</label> <input type="text" id="nName">
-                <label>Job Title</label> <input type="text" id="job">
-            </div>
-            <div>
-                <label>Working Days</label>
-                <div id="daysPicker">
-                    <span class="day-btn" onclick="this.classList.toggle('selected')">Mon</span>
-                    <span class="day-btn" onclick="this.classList.toggle('selected')">Tue</span>
-                    <span class="day-btn" onclick="this.classList.toggle('selected')">Wed</span>
-                    <span class="day-btn" onclick="this.classList.toggle('selected')">Thu</span>
-                    <span class="day-btn" onclick="this.classList.toggle('selected')">Fri</span>
-                    <span class="day-btn" onclick="this.classList.toggle('selected')">Sat</span>
-                    <span class="day-btn" onclick="this.classList.toggle('selected')">Sun</span>
+    <div id="tab-staff" class="section" style="display:block;">
+        <div class="card">
+            <h3>Add Specialist</h3>
+            <div class="grid">
+                <div>
+                    <label>Public Nickname</label> <input type="text" id="nName">
+                    <label>Job Title</label> <input type="text" id="job">
+                    <label>Contact Email</label> <input type="email" id="email">
+                    <label>Specialist Photo</label> <input type="file" onchange="previewImg(this)">
                 </div>
-                <label style="margin-top:15px;">Shift 1</label>
-                <div style="display:flex; gap:5px;"><input type="time" id="s1s"> <input type="time" id="s1e"></div>
+                <div>
+                    <label>Working Days</label>
+                    <div id="daysPicker">
+                        <span class="day-btn" onclick="this.classList.toggle('selected')">Mon</span>
+                        <span class="day-btn" onclick="this.classList.toggle('selected')">Tue</span>
+                        <span class="day-btn" onclick="this.classList.toggle('selected')">Wed</span>
+                        <span class="day-btn" onclick="this.classList.toggle('selected')">Thu</span>
+                        <span class="day-btn" onclick="this.classList.toggle('selected')">Fri</span>
+                        <span class="day-btn" onclick="this.classList.toggle('selected')">Sat</span>
+                        <span class="day-btn" onclick="this.classList.toggle('selected')">Sun</span>
+                    </div>
+                    <label>Shift 1</label>
+                    <div style="display:flex; gap:10px;"><input type="time" id="s1s"> <input type="time" id="s1e"></div>
+                    <label>Shift 2 (Optional)</label>
+                    <div style="display:flex; gap:10px;"><input type="time" id="s2s"> <input type="time" id="s2e"></div>
+                </div>
             </div>
+            <button class="btn-black" onclick="saveStaff()">Save Specialist</button>
         </div>
-        <button class="btn-save" onclick="saveStaff()">Add to Team</button>
+
+        <div class="card">
+            <table>
+                <thead>
+                    <tr><th>Photo</th><th>Name</th><th>Schedule</th><th>Published</th><th>Action</th></tr>
+                </thead>
+                <tbody id="staffTable"></tbody>
+            </table>
+        </div>
     </div>
 
-    <div class="card">
-        <table>
-            <thead>
-                <tr><th>Staff</th><th>Job</th><th>Shift</th><th>Published</th><th>Action</th></tr>
-            </thead>
-            <tbody id="staffTable"></tbody>
-        </table>
+    <div id="tab-company" class="section">
+        <div class="card">
+            <h3>Company Identity</h3>
+            <div class="grid">
+                <div>
+                    <label>Business Name</label> <input type="text" id="cName">
+                    <label>Slogan (Max 90 chars)</label> <textarea id="cSlogan" maxlength="90"></textarea>
+                </div>
+                <div>
+                    <label>Logo URL or Upload</label> <input type="text" id="cLogo" placeholder="Paste URL or use master to upload">
+                    <label>Global Currency</label>
+                    <select id="cCurr"><option value="CAD">CAD ($)</option><option value="USD">USD ($)</option></select>
+                </div>
+            </div>
+            <button class="btn-black" onclick="saveCompany()">Update Profile</button>
+        </div>
+    </div>
+
+    <div id="tab-master" class="section">
+        <div class="card">
+            <h3>Master Control Panel</h3>
+            <p style="color:gray; font-size:13px;">Manage all business entities from here.</p>
+            <button class="btn-black" onclick="alert('Master Link Generated: index.html?id=mouneh')">Generate Public Link</button>
+        </div>
     </div>
 </div>
 
@@ -90,54 +124,37 @@
     let staffData = JSON.parse(localStorage.getItem('master_staff') || '[]');
     let currentImg = "";
 
-    // الربط الذكي مع الماستر
-    function syncWithMaster() {
-        const entities = JSON.parse(localStorage.getItem('global_entities') || '[]');
-        const currentBiz = entities[entities.length - 1]; // جلب آخر شركة سجلتها في الماستر كتجربة
-        
-        if(currentBiz) {
-            document.getElementById('displayName').innerText = currentBiz.name;
-            document.getElementById('targetStore').innerText = currentBiz.name;
-        }
-    }
-
-    function handleImg(input) {
-        const reader = new FileReader();
-        reader.onload = (e) => currentImg = e.target.result;
-        reader.readAsDataURL(input.files[0]);
+    function previewImg(input) {
+        const r = new FileReader();
+        r.onload = (e) => currentImg = e.target.result;
+        r.readAsDataURL(input.files[0]);
     }
 
     function saveStaff() {
         const name = document.getElementById('nName').value;
         if(!name) return;
-
         const member = {
             id: Date.now(),
-            nName: name,
-            job: document.getElementById('job').value,
+            nName: name, job: document.getElementById('job').value,
+            email: document.getElementById('email').value,
             img: currentImg || 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
-            s1: document.getElementById('s1s').value + " - " + document.getElementById('s1e').value,
+            days: Array.from(document.querySelectorAll('.day-btn.selected')).map(d => d.innerText),
+            s1: document.getElementById('s1s').value + "-" + document.getElementById('s1e').value,
             published: true
         };
-
         staffData.push(member);
         localStorage.setItem('master_staff', JSON.stringify(staffData));
-        render();
+        location.reload();
     }
 
     function render() {
         const table = document.getElementById('staffTable');
         table.innerHTML = staffData.map(s => `
             <tr>
-                <td><img src="${s.img}" class="avatar"> <br> <b>${s.nName}</b></td>
-                <td>${s.job}</td>
-                <td>${s.s1}</td>
-                <td>
-                    <label class="switch">
-                        <input type="checkbox" ${s.published ? 'checked' : ''} onchange="toggleP(${s.id})">
-                        <span class="slider"></span>
-                    </label>
-                </td>
+                <td><img src="${s.img}" class="avatar-box"></td>
+                <td><b>${s.nName}</b><br><small>${s.job}</small></td>
+                <td><small>${(s.days || []).join(', ')}<br>S1: ${s.s1}</small></td>
+                <td><button class="toggle-btn ${s.published?'status-on':'status-off'}" onclick="toggleP(${s.id})">${s.published?'PUBLISHED':'HIDDEN'}</button></td>
                 <td><button onclick="del(${s.id})" style="color:red;border:none;background:none;cursor:pointer;">Delete</button></td>
             </tr>
         `).join('');
@@ -147,15 +164,43 @@
         const idx = staffData.findIndex(s => s.id === id);
         staffData[idx].published = !staffData[idx].published;
         localStorage.setItem('master_staff', JSON.stringify(staffData));
-    }
-
-    function del(id) {
-        staffData = staffData.filter(s => s.id !== id);
-        localStorage.setItem('master_staff', JSON.stringify(staffData));
         render();
     }
 
-    window.onload = () => { syncWithMaster(); render(); };
+    function del(id) {
+        if(confirm('Delete Specialist?')) {
+            staffData = staffData.filter(s => s.id !== id);
+            localStorage.setItem('master_staff', JSON.stringify(staffData));
+            render();
+        }
+    }
+
+    function saveCompany() {
+        const comp = { name: document.getElementById('cName').value, slogan: document.getElementById('cSlogan').value, logo: document.getElementById('cLogo').value };
+        localStorage.setItem('company_profile', JSON.stringify(comp));
+        alert('Saved!');
+        location.reload();
+    }
+
+    function showTab(id) {
+        document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+        document.getElementById('tab-' + id).style.display = 'block';
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+    }
+
+    function resetAll() { if(confirm('Full System Reset?')) { localStorage.clear(); location.reload(); } }
+
+    window.onload = () => {
+        render();
+        const cp = JSON.parse(localStorage.getItem('company_profile') || '{}');
+        if(cp.name) {
+            document.getElementById('sideName').innerText = cp.name;
+            document.getElementById('cName').value = cp.name;
+            document.getElementById('cSlogan').value = cp.slogan;
+            document.getElementById('cLogo').value = cp.logo;
+        }
+    };
 </script>
 </body>
 </html>
