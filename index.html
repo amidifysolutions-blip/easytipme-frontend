@@ -6,7 +6,7 @@
     <title>Select Team | EazyTipMe</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* ستايلك الأصلي المحترف 100% */
+        /* ستايلك الأصلي الفخم كما هو دون تغيير */
         body { font-family: 'Inter', sans-serif; background-color: #f5f5f7; display: flex; justify-content: center; padding: 20px; margin: 0; flex-direction: column; align-items: center; }
         .main-card { background: white; width: 100%; max-width: 400px; padding: 30px; border-radius: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; box-sizing: border-box; position: relative; }
         .brand-logo { width: 60px; height: 60px; border-radius: 12px; margin-bottom: 10px; object-fit: contain; }
@@ -23,13 +23,11 @@
         .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 2px; bottom: 2px; background-color: white; transition: .3s; border-radius: 50%; }
         input:checked + .slider { background-color: #34c759; }
         input:checked + .slider:before { transform: translateX(18px); }
-        #select-all-btn { display: none; text-align: right; margin-bottom: 15px; }
-        #select-all-btn span { color: #0071e3; font-size: 13px; font-weight: 600; cursor: pointer; }
         .staff-list { display: flex; flex-direction: column; gap: 12px; }
         .staff-card { display: flex; align-items: center; justify-content: space-between; padding: 15px; border: 1px solid #f2f2f2; border-radius: 16px; cursor: pointer; transition: 0.2s; }
         .staff-card.selected { border-color: #000; background: #f9f9f9; }
         .avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 1px solid #eee; }
-        .check-box { width: 22px; height: 22px; border: 2px solid #d2d2d7; border-radius: 6px; display: none; transition: 0.2s; }
+        .check-box { width: 22px; height: 22px; border: 2px solid #d2d2d7; border-radius: 6px; display: none; }
         .staff-card.selected .check-box { background: #000 !important; border-color: #000 !important; position: relative; display: block; }
         .staff-card.selected .check-box::after { content: '✓'; color: white; position: absolute; left: 4px; top: -1px; font-weight: bold; font-size: 14px; }
         .chevron { color: #c7c7cc; font-size: 20px; }
@@ -42,7 +40,7 @@
 <div class="main-card">
     <img id="bizLogo" src="" class="brand-logo" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png'">
     <h1 id="bizName">Loading Store...</h1>
-    <p class="sub-text" id="bizSlogan"></p>
+    <p class="sub-text" id="bizSlogan">Loading slogan...</p>
 
     <div class="main-question">Please choose a member of our team you would like to tip</div>
 
@@ -59,7 +57,7 @@
         </label>
     </div>
 
-    <div id="select-all-btn"><span onclick="selectAll()">Select All</span></div>
+    <div id="select-all-btn" style="display:none; text-align: right; margin-bottom: 15px;"><span onclick="selectAll()" style="color: #0071e3; font-size: 13px; font-weight: 600; cursor: pointer;">Select All</span></div>
 
     <div class="staff-list" id="stafflist"></div>
     <button id="next-btn" onclick="goToMultiple()">Next</button>
@@ -74,18 +72,19 @@
     let isMulti = false;
     let selectedStaff = [];
     
-    // جلب البيانات باستخدام المفاتيح الصحيحة التي تم ربطها بالـ ID
+    // تصحيح المفاتيح لتتطابق مع الداشبورد
     let staffData = JSON.parse(localStorage.getItem('staff_' + bizId) || '[]');
-    let companyConfig = JSON.parse(localStorage.getItem('config_' + bizId) || '{}');
+    let companyConfig = JSON.parse(localStorage.getItem('profile_' + bizId) || '{}');
 
     function renderStaff() {
         const list = document.getElementById('stafflist');
-        if (!list) return;
+        // عرض الموظفين المنشورين (Published) فقط
+        const publishedStaff = staffData.filter(s => s.published === true);
         
-        list.innerHTML = staffData.map(s => `
+        list.innerHTML = publishedStaff.map(s => `
             <div class="staff-card" id="card-${s.id}" onclick="handleSelect('${s.id}', this)">
                 <div style="display:flex; align-items:center; gap:12px;">
-                    <img src="${s.photo || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="avatar">
+                    <img src="${s.img || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="avatar">
                     <div style="text-align:left;">
                         <h3 style="margin:0; font-size:15px; font-weight:600;">${s.nName}</h3>
                         <p style="margin:2px 0 0; font-size:12px; color:#86868b;">${s.job}</p>
@@ -98,20 +97,15 @@
     }
 
     window.onload = () => {
-        if (!bizId) {
+        if (bizId && companyConfig.name) {
+            document.getElementById('bizName').innerText = companyConfig.name;
+            document.getElementById('bizSlogan').innerText = companyConfig.slogan || "";
+            if (companyConfig.logo) {
+                document.getElementById('bizLogo').src = companyConfig.logo;
+            }
+        } else {
             document.getElementById('bizName').innerText = "Business Not Found";
-            return;
         }
-
-        // تحديث بروفايل الشركة من بيانات الداشبورد (config)
-        // إذا لم يجد اسم في الكوفنج، يحاول جلب اسم المستخدم كخيار احتياطي
-        document.getElementById('bizName').innerText = companyConfig.name || companyConfig.businessName || "Our Store";
-        document.getElementById('bizSlogan').innerText = companyConfig.slogan || "Authentic flavors delivered with tradition.";
-        
-        if (companyConfig.logo) {
-            document.getElementById('bizLogo').src = companyConfig.logo;
-        }
-        
         renderStaff();
     };
 
@@ -134,20 +128,19 @@
     function handleSelect(id, element) {
         const person = staffData.find(s => s.id == id);
         if (!isMulti) {
-            localStorage.setItem('selectedStaff', JSON.stringify([{name: person.nName, image: person.photo}]));
+            localStorage.setItem('selectedStaff', JSON.stringify([{name: person.nName, image: person.img}]));
             window.location.href = 'multiple.html?id=' + bizId;
             return;
         }
         element.classList.toggle('selected');
         const idx = selectedStaff.findIndex(s => s.id == id);
         if (idx > -1) selectedStaff.splice(idx, 1);
-        else selectedStaff.push({name: person.nName, image: person.photo, id: id});
+        else selectedStaff.push({name: person.nName, image: person.img, id: id});
         document.getElementById('next-btn').style.display = selectedStaff.length > 0 ? 'block' : 'none';
     }
 
     function selectAll() {
-        selectedStaff = [...staffData.map(s => ({name: s.nName, image: s.photo, id: s.id}))];
-        renderStaff();
+        selectedStaff = [...staffData.filter(s => s.published).map(s => ({name: s.nName, image: s.img, id: s.id}))];
         document.querySelectorAll('.staff-card').forEach(card => card.classList.add('selected'));
         document.getElementById('next-btn').style.display = 'block';
     }
