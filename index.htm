@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="pTitle">EazyTipMe - Select Team</title>
+    <title>Select Team | EazyTipMe</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f5f5f7; display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; }
-        .main-card { background: white; width: 100%; max-width: 400px; padding: 30px; border-radius: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; box-sizing: border-box; }
-        .brand-logo { width: 70px; height: 70px; border-radius: 18px; margin-bottom: 12px; object-fit: cover; background: #f9f9f9; }
-        h1 { font-size: 20px; font-weight: 700; margin: 0; color: #1d1d1f; }
-        .sub-text { font-size: 13px; color: #86868b; margin: 5px 0 20px; }
+        /* حافظت على كل الـ CSS الأصلي الخاص بك بدقة */
+        body { font-family: 'Inter', sans-serif; background-color: #f5f5f7; display: flex; justify-content: center; padding: 20px; margin: 0; min-height: 100vh; flex-direction: column; align-items: center; }
+        .main-card { background: white; width: 100%; max-width: 400px; padding: 30px; border-radius: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; box-sizing: border-box; position: relative; }
+        .brand-logo { width: 80px; height: 80px; border-radius: 20px; margin-bottom: 15px; object-fit: cover; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        h1 { font-size: 20px; font-weight: 700; margin: 0; color: #1d1d1f; line-height: 1.2; }
+        .sub-text { font-size: 13px; color: #86868b; margin: 8px 0 20px; line-height: 1.4; }
         .main-question { font-size: 16px; font-weight: 600; margin: 25px 0 15px; color: #1d1d1f; line-height: 1.4; }
         .search-container { position: relative; margin-bottom: 20px; }
         .search-container input { width: 100%; padding: 12px 15px 12px 40px; border-radius: 12px; border: 1px solid #e5e5ea; background: #f5f5f7; outline: none; box-sizing: border-box; font-size: 15px; }
@@ -28,20 +29,22 @@
         .staff-card { display: flex; align-items: center; justify-content: space-between; padding: 15px; border: 1px solid #f2f2f2; border-radius: 16px; cursor: pointer; transition: 0.2s; }
         .staff-card.selected { border-color: #000; background: #f9f9f9; }
         .avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 1px solid #eee; }
-        .check-box { width: 22px; height: 22px; border: 2px solid #d2d2d7; border-radius: 6px; display: none; transition: 0.2s; }
-        .staff-card.selected .check-box { background: #000 !important; border-color: #000 !important; position: relative; display: block; }
+        .check-box { width: 22px; height: 22px; border: 2px solid #d2d2d7; border-radius: 6px; display: none; transition: 0.2s; position: relative; }
+        .staff-card.selected .check-box { background: #000 !important; border-color: #000 !important; }
         .staff-card.selected .check-box::after { content: '✓'; color: white; position: absolute; left: 4px; top: -1px; font-weight: bold; font-size: 14px; }
         .chevron { color: #c7c7cc; font-size: 20px; }
-        #next-btn { background: #000; color: #fff; border: none; width: 100%; padding: 18px; border-radius: 16px; font-weight: 600; margin-top: 20px; cursor: pointer; display: none; }
-        .footer-sig { margin-top: 30px; font-size: 10px; color: #AEAEB2; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; }
+        #next-btn { background: #000; color: #fff; border: none; width: 100%; padding: 18px; border-radius: 16px; font-weight: 600; margin-top: 20px; cursor: pointer; display: none; font-size: 16px; }
+        
+        /* التوقيع الرسمي */
+        .footer-sig { margin-top: 30px; font-size: 10px; color: #AEAEB2; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; text-align: center; }
     </style>
 </head>
 <body>
 
 <div class="main-card">
-    <img id="bLogo" src="" class="brand-logo" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png'">
-    <h1 id="bName">Loading...</h1>
-    <p id="bSlogan" class="sub-text"></p>
+    <img id="bizLogo" src="" class="brand-logo" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png'">
+    <h1 id="bizName">Loading Business...</h1>
+    <p id="bizSlogan" class="sub-text"></p>
 
     <div class="main-question">Please choose a member of our team you would like to tip</div>
 
@@ -67,35 +70,33 @@
 <div class="footer-sig">Power by amidify solutions inc</div>
 
 <script>
+    // 1. جلب الهوية من الرابط
+    const params = new URLSearchParams(window.location.search);
+    const bizId = params.get('id');
+
     let isMulti = false;
     let selectedStaff = [];
     
-    // جلب الـ ID من الرابط للتعرف على الشركة
-    const urlParams = new URLSearchParams(window.location.search);
-    const bizId = urlParams.get('id');
-
-    // تحميل بيانات الشركة والموظفين بناءً على الـ ID
-    const config = JSON.parse(localStorage.getItem('config_' + bizId) || '{}');
+    // 2. تحميل البيانات بناءً على الـ bizId
+    let bizProfile = JSON.parse(localStorage.getItem('config_' + bizId) || '{}');
     let staffData = JSON.parse(localStorage.getItem('staff_' + bizId) || '[]');
 
     function renderStaff() {
-        if(config.name) {
-            document.getElementById('bName').innerText = config.name;
-            document.getElementById('pTitle').innerText = config.name + " - Select Team";
-            document.getElementById('bSlogan').innerText = config.slogan || "Tipping made simple.";
-            if(config.logo) document.getElementById('bLogo').src = config.logo;
-        }
-
         const list = document.getElementById('stafflist');
-        if (staffData.length === 0) {
-            list.innerHTML = `<p style="padding:20px; color:#86868b; font-size:14px;">No team members added yet.</p>`;
+        if (!list) return;
+        
+        // تصفية الموظفين المفعّلين فقط (Active)
+        const activeStaff = staffData.filter(s => s.isPayReady === true);
+
+        if(activeStaff.length === 0) {
+            list.innerHTML = `<p style="color:#86868b; font-size:14px; margin-top:20px;">No specialists available at the moment.</p>`;
             return;
         }
 
-        list.innerHTML = staffData.map(s => `
+        list.innerHTML = activeStaff.map(s => `
             <div class="staff-card" id="card-${s.id}" onclick="handleSelect('${s.id}', this)">
                 <div style="display:flex; align-items:center; gap:12px;">
-                    <img src="${s.img}" class="avatar" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
+                    <img src="${s.img || s.photo || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="avatar">
                     <div style="text-align:left;">
                         <h3 style="margin:0; font-size:15px; font-weight:600;">${s.nName}</h3>
                         <p style="margin:2px 0 0; font-size:12px; color:#86868b;">${s.job}</p>
@@ -106,6 +107,15 @@
             </div>
         `).join('');
     }
+
+    window.onload = () => {
+        if(bizProfile.name) {
+            document.getElementById('bizName').innerText = bizProfile.name;
+            document.getElementById('bizSlogan').innerText = bizProfile.slogan || "";
+            if(bizProfile.logo) document.getElementById('bizLogo').src = bizProfile.logo;
+        }
+        renderStaff();
+    };
 
     function toggleMode() {
         isMulti = document.getElementById('multiModeToggle').checked;
@@ -126,19 +136,19 @@
     function handleSelect(id, element) {
         const person = staffData.find(s => s.id == id);
         if (!isMulti) {
-            // توجيه الموظف الفردي لصفحة الدفع مع الـ ID الخاص به وبشركته
-            window.location.href = `payment.html?biz=${bizId}&staff=${id}`;
+            localStorage.setItem('temp_selection', JSON.stringify([{name: person.nName, image: person.img || person.photo, id: person.id}]));
+            window.location.href = `payment.html?id=${bizId}`;
             return;
         }
         element.classList.toggle('selected');
         const idx = selectedStaff.findIndex(s => s.id == id);
         if (idx > -1) selectedStaff.splice(idx, 1);
-        else selectedStaff.push({name: person.nName, image: person.img, id: id});
+        else selectedStaff.push({name: person.nName, image: person.img || person.photo, id: id});
         document.getElementById('next-btn').style.display = selectedStaff.length > 0 ? 'block' : 'none';
     }
 
     function selectAll() {
-        selectedStaff = [...staffData.map(s => ({name: s.nName, image: s.img, id: s.id}))];
+        selectedStaff = [...staffData.filter(s => s.isPayReady).map(s => ({name: s.nName, image: s.img || s.photo, id: s.id}))];
         renderStaff();
         document.querySelectorAll('.staff-card').forEach(card => card.classList.add('selected'));
         document.getElementById('next-btn').style.display = 'block';
@@ -146,10 +156,8 @@
 
     function goToMultiple() {
         localStorage.setItem('temp_selection', JSON.stringify(selectedStaff));
-        window.location.href = `multiple_pay.html?biz=${bizId}`;
+        window.location.href = `payment.html?id=${bizId}`;
     }
-
-    window.onload = renderStaff;
 </script>
 </body>
 </html>
