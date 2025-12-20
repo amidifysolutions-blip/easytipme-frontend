@@ -3,81 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="pageTitle">Mouneh Store</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <title id="dynamicTitle">Loading Store...</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --apple-bg: #F5F5F7; --apple-blue: #007AFF; }
-        body { font-family: 'Inter', -apple-system, sans-serif; background: var(--apple-bg); margin: 0; display: flex; justify-content: center; padding: 20px; color: #1D1D1F; }
+        :root { --apple-bg: #F5F5F7; --apple-blue: #007AFF; --apple-gray: #86868B; }
+        body { font-family: 'Inter', -apple-system, sans-serif; background: var(--apple-bg); margin: 0; padding: 20px; display: flex; justify-content: center; color: #1D1D1F; }
         
-        .container { width: 100%; max-width: 400px; background: #FFF; border-radius: 35px; padding: 40px 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); text-align: center; }
-        .logo { width: 85px; height: 85px; border-radius: 22px; margin-bottom: 20px; object-fit: contain; background: #f9f9fb; display: none; margin-left: auto; margin-right: auto; }
-        h1 { font-size: 24px; font-weight: 700; margin: 0; letter-spacing: -0.5px; }
-        .slogan { color: #86868B; font-size: 14px; margin: 10px 0 30px; line-height: 1.5; }
+        .triple-view-container { width: 100%; max-width: 450px; display: flex; flex-direction: column; gap: 20px; }
+
+        /* Section 1: Business Identity Card */
+        .identity-card { background: #FFF; border-radius: 32px; padding: 40px 20px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.04); }
+        .biz-logo { width: 90px; height: 90px; border-radius: 24px; object-fit: contain; background: #FBFBFD; margin-bottom: 20px; border: 1px solid #F2F2F7; }
+        h1 { font-size: 26px; font-weight: 700; margin: 0; letter-spacing: -0.8px; }
+        .biz-slogan { color: var(--apple-gray); font-size: 15px; margin-top: 10px; line-height: 1.4; }
+
+        /* Section 2: Search & Quick Selection */
+        .interaction-box { background: #FFF; border-radius: 28px; padding: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.02); }
+        .search-wrapper { position: relative; }
+        .search-input { width: 100%; padding: 16px 20px; border-radius: 18px; border: 1px solid #D2D2D7; background: #FBFBFD; outline: none; font-size: 16px; box-sizing: border-box; transition: 0.3s; }
+        .search-input:focus { border-color: var(--apple-blue); background: #FFF; }
+
+        /* Section 3: Staff Registry (The Core Feature) */
+        .staff-registry { background: #FFF; border-radius: 32px; padding: 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.04); }
+        .staff-card { display: flex; align-items: center; padding: 18px; border-radius: 24px; text-decoration: none; color: inherit; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); margin-bottom: 8px; border: 1px solid transparent; }
+        .staff-card:hover { transform: translateY(-4px); background: #FBFBFD; border-color: #E5E5E7; box-shadow: 0 8px 20px rgba(0,0,0,0.05); }
         
-        .staff-grid { display: flex; flex-direction: column; gap: 12px; }
-        .staff-card { display: flex; align-items: center; padding: 18px; background: #FBFBFD; border-radius: 22px; border: 1px solid #F2F2F7; cursor: pointer; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); text-decoration: none; color: inherit; }
-        .staff-card:hover { transform: translateY(-3px); border-color: #D2D2D7; background: #FFF; }
+        .staff-photo { width: 65px; height: 65px; border-radius: 50%; object-fit: cover; margin-right: 18px; border: 2px solid #FFF; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .staff-info { flex: 1; }
+        .staff-name { font-weight: 600; font-size: 17px; margin: 0; }
+        .staff-job { font-size: 13px; color: var(--apple-gray); margin-top: 4px; font-weight: 500; }
         
-        .avatar { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-right: 18px; background: #eee; }
-        .info { text-align: left; }
-        .name { font-weight: 600; font-size: 16px; margin: 0; }
-        .job { font-size: 12px; color: #86868B; margin-top: 3px; }
-        .chevron { margin-left: auto; color: #C7C7CC; font-size: 20px; }
+        /* Working Days Pills (The 9-hour work result) */
+        .days-container { display: flex; gap: 4px; margin-top: 10px; flex-wrap: wrap; }
+        .day-pill { font-size: 10px; padding: 4px 10px; background: #F2F2F7; border-radius: 8px; color: #1D1D1F; font-weight: 600; text-transform: uppercase; }
+        
+        .arrow-icon { color: #C7C7CC; font-size: 22px; margin-left: 10px; }
+
+        /* Global Currency & Hours Footer */
+        .footer-info { text-align: center; color: var(--apple-gray); font-size: 12px; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <img id="mainLogo" src="" class="logo">
-    <h1 id="mainName">Loading...</h1>
-    <p id="mainSlogan" class="slogan"></p>
-    
-    <div class="staff-grid" id="staffList">
+<div class="triple-view-container">
+    <div class="identity-card">
+        <img id="storeLogo" src="" class="biz-logo" style="display:none;">
+        <h1 id="storeName">Welcome</h1>
+        <p id="storeSlogan" class="biz-slogan"></p>
+    </div>
+
+    <div class="interaction-box">
+        <div class="search-wrapper">
+            <input type="text" id="staffSearch" class="search-input" placeholder="Find your specialist..." onkeyup="doSearch()">
         </div>
+    </div>
+
+    <div class="staff-registry">
+        <div id="staffList">
+            </div>
+    </div>
+
+    <div class="footer-info">
+        <span id="storeHours"></span> • <span id="storeLocation"></span>
+    </div>
 </div>
 
 <script>
-    function loadPage() {
-        // 1. جلب بيانات الشركة
-        const cp = JSON.parse(localStorage.getItem('company_profile') || '{}');
-        if(cp.name) {
-            document.getElementById('mainName').innerText = cp.name;
-            document.getElementById('pageTitle').innerText = cp.name;
-            document.getElementById('mainSlogan').innerText = cp.slogan || "Select a specialist to tip";
-            if(cp.logo) {
-                const logo = document.getElementById('mainLogo');
-                logo.src = cp.logo;
-                logo.style.display = 'block';
+    function renderApp() {
+        // Fetching Master Data
+        const company = JSON.parse(localStorage.getItem('company_profile') || '{}');
+        const team = JSON.parse(localStorage.getItem('master_staff') || '[]');
+
+        // 1. Setup Branding
+        if(company.name) {
+            document.getElementById('storeName').innerText = company.name;
+            document.getElementById('dynamicTitle').innerText = company.name;
+            document.getElementById('storeSlogan').innerText = company.slogan || "Select a professional to proceed";
+            document.getElementById('storeHours').innerText = company.hours || "Open Daily";
+            document.getElementById('storeLocation').innerText = company.address || "Contact for address";
+            
+            if(company.logo) {
+                const logoEl = document.getElementById('storeLogo');
+                logoEl.src = company.logo;
+                logoEl.style.display = 'inline-block';
             }
-        } else {
-            document.getElementById('mainName').innerText = "Mouneh Store";
         }
 
-        // 2. جلب الموظفين (المفعلين للنشر فقط)
-        const staff = JSON.parse(localStorage.getItem('master_staff') || '[]');
-        const container = document.getElementById('staffList');
-        
-        // تصفية الموظفين المنشورين
-        const publishedStaff = staff.filter(s => s.published === true);
+        // 2. Setup Staff List with Triple-View Features
+        const listContainer = document.getElementById('staffList');
+        // Only show PUBLISHED staff
+        const activeTeam = team.filter(m => m.published === true);
 
-        if(publishedStaff.length === 0) {
-            container.innerHTML = '<p style="color:#86868B; margin-top:20px;">No specialists active right now.</p>';
+        if(activeTeam.length === 0) {
+            listContainer.innerHTML = `<div style="padding:40px; text-align:center; color:#86868B;">No specialists currently available.</div>`;
             return;
         }
 
-        container.innerHTML = publishedStaff.map(s => `
-            <a href="payment.html?id=${s.id}" class="staff-card">
-                <img src="${s.img}" class="avatar">
-                <div class="info">
-                    <p class="name">${s.nName}</p>
-                    <p class="job">${s.job}</p>
+        listContainer.innerHTML = activeTeam.map(member => `
+            <a href="payment.html?id=${member.id}" class="staff-card" data-search="${member.nName.toLowerCase()}">
+                <img src="${member.img}" class="staff-photo">
+                <div class="staff-info">
+                    <p class="staff-name">${member.nName}</p>
+                    <p class="staff-job">${member.job}</p>
+                    <div class="days-container">
+                        ${(member.days || []).map(d => `<span class="day-pill">${d}</span>`).join('')}
+                    </div>
                 </div>
-                <span class="chevron">›</span>
+                <span class="arrow-icon">›</span>
             </a>
         `).join('');
     }
 
-    window.onload = loadPage;
+    // Fast Search Functionality
+    function doSearch() {
+        const query = document.getElementById('staffSearch').value.toLowerCase();
+        const cards = document.querySelectorAll('.staff-card');
+        cards.forEach(card => {
+            const name = card.getAttribute('data-search');
+            card.style.display = name.includes(query) ? 'flex' : 'none';
+        });
+    }
+
+    // Auto-load
+    window.onload = renderApp;
 </script>
 </body>
 </html>
