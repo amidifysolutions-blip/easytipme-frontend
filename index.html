@@ -83,33 +83,32 @@
     let staffData = JSON.parse(localStorage.getItem('master_staff') || '[]');
 
     function renderStaff() {
-        const list = document.getElementById('stafflist');
-        list.innerHTML = staffData.map(s => `
-            <div class="staff-card" id="card-${s.id}" onclick="handleSelect('${s.id}', this)">
-                <div style="display:flex; align-items:center; gap:12px;">
-                    <img src="${s.img}" class="avatar" onerror="this.src='logo.png'">
-                    <div class="details">
-                        <h3>${s.nName}</h3>
-                        <p>${s.job}</p>
-                    </div>
+    const list = document.getElementById('stafflist');
+    list.innerHTML = staffData.map(s => `
+        <div class="staff-card" id="card-${s.id}" onclick="handleSelect('${s.id}', this)" style="display:flex; justify-content:space-between; align-items:center; padding:15px; border:1px solid #eee; border-radius:15px; margin-bottom:10px; cursor:pointer;">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <img src="${s.img}" style="width:50px; height:50px; border-radius:50%; object-fit:cover;" onerror="this.src='default-avatar.png'">
+                <div style="text-align:left;">
+                    <h3 style="margin:0; font-size:16px;">${s.nName}</h3>
+                    <p style="margin:0; font-size:13px; color:#888;">${s.job}</p>
                 </div>
-                <div class="chevron" style="display: ${isMulti ? 'none' : 'block'}">›</div>
-                <div class="checkbox-container" style="display: ${isMulti ? 'flex' : 'none'}"></div>
             </div>
-        `).join('');
-    }
+            <div class="checkbox-container" style="display: ${isMulti ? 'block' : 'none'}; width:20px; height:20px; border:2px solid #ddd; border-radius:5px;"></div>
+        </div>
+    `).join('');
 
-    function toggleMode() {
-        isMulti = document.getElementById('multiModeToggle').checked;
-        selectedStaff = [];
-        
-        // إظهار أو إخفاء زر Select All
-        document.getElementById('select-all-btn').style.display = isMulti ? 'block' : 'none';
-        document.getElementById('next-btn').style.display = 'none';
-        
-        renderStaff();
-    }
-
+   function toggleMode() {
+    isMulti = document.getElementById('multiModeToggle').checked;
+    document.getElementById('select-all-btn').style.display = isMulti ? 'block' : 'none';
+    renderStaff();
+}
+   function filterStaff() {
+    let val = document.getElementById('staffSearch').value.toLowerCase();
+    document.querySelectorAll('.staff-card').forEach(card => {
+        let name = card.querySelector('h3').innerText.toLowerCase();
+        card.style.display = name.includes(val) ? 'flex' : 'none';
+    });
+}
     function handleSelect(id, element) {
         const person = staffData.find(s => s.id == id);
         
