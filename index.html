@@ -3,83 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="pageTitle">Welcome | EasyTipMe</title>
+    <title id="pageTitle">Mouneh Store</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root { --apple-bg: #F5F5F7; --apple-blue: #007AFF; }
         body { font-family: 'Inter', -apple-system, sans-serif; background: var(--apple-bg); margin: 0; display: flex; justify-content: center; padding: 20px; color: #1D1D1F; }
+        
         .container { width: 100%; max-width: 400px; background: #FFF; border-radius: 35px; padding: 40px 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); text-align: center; }
-        .logo { width: 85px; height: 85px; border-radius: 22px; margin-bottom: 20px; object-fit: contain; background: #f9f9fb; }
+        .logo { width: 85px; height: 85px; border-radius: 22px; margin-bottom: 20px; object-fit: contain; background: #f9f9fb; display: none; margin-left: auto; margin-right: auto; }
         h1 { font-size: 24px; font-weight: 700; margin: 0; letter-spacing: -0.5px; }
         .slogan { color: #86868B; font-size: 14px; margin: 10px 0 30px; line-height: 1.5; }
+        
         .staff-grid { display: flex; flex-direction: column; gap: 12px; }
         .staff-card { display: flex; align-items: center; padding: 18px; background: #FBFBFD; border-radius: 22px; border: 1px solid #F2F2F7; cursor: pointer; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); text-decoration: none; color: inherit; }
-        .staff-card:hover { transform: translateY(-3px); border-color: #D2D2D7; background: #FFF; box-shadow: 0 5px 15px rgba(0,0,0,0.03); }
-        .avatar { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-right: 18px; border: 2px solid #FFF; }
+        .staff-card:hover { transform: translateY(-3px); border-color: #D2D2D7; background: #FFF; }
+        
+        .avatar { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-right: 18px; background: #eee; }
         .info { text-align: left; }
         .name { font-weight: 600; font-size: 16px; margin: 0; }
         .job { font-size: 12px; color: #86868B; margin-top: 3px; }
         .chevron { margin-left: auto; color: #C7C7CC; font-size: 20px; }
-        #errorMsg { display:none; text-align:center; padding: 50px 20px; color: #86868B; }
     </style>
 </head>
 <body>
 
-<div class="container" id="mainContainer" style="display:none;">
-    <img id="bizLogo" src="" class="logo">
-    <h1 id="bizName">...</h1>
-    <p id="bizSlogan" class="slogan"></p>
-    <div class="staff-grid" id="staffList"></div>
-</div>
-
-<div id="errorMsg">
-    <h1>Business Not Found</h1>
-    <p>Please use a valid business link to view specialists.</p>
+<div class="container">
+    <img id="mainLogo" src="" class="logo">
+    <h1 id="mainName">Loading...</h1>
+    <p id="mainSlogan" class="slogan"></p>
+    
+    <div class="staff-grid" id="staffList">
+        </div>
 </div>
 
 <script>
-    function loadSmartTemplate() {
-        const params = new URLSearchParams(window.location.search);
-        const bizId = params.get('id'); // يقرأ المعرف من الرابط
+    function loadPage() {
+        // 1. جلب بيانات الشركة
+        const cp = JSON.parse(localStorage.getItem('company_profile') || '{}');
+        if(cp.name) {
+            document.getElementById('mainName').innerText = cp.name;
+            document.getElementById('pageTitle').innerText = cp.name;
+            document.getElementById('mainSlogan').innerText = cp.slogan || "Select a specialist to tip";
+            if(cp.logo) {
+                const logo = document.getElementById('mainLogo');
+                logo.src = cp.logo;
+                logo.style.display = 'block';
+            }
+        } else {
+            document.getElementById('mainName').innerText = "Mouneh Store";
+        }
 
-        // جلب البيانات من الماستر
-        const entities = JSON.parse(localStorage.getItem('global_entities') || '[]');
-        const business = entities.find(b => b.id === bizId);
+        // 2. جلب الموظفين (المفعلين للنشر فقط)
+        const staff = JSON.parse(localStorage.getItem('master_staff') || '[]');
+        const container = document.getElementById('staffList');
+        
+        // تصفية الموظفين المنشورين
+        const publishedStaff = staff.filter(s => s.published === true);
 
-        if (!business) {
-            document.getElementById('errorMsg').style.display = 'block';
+        if(publishedStaff.length === 0) {
+            container.innerHTML = '<p style="color:#86868B; margin-top:20px;">No specialists active right now.</p>';
             return;
         }
 
-        // تعبئة هوية الشركة
-        document.getElementById('bizName').innerText = business.name;
-        document.getElementById('pageTitle').innerText = business.name + " | EasyTipMe";
-        document.getElementById('bizSlogan').innerText = business.slogan || "Choose a specialist to tip";
-        document.getElementById('bizLogo').src = business.logo;
-        document.getElementById('mainContainer').style.display = 'block';
-
-        // عرض الموظفين التابعين لهذه الشركة فقط
-        const allStaff = JSON.parse(localStorage.getItem('master_staff') || '[]');
-        // ملاحظة: الموظف يظهر فقط إذا كان Published ومربوط بالشركة
-        const publishedStaff = allStaff.filter(s => s.published === true);
-
-        const listDiv = document.getElementById('staffList');
-        if (publishedStaff.length === 0) {
-            listDiv.innerHTML = '<p style="color:#C7C7CC; margin-top:20px;">No specialists available right now.</p>';
-        } else {
-            listDiv.innerHTML = publishedStaff.map(s => `
-                <a href="payment.html?staff=${s.id}&biz=${business.id}" class="staff-card">
-                    <img src="${s.img}" class="avatar">
-                    <div class="info">
-                        <p class="name">${s.nName}</p>
-                        <p class="job">${s.job}</p>
-                    </div>
-                    <span class="chevron">›</span>
-                </a>
-            `).join('');
-        }
+        container.innerHTML = publishedStaff.map(s => `
+            <a href="payment.html?id=${s.id}" class="staff-card">
+                <img src="${s.img}" class="avatar">
+                <div class="info">
+                    <p class="name">${s.nName}</p>
+                    <p class="job">${s.job}</p>
+                </div>
+                <span class="chevron">›</span>
+            </a>
+        `).join('');
     }
-    window.onload = loadSmartTemplate;
+
+    window.onload = loadPage;
 </script>
 </body>
 </html>
