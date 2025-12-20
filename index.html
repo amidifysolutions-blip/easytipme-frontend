@@ -48,27 +48,31 @@
 <body>
 
 <div class="main-card">
-    <img src="logo.png" class="brand-logo" alt="Logo">
-    <h1 class="brand-name">Mouneh Lebanese Gourmet Store</h1>
-    <p class="brand-bio">Authentic flavors delivered with love and tradition.</p>
-    <h2 style="font-size: 18px; font-weight: 700; margin: 25px 0 15px; text-align: center; color: #1d1d1f;">
-   
-    Please choose a member of our team you would like to tip
-</h2>
-    <div class="selection-header">
-        <span style="font-size: 14px; font-weight: 500;">Select multiple</span>
-        <label class="switch">
-            <input type="checkbox" id="multiModeToggle" onchange="toggleMode()">
-            <span class="slider"></span>
-        </label>
+    <img src="logo.png" class="brand-logo" alt="Logo" onerror="this.style.display='none'">
+    <h1 style="font-size: 22px; font-weight: 700;">Mouneh Lebanese Gourmet Store</h1>
+    
+    <h2 style="font-size: 18px; font-weight: 700; margin: 25px 0 10px; color: #1a1a1b;">
+        Please choose a member of our team you would like to tip
+    </h2>
+
+    <div style="margin: 15px 0; position: relative;">
+        <input type="text" id="staffSearch" onkeyup="filterStaff()" placeholder="Search by name..." 
+            style="width: 100%; padding: 12px 15px 12px 40px; border-radius: 12px; border: 1px solid #eee; background: #f5f5f7; outline: none;">
+        <span style="position: absolute; left: 12px; top: 12px;">🔍</span>
     </div>
 
-    <div id="select-all-btn"><span onclick="selectAll()">Select All</span></div>
+    <div class="selection-header">
+        <span>Select multiple specialists</span>
+        <label class="switch"><input type="checkbox" id="multiModeToggle" onchange="toggleMode()"><span class="slider"></span></label>
+    </div>
+    
+    <div id="select-all-btn" style="display:none; text-align:right; margin-bottom:10px;">
+        <span onclick="selectAll()" style="color:#0071e3; cursor:pointer; font-weight:600; font-size:13px;">Select All</span>
+    </div>
 
     <div class="staff-list" id="stafflist"></div>
-
-    <button id="next-btn" onclick="goToMultiple()">Next</button>
-    
+    <button id="next-btn" onclick="goToMultiple()" style="display:none; background:#000; color:#fff; width:100%; padding:15px; border-radius:12px; border:none; font-weight:600;">Next</button>
+</div>
     <div style="margin-top:30px; font-size:11px; color:#bbb;">Powered by <b>Amidify Solutions Inc.</b></div>
 </div>
 
