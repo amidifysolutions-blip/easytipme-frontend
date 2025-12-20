@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Control | EasyTipMe Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --apple-dark: #1C1C1E; --apple-card: #2C2C2E; --apple-blue: #0A84FF; --apple-red: #FF453A; }
+        body { font-family: 'Inter', sans-serif; background: var(--apple-dark); color: #FFF; margin: 0; display: flex; height: 100vh; }
+        
+        .sidebar { width: 280px; background: #000; padding: 40px 20px; border-right: 1px solid #38383A; }
+        .nav-item { padding: 15px; cursor: pointer; border-radius: 12px; margin-bottom: 10px; transition: 0.3s; opacity: 0.7; }
+        .nav-item.active, .nav-item:hover { background: var(--apple-blue); opacity: 1; font-weight: 600; }
+
+        .main { flex: 1; padding: 50px; overflow-y: auto; }
+        .card { background: var(--apple-card); padding: 30px; border-radius: 24px; margin-bottom: 30px; border: 1px solid #38383A; }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+        label { display: block; font-size: 11px; text-transform: uppercase; color: #8E8E93; margin-bottom: 8px; }
+        input, select, textarea { width: 100%; background: #1C1C1E; border: 1px solid #38383A; padding: 12px; border-radius: 10px; color: #FFF; margin-bottom: 20px; outline: none; }
+        
+        .btn-master { background: var(--apple-blue); color: #FFF; border: none; padding: 15px 30px; border-radius: 14px; cursor: pointer; font-weight: 600; transition: 0.3s; }
+        .btn-master:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(10,132,255,0.3); }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { text-align: left; color: #8E8E93; font-size: 12px; padding: 15px; border-bottom: 1px solid #38383A; }
+        td { padding: 15px; border-bottom: 1px solid #38383A; font-size: 14px; }
+        
+        .status-pill { padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+        .online { background: rgba(52, 199, 89, 0.2); color: #32D74B; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <h2 style="font-size: 22px; margin-bottom: 50px; color: var(--apple-blue);">Master Panel</h2>
+    <div class="nav-item active" onclick="showSection('businesses')">Registered Businesses</div>
+    <div class="nav-item" onclick="showSection('global')">Global Configurations</div>
+    <div class="nav-item" onclick="showSection('revenue')">Revenue Analytics</div>
+    <div style="margin-top: auto; color: var(--apple-red); cursor: pointer;" onclick="logout()">Logout Master</div>
+</div>
+
+<div class="main">
+    <div id="sec-businesses" class="section">
+        <div class="card">
+            <h2 style="margin-top:0;">Register New Business Entity</h2>
+            <div class="grid">
+                <div>
+                    <label>Business Name</label>
+                    <input type="text" id="bName" placeholder="e.g. Mouneh Store">
+                </div>
+                <div>
+                    <label>Admin Email</label>
+                    <input type="email" id="bEmail" placeholder="admin@store.com">
+                </div>
+                <div>
+                    <label>Base Currency</label>
+                    <select id="bCurr">
+                        <option value="CAD">CAD ($)</option>
+                        <option value="USD">USD ($)</option>
+                        <option value="EUR">EUR (€)</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Plan Type</label>
+                    <select id="bPlan">
+                        <option value="Pro">SaaS Pro</option>
+                        <option value="Basic">Basic</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn-master" onclick="registerBusiness()">Create Business Identity</button>
+        </div>
+
+        <div class="card">
+            <h3>Active Businesses</h3>
+            <table>
+                <thead>
+                    <tr><th>Identity</th><th>Email</th><th>Currency</th><th>Status</th><th>Action</th></tr>
+                </thead>
+                <tbody id="businessTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="sec-global" class="section" style="display:none;">
+        <div class="card">
+            <h2>Global Fields Manager</h2>
+            <p style="color: #8E8E93;">Add fields that will appear in ALL staff registries globally.</p>
+            <div class="grid">
+                <input type="text" placeholder="Field Name (e.g. Bank Account)">
+                <button class="btn-master">Add Global Field</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let businesses = JSON.parse(localStorage.getItem('global_entities') || '[]');
+
+    function registerBusiness() {
+        const name = document.getElementById('bName').value;
+        if(!name) return;
+
+        const entity = {
+            id: Date.now(),
+            name: name,
+            email: document.getElementById('bEmail').value,
+            curr: document.getElementById('bCurr').value,
+            plan: document.getElementById('bPlan').value,
+            status: 'Active'
+        };
+
+        businesses.push(entity);
+        localStorage.setItem('global_entities', JSON.stringify(businesses));
+        render();
+        alert("Business '" + name + "' has been created successfully!");
+    }
+
+    function render() {
+        const table = document.getElementById('businessTable');
+        table.innerHTML = businesses.map(b => `
+            <tr>
+                <td><b>${b.name}</b></td>
+                <td>${b.email}</td>
+                <td>${b.curr}</td>
+                <td><span class="status-pill online">${b.status}</span></td>
+                <td><button onclick="deleteB(${b.id})" style="color:var(--apple-red); background:none; border:none; cursor:pointer;">Terminate</button></td>
+            </tr>
+        `).join('');
+    }
+
+    function deleteB(id) {
+        if(confirm("Terminate this business? This will revoke access to their dashboard.")){
+            businesses = businesses.filter(x => x.id !== id);
+            localStorage.setItem('global_entities', JSON.stringify(businesses));
+            render();
+        }
+    }
+
+    function showSection(id) {
+        document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+        document.getElementById('sec-' + id).style.display = 'block';
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+    }
+
+    window.onload = render;
+</script>
+</body>
+</html>
