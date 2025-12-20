@@ -1,86 +1,107 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mouneh Admin - Final Elite</title>
+    <title>لوحة تحكم موني - النظام الشامل</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root { --apple-bg: #F5F5F7; --apple-blue: #007AFF; --apple-red: #FF3B30; --apple-green: #34C759; }
-        body { font-family: 'Inter', sans-serif; margin: 0; display: flex; height: 100vh; background: var(--apple-bg); color: #1D1D1F; overflow: hidden; }
+        body { font-family: 'Inter', sans-serif; margin: 0; display: flex; height: 100vh; background: var(--apple-bg); color: #1D1D1F; overflow: hidden; direction: rtl; }
         
-        .sidebar { width: 260px; background: #000; color: white; padding: 30px 20px; display: flex; flex-direction: column; }
-        .nav-item { padding: 14px 18px; cursor: pointer; border-radius: 12px; margin-bottom: 8px; transition: 0.3s; opacity: 0.6; font-size: 14px; }
-        .nav-item:hover { background: #222; opacity: 1; transform: translateX(5px); }
+        /* القائمة الجانبية */
+        .sidebar { width: 280px; background: #000; color: white; padding: 30px 20px; display: flex; flex-direction: column; }
+        .nav-item { padding: 14px 18px; cursor: pointer; border-radius: 12px; margin-bottom: 8px; transition: 0.3s; opacity: 0.6; font-size: 15px; text-align: right; }
+        .nav-item:hover { background: #222; opacity: 1; transform: translateX(-5px); }
         .nav-item.active { background: #333; opacity: 1; font-weight: 600; }
 
         .main { flex: 1; padding: 40px; overflow-y: auto; }
-        .card { background: #FFF; padding: 30px; border-radius: 24px; box-shadow: 0 4px 24px rgba(0,0,0,0.04); margin-bottom: 25px; }
+        .section { display: none; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card { background: #FFF; padding: 30px; border-radius: 24px; box-shadow: 0 4px 24px rgba(0,0,0,0.04); margin-bottom: 25px; border: 1px solid #E5E5E7; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
         
-        label { display: block; font-size: 11px; font-weight: 700; margin-bottom: 8px; color: #86868B; text-transform: uppercase; }
-        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #D2D2D7; border-radius: 12px; font-size: 14px; margin-bottom: 15px; background: #FBFBFD; outline: none; }
+        label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 8px; color: #86868B; text-transform: uppercase; }
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #D2D2D7; border-radius: 12px; font-size: 14px; margin-bottom: 15px; background: #FBFBFD; outline: none; box-sizing: border-box; }
         
-        .day-btn { padding: 8px 12px; border: 1px solid #D2D2D7; border-radius: 8px; cursor: pointer; font-size: 11px; background: #FFF; margin-right: 4px; }
+        /* أيام الأسبوع */
+        .days-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px; }
+        .day-btn { padding: 8px 14px; border: 1px solid #D2D2D7; border-radius: 10px; cursor: pointer; font-size: 12px; background: #FFF; transition: 0.2s; }
         .day-btn.selected { background: #000; color: #FFF; border-color: #000; }
 
-        /* Switches */
-        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+        /* مفتاح النشر */
+        .switch { position: relative; display: inline-block; width: 45px; height: 24px; }
         .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 20px; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
         input:checked + .slider { background-color: var(--apple-green); }
 
-        .btn-main { background: #000; color: #FFF; border: none; padding: 16px; border-radius: 14px; width: 100%; cursor: pointer; font-weight: 600; transition: 0.3s; }
+        .btn-main { background: #000; color: #FFF; border: none; padding: 16px; border-radius: 14px; width: 100%; cursor: pointer; font-weight: 600; font-size: 16px; transition: 0.3s; }
         .btn-main:hover { background: #333; }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { text-align: left; color: #86868B; font-size: 10px; padding: 12px; border-bottom: 1px solid #E5E5E7; }
-        td { padding: 12px; border-bottom: 1px solid #F5F5F7; font-size: 13px; }
-        .avatar-preview { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #EEE; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { text-align: right; color: #86868B; font-size: 11px; padding: 15px; border-bottom: 1px solid #E5E5E7; }
+        td { padding: 15px; border-bottom: 1px solid #F5F5F7; font-size: 14px; }
+        
+        .img-preview { width: 60px; height: 60px; border-radius: 12px; object-fit: cover; background: #f0f0f2; border: 1px dashed #ccc; }
+        .company-logo-preview { width: 80px; height: 80px; border-radius: 15px; object-fit: contain; background: #fff; margin-bottom: 15px; border: 1px solid #eee; }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
     <div style="text-align: center; margin-bottom: 40px;">
-        <img id="sideLogo" src="" style="width: 50px; border-radius: 12px; display: none;">
-        <h2 id="sideStoreName" style="font-size: 18px; margin: 0;">Mouneh</h2>
+        <img id="sideLogo" src="" style="width: 60px; border-radius: 14px; display: none; margin: 0 auto 10px;">
+        <h2 id="sideStoreName" style="font-size: 18px; margin: 0;">موني</h2>
     </div>
-    <div class="nav-item active" onclick="showTab('reg')">Team Management</div>
-    <div class="nav-item" onclick="showTab('set')">Company Settings</div>
-    <div style="margin-top:auto; color:var(--apple-red); cursor:pointer; font-size:14px;" onclick="localStorage.clear(); location.reload();">Reset System Data</div>
+    <div class="nav-item active" onclick="showTab('reg')">إدارة فريق العمل</div>
+    <div class="nav-item" onclick="showTab('set')">بروفايل الشركة (رسمي)</div>
+    <div style="margin-top:auto; color:var(--apple-red); cursor:pointer; font-size:14px; padding:10px;" onclick="if(confirm('سيتم حذف كل البيانات!')){localStorage.clear(); location.reload();}">إعادة ضبط النظام كاملاً</div>
 </div>
 
 <div class="main">
     <div id="section-reg" class="section" style="display:block;">
         <div class="card">
-            <h3>Add Specialist</h3>
+            <h3>إضافة موظف / مختص جديد</h3>
             <div class="grid">
                 <div>
-                    <label>Public Name</label> <input type="text" id="nName" placeholder="e.g. Shani">
-                    <label>Real Name</label> <input type="text" id="rName">
-                    <label>Contact Email</label> <input type="email" id="email">
-                    <label>Photo</label> <input type="file" id="photoFile" accept="image/*" onchange="previewImg(this)">
+                    <label>الاسم الفني (يظهر للزبون)</label> <input type="text" id="nName" placeholder="مثلاً: شاني">
+                    <label>الاسم الرسمي (للإدارة)</label> <input type="text" id="rName">
+                    <label>البريد الإلكتروني</label> <input type="email" id="email">
+                    <label>رقم الهاتف</label> <input type="text" id="phone">
+                    <label>صورة الموظف</label> 
+                    <input type="file" id="staffImgFile" accept="image/*" onchange="previewFile(this, 'staffPreview')">
+                    <img id="staffPreview" class="img-preview" src="">
                 </div>
                 <div>
-                    <label>Job Title</label> <input type="text" id="job">
-                    <label>Shift 1</label>
-                    <div style="display:flex; gap:5px;">
+                    <label>التخصص / المسمى الوظيفي</label> <input type="text" id="job">
+                    <label>أيام العمل الأسبوعية</label>
+                    <div class="days-row" id="daysPicker">
+                        <div class="day-btn" onclick="this.classList.toggle('selected')">الاثنين</div>
+                        <div class="day-btn" onclick="this.classList.toggle('selected')">الثلاثاء</div>
+                        <div class="day-btn" onclick="this.classList.toggle('selected')">الأربعاء</div>
+                        <div class="day-btn" onclick="this.classList.toggle('selected')">الخميس</div>
+                        <div class="day-btn" onclick="this.classList.toggle('selected')">الجمعة</div>
+                        <div class="day-btn" onclick="this.classList.toggle('selected')">السبت</div>
+                        <div class="day-btn" onclick="this.classList.toggle('selected')">الأحد</div>
+                    </div>
+                    <label>دوام الشفت الأول</label>
+                    <div style="display:flex; gap:10px;">
                         <input type="time" id="s1_s"> <input type="time" id="s1_e">
                     </div>
-                    <label>Shift 2</label>
-                    <div style="display:flex; gap:5px;">
+                    <label>دوام الشفت الثاني (اختياري)</label>
+                    <div style="display:flex; gap:10px;">
                         <input type="time" id="s2_s"> <input type="time" id="s2_e">
                     </div>
                 </div>
             </div>
-            <button class="btn-main" onclick="saveStaff()">Register & Show Below</button>
+            <button class="btn-main" onclick="saveStaff()">حفظ الموظف ونشره</button>
         </div>
 
         <div class="card">
             <table>
                 <thead>
-                    <tr><th>Photo</th><th>Name</th><th>Shifts</th><th>Published</th><th>Actions</th></tr>
+                    <tr><th>الصورة</th><th>الموظف</th><th>أيام العمل والدوام</th><th>نشر بالرئيسية</th><th>إجراءات</th></tr>
                 </thead>
                 <tbody id="staffTable"></tbody>
             </table>
@@ -89,58 +110,90 @@
 
     <div id="section-set" class="section">
         <div class="card">
-            <h3>Company Identity</h3>
-            <label>Store Name</label> <input type="text" id="set_name">
-            <label>Slogan (90 Chars)</label> <textarea id="set_slogan" maxlength="90"></textarea>
-            <button class="btn-main" onclick="saveSet()">Update Store Info</button>
+            <h3>هوية الشركة (تظهر للزبون)</h3>
+            <div class="grid">
+                <div>
+                    <label>اسم الشركة / المتجر</label> <input type="text" id="set_name">
+                    <label>السلوجن (وصف مختصر)</label> <textarea id="set_slogan" maxlength="90"></textarea>
+                </div>
+                <div>
+                    <label>لوجو الشركة الرسمي</label>
+                    <input type="file" id="logoFile" accept="image/*" onchange="previewFile(this, 'logoPreview')">
+                    <img id="logoPreview" class="company-logo-preview" src="">
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="border-right: 5px solid #000;">
+            <h3>البيانات الرسمية (للإدارة فقط)</h3>
+            <div class="grid">
+                <div>
+                    <label>العنوان الفعلي</label> <input type="text" id="set_address">
+                    <label>إيميل التواصل الرسمي</label> <input type="email" id="set_bEmail">
+                </div>
+                <div>
+                    <label>رقم هاتف الشركة</label> <input type="text" id="set_bPhone">
+                    <label>ساعات العمل الرسمية</label> <input type="text" id="set_hours" placeholder="مثلاً: 9 AM - 10 PM">
+                </div>
+            </div>
+            <button class="btn-main" onclick="saveCompany()">تحديث بروفايل الشركة</button>
         </div>
     </div>
 </div>
 
 <script>
-    let staffData = JSON.parse(localStorage.getItem('master_staff') || '[]');
-    let currentBase64 = "";
+    let staffList = JSON.parse(localStorage.getItem('master_staff') || '[]');
+    let tempStaffImg = "";
+    let tempLogoImg = "";
 
-    function previewImg(input) {
+    function previewFile(input, previewId) {
         const reader = new FileReader();
-        reader.onload = (e) => currentBase64 = e.target.result;
-        reader.readAsDataURL(input.files[0]);
+        reader.onload = (e) => {
+            document.getElementById(previewId).src = e.target.result;
+            if(previewId === 'staffPreview') tempStaffImg = e.target.result;
+            if(previewId === 'logoPreview') tempLogoImg = e.target.result;
+        };
+        if(input.files[0]) reader.readAsDataURL(input.files[0]);
     }
 
     function saveStaff() {
-        const name = document.getElementById('nName').value;
-        if(!name) { alert("Please enter a name"); return; }
+        const nName = document.getElementById('nName').value;
+        if(!nName) { alert("يرجى إدخال اسم الموظف"); return; }
 
-        const newStaff = {
+        const newMember = {
             id: Date.now(),
-            nName: name,
+            nName: nName,
             rName: document.getElementById('rName').value,
             email: document.getElementById('email').value,
+            phone: document.getElementById('phone').value,
             job: document.getElementById('job').value,
+            days: Array.from(document.querySelectorAll('#daysPicker .day-btn.selected')).map(d => d.innerText),
             s1: { s: document.getElementById('s1_s').value, e: document.getElementById('s1_e').value },
             s2: { s: document.getElementById('s2_s').value, e: document.getElementById('s2_e').value },
-            img: currentBase64 || 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
-            published: false // افتراضياً غير منشور حتى يتم تفعيله
+            img: tempStaffImg || 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
+            published: false 
         };
 
-        staffData.push(newStaff);
-        localStorage.setItem('master_staff', JSON.stringify(staffData));
+        staffList.push(newMember);
+        localStorage.setItem('master_staff', JSON.stringify(staffList));
         
-        // إعادة التصفير والرسم
-        currentBase64 = "";
-        document.getElementById('photoFile').value = "";
-        render();
+        // مسح الحقول بعد الحفظ
+        tempStaffImg = "";
+        document.getElementById('staffPreview').src = "";
+        document.getElementById('nName').value = "";
+        document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('selected'));
+        
+        renderStaff();
+        alert("تم حفظ الموظف بنجاح");
     }
 
-    function render() {
+    function renderStaff() {
         const table = document.getElementById('staffTable');
-        table.innerHTML = ""; // مسح الجدول أولاً
-        
-        staffData.forEach(s => {
-            const row = `<tr>
-                <td><img src="${s.img}" class="avatar-preview"></td>
+        table.innerHTML = staffList.map(s => `
+            <tr>
+                <td><img src="${s.img}" style="width:45px; height:45px; border-radius:50%; object-fit:cover;"></td>
                 <td><b>${s.nName}</b><br><small>${s.job}</small></td>
-                <td><small>S1: ${s.s1.s || '--'} | S2: ${s.s2.s || '--'}</small></td>
+                <td><small>${s.days.join(', ')}<br>الشفت: ${s.s1.s || '--'} إلى ${s.s1.e || '--'}</small></td>
                 <td>
                     <label class="switch">
                         <input type="checkbox" ${s.published ? 'checked' : ''} onchange="togglePublish(${s.id})">
@@ -148,33 +201,68 @@
                     </label>
                 </td>
                 <td>
-                    <button onclick="deleteStaff(${s.id})" style="color:red; border:none; background:none; cursor:pointer;">Delete</button>
+                    <button onclick="deleteMember(${s.id})" style="color:red; border:none; background:none; cursor:pointer;">حذف</button>
                 </td>
-            </tr>`;
-            table.innerHTML += row;
-        });
+            </tr>
+        `).join('');
     }
 
     function togglePublish(id) {
-        const idx = staffData.findIndex(s => s.id === id);
-        staffData[idx].published = !staffData[idx].published;
-        localStorage.setItem('master_staff', JSON.stringify(staffData));
+        const idx = staffList.findIndex(s => s.id === id);
+        staffList[idx].published = !staffList[idx].published;
+        localStorage.setItem('master_staff', JSON.stringify(staffList));
     }
 
-    function deleteStaff(id) {
-        if(confirm("Delete this staff member?")) {
-            staffData = staffData.filter(s => s.id !== id);
-            localStorage.setItem('master_staff', JSON.stringify(staffData));
-            render();
+    function deleteMember(id) {
+        if(confirm("هل أنت متأكد من حذف الموظف؟")) {
+            staffList = staffList.filter(s => s.id !== id);
+            localStorage.setItem('master_staff', JSON.stringify(staffList));
+            renderStaff();
         }
+    }
+
+    function saveCompany() {
+        const company = {
+            name: document.getElementById('set_name').value,
+            slogan: document.getElementById('set_slogan').value,
+            logo: tempLogoImg || document.getElementById('logoPreview').src,
+            address: document.getElementById('set_address').value,
+            email: document.getElementById('set_bEmail').value,
+            phone: document.getElementById('set_bPhone').value,
+            hours: document.getElementById('set_hours').value
+        };
+        localStorage.setItem('company_profile', JSON.stringify(company));
+        
+        // تحديث الهوية في القائمة الجانبية فوراً
+        document.getElementById('sideStoreName').innerText = company.name;
+        document.getElementById('sideLogo').src = company.logo;
+        document.getElementById('sideLogo').style.display = 'block';
+        alert("تم تحديث بيانات الشركة بنجاح");
     }
 
     function showTab(t) {
         document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
         document.getElementById('section-' + t).style.display = 'block';
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        event.currentTarget.classList.add('active');
     }
 
-    window.onload = render;
+    window.onload = () => {
+        renderStaff();
+        const cp = JSON.parse(localStorage.getItem('company_profile') || '{}');
+        if(cp.name) {
+            document.getElementById('set_name').value = cp.name;
+            document.getElementById('set_slogan').value = cp.slogan;
+            document.getElementById('logoPreview').src = cp.logo;
+            document.getElementById('set_address').value = cp.address;
+            document.getElementById('set_bEmail').value = cp.email;
+            document.getElementById('set_bPhone').value = cp.phone;
+            document.getElementById('set_hours').value = cp.hours;
+            document.getElementById('sideStoreName').innerText = cp.name;
+            document.getElementById('sideLogo').src = cp.logo;
+            document.getElementById('sideLogo').style.display = 'block';
+        }
+    };
 </script>
 </body>
 </html>
