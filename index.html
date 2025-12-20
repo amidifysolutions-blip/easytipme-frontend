@@ -6,10 +6,10 @@
     <title>Select Team | EazyTipMe</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* ستايلك الأصلي كما هو 100% */
+        /* الحفاظ على ستايلك الأصلي 100% */
         body { font-family: 'Inter', sans-serif; background-color: #f5f5f7; display: flex; justify-content: center; padding: 20px; margin: 0; flex-direction: column; align-items: center; }
         .main-card { background: white; width: 100%; max-width: 400px; padding: 30px; border-radius: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; box-sizing: border-box; position: relative; }
-        .brand-logo { width: 60px; height: 60px; border-radius: 12px; margin-bottom: 10px; object-fit: cover; background: #eee; }
+        .brand-logo { width: 60px; height: 60px; border-radius: 12px; margin-bottom: 10px; object-fit: contain; background: #eee; display: none; margin-left: auto; margin-right: auto; }
         h1 { font-size: 20px; font-weight: 700; margin: 0; color: #1d1d1f; }
         .sub-text { font-size: 13px; color: #86868b; margin: 5px 0 20px; }
         .main-question { font-size: 17px; font-weight: 600; margin: 25px 0 15px; color: #1d1d1f; line-height: 1.4; }
@@ -30,8 +30,8 @@
         .staff-card.selected { border-color: #000; background: #f9f9f9; }
         .avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 1px solid #eee; }
         .check-box { width: 22px; height: 22px; border: 2px solid #d2d2d7; border-radius: 6px; display: none; }
-        .staff-card.selected .check-box { background: #000; border-color: #000; display: block; position: relative; }
-        .staff-card.selected .check-box::after { content: '✓'; color: white; position: absolute; left: 4px; top: -1px; font-size: 14px; }
+        .staff-card.selected .check-box { background: #000 !important; border-color: #000 !important; position: relative; display: block; }
+        .staff-card.selected .check-box::after { content: '✓'; color: white; position: absolute; left: 4px; top: -1px; font-weight: bold; font-size: 14px; }
         .chevron { color: #c7c7cc; font-size: 20px; }
         #next-btn { background: #000; color: #fff; border: none; width: 100%; padding: 16px; border-radius: 14px; font-weight: 600; margin-top: 20px; cursor: pointer; display: none; }
         .footer-sig { margin-top: 40px; font-size: 10px; color: #aeaeb2; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; text-align: center; }
@@ -40,7 +40,7 @@
 <body>
 
 <div class="main-card">
-    <img id="bizLogo" src="" class="brand-logo" style="display:none;">
+    <img id="bizLogo" src="" class="brand-logo">
     <h1 id="bizName">Welcome</h1>
     <p class="sub-text" id="bizSlogan"></p>
 
@@ -74,7 +74,7 @@
     let isMulti = false;
     let selectedStaff = [];
     
-    // سحب البيانات المخزنة من الداشبورد
+    // جلب البيانات مع التأكد من مطابقة المفاتيح مع الداشبورد
     let staffData = JSON.parse(localStorage.getItem('staff_' + bizId) || '[]');
     let companyConfig = JSON.parse(localStorage.getItem('config_' + bizId) || '{}');
 
@@ -84,14 +84,14 @@
             return;
         }
 
-        // تحديث بروفايل الشركة (الاسم، السلوجن، اللوجو)
-        // أضفت احتمالية وجود المفتاح باسم name أو businessName لضمان القراءة
-        document.getElementById('bizName').innerText = companyConfig.name || companyConfig.businessName || "Our Store";
-        document.getElementById('bizSlogan').innerText = companyConfig.slogan || "Happy to serve you.";
+        // تحديث الهيدر: يقرأ الاسم أو الـ businessName المخزن في الداشبورد
+        const finalName = companyConfig.name || companyConfig.businessName;
+        document.getElementById('bizName').innerText = finalName || "Our Store";
+        document.getElementById('bizSlogan').innerText = companyConfig.slogan || "";
         
         if (companyConfig.logo) {
             document.getElementById('bizLogo').src = companyConfig.logo;
-            document.getElementById('bizLogo').style.display = 'inline-block';
+            document.getElementById('bizLogo').style.display = 'block';
         }
 
         renderStaff();
@@ -121,6 +121,7 @@
         `).join('');
     }
 
+    // [بقية الوظائف الأصلية الخاصة بك كما هي]
     function toggleMode() {
         isMulti = document.getElementById('multiModeToggle').checked;
         selectedStaff = [];
