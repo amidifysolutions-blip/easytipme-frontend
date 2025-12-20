@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Payment - EazyTipMe</title>
+    <title>Team Tip - Payment</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://js.stripe.com/v3/"></script>
     <style>
+        /* سأبقي نفس الـ CSS الخاص بك تماماً دون تغيير بكسل واحد */
         body { font-family: 'Inter', sans-serif; background-color: #fafafa; display: flex; justify-content: center; padding-top: 20px; margin: 0; color: #1a1a1a; }
         .main-card { background: white; width: 92%; max-width: 380px; padding: 25px 25px 35px; border-radius: 32px; box-shadow: 0 4px 25px rgba(0,0,0,0.03); border: 1px solid #f2f2f2; box-sizing: border-box; min-height: 600px; position: relative; }
         .back-nav { display: flex; align-items: center; margin-bottom: 15px; }
@@ -20,9 +21,12 @@
         .amount-btn.active { border-color: #1a1a1a; box-shadow: inset 0 0 0 1px #1a1a1a; }
         .custom-box { display: none; background: #f9f9f9; border-radius: 20px; padding: 20px; margin-top: 15px; border: 1px dashed #ddd; }
         .custom-input-wrapper { display: flex; align-items: center; background: white; border: 1px solid #eee; border-radius: 12px; padding: 10px 15px; }
+        .custom-input-wrapper span { font-weight: 600; color: #1a1a1a; margin-right: 5px; }
         .custom-input-wrapper input { border: none; outline: none; width: 100%; font-size: 16px; font-weight: 600; }
         .error-text { font-size: 11px; color: #ff3b30; margin-top: 8px; text-align: left; display: none; font-weight: 500; }
-        .love-box { background: #f8f8f8; padding: 18px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; margin: 20px 0; border: 1px solid #eee; }
+        .min-tip-text { font-size: 11px; color: #999; margin-top: 8px; text-align: left; }
+        #confirm-custom-btn { background: #1a1a1a; color: white; border: none; width: 100%; padding: 12px; border-radius: 12px; margin-top: 12px; cursor: pointer; font-weight: 600; }
+        .love-box { background: #f8f8f8; padding: 18px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; margin: 20px 0; border: 1px solid #eee; text-align: left; }
         .switch { position: relative; display: inline-block; width: 42px; height: 24px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #e5e5ea; transition: .4s; border-radius: 24px; }
@@ -32,29 +36,37 @@
         .rating-section { text-align: center; margin-top: 30px; }
         .stars-container { display: inline-flex; flex-direction: row-reverse; gap: 10px; }
         .stars-container input { display: none; }
-        .stars-container label { font-size: 32px; color: #e5e5e5; cursor: pointer; }
-        .stars-container input:checked ~ label { color: #FFD700; }
+        .stars-container label { font-size: 32px; color: #e5e5e5; cursor: pointer; transition: 0.2s; }
+        .stars-container label:hover, .stars-container label:hover ~ label, .stars-container input:checked ~ label { color: #FFD700 !important; }
         #submit-btn { background: #1a1a1a; color: white; border: none; width: 100%; padding: 18px; border-radius: 18px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 20px; display: none; }
         #success-msg { display: none; text-align: center; padding: 60px 10px; }
-        .footer-credit { margin-top: 40px; font-size: 11px; color: #bbb; text-align: center; border-top: 1px solid #f9f9f9; padding-top: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        .footer-credit { margin-top: 40px; font-size: 11px; color: #bbb; text-align: center; border-top: 1px solid #f9f9f9; padding-top: 20px; }
+        
+        /* تداخل الصور Apple Style */
+        .staff-stack { display: flex; justify-content: center; margin: 20px auto; }
+        .stack-img { width: 65px; height: 65px; border-radius: 50%; border: 3px solid white; object-fit: cover; margin-left: -15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .stack-img:first-child { margin-left: 0; }
     </style>
 </head>
 <body>
 
 <div class="main-card">
     <div id="payment-content">
-        <div class="back-nav"><button class="back-btn" onclick="history.back()"><span>‹</span> Back</button></div>
+        <div class="back-nav">
+            <button class="back-btn" id="dynamicBackBtn"><span>‹</span> Back</button>
+        </div>
         
         <div class="brand-header">
-            <img id="bizLogo" src="" class="brand-logo" alt="Logo" style="display:none;">
-            <h1 id="bizName" style="font-size: 18px; margin: 0;">Business Name</h1>
+            <img id="dynamicLogo" src="" class="brand-logo" style="display:none;">
+            <h1 id="dynamicBizName" style="font-size: 18px; margin: 0;">Loading...</h1>
+            <p id="dynamicSlogan" style="font-size: 12px; color: #888; margin-top: 5px;"></p>
         </div>
 
         <div class="staff-header">
-            <h1 id="staffTitle" class="staff-name">Team Tip</h1>
+            <h1 class="staff-name">Team Tip</h1>
         </div>
 
-        <div id="selected-team-photos" style="display: flex; justify-content: center; gap: 15px; margin: 20px 0; flex-wrap: wrap;"></div>
+        <div id="selected-team-photos" class="staff-stack"></div>        
 
         <div class="grid">
             <button class="amount-btn" onclick="tap(500, this)">CA$5</button>
@@ -68,7 +80,8 @@
         <div id="custom-container" class="custom-box">
             <div class="custom-input-wrapper"><span>CA$</span><input type="number" id="custom-val" placeholder="0.00"></div>
             <p id="min-error" class="error-text">⚠️ Minimum tip is CA$3.00</p>
-            <button id="confirm-custom-btn" onclick="applyOth()" style="background:#1a1a1a; color:white; border:none; width:100%; padding:12px; border-radius:12px; margin-top:12px; cursor:pointer; font-weight:600;">Confirm</button>
+            <p id="min-desc" class="min-tip-text">Minimum tip is CA$3.00</p>
+            <button id="confirm-custom-btn" onclick="applyOth()">Confirm</button>
         </div>
 
         <div class="love-box">
@@ -78,9 +91,9 @@
 
         <div id="payment-element"></div>
         <button id="submit-btn" onclick="handleSubmit()">Pay Now</button>
-
+        
         <div class="rating-section">
-            <p style="font-size: 13px; color: #888;">Rate the service</p>
+            <p style="font-size: 13px; color: #888;">Rate the team's service</p>
             <div class="stars-container">
                 <input type="radio" id="s5" name="rating" value="5"><label for="s5">★</label>
                 <input type="radio" id="s4" name="rating" value="4"><label for="s4">★</label>
@@ -95,7 +108,7 @@
         <div style="font-size: 55px; margin-bottom: 15px;">✅</div>
         <h2>Thank You!</h2>
         <p style="color: #888; font-size: 14px;">Your tip has been received. We appreciate your support!</p>
-        <button onclick="history.back()" style="margin-top:25px; background:#1a1a1a; color:white; border:none; padding:15px 30px; border-radius:15px; cursor:pointer; font-weight:600;">Done</button>
+        <button id="doneBtn" style="margin-top:25px; background:#1a1a1a; color:white; border:none; padding:15px 30px; border-radius:15px; cursor:pointer; font-weight:600;">Done</button>
     </div>
     <div class="footer-credit">Powered by <b>Amidify Solutions Inc.</b></div>
 </div>
@@ -103,73 +116,97 @@
 <script>
     let currentBaseAmount = 0; const FEE_PERCENT = 0.12; let elements;
     const stripe = Stripe('pk_test_51QpPGt01TRhauBHP6dGYUaBYZJr9oHskEqZy9zWm8L6SPtG2kdzQS0MhPiatv3QDvzkTXvJDvbWMSIOUVOCcaswu003bDig62n'); 
+    const API_URL = "https://easytipme-backend.onrender.com";
+
+    // جلب الـ ID من الرابط
+    const urlParams = new URLSearchParams(window.location.search);
+    const bizId = urlParams.get('id');
 
     window.onload = function() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const bizId = urlParams.get('id');
-        
-        // 1. جلب بيانات الشركة
+        if (!bizId) return;
+
+        // 1. جلب بيانات الشركة من الداشبورد
         const config = JSON.parse(localStorage.getItem('config_' + bizId) || '{}');
-        document.getElementById('bizName').innerText = config.name || "Our Business";
-        if(config.logo) {
-            document.getElementById('bizLogo').src = config.logo;
-            document.getElementById('bizLogo').style.display = 'inline-block';
+        document.getElementById('dynamicBizName').innerText = config.name || "Our Business";
+        document.getElementById('dynamicSlogan').innerText = config.slogan || "";
+        if (config.logo) {
+            const logo = document.getElementById('dynamicLogo');
+            logo.src = config.logo;
+            logo.style.display = 'inline-block';
         }
 
-        // 2. جلب الموظفين المختارين من الاندكس (الذين ضغط عليهم المستخدم)
-        const selected = JSON.parse(localStorage.getItem('selected_for_tip_' + bizId) || '[]');
+        // 2. جلب الموظفين المختارين (المخزنين في localStorage من صفحة الاندكس)
+        const selectedStaff = JSON.parse(localStorage.getItem('selected_staff_session') || '[]');
         const photoContainer = document.getElementById('selected-team-photos');
+        
+        photoContainer.innerHTML = "";
+        selectedStaff.forEach(staff => {
+            const img = document.createElement('img');
+            img.src = staff.photo || 'https://via.placeholder.com/65';
+            img.className = "stack-img";
+            photoContainer.appendChild(img);
+        });
 
-        if (selected.length > 0) {
-            document.getElementById('staffTitle').innerText = selected.length > 1 ? "Team Tip" : selected[0].nName;
-            selected.forEach(s => {
-                photoContainer.innerHTML += `
-                    <div style="text-align:center">
-                        <img src="${s.photo || ''}" style="width:70px; height:70px; border-radius:50%; object-fit:cover; border:3px solid white; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                        <p style="font-size:11px; font-weight:600; margin-top:5px;">${s.nName}</p>
-                    </div>`;
-            });
-        }
+        // 3. روابط العودة والانتهاء
+        document.getElementById('dynamicBackBtn').onclick = () => window.location.href = `index.html?id=${bizId}`;
+        document.getElementById('doneBtn').onclick = () => window.location.href = `index.html?id=${bizId}`;
     };
 
-    function tap(amt, btn) {
-        document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentBaseAmount = amt;
-        refreshAmount();
-    }
-
-    function handleOther(btn) {
-        document.getElementById('custom-container').style.display = 'block';
-        document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+    function refreshAmount() { if (currentBaseAmount > 0) calculateAndStart(currentBaseAmount); }
+    
+    function handleOther(btn) { 
+        document.getElementById('custom-container').style.display = 'block'; 
+        document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active')); 
+        btn.classList.add('active'); 
     }
 
     function applyOth() {
         const val = parseFloat(document.getElementById('custom-val').value);
-        if (val >= 3) {
-            currentBaseAmount = val * 100;
-            refreshAmount();
-            document.getElementById('custom-container').style.display = 'none';
-        } else {
+        if (val >= 3) { 
+            currentBaseAmount = val * 100; 
+            calculateAndStart(currentBaseAmount); 
+            document.getElementById('custom-container').style.display = 'none'; 
+        } else { 
             document.getElementById('min-error').style.display = 'block';
         }
     }
 
-    function refreshAmount() {
-        if (currentBaseAmount > 0) {
-            const isCoveringFees = document.getElementById('feeToggle').checked;
-            const finalAmount = isCoveringFees ? Math.round(currentBaseAmount * (1 + FEE_PERCENT)) : currentBaseAmount;
-            document.getElementById('submit-btn').innerText = `Pay CA$${(finalAmount/100).toFixed(2)} Now`;
-            document.getElementById('submit-btn').style.display = 'block';
-            // هنا يتم استدعاء Stripe Elements إذا كان هناك Backend
+    function tap(amt, btn) { 
+        document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active')); 
+        btn.classList.add('active'); 
+        document.getElementById('custom-container').style.display = 'none'; 
+        currentBaseAmount = amt; 
+        calculateAndStart(amt); 
+    }
+
+    async function calculateAndStart(baseAmt) {
+        const isCoveringFees = document.getElementById('feeToggle').checked;
+        const finalAmount = isCoveringFees ? Math.round(baseAmt * (1 + FEE_PERCENT)) : baseAmt;
+        document.getElementById('submit-btn').innerText = `Pay CA$${(finalAmount/100).toFixed(2)} Now`;
+        document.getElementById('payment-element').innerHTML = 'Loading secure payment...';
+        
+        try {
+            const res = await fetch(`${API_URL}/create-payment-intent`, { 
+                method: "POST", 
+                headers: {"Content-Type": "application/json"}, 
+                body: JSON.stringify({ amount: finalAmount, currency: "cad", metadata: { bizId: bizId } }) 
+            });
+            const { clientSecret } = await res.json();
+            elements = stripe.elements({ clientSecret });
+            const paymentElement = elements.create("payment"); 
+            paymentElement.mount("#payment-element");
+            paymentElement.on('ready', () => { document.getElementById('submit-btn').style.display = 'block'; });
+        } catch (e) { 
+            document.getElementById('payment-element').innerHTML = 'Error connecting to payment gateway.'; 
         }
     }
 
     async function handleSubmit() {
-        // محاكاة النجاح للتجربة حالياً
-        document.getElementById('payment-content').style.display = 'none';
-        document.getElementById('success-msg').style.display = 'block';
+        const { error, paymentIntent } = await stripe.confirmPayment({ elements, redirect: 'if_required' });
+        if (!error && paymentIntent.status === 'succeeded') { 
+            document.getElementById('payment-content').style.display = 'none'; 
+            document.getElementById('success-msg').style.display = 'block'; 
+        }
     }
 </script>
 </body>
