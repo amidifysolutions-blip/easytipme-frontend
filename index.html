@@ -14,6 +14,11 @@
         .main-question { font-size: 18px; font-weight: 700; margin: 25px 0 15px; }
         
         /* Selection Header */
+        <div style="margin: 15px 0; position: relative;">
+    <input type="text" id="staffSearch" onkeyup="filterStaff()" placeholder="Search by name..." 
+        style="width: 100%; padding: 14px 15px 14px 40px; border-radius: 14px; border: 1px solid #efeff4; background: #f2f2f7; font-size: 15px; outline: none; box-sizing: border-box;">
+    <span style="position: absolute; left: 15px; top: 14px; color: #999;">🔍</span>
+</div>
         .selection-header { background: #f2f2f7; padding: 12px 15px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .switch { position: relative; width: 42px; height: 24px; }
         .switch input { opacity: 0; width: 0; height: 0; }
@@ -94,7 +99,20 @@
             </div>
         `).join('');
     }
-
+function filterStaff() {
+    let input = document.getElementById('staffSearch').value.toLowerCase();
+    let cards = document.querySelectorAll('.staff-card');
+    
+    cards.forEach(card => {
+        // البحث يعتمد على الـ Nickname المكتوب في الـ h3
+        let name = card.querySelector('h3').innerText.toLowerCase();
+        if (name.includes(input)) {
+            card.style.display = "flex";
+        } else {
+            card.style.display = "none";
+        }
+    });
+}
     function toggleMode() {
         isMulti = document.getElementById('multiModeToggle').checked;
         selectedStaff = [];
