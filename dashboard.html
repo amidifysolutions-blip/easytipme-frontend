@@ -56,6 +56,28 @@
                 <span id="uploadText">Click to Upload Member Photo</span>
                 <input type="file" id="imgInput" hidden onchange="previewImage(this)">
             </div>
+            <div id="section-trans" class="section" style="display:none; padding:20px; background:white; border-radius:15px; margin-top:20px;">
+    <h2 style="font-size:18px; font-weight:700;">Transaction Log</h2>
+    <div id="transaction-list">
+        <p style="color:#888;">No transactions recorded yet.</p>
+    </div>
+</div>
+
+<div id="section-set" class="section" style="display:none; padding:20px; background:white; border-radius:15px; margin-top:20px;">
+    <h2 style="font-size:18px; font-weight:700;">Store Settings (Mouneh)</h2>
+    <div style="margin-top:20px;">
+        <label style="display:block; font-size:13px; margin-bottom:5px;">Store Name</label>
+        <input type="text" id="storeName" value="Mouneh Lebanese Gourmet Store" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:15px;">
+        
+        <label style="display:block; font-size:13px; margin-bottom:5px;">System Language</label>
+        <select style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+            <option>English (Default)</option>
+            <option>Arabic</option>
+        </select>
+        
+        <button onclick="alert('Settings Saved Locally!')" style="margin-top:20px; background:#000; color:#fff; border:none; padding:12px 25px; border-radius:8px; cursor:pointer; width:100%;">Save Store Profile</button>
+    </div>
+</div>
 
             <div class="form-grid">
                 <input type="hidden" id="editId">
