@@ -3,58 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Team | EazyTipMe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* أنا أستخدم هنا نفس التنسيق الذي ظهر في صورتك */
-        body { font-family: 'Inter', sans-serif; background-color: #f5f5f7; margin: 0; display: flex; flex-direction: column; align-items: center; }
-        .biz-name-header { margin-top: 50px; font-size: 24px; font-weight: bold; color: #000; }
-        .staff-container { margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; width: 90%; max-width: 1000px; }
-        
-        /* هذا هو "المود" الخاص بك للكارت */
-        .specialist-card { background: #fff; border-radius: 20px; padding: 20px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .specialist-img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; background: #eee; }
-        .specialist-name { font-weight: 700; margin-top: 10px; font-size: 14px; }
-        .specialist-job { color: #86868b; font-size: 12px; }
-        
-        .footer-sig { margin-top: 100px; font-size: 10px; color: #aeaeb2; text-transform: uppercase; letter-spacing: 1px; }
+        /* الحفاظ على ستايلك الأصلي 100% كما هو في الكود الذي أرسلته */
+        body { font-family: 'Inter', sans-serif; background-color: #f5f5f7; display: flex; justify-content: center; padding: 20px; margin: 0; flex-direction: column; align-items: center; }
+        .main-card { background: white; width: 100%; max-width: 400px; padding: 30px; border-radius: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; box-sizing: border-box; position: relative; }
+        .brand-logo { width: 60px; height: 60px; border-radius: 12px; margin-bottom: 10px; object-fit: cover; background: #eee; }
+        h1 { font-size: 20px; font-weight: 700; margin: 0; color: #1d1d1f; }
+        .sub-text { font-size: 13px; color: #86868b; margin: 5px 0 20px; }
+        .main-question { font-size: 17px; font-weight: 600; margin: 25px 0 15px; color: #1d1d1f; line-height: 1.4; }
+        .search-container { position: relative; margin-bottom: 20px; }
+        .search-container input { width: 100%; padding: 12px 15px 12px 40px; border-radius: 12px; border: 1px solid #e5e5ea; background: #f5f5f7; outline: none; box-sizing: border-box; font-size: 15px; }
+        .search-icon { position: absolute; left: 14px; top: 12px; color: #999; }
+        .selection-header { display: flex; justify-content: space-between; align-items: center; background: #f5f5f7; padding: 12px 15px; border-radius: 12px; margin-bottom: 10px; font-size: 14px; }
+        .switch { position: relative; width: 42px; height: 24px; display: inline-block; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #e5e5ea; transition: .3s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 2px; bottom: 2px; background-color: white; transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background-color: #34c759; }
+        input:checked + .slider:before { transform: translateX(18px); }
+        #select-all-btn { display: none; text-align: right; margin-bottom: 15px; }
+        #select-all-btn span { color: #0071e3; font-size: 13px; font-weight: 600; cursor: pointer; }
+        .staff-list { display: flex; flex-direction: column; gap: 12px; }
+        .staff-card { display: flex; align-items: center; justify-content: space-between; padding: 15px; border: 1px solid #f2f2f2; border-radius: 16px; cursor: pointer; transition: 0.2s; }
+        .staff-card.selected { border-color: #000; background: #f9f9f9; }
+        .avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 1px solid #eee; }
+        .check-box { width: 22px; height: 22px; border: 2px solid #d2d2d7; border-radius: 6px; position: relative; display: block; }
+        .staff-card.selected .check-box { background: #000 !important; border-color: #000 !important; }
+        .staff-card.selected .check-box::after { content: '✓'; color: white; position: absolute; left: 4px; top: -1px; font-weight: bold; font-size: 14px; }
+        .chevron { color: #c7c7cc; font-size: 20px; }
+        #next-btn { background: #000; color: #fff; border: none; width: 100%; padding: 16px; border-radius: 14px; font-weight: 600; margin-top: 20px; cursor: pointer; display: none; }
+        .footer-sig { margin-top: 40px; font-size: 10px; color: #aeaeb2; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; text-align: center; }
     </style>
 </head>
 <body>
 
-    <div class="biz-name-header" id="businessName">Loading...</div>
+<div class="main-card">
+    <img id="bizLogo" src="" class="brand-logo" onerror="this.style.display='none'">
+    <h1 id="bizName">Welcome</h1>
+    <p class="sub-text" id="bizSlogan"></p>
 
-    <div class="staff-container" id="staffGrid">
-        </div>
+    <div class="main-question">Please choose a member of our team you would like to tip</div>
 
-    <div class="footer-sig">POWER BY AMIDIFY SOLUTIONS INC</div>
+    <div class="search-container">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="staffSearch" onkeyup="filterStaff()" placeholder="Search by name...">
+    </div>
+
+    <div class="selection-header">
+        <span style="font-weight: 500;">Select multiple specialists</span>
+        <label class="switch">
+            <input type="checkbox" id="multiModeToggle" onchange="toggleMode()">
+            <span class="slider"></span>
+        </label>
+    </div>
+
+    <div id="select-all-btn"><span onclick="selectAll()">Select All</span></div>
+
+    <div class="staff-list" id="stafflist"></div>
+    <button id="next-btn" onclick="goToMultiple()">Next</button>
+</div>
+
+<div class="footer-sig">POWER BY AMIDIFY SOLUTIONS INC</div>
 
 <script>
-    // هذا هو الجزء الذي يقرأ "المود" ويجعله يسحب البيانات
-    window.onload = () => {
-        const params = new URLSearchParams(window.location.search);
-        const bizId = params.get('id');
+    const params = new URLSearchParams(window.location.search);
+    const bizId = params.get('id');
 
-        if (bizId) {
-            const config = JSON.parse(localStorage.getItem('config_' + bizId) || '{}');
-            const staff = JSON.parse(localStorage.getItem('staff_' + bizId) || '[]');
+    let isMulti = false;
+    let selectedStaff = [];
+    
+    // جلب البيانات بناءً على الـ ID
+    let staffData = JSON.parse(localStorage.getItem('staff_' + bizId) || '[]');
+    let companyConfig = JSON.parse(localStorage.getItem('config_' + bizId) || '{}');
 
-            // سحب اسم الشركة للسرفر
-            document.getElementById('businessName').innerText = config.name || "Business Name";
-
-            const grid = document.getElementById('staffGrid');
-            grid.innerHTML = ""; // تفريغ المكان لبدء السحب
-
-            staff.forEach(s => {
-                // صنع الكارت بنفس "المود" والتصميم الخاص بك
-                grid.innerHTML += `
-                    <div class="specialist-card">
-                        <img src="${s.photo || ''}" class="specialist-img">
-                        <div class="specialist-name">${s.nName}</div>
-                        <div class="specialist-job">${s.job}</div>
+    function renderStaff() {
+        const list = document.getElementById('stafflist');
+        if (!list) return;
+        
+        list.innerHTML = staffData.map(s => {
+            // معالجة رابط الصورة سواء كان photo أو img
+            const imageSrc = s.photo || s.img || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+            return `
+                <div class="staff-card" id="card-${s.id}" onclick="handleSelect('${s.id}', this)">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <img src="${imageSrc}" class="avatar">
+                        <div style="text-align:left;">
+                            <h3 style="margin:0; font-size:15px; font-weight:600;">${s.nName}</h3>
+                            <p style="margin:2px 0 0; font-size:12px; color:#86868b;">${s.job}</p>
+                        </div>
                     </div>
-                `;
-            });
+                    <div class="check-box" style="display: ${isMulti ? 'block' : 'none'}"></div>
+                    <div class="chevron" style="display: ${isMulti ? 'none' : 'block'}">›</div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    window.onload = () => {
+        if (bizId) {
+            // تحديث بيانات الشركة
+            document.getElementById('bizName').innerText = companyConfig.name || "Our Store";
+            document.getElementById('bizSlogan').innerText = companyConfig.slogan || "";
+            if (companyConfig.logo) {
+                document.getElementById('bizLogo').src = companyConfig.logo;
+                document.getElementById('bizLogo').style.display = 'inline-block';
+            }
+            renderStaff();
+        } else {
+            document.getElementById('bizName').innerText = "Business Not Found";
         }
     };
+
+    function toggleMode() {
+        isMulti = document.getElementById('multiModeToggle').checked;
+        selectedStaff = [];
+        document.getElementById('select-all-btn').style.display = isMulti ? 'block' : 'none';
+        document.getElementById('next-btn').style.display = 'none';
+        renderStaff();
+    }
+
+    function filterStaff() {
+        let val = document.getElementById('staffSearch').value.toLowerCase();
+        document.querySelectorAll('.staff-card').forEach(card => {
+            let name = card.querySelector('h3').innerText.toLowerCase();
+            card.style.display = name.includes(val) ? 'flex' : 'none';
+        });
+    }
+
+    function handleSelect(id, element) {
+        const person = staffData.find(s => s.id == id);
+        if (!isMulti) {
+            localStorage.setItem('selectedStaff', JSON.stringify([{name: person.nName, image: person.photo || person.img}]));
+            window.location.href = 'multiple.html?id=' + bizId;
+            return;
+        }
+        element.classList.toggle('selected');
+        const idx = selectedStaff.findIndex(s => s.id == id);
+        if (idx > -1) selectedStaff.splice(idx, 1);
+        else selectedStaff.push({name: person.nName, image: person.photo || person.img, id: id});
+        document.getElementById('next-btn').style.display = selectedStaff.length > 0 ? 'block' : 'none';
+    }
+
+    function selectAll() {
+        selectedStaff = [...staffData.map(s => ({name: s.nName, image: s.photo || s.img, id: s.id}))];
+        renderStaff();
+        document.querySelectorAll('.staff-card').forEach(card => card.classList.add('selected'));
+        document.getElementById('next-btn').style.display = 'block';
+    }
+
+    function goToMultiple() {
+        localStorage.setItem('selectedStaff', JSON.stringify(selectedStaff));
+        window.location.href = 'multiple.html?id=' + bizId;
+    }
 </script>
 </body>
 </html>
