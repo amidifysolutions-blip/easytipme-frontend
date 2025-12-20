@@ -3,251 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mouneh Admin - Global Dashboard</title>
+    <title>Business Dashboard | Smart Portal</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --apple-bg: #F5F5F7; --apple-blue: #007AFF; --apple-red: #FF3B30; --apple-green: #34C759; }
-        body { font-family: 'Inter', -apple-system, sans-serif; margin: 0; display: flex; height: 100vh; background: var(--apple-bg); color: #1D1D1F; overflow: hidden; }
+        :root { --apple-bg: #F5F5F7; --apple-blue: #007AFF; --apple-green: #34C759; }
+        body { font-family: 'Inter', sans-serif; margin: 0; display: flex; height: 100vh; background: var(--apple-bg); overflow: hidden; }
         
-        /* Sidebar */
         .sidebar { width: 260px; background: #000; color: white; padding: 30px 20px; display: flex; flex-direction: column; }
         .nav-item { padding: 14px 18px; cursor: pointer; border-radius: 12px; margin-bottom: 8px; transition: 0.3s; opacity: 0.6; font-size: 14px; }
-        .nav-item:hover { background: #222; opacity: 1; transform: translateX(5px); }
-        .nav-item.active { background: #333; opacity: 1; font-weight: 600; }
+        .nav-item.active, .nav-item:hover { background: #333; opacity: 1; font-weight: 600; }
 
         .main { flex: 1; padding: 40px; overflow-y: auto; }
-        .section { display: none; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .card { background: #FFF; padding: 30px; border-radius: 24px; box-shadow: 0 4px 24px rgba(0,0,0,0.04); margin-bottom: 25px; border: 1px solid #E5E5E7; }
+        .card { background: #FFF; padding: 30px; border-radius: 24px; box-shadow: 0 4px 24px rgba(0,0,0,0.04); margin-bottom: 25px; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
         
-        label { display: block; font-size: 11px; font-weight: 700; margin-bottom: 8px; color: #86868B; text-transform: uppercase; }
-        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #D2D2D7; border-radius: 12px; font-size: 14px; margin-bottom: 15px; background: #FBFBFD; outline: none; box-sizing: border-box; }
-        
-        /* Working Days Buttons */
-        .days-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px; }
-        .day-btn { padding: 8px 12px; border: 1px solid #D2D2D7; border-radius: 10px; cursor: pointer; font-size: 11px; background: #FFF; transition: 0.2s; }
-        .day-btn.selected { background: #000; color: #FFF; border-color: #000; }
+        label { display: block; font-size: 11px; font-weight: 700; color: #86868B; text-transform: uppercase; margin-bottom: 8px; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #D2D2D7; border-radius: 12px; margin-bottom: 15px; outline: none; box-sizing: border-box; }
 
-        /* Publish Switch */
-        .switch { position: relative; display: inline-block; width: 42px; height: 22px; }
+        .day-btn { padding: 8px 12px; border: 1px solid #D2D2D7; border-radius: 8px; cursor: pointer; font-size: 11px; margin-right: 4px; background: #FFF; }
+        .day-btn.selected { background: #000; color: #FFF; }
+
+        .btn-save { background: #000; color: #FFF; border: none; padding: 16px; border-radius: 14px; width: 100%; cursor: pointer; font-weight: 600; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th { text-align: left; color: #86868B; font-size: 10px; padding: 12px; border-bottom: 1px solid #E5E5E7; }
+        td { padding: 12px; border-bottom: 1px solid #F5F5F7; font-size: 13px; }
+        
+        .avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: #eee; }
+        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
         .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 20px; }
         input:checked + .slider { background-color: var(--apple-green); }
-
-        .btn-main { background: #000; color: #FFF; border: none; padding: 16px; border-radius: 14px; width: 100%; cursor: pointer; font-weight: 600; font-size: 16px; transition: 0.3s; }
-        .btn-main:hover { background: #333; }
-
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th { text-align: left; color: #86868B; font-size: 10px; padding: 15px; border-bottom: 1px solid #E5E5E7; }
-        td { padding: 15px; border-bottom: 1px solid #F5F5F7; font-size: 13px; }
-        
-        .img-prev { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background: #f0f0f2; margin-top: 5px; border: 1px solid #eee; }
-        .logo-prev { width: 80px; height: 80px; border-radius: 15px; object-fit: contain; background: #fff; border: 1px solid #eee; }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
     <div style="text-align: center; margin-bottom: 40px;">
-        <img id="sideLogo" src="" style="width: 55px; border-radius: 14px; display: none; margin: 0 auto 10px;">
-        <h2 id="sideStoreName" style="font-size: 18px; margin: 0;">Admin</h2>
+        <img id="displayLogo" src="" style="width: 50px; border-radius: 12px; display:none; margin: 0 auto 10px;">
+        <h2 id="displayName" style="font-size: 18px; margin: 0;">Business</h2>
     </div>
-    <div class="nav-item active" onclick="showTab('reg')">Team Management</div>
-    <div class="nav-item" onclick="showTab('set')">Company Profile</div>
-    <div style="margin-top:auto; color:var(--apple-red); cursor:pointer; font-size:13px; padding:10px;" onclick="if(confirm('Clear all data?')){localStorage.clear(); location.reload();}">Reset All Data</div>
+    <div class="nav-item active">Team Management</div>
+    <div class="nav-item">Settings & Profile</div>
+    <div style="margin-top:auto; color:red; cursor:pointer; font-size:12px;" onclick="location.href='master-control.html'">← Back to Master Panel</div>
 </div>
 
 <div class="main">
-    <div id="section-reg" class="section" style="display:block;">
-        <div class="card">
-            <h3 style="margin-top:0;">Register New Specialist</h3>
-            <div class="grid">
-                <div>
-                    <label>Public Nickname</label> <input type="text" id="nName" placeholder="e.g. Shani">
-                    <label>Official Real Name</label> <input type="text" id="rName">
-                    <label>Contact Email</label> <input type="email" id="email">
-                    <label>Phone Number</label> <input type="text" id="phone">
-                    <label>Specialist Photo</label> 
-                    <input type="file" id="staffImg" accept="image/*" onchange="preview(this, 'sPrev')">
-                    <img id="sPrev" class="img-prev" src="">
-                </div>
-                <div>
-                    <label>Job Title</label> <input type="text" id="job" placeholder="e.g. Nail Technician">
-                    <label>Working Days</label>
-                    <div class="days-row" id="daysPicker">
-                        <div class="day-btn" onclick="this.classList.toggle('selected')">Mon</div>
-                        <div class="day-btn" onclick="this.classList.toggle('selected')">Tue</div>
-                        <div class="day-btn" onclick="this.classList.toggle('selected')">Wed</div>
-                        <div class="day-btn" onclick="this.classList.toggle('selected')">Thu</div>
-                        <div class="day-btn" onclick="this.classList.toggle('selected')">Fri</div>
-                        <div class="day-btn" onclick="this.classList.toggle('selected')">Sat</div>
-                        <div class="day-btn" onclick="this.classList.toggle('selected')">Sun</div>
-                    </div>
-                    <label>Shift 1 (Standard)</label>
-                    <div style="display:flex; gap:10px;">
-                        <input type="time" id="s1_s"> <input type="time" id="s1_e">
-                    </div>
-                    <label>Shift 2 (Optional)</label>
-                    <div style="display:flex; gap:10px;">
-                        <input type="time" id="s2_s"> <input type="time" id="s2_e">
-                    </div>
-                </div>
+    <div class="card">
+        <h3>Register Specialist for <span id="targetStore">Store</span></h3>
+        <div class="grid">
+            <div>
+                <label>Photo</label>
+                <input type="file" onchange="handleImg(this)">
+                <label>Nickname</label> <input type="text" id="nName">
+                <label>Job Title</label> <input type="text" id="job">
             </div>
-            <button class="btn-main" onclick="saveStaff()">Register Specialist</button>
+            <div>
+                <label>Working Days</label>
+                <div id="daysPicker">
+                    <span class="day-btn" onclick="this.classList.toggle('selected')">Mon</span>
+                    <span class="day-btn" onclick="this.classList.toggle('selected')">Tue</span>
+                    <span class="day-btn" onclick="this.classList.toggle('selected')">Wed</span>
+                    <span class="day-btn" onclick="this.classList.toggle('selected')">Thu</span>
+                    <span class="day-btn" onclick="this.classList.toggle('selected')">Fri</span>
+                    <span class="day-btn" onclick="this.classList.toggle('selected')">Sat</span>
+                    <span class="day-btn" onclick="this.classList.toggle('selected')">Sun</span>
+                </div>
+                <label style="margin-top:15px;">Shift 1</label>
+                <div style="display:flex; gap:5px;"><input type="time" id="s1s"> <input type="time" id="s1e"></div>
+            </div>
         </div>
-
-        <div class="card">
-            <table>
-                <thead>
-                    <tr><th>Photo</th><th>Name & Job</th><th>Schedule & Shifts</th><th>Publish</th><th>Actions</th></tr>
-                </thead>
-                <tbody id="staffTable"></tbody>
-            </table>
-        </div>
+        <button class="btn-save" onclick="saveStaff()">Add to Team</button>
     </div>
 
-    <div id="section-set" class="section">
-        <div class="card">
-            <h3>Public Business Identity</h3>
-            <div class="grid">
-                <div>
-                    <label>Business Name</label> <input type="text" id="set_name" placeholder="Mouneh Store">
-                    <label>Slogan (Max 90 chars)</label> <textarea id="set_slogan" maxlength="90"></textarea>
-                </div>
-                <div>
-                    <label>Official Company Logo</label>
-                    <input type="file" id="logoFile" accept="image/*" onchange="preview(this, 'lPrev')">
-                    <img id="lPrev" class="logo-prev" src="">
-                </div>
-            </div>
-        </div>
-
-        <div class="card" style="border-left: 5px solid #000;">
-            <h3>Official Admin Info (Private)</h3>
-            <div class="grid">
-                <div>
-                    <label>Legal Address</label> <input type="text" id="set_address">
-                    <label>Business Email</label> <input type="email" id="set_bEmail">
-                </div>
-                <div>
-                    <label>Business Phone</label> <input type="text" id="set_bPhone">
-                    <label>Operating Hours</label> <input type="text" id="set_hours" placeholder="e.g. 9 AM - 10 PM">
-                </div>
-            </div>
-            <button class="btn-main" onclick="saveCompany()">Update Global Profile</button>
-        </div>
+    <div class="card">
+        <table>
+            <thead>
+                <tr><th>Staff</th><th>Job</th><th>Shift</th><th>Published</th><th>Action</th></tr>
+            </thead>
+            <tbody id="staffTable"></tbody>
+        </table>
     </div>
 </div>
 
 <script>
-    let staffList = JSON.parse(localStorage.getItem('master_staff') || '[]');
-    let sImg = "", lImg = "";
+    let staffData = JSON.parse(localStorage.getItem('master_staff') || '[]');
+    let currentImg = "";
 
-    function preview(input, id) {
-        const r = new FileReader();
-        r.onload = (e) => {
-            document.getElementById(id).src = e.target.result;
-            if(id === 'sPrev') sImg = e.target.result;
-            if(id === 'lPrev') lImg = e.target.result;
-        };
-        if(input.files[0]) r.readAsDataURL(input.files[0]);
+    // الربط الذكي مع الماستر
+    function syncWithMaster() {
+        const entities = JSON.parse(localStorage.getItem('global_entities') || '[]');
+        const currentBiz = entities[entities.length - 1]; // جلب آخر شركة سجلتها في الماستر كتجربة
+        
+        if(currentBiz) {
+            document.getElementById('displayName').innerText = currentBiz.name;
+            document.getElementById('targetStore').innerText = currentBiz.name;
+        }
+    }
+
+    function handleImg(input) {
+        const reader = new FileReader();
+        reader.onload = (e) => currentImg = e.target.result;
+        reader.readAsDataURL(input.files[0]);
     }
 
     function saveStaff() {
         const name = document.getElementById('nName').value;
-        if(!name) { alert("Please enter a name"); return; }
+        if(!name) return;
+
         const member = {
             id: Date.now(),
-            nName: name, rName: document.getElementById('rName').value,
-            email: document.getElementById('email').value, phone: document.getElementById('phone').value,
+            nName: name,
             job: document.getElementById('job').value,
-            days: Array.from(document.querySelectorAll('#daysPicker .day-btn.selected')).map(d => d.innerText),
-            s1: { s: document.getElementById('s1_s').value, e: document.getElementById('s1_e').value },
-            s2: { s: document.getElementById('s2_s').value, e: document.getElementById('s2_e').value },
-            img: sImg || 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
-            published: false
+            img: currentImg || 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
+            s1: document.getElementById('s1s').value + " - " + document.getElementById('s1e').value,
+            published: true
         };
-        staffList.push(member);
-        localStorage.setItem('master_staff', JSON.stringify(staffList));
-        sImg = ""; document.getElementById('sPrev').src = "";
+
+        staffData.push(member);
+        localStorage.setItem('master_staff', JSON.stringify(staffData));
         render();
-        alert("Staff Registered Successfully!");
     }
 
     function render() {
         const table = document.getElementById('staffTable');
-        table.innerHTML = staffList.map(s => `
+        table.innerHTML = staffData.map(s => `
             <tr>
-                <td><img src="${s.img}" style="width:40px; height:40px; border-radius:50%; object-fit:cover;"></td>
-                <td><b>${s.nName}</b><br><small>${s.job}</small></td>
-                <td><small>${s.days.join(', ')}<br>S1: ${s.s1.s || '--'} to ${s.s1.e || '--'}</small></td>
+                <td><img src="${s.img}" class="avatar"> <br> <b>${s.nName}</b></td>
+                <td>${s.job}</td>
+                <td>${s.s1}</td>
                 <td>
                     <label class="switch">
-                        <input type="checkbox" ${s.published ? 'checked' : ''} onchange="togglePublish(${s.id})">
+                        <input type="checkbox" ${s.published ? 'checked' : ''} onchange="toggleP(${s.id})">
                         <span class="slider"></span>
                     </label>
                 </td>
-                <td><button onclick="del(${s.id})" style="color:red; border:none; background:none; cursor:pointer;">Delete</button></td>
+                <td><button onclick="del(${s.id})" style="color:red;border:none;background:none;cursor:pointer;">Delete</button></td>
             </tr>
         `).join('');
     }
 
-    function togglePublish(id) {
-        const i = staffList.findIndex(s => s.id === id);
-        staffList[i].published = !staffList[i].published;
-        localStorage.setItem('master_staff', JSON.stringify(staffList));
+    function toggleP(id) {
+        const idx = staffData.findIndex(s => s.id === id);
+        staffData[idx].published = !staffData[idx].published;
+        localStorage.setItem('master_staff', JSON.stringify(staffData));
     }
 
     function del(id) {
-        if(confirm("Delete?")){
-            staffList = staffList.filter(s => s.id !== id);
-            localStorage.setItem('master_staff', JSON.stringify(staffList));
-            render();
-        }
-    }
-
-    function saveCompany() {
-        const comp = {
-            name: document.getElementById('set_name').value,
-            slogan: document.getElementById('set_slogan').value,
-            logo: lImg || document.getElementById('lPrev').src,
-            address: document.getElementById('set_address').value,
-            email: document.getElementById('set_bEmail').value,
-            phone: document.getElementById('set_bPhone').value,
-            hours: document.getElementById('set_hours').value
-        };
-        localStorage.setItem('company_profile', JSON.stringify(comp));
-        document.getElementById('sideStoreName').innerText = comp.name;
-        document.getElementById('sideLogo').src = comp.logo;
-        document.getElementById('sideLogo').style.display = 'block';
-        alert("Business Profile Updated!");
-    }
-
-    function showTab(t) {
-        document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
-        document.getElementById('section-' + t).style.display = 'block';
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        event.currentTarget.classList.add('active');
-    }
-
-    window.onload = () => {
+        staffData = staffData.filter(s => s.id !== id);
+        localStorage.setItem('master_staff', JSON.stringify(staffData));
         render();
-        const cp = JSON.parse(localStorage.getItem('company_profile') || '{}');
-        if(cp.name) {
-            document.getElementById('set_name').value = cp.name;
-            document.getElementById('set_slogan').value = cp.slogan;
-            document.getElementById('lPrev').src = cp.logo;
-            document.getElementById('sideStoreName').innerText = cp.name;
-            document.getElementById('sideLogo').src = cp.logo;
-            document.getElementById('sideLogo').style.display = 'block';
-            document.getElementById('set_address').value = cp.address || '';
-            document.getElementById('set_bEmail').value = cp.email || '';
-            document.getElementById('set_bPhone').value = cp.phone || '';
-            document.getElementById('set_hours').value = cp.hours || '';
-        }
-    };
+    }
+
+    window.onload = () => { syncWithMaster(); render(); };
 </script>
 </body>
 </html>
