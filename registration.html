@@ -6,14 +6,14 @@
     <title>Sign Up | EazyTipMe</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --apple-blue: #007AFF; --apple-bg: #F5F5F7; }
-        body { font-family: 'Inter', sans-serif; background: #000; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: #FFF; }
+        :root { --apple-blue: #007AFF; --apple-bg: #F5F5F7; --error-red: #FF3B30; }
+        body { font-family: 'Inter', sans-serif; background: #000; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: #FFF; padding: 20px; }
         
-        .signup-container { background: #FFF; padding: 50px 40px; border-radius: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); width: 100%; max-width: 440px; text-align: center; color: #000; }
+        /* الحاوية الرئيسية (المربع الأبيض) */
+        .signup-container { background: #FFF; padding: 50px 40px; border-radius: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); width: 100%; max-width: 440px; text-align: center; color: #000; position: relative; }
         
-        /* تصميم الشعار المدمج لضمان الظهور */
         .brand-header { margin-bottom: 25px; }
-        .logo-svg { width: 180px; height: auto; margin-bottom: 10px; }
+        .logo-img { width: 180px; height: auto; margin-bottom: 10px; }
         
         h1 { font-size: 24px; font-weight: 700; margin: 0 0 8px 0; letter-spacing: -0.5px; color: #1D1D1F; }
         p { color: #86868B; margin-bottom: 30px; font-size: 15px; }
@@ -22,10 +22,13 @@
         label { display: block; font-size: 11px; font-weight: 700; color: #86868B; text-transform: uppercase; margin-bottom: 8px; margin-left: 4px; }
         
         input { width: 100%; padding: 14px 16px; border: 1px solid #D2D2D7; border-radius: 12px; font-size: 15px; box-sizing: border-box; outline: none; background: #FBFBFD; transition: 0.2s; }
-        input:focus { border-color: #000; background: #FFF; box-shadow: 0 0 0 3px rgba(0,0,0,0.05); }
+        input:focus { border-color: #000; background: #FFF; }
 
-        .btn-submit { background: #000; color: #FFF; border: none; padding: 18px; border-radius: 15px; width: 100%; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; margin-top: 15px; }
-        .btn-submit:hover { transform: translateY(-2px); opacity: 0.9; }
+        /* صندوق رسالة الخطأ داخل التصميم */
+        #errorBox { display: none; color: var(--error-red); background: rgba(255, 59, 48, 0.08); padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 500; margin-bottom: 20px; border: 1px solid rgba(255, 59, 48, 0.2); }
+
+        .btn-submit { background: #000; color: #FFF; border: none; padding: 18px; border-radius: 15px; width: 100%; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        .btn-submit:hover { opacity: 0.9; transform: translateY(-1px); }
 
         .signature { margin-top: 40px; font-size: 10px; color: #AEAEB2; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; }
     </style>
@@ -34,36 +37,34 @@
 
 <div class="signup-container">
     <div class="brand-header">
-        <svg class="logo-svg" viewBox="0 0 300 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M40 60C40 65.5228 35.5228 70 30 70C24.4772 70 20 65.5228 20 60V40C20 34.4772 24.4772 30 30 30C35.5228 30 40 34.4772 40 40V60Z" fill="black"/>
-            <path d="M30 35V65M25 45H35M25 55H35" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <text x="55" y="62" font-family="Inter" font-weight="700" font-size="34" fill="black">EazyTipMe</text>
-        </svg>
+        <img src="https://i.ibb.co/gLZ6yJMV/image.png" class="logo-img" alt="EazyTipMe Logo">
     </div>
 
     <h1>Create Account</h1>
     <p>Setup your secure tipping portal</p>
 
+    <div id="errorBox">Please fill in all required fields.</div>
+
     <form id="signupForm">
         <div class="form-group">
             <label>Business Entity Name</label>
-            <input type="text" id="bizName" placeholder="e.g. Mouneh Store" required>
+            <input type="text" id="bizName" placeholder="e.g. Mouneh Store">
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
             <div class="form-group">
                 <label>Work Email</label>
-                <input type="email" id="bizEmail" placeholder="admin@store.com" required>
+                <input type="email" id="bizEmail" placeholder="admin@store.com">
             </div>
             <div class="form-group">
                 <label>Phone Number</label>
-                <input type="tel" id="bizPhone" placeholder="+1..." required>
+                <input type="tel" id="bizPhone" placeholder="+1...">
             </div>
         </div>
 
         <div class="form-group">
             <label>Master Password</label>
-            <input type="password" id="bizPass" placeholder="••••••••" required>
+            <input type="password" id="bizPass" placeholder="••••••••">
         </div>
 
         <button type="button" class="btn-submit" onclick="startOnboarding()">Create Dashboard →</button>
@@ -75,12 +76,26 @@
 <script>
     function startOnboarding() {
         const name = document.getElementById('bizName').value;
-        if(!name) { alert("Please fill in your business name."); return; }
-        
+        const email = document.getElementById('bizEmail').value;
+        const errorBox = document.getElementById('errorBox');
+
+        // التحقق من البيانات
+        if(!name || !email) {
+            errorBox.style.display = 'block';
+            errorBox.innerText = "Please fill in your business name and email.";
+            return;
+        }
+
+        // إخفاء الخطأ في حال كانت البيانات سليمة
+        errorBox.style.display = 'none';
+
+        // توليد ID للشركة الجديدة
         const bizId = "Eazy_" + Math.random().toString(36).substr(2, 7);
-        const coreData = { id: bizId, name: name };
+        const coreData = { id: bizId, name: name, email: email };
+        
         localStorage.setItem('config_' + bizId, JSON.stringify(coreData));
         
+        // التوجيه للداشبورد (المرحلة القادمة)
         window.location.href = `dashboard.html?id=${bizId}`;
     }
 </script>
