@@ -3,74 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mouneh Admin - Apple Style</title>
+    <title>Mouneh Admin - Apple Elite</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root { --apple-bg: #F5F5F7; --apple-card: #FFFFFF; --apple-blue: #007AFF; --apple-gray: #86868B; }
         body { font-family: 'Inter', -apple-system, sans-serif; margin: 0; display: flex; height: 100vh; background: var(--apple-bg); color: #1D1D1F; }
-        
-        /* Sidebar */
         .sidebar { width: 260px; background: #000; color: white; padding: 30px 20px; display: flex; flex-direction: column; }
         .nav-item { padding: 14px 18px; cursor: pointer; border-radius: 12px; margin-bottom: 6px; transition: 0.2s; font-size: 14px; opacity: 0.7; }
-        .nav-item:hover, .nav-item.active { background: #333; opacity: 1; font-weight: 600; }
-
-        /* Content */
+        .nav-item.active { background: #333; opacity: 1; font-weight: 600; }
         .main { flex: 1; padding: 40px; overflow-y: auto; }
         .section { display: none; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .card { background: var(--apple-card); padding: 30px; border-radius: 24px; box-shadow: 0 4px 24px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.02); }
+        .card { background: var(--apple-card); padding: 30px; border-radius: 24px; box-shadow: 0 4px 24px rgba(0,0,0,0.04); margin-bottom: 25px; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
-        
         label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--apple-gray); }
-        input, select { width: 100%; padding: 12px; border: 1px solid #D2D2D7; border-radius: 12px; font-size: 15px; box-sizing: border-box; background: #FBFBFD; transition: 0.2s; }
-        input:focus { border-color: var(--apple-blue); outline: none; background: #FFF; }
-
-        /* الأيام بنظام أبل - تضغط عليها تصبح سوداء */
-        .days-row { display: flex; gap: 6px; margin-top: 5px; flex-wrap: wrap; }
-        .day-btn { padding: 8px 14px; border: 1px solid #D2D2D7; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 500; background: #FFF; transition: 0.2s; }
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #D2D2D7; border-radius: 12px; font-size: 15px; box-sizing: border-box; background: #FBFBFD; transition: 0.2s; }
+        .days-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 15px; }
+        .day-btn { padding: 8px 14px; border: 1px solid #D2D2D7; border-radius: 10px; cursor: pointer; font-size: 12px; background: #FFF; }
         .day-btn.selected { background: #000; color: #FFF; border-color: #000; }
-
-        /* الدوامين */
-        .shift-container { display: flex; align-items: center; gap: 10px; background: #F5F5F7; padding: 10px; border-radius: 12px; margin-bottom: 10px; }
-        .shift-container input { padding: 8px; margin: 0; }
-
-        .btn-action { background: #000; color: #FFF; border: none; padding: 16px; border-radius: 14px; width: 100%; cursor: pointer; font-weight: 600; font-size: 16px; margin-top: 20px; transition: 0.2s; }
-        .btn-action:active { transform: scale(0.98); }
-
+        .btn-action { background: #000; color: #FFF; border: none; padding: 16px; border-radius: 14px; width: 100%; cursor: pointer; font-weight: 600; font-size: 16px; margin-top: 10px; }
         table { width: 100%; border-collapse: collapse; margin-top: 30px; }
-        th { text-align: left; color: var(--apple-gray); font-size: 11px; text-transform: uppercase; padding: 15px; border-bottom: 1px solid #E5E5E7; letter-spacing: 0.5px; }
+        th { text-align: left; color: var(--apple-gray); font-size: 11px; padding: 15px; border-bottom: 1px solid #E5E5E7; }
         td { padding: 15px; border-bottom: 1px solid #F5F5F7; font-size: 14px; }
-        .avatar-prev { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: #E8E8ED; }
+        .avatar-img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: #EEE; }
+        .status-toggle { cursor: pointer; padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
-    <h2 style="font-size: 20px; margin-bottom: 40px; font-weight: 700;">Mouneh Admin</h2>
+    <h2 id="sideStoreName" style="font-size: 18px; margin-bottom: 40px;">Mouneh</h2>
     <div class="nav-item active" onclick="showTab('reg')">Team Management</div>
-    <div class="nav-item" onclick="showTab('trans')">Transactions</div>
-    <div class="nav-item" onclick="showTab('set')">Settings</div>
+    <div class="nav-item" onclick="showTab('set')">Company & Settings</div>
 </div>
 
 <div class="main">
     <div id="section-reg" class="section" style="display:block;">
         <div class="card">
-            <h3 style="margin-top:0; font-weight:700;">Add New Specialist</h3>
+            <h3 id="formTitle">Add Specialist</h3>
             <div class="grid">
                 <div>
-                    <label>Real Name (Official)</label>
-                    <input type="text" id="rName" placeholder="Full legal name">
-                    <label>Nickname (Public Display)</label>
-                    <input type="text" id="nName" placeholder="e.g. Shani">
-                    <label>Email (Mandatory)</label>
-                    <input type="email" id="email" placeholder="email@example.com">
-                    <label>Phone (Mandatory)</label>
-                    <input type="text" id="phone" placeholder="+1 000 000 0000">
+                    <label>Nickname (Display)</label> <input type="text" id="nName">
+                    <label>Real Name</label> <input type="text" id="rName">
+                    <label>Email (For Stripe)</label> <input type="email" id="email">
+                    <label>Phone</label> <input type="text" id="phone">
                 </div>
                 <div>
+                    <label>Job Title</label> <input type="text" id="job">
                     <label>Working Days</label>
-                    <div class="days-row">
+                    <div class="days-row" id="daysPicker">
                         <div class="day-btn" onclick="this.classList.toggle('selected')">Mon</div>
                         <div class="day-btn" onclick="this.classList.toggle('selected')">Tue</div>
                         <div class="day-btn" onclick="this.classList.toggle('selected')">Wed</div>
@@ -79,133 +60,117 @@
                         <div class="day-btn" onclick="this.classList.toggle('selected')">Sat</div>
                         <div class="day-btn" onclick="this.classList.toggle('selected')">Sun</div>
                     </div>
-                    <label style="margin-top:20px;">Shifts (Double Shift Support)</label>
-                    <div class="shift-container">
-                        <small>S1:</small> <input type="time" id="s1_s"> <span>to</span> <input type="time" id="s1_e">
-                    </div>
-                    <div class="shift-container">
-                        <small>S2:</small> <input type="time" id="s2_s"> <span>to</span> <input type="time" id="s2_e">
-                    </div>
-                    <label>Job Title</label>
-                    <input type="text" id="job" placeholder="Barber, Specialist...">
+                    <label>Photo</label> <input type="file" onchange="handleImg(this)">
                 </div>
             </div>
-            <button class="btn-action" onclick="saveStaff()">Register & Notify Team Member</button>
-
+            <input type="hidden" id="editId">
+            <button class="btn-action" onclick="saveStaff()">Save Specialist</button>
+        </div>
+        <div class="card">
+            <h3>Staff List (<span id="staffCount">0</span>)</h3>
             <table>
                 <thead>
-                    <tr><th>Specialist</th><th>Contact</th><th>Schedule & Shifts</th><th>Action</th></tr>
+                    <tr><th>Photo</th><th>Specialist</th><th>Schedule</th><th>Status</th><th>Actions</th></tr>
                 </thead>
                 <tbody id="staffTable"></tbody>
             </table>
         </div>
     </div>
 
-    <div id="section-trans" class="section">
-        <div class="card">
-            <h3 style="margin-top:0;">Global Transaction Log</h3>
-            <div id="transList" style="text-align:center; padding:40px; color:var(--apple-gray);">No activities yet.</div>
-        </div>
-    </div>
-
     <div id="section-set" class="section">
         <div class="card">
-            <h3 style="margin-top:0;">System Configuration</h3>
-            <label>Global Currency (Global System)</label>
-            <select id="currency">
-                <option value="CAD">Canada (CAD $)</option>
-                <option value="USD">USA (USD $)</option>
-                <option value="EUR">Europe (€)</option>
-                <option value="AED">UAE (د.إ)</option>
-            </select>
-            <button class="btn-action" onclick="saveSet()">Save System Settings</button>
+            <h3>Company Profile (Mouneh)</h3>
+            <label>Business Name</label> <input type="text" id="set_bName">
+            <label>Slogan (Max 90 chars)</label> <textarea id="set_slogan" maxlength="90"></textarea>
+            <label>Global Currency</label>
+            <select id="set_curr"><option value="CAD">CAD ($)</option><option value="USD">USD ($)</option></select>
+            <button class="btn-action" onclick="saveCompany()">Update Profile</button>
         </div>
     </div>
 </div>
 
 <script>
-    function showTab(tab) {
+    let staff = JSON.parse(localStorage.getItem('master_staff') || '[]');
+    let currentImg = "";
+
+    function handleImg(i) {
+        const r = new FileReader();
+        r.onload = (e) => currentImg = e.target.result;
+        r.readAsDataURL(i.files[0]);
+    }
+
+    function showTab(t) {
         document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
-        document.getElementById('section-' + tab).style.display = 'block';
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        event.currentTarget.classList.add('active');
-        localStorage.setItem('activeDashboardTab', tab);
+        document.getElementById('section-' + t).style.display = 'block';
     }
 
     function saveStaff() {
-        const rName = document.getElementById('rName').value;
-        const email = document.getElementById('email').value;
-        const phone = document.getElementById('phone').value;
-        const job = document.getElementById('job').value;
-
-        if(!rName || !email || !phone) {
-            alert("Official Name, Email, and Phone are MANDATORY for global automation.");
-            return;
-        }
-
-        let staff = JSON.parse(localStorage.getItem('master_staff') || '[]');
-        let selectedDays = Array.from(document.querySelectorAll('.day-btn.selected')).map(d => d.innerText);
-
-        const newMember = {
-            id: Date.now(),
-            rName, nName: document.getElementById('nName').value || rName,
-            email, phone, job, days: selectedDays,
-            s1: { s: document.getElementById('s1_s').value, e: document.getElementById('s1_e').value },
-            s2: { s: document.getElementById('s2_s').value, e: document.getElementById('s2_e').value },
-            img: 'https://cdn-icons-png.flaticon.com/512/149/149071.png'
+        const id = document.getElementById('editId').value;
+        const data = {
+            id: id ? parseInt(id) : Date.now(),
+            nName: document.getElementById('nName').value,
+            rName: document.getElementById('rName').value,
+            email: document.getElementById('email').value,
+            phone: document.getElementById('phone').value,
+            job: document.getElementById('job').value,
+            days: Array.from(document.querySelectorAll('.day-btn.selected')).map(d => d.innerText),
+            img: currentImg || 'logo.png',
+            active: true
         };
 
-        staff.push(newMember);
+        if(id) {
+            const idx = staff.findIndex(s => s.id === parseInt(id));
+            staff[idx] = data;
+        } else {
+            staff.push(data);
+        }
+
         localStorage.setItem('master_staff', JSON.stringify(staff));
-        
-        // أتمتة الإرسال عبر الإيميل
-        window.location.href = `mailto:${email}?subject=Onboarding&body=Welcome ${rName}, please complete your banking setup here: https://easytipme.com/onboard?id=${newMember.id}`;
-        
-        render();
-        clearForm();
+        location.reload();
     }
 
     function render() {
-        const staff = JSON.parse(localStorage.getItem('master_staff') || '[]');
         const table = document.getElementById('staffTable');
+        document.getElementById('staffCount').innerText = staff.length;
         table.innerHTML = staff.map(s => `
             <tr>
-                <td><img src="${s.img}" class="avatar-prev"><br><b>${s.nName}</b><br><small>${s.rName}</small></td>
-                <td>${s.email}<br>${s.phone}</td>
+                <td><img src="${s.img}" class="avatar-img"></td>
+                <td><b>${s.nName || s.name}</b><br><small>${s.job}</small></td>
+                <td><small>${(s.days || []).join(', ')}</small></td>
+                <td><span class="status-toggle" style="background:${s.active?'#E1F5FE':'#FFEBEE'}; color:${s.active?'#0288D1':'#C62828'}" onclick="toggleActive(${s.id})">${s.active?'ACTIVE':'ON LEAVE'}</span></td>
                 <td>
-                    <div style="font-size:11px; margin-bottom:4px;">${s.days.join(', ')}</div>
-                    <span style="color:var(--apple-blue); font-size:12px;">S1: ${s.s1.s || '--'} to ${s.s1.e || '--'}</span><br>
-                    ${s.s2.s ? `<span style="color:#5856D6; font-size:12px;">S2: ${s.s2.s} to ${s.s2.e}</span>` : ''}
+                    <button onclick="edit(${s.id})" style="border:none; background:none; color:blue; cursor:pointer;">Edit</button>
+                    <button onclick="del(${s.id})" style="border:none; background:none; color:red; cursor:pointer; margin-left:10px;">Del</button>
                 </td>
-                <td><button onclick="del(${s.id})" style="color:#FF3B30; background:none; border:none; cursor:pointer; font-weight:600;">Delete</button></td>
             </tr>
         `).join('');
     }
 
-    function del(id) {
-        if(confirm('Delete this member?')) {
-            let staff = JSON.parse(localStorage.getItem('master_staff') || '[]');
-            staff = staff.filter(x => x.id !== id);
-            localStorage.setItem('master_staff', JSON.stringify(staff));
-            render();
-        }
-    }
-
-    function clearForm() {
-        document.querySelectorAll('input').forEach(i => i.value = '');
-        document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('selected'));
-    }
-
-    function saveSet() {
-        localStorage.setItem('global_currency', document.getElementById('currency').value);
-        alert('Global Settings Updated.');
-    }
-
-    window.onload = () => {
-        const lastTab = localStorage.getItem('activeDashboardTab') || 'reg';
-        showTab(lastTab);
+    function toggleActive(id) {
+        const idx = staff.findIndex(s => s.id === id);
+        staff[idx].active = !staff[idx].active;
+        localStorage.setItem('master_staff', JSON.stringify(staff));
         render();
-    };
+    }
+
+    function edit(id) {
+        const s = staff.find(x => x.id === id);
+        document.getElementById('editId').value = s.id;
+        document.getElementById('nName').value = s.nName || s.name;
+        document.getElementById('rName').value = s.rName || '';
+        document.getElementById('email').value = s.email || '';
+        document.getElementById('job').value = s.job;
+        document.getElementById('formTitle').innerText = "Edit Specialist";
+        window.scrollTo(0,0);
+    }
+
+    function saveCompany() {
+        localStorage.setItem('company_name', document.getElementById('set_bName').value);
+        localStorage.setItem('company_slogan', document.getElementById('set_slogan').value);
+        alert('Company Profile Updated!');
+    }
+
+    window.onload = render;
 </script>
 </body>
 </html>
