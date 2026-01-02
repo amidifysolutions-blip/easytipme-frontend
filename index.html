@@ -82,7 +82,7 @@
                 <p id="formDesc">Enter your credentials to access your dashboard.</p>
             </div>
 
-            <form id="authForm">
+            <form id="authForm" novalidate>
                 <div id="signupFields">
                     <div class="input-group">
     <label>Business Name</label>
@@ -196,6 +196,11 @@ function handleSignup() {
 // 3. Form Submission Handler (Login & Registration)
 document.getElementById('authForm').addEventListener('submit', function(e) {
     e.preventDefault();
+   if (isLogin) {
+    // تجاوز أي قيود حقول مخفية عند الدخول
+    document.getElementById('bizNameInput').removeAttribute('required');
+    if(document.getElementById('regPhone')) document.getElementById('regPhone').removeAttribute('required');
+}
     const email = document.getElementById('authEmail').value;
     const pass = document.getElementById('authPass').value;
     const isLogin = document.getElementById('submitBtn').innerText === "Sign In";
