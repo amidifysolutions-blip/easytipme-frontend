@@ -117,13 +117,6 @@
     </div>
 
     <script>
-/*
-UPDATE 1
-Fix Login / Signup logic
-No design changes
-Pure JS logic fix
-*/
-
 let authMode = "login";
 
 // =========================
@@ -142,17 +135,17 @@ function toggleAuth(mode) {
 
     if (mode === 'signup') {
         signupFields.style.display = 'block';
-        formTitle.textContent = 'Create Account';
-        formDesc.textContent = 'Start your 30-day free trial today.';
-        submitBtn.textContent = 'Register Business';
+        formTitle.innerText = 'Create Account';
+        formDesc.innerText = 'Start your 30-day free trial today.';
+        submitBtn.innerText = 'Register Business';
         forgotBtn.style.display = 'none';
         signupTab.classList.add('active');
         loginTab.classList.remove('active');
     } else {
         signupFields.style.display = 'none';
-        formTitle.textContent = 'Welcome Back';
-        formDesc.textContent = 'Enter your credentials to access your dashboard.';
-        submitBtn.textContent = 'Sign In';
+        formTitle.innerText = 'Welcome Back';
+        formDesc.innerText = 'Enter your credentials to access your dashboard.';
+        submitBtn.innerText = 'Sign In';
         forgotBtn.style.display = 'block';
         loginTab.classList.add('active');
         signupTab.classList.remove('active');
@@ -160,85 +153,91 @@ function toggleAuth(mode) {
 }
 
 // =========================
-// Signup Logic
+// Signup
 // =========================
 function handleSignup() {
-    const businessName = document.getElementById('bizNameInput').value.trim();
+    const bName = document.getElementById('bizNameInput').value.trim();
     const email = document.getElementById('authEmail').value.trim();
-    const password = document.getElementById('authPass').value.trim();
+    const pass = document.getElementById('authPass').value;
     const phone = document.getElementById('regPhone').value.trim();
 
-    if (!businessName || !email || !password) {
+    if (!bName || !email || !pass) {
         alert("Please fill all required fields");
         return;
     }
 
-    const businesses = JSON.parse(localStorage.getItem('all_businesses') || '[]');
+    let allBusinesses = JSON.parse(localStorage.getItem('all_businesses') || '[]');
 
-    if (businesses.find(b => b.email === email)) {
-        alert("Email already registered");
+    const exists = allBusinesses.find(b => b.email === email);
+    if (exists) {
+        alert("This email is already registered");
         return;
     }
 
-    const newBusiness = {
-        id: 'biz_' + Date.now(),
-        name: businessName,
-        email,
-        password,
-        phone,
-        createdAt: new Date().toISOString()
+    const newBiz = {
+        id: "biz_" + Date.now(),
+        name: bName,
+        email: email,
+        password: pass,
+        phone: phone,
+        status: "Active"
     };
 
-    businesses.push(newBusiness);
-    localStorage.setItem('all_businesses', JSON.stringify(businesses));
+    allBusinesses.push(newBiz);
+    localStorage.setItem('all_businesses', JSON.stringify(allBusinesses));
 
-    // Auto login after signup
-    localStorage.setItem('session_business_id', newBusiness.id);
+    // clear old sessions
+    localStorage.removeItem('session_business_id');
+    localStorage.removeItem('session_role');
+
+    // new session
     localStorage.setItem('session_role', 'business');
+    localStorage.setItem('session_business_id', newBiz.id);
+    localStorage.setItem('temp_biz_name', newBiz.name);
 
     window.location.href = "dashboard.html";
 }
 
 // =========================
-// Login Logic
+// Login
 // =========================
-function handleLogin(email, password) {
-    // Master login
-    if (email === "admin@mouneh.com" && password === "123") {
+function handleLogin(email, pass) {
+
+    // Master
+    if (email === "admin@mouneh.com" && pass === "123") {
         localStorage.setItem('session_role', 'master');
         window.location.href = "master-control.html";
         return;
     }
 
-    const businesses = JSON.parse(localStorage.getItem('all_businesses') || '[]');
-    const business = businesses.find(
-        b => b.email === email && b.password === password
-    );
+    const allBusinesses = JSON.parse(localStorage.getItem('all_businesses') || '[]');
+    const biz = allBusinesses.find(b => b.email === email && b.password === pass);
 
-    if (!business) {
+    if (!biz) {
         alert("Invalid email or password");
         return;
     }
 
-    localStorage.setItem('session_business_id', business.id);
     localStorage.setItem('session_role', 'business');
+    localStorage.setItem('session_business_id', biz.id);
+    localStorage.setItem('temp_biz_name', biz.name);
 
     window.location.href = "dashboard.html";
 }
 
 // =========================
-// Form Submit
+// Submit
 // =========================
-document.getElementById('authForm').addEventListener('submit', function (e) {
+document.getElementById('authForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
     const email = document.getElementById('authEmail').value.trim();
-    const password = document.getElementById('authPass').value.trim();
+    const pass = document.getElementById('authPass').value;
 
-    if (authMode === 'signup') {
+    if (authMode === "signup") {
         handleSignup();
     } else {
-        handleLogin(email, password);
+        handleLogin(email, pass);
     }
 });
 </script>
