@@ -149,12 +149,16 @@ function toggleAuth(type) {
 function toggleAuth(mode) {
     const isLogin = mode === 'login';
     
-    // إذا كنا في وضع الدخول (Login)، نجعل الحقول الإضافية غير إجبارية
-    document.getElementById('bizNameInput').required = !isLogin;
+    // فك القيود عن كل الحقول الإضافية عند الدخول
+    const bizInput = document.getElementById('bizNameInput');
+    const phoneInput = document.getElementById('regPhone');
     
-    // باقي الكود الخاص بتبديل الواجهات (موجود عندك مسبقاً)
+    if (bizInput) bizInput.required = !isLogin;
+    if (phoneInput) phoneInput.required = !isLogin;
+
+    // كود التبديل بين الواجهات (اتركه كما هو عندك)
     if (isLogin) {
-        // إخفاء حقول التسجيل وإظهار الدخول
+        // ... (كود إظهار/إخفاء الحقول الذي تملكه مسبقاً)
     }
 }
 // 2. Logic to Save New Business and Link to Master
