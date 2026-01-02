@@ -162,27 +162,24 @@ function handleSignup() {
 }
         // دالة برمجة زر الدخول والربط بصفحة الماستر
         document.getElementById('authForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const email = document.getElementById('authEmail').value;
-            const pass = document.getElementById('authPass').value;
-            const isLogin = document.getElementById('submitBtn').innerText === "Sign In";
+    e.preventDefault();
+    const email = document.getElementById('authEmail').value;
+    const pass = document.getElementById('authPass').value;
+    const isLogin = document.getElementById('submitBtn').innerText === "Sign In";
 
-            if (isLogin) {
-                // هنا تضع كلمة السر التي طلبتها
-                const masterEmail = "admin@mouneh.com"; 
-                const masterPass = "123"; 
-
-                if (email === masterEmail && pass === masterPass) {
-                    window.location.href = "master-control.html"; // اسم صفحة الماستر عندك
-                } else {
-                    alert("Error: Incorrect credentials. Hint: admin@mouneh.com / 123");
-                }
-            } else {
-                alert("Success! Your 30-day trial has started. Please Log In.");
-                toggleAuth('login');
-            }
-        });
+    if (isLogin) {
+        // فحص دخول الماستر (أنت)
+        if (email === "admin@mouneh.com" && pass === "123") {
+            window.location.href = "master-control.html";
+        } else {
+            // دخول الزبائن المسجلين سابقاً
+            window.location.href = "dashboard.html";
+        }
+    } else {
+        // تسجيل زبون جديد (AMIDIFY مثلاً)
+        handleSignup(); 
+    }
+});
     </script>
 </body>
 </html>
