@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EasyTipMe | Digital Tipping Solution</title>
+    <title>Easy Tip Me | Digital Tipping Solution</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; margin: 0; display: flex; min-height: 100vh; background: #fff; color: #1d1d1f; }
@@ -13,8 +13,10 @@
             flex: 1.2; background: #000; color: #fff; display: flex; flex-direction: column; 
             justify-content: center; padding: 60px 80px; position: relative;
         }
-        .logo-placeholder { width: 100px; height: 100px; margin-bottom: 50px; background: #fff; border-radius: 20px; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 800; font-size: 14px; text-align: center; overflow: hidden; }
-        .logo-placeholder img { width: 100%; height: auto; }
+        .logo-section { display: flex; align-items: center; gap: 15px; margin-bottom: 50px; }
+        .logo-box { width: 60px; height: 60px; background: #fff; border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .logo-box img { width: 100%; height: auto; }
+        .brand-name-top { font-size: 24px; font-weight: 700; letter-spacing: -1px; }
 
         .brand-side h1 { font-size: 48px; font-weight: 700; line-height: 1.1; margin-bottom: 20px; letter-spacing: -2px; }
         .brand-side p { font-size: 19px; color: #a1a1a6; line-height: 1.5; max-width: 450px; margin-bottom: 40px; }
@@ -22,11 +24,10 @@
         .feature-item { display: flex; align-items: center; margin-bottom: 25px; font-size: 16px; color: #eee; }
         .feature-item i { margin-right: 15px; width: 24px; text-align: center; color: #fff; font-style: normal; font-weight: bold; }
 
-        /* الجهة اليمنى: التبديل بين الدخول والتسجيل */
-        .action-side { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; background: #fff; }
+        /* الجهة اليمنى: العمليات */
+        .action-side { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; background: #fff; position: relative; }
         .form-container { width: 100%; max-width: 380px; }
         
-        /* أزرار التبديل العلوي */
         .auth-toggle { display: flex; background: #f5f5f7; padding: 4px; border-radius: 12px; margin-bottom: 40px; }
         .toggle-btn { flex: 1; padding: 10px; border: none; background: none; font-size: 14px; font-weight: 600; cursor: pointer; border-radius: 9px; transition: 0.2s; color: #86868b; }
         .toggle-btn.active { background: #fff; color: #000; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
@@ -34,24 +35,31 @@
         .form-header h2 { font-size: 28px; font-weight: 700; margin-bottom: 10px; letter-spacing: -1px; }
         .form-header p { font-size: 15px; color: #86868b; margin-bottom: 30px; }
 
-        .input-group { margin-bottom: 18px; text-align: left; }
+        .input-group { margin-bottom: 18px; text-align: left; position: relative; }
         .input-group label { display: block; font-size: 11px; font-weight: 700; margin-bottom: 6px; text-transform: uppercase; color: #1d1d1f; letter-spacing: 0.5px; }
         .input-group input { width: 100%; padding: 15px; border-radius: 12px; border: 1.5px solid #eee; font-size: 16px; outline: none; transition: 0.2s; box-sizing: border-box; background: #f9f9f9; }
         .input-group input:focus { border-color: #000; background: #fff; }
+        
+        .forgot-link { font-size: 12px; color: #007aff; text-decoration: none; position: absolute; right: 0; top: 0; font-weight: 500; }
 
         .main-btn { width: 100%; background: #000; color: #fff; border: none; padding: 18px; border-radius: 14px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 15px; transition: 0.3s; }
         .main-btn:hover { background: #333; }
 
-        #signupFields { display: none; } /* يظهر فقط عند ضغط Get Started */
+        .power-by { position: absolute; bottom: 20px; font-size: 12px; color: #c7c7cc; font-weight: 500; }
 
-        @media (max-width: 992px) { .brand-side { display: none; } }
+        #signupFields { display: none; }
+
+        @media (max-width: 992px) { .brand-side { display: none; } .action-side { padding: 20px; } }
     </style>
 </head>
 <body>
 
     <div class="brand-side">
-        <div class="logo-placeholder">
-            <img src="YOUR_LOGO_LINK" alt="Logo">
+        <div class="logo-section">
+            <div class="logo-box">
+                <img src="YOUR_CANVA_LOGO_LINK_HERE" alt="Easy Tip Me Logo">
+            </div>
+            <span class="brand-name-top">Easy Tip Me</span>
         </div>
         <h1>Elevate Service.<br>Simplify Tipping.</h1>
         <p>The ultimate SaaS platform for modern restaurants and service businesses to manage digital tips.</p>
@@ -81,6 +89,10 @@
                         <input type="text" placeholder="e.g. Mouneh Lebanese Gourmet">
                     </div>
                     <div class="input-group">
+                        <label>Owner Name</label>
+                        <input type="text" placeholder="Full Name">
+                    </div>
+                    <div class="input-group">
                         <label>Phone Number</label>
                         <input type="tel" placeholder="+1 (000) 000-0000">
                     </div>
@@ -93,12 +105,15 @@
 
                 <div class="input-group">
                     <label>Password</label>
+                    <a href="#" class="forgot-link" id="forgotBtn">Forgot Password?</a>
                     <input type="password" placeholder="••••••••" required>
                 </div>
 
                 <button type="submit" class="main-btn" id="submitBtn">Sign In</button>
             </form>
         </div>
+        
+        <div class="power-by">POWER BY AMIDIFY SOLUTIONS INC</div>
     </div>
 
     <script>
@@ -107,6 +122,7 @@
             const formTitle = document.getElementById('formTitle');
             const formDesc = document.getElementById('formDesc');
             const submitBtn = document.getElementById('submitBtn');
+            const forgotBtn = document.getElementById('forgotBtn');
             const buttons = document.querySelectorAll('.toggle-btn');
 
             buttons.forEach(btn => btn.classList.remove('active'));
@@ -114,14 +130,16 @@
             if (type === 'signup') {
                 signupFields.style.display = 'block';
                 formTitle.innerText = 'Create Account';
-                formDesc.innerText = 'Start your 14-day free trial today.';
+                formDesc.innerText = 'Start your 30-day free trial today.';
                 submitBtn.innerText = 'Register Business';
+                forgotBtn.style.display = 'none';
                 buttons[1].classList.add('active');
             } else {
                 signupFields.style.display = 'none';
                 formTitle.innerText = 'Welcome Back';
                 formDesc.innerText = 'Enter your credentials to access your dashboard.';
                 submitBtn.innerText = 'Sign In';
+                forgotBtn.style.display = 'block';
                 buttons[0].classList.add('active');
             }
         }
