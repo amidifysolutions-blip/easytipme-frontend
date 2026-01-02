@@ -117,6 +117,13 @@
     </div>
 
     <script>
+/*
+UPDATE 1
+Fix Login / Signup logic
+No design changes
+Pure JS logic fix
+*/
+
 let authMode = "login";
 
 // =========================
@@ -135,17 +142,17 @@ function toggleAuth(mode) {
 
     if (mode === 'signup') {
         signupFields.style.display = 'block';
-        formTitle.innerText = 'Create Account';
-        formDesc.innerText = 'Start your 30-day free trial today.';
-        submitBtn.innerText = 'Register Business';
+        formTitle.textContent = 'Create Account';
+        formDesc.textContent = 'Start your 30-day free trial today.';
+        submitBtn.textContent = 'Register Business';
         forgotBtn.style.display = 'none';
         signupTab.classList.add('active');
         loginTab.classList.remove('active');
     } else {
         signupFields.style.display = 'none';
-        formTitle.innerText = 'Welcome Back';
-        formDesc.innerText = 'Enter your credentials to access your dashboard.';
-        submitBtn.innerText = 'Sign In';
+        formTitle.textContent = 'Welcome Back';
+        formDesc.textContent = 'Enter your credentials to access your dashboard.';
+        submitBtn.textContent = 'Sign In';
         forgotBtn.style.display = 'block';
         loginTab.classList.add('active');
         signupTab.classList.remove('active');
@@ -153,62 +160,68 @@ function toggleAuth(mode) {
 }
 
 // =========================
-// Signup Handler
+// Signup Logic
 // =========================
 function handleSignup() {
-    const bName = document.getElementById('bizNameInput').value;
-    const email = document.getElementById('authEmail').value;
-    const pass = document.getElementById('authPass').value;
-    const phone = document.getElementById('regPhone').value;
+    const businessName = document.getElementById('bizNameInput').value.trim();
+    const email = document.getElementById('authEmail').value.trim();
+    const password = document.getElementById('authPass').value.trim();
+    const phone = document.getElementById('regPhone').value.trim();
 
-    const newBizId = 'biz_' + Date.now();
+    if (!businessName || !email || !password) {
+        alert("Please fill all required fields");
+        return;
+    }
 
-    const businessData = {
-        id: newBizId,
-        name: bName,
-        email: email,
-        password: pass,
-        phone: phone,
-        status: 'Active'
+    const businesses = JSON.parse(localStorage.getItem('all_businesses') || '[]');
+
+    if (businesses.find(b => b.email === email)) {
+        alert("Email already registered");
+        return;
+    }
+
+    const newBusiness = {
+        id: 'biz_' + Date.now(),
+        name: businessName,
+        email,
+        password,
+        phone,
+        createdAt: new Date().toISOString()
     };
 
-    let allBusinesses = JSON.parse(localStorage.getItem('all_businesses') || '[]');
-    allBusinesses.push(businessData);
-    localStorage.setItem('all_businesses', JSON.stringify(allBusinesses));
+    businesses.push(newBusiness);
+    localStorage.setItem('all_businesses', JSON.stringify(businesses));
 
-    // Auto-login after signup
-    localStorage.setItem('user_role', 'customer');
-    localStorage.setItem('temp_biz_id', newBizId);
-    localStorage.setItem('temp_biz_name', bName);
-    localStorage.setItem('temp_biz_email', email);
+    // Auto login after signup
+    localStorage.setItem('session_business_id', newBusiness.id);
+    localStorage.setItem('session_role', 'business');
 
     window.location.href = "dashboard.html";
 }
 
 // =========================
-// Login Handler
+// Login Logic
 // =========================
-function handleLogin(email, pass) {
-    // Master account
-    if (email === "admin@mouneh.com" && pass === "123") {
-        localStorage.setItem('user_role', 'master');
+function handleLogin(email, password) {
+    // Master login
+    if (email === "admin@mouneh.com" && password === "123") {
+        localStorage.setItem('session_role', 'master');
         window.location.href = "master-control.html";
         return;
     }
 
-    // Business login
-    const allBusinesses = JSON.parse(localStorage.getItem('all_businesses') || '[]');
-    const foundBiz = allBusinesses.find(b => b.email === email && b.password === pass);
+    const businesses = JSON.parse(localStorage.getItem('all_businesses') || '[]');
+    const business = businesses.find(
+        b => b.email === email && b.password === password
+    );
 
-    if (!foundBiz) {
+    if (!business) {
         alert("Invalid email or password");
         return;
     }
 
-    localStorage.setItem('user_role', 'customer');
-    localStorage.setItem('temp_biz_id', foundBiz.id);
-    localStorage.setItem('temp_biz_name', foundBiz.name);
-    localStorage.setItem('temp_biz_email', foundBiz.email);
+    localStorage.setItem('session_business_id', business.id);
+    localStorage.setItem('session_role', 'business');
 
     window.location.href = "dashboard.html";
 }
@@ -216,19 +229,18 @@ function handleLogin(email, pass) {
 // =========================
 // Form Submit
 // =========================
-document.getElementById('authForm').addEventListener('submit', function(e) {
+document.getElementById('authForm').addEventListener('submit', function (e) {
     e.preventDefault();
 
-    const email = document.getElementById('authEmail').value;
-    const pass = document.getElementById('authPass').value;
+    const email = document.getElementById('authEmail').value.trim();
+    const password = document.getElementById('authPass').value.trim();
 
-    if (authMode === "login") {
-        handleLogin(email, pass);
-    } else {
+    if (authMode === 'signup') {
         handleSignup();
+    } else {
+        handleLogin(email, password);
     }
 });
 </script>
-
 </body>
 </html>
