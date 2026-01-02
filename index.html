@@ -146,7 +146,17 @@ function toggleAuth(type) {
         signupTab.classList.remove('active');
     }
 }
-
+function toggleAuth(mode) {
+    const isLogin = mode === 'login';
+    
+    // إذا كنا في وضع الدخول (Login)، نجعل الحقول الإضافية غير إجبارية
+    document.getElementById('bizNameInput').required = !isLogin;
+    
+    // باقي الكود الخاص بتبديل الواجهات (موجود عندك مسبقاً)
+    if (isLogin) {
+        // إخفاء حقول التسجيل وإظهار الدخول
+    }
+}
 // 2. Logic to Save New Business and Link to Master
 function handleSignup() {
     const bName = document.getElementById('bizNameInput').value;
