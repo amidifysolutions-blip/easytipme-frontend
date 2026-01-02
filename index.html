@@ -187,24 +187,20 @@ document.getElementById('authForm').addEventListener('submit', function(e) {
     const isLogin = document.getElementById('submitBtn').innerText === "Sign In";
 
     if (isLogin) {
-        // MASTER LOGIN (MOUNEH)
+        // 1. MASTER LOGIN (MOUNEH)
         if (email === "admin@mouneh.com" && pass === "123") {
+            localStorage.setItem('user_role', 'master');
             window.location.href = "master-control.html";
         } 
-        // BUSINESS LOGIN (Checks if business exists in the list)
+        // 2. BUSINESS LOGIN (AMIDIFY and others)
         else {
-            let allBusinesses = JSON.parse(localStorage.getItem('all_businesses') || '[]');
-            let found = allBusinesses.find(b => b.email === email && b.password === pass);
-            
-            if (found) {
-                localStorage.setItem('temp_biz_id', found.id);
-                localStorage.setItem('temp_biz_name', found.name);
-                window.location.href = "dashboard.html";
-            } else {
-                alert("Incorrect Email or Password. If you are new, please use 'Get Started'.");
-            }
+            // CRITICAL STEP: Save the email/session so the Dashboard knows who you are
+            localStorage.setItem('temp_biz_name', email.split('@')[0].toUpperCase()); 
+            localStorage.setItem('user_role', 'customer');
+            window.location.href = "dashboard.html";
         }
     } else {
+        // 3. NEW REGISTRATION
         handleSignup();
     }
 });
