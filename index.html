@@ -117,11 +117,14 @@
     </div>
 
     <script>
-let authMode = "login";
+/* =========================
+   GLOBAL AUTH STATE
+========================= */
+let authMode = "login"; // login | signup
 
-// =========================
-// Toggle Login / Signup
-// =========================
+/* =========================
+   TOGGLE LOGIN / SIGNUP
+========================= */
 function toggleAuth(mode) {
     authMode = mode;
 
@@ -132,6 +135,9 @@ function toggleAuth(mode) {
     const forgotBtn = document.getElementById('forgotBtn');
     const loginTab = document.getElementById('loginTab');
     const signupTab = document.getElementById('signupTab');
+
+    // Reset form values to avoid ghost state
+    document.getElementById('authForm').reset();
 
     if (mode === 'signup') {
         signupFields.style.display = 'block';
@@ -152,57 +158,54 @@ function toggleAuth(mode) {
     }
 }
 
-// =========================
-// Signup
-// =========================
+/* =========================
+   SIGNUP
+========================= */
 function handleSignup() {
     const bName = document.getElementById('bizNameInput').value.trim();
     const email = document.getElementById('authEmail').value.trim();
-    const pass = document.getElementById('authPass').value;
+    const pass = document.getElementById('authPass').value.trim();
     const phone = document.getElementById('regPhone').value.trim();
 
     if (!bName || !email || !pass) {
-        alert("Please fill all required fields");
+        alert("Please complete all required fields");
         return;
     }
 
-    let allBusinesses = JSON.parse(localStorage.getItem('all_businesses') || '[]');
+    const allBusinesses = JSON.parse(localStorage.getItem('all_businesses') || '[]');
 
-    const exists = allBusinesses.find(b => b.email === email);
-    if (exists) {
-        alert("This email is already registered");
+    // Prevent duplicate email
+    if (allBusinesses.some(b => b.email === email)) {
+        alert("Email already registered");
         return;
     }
 
     const newBiz = {
-        id: "biz_" + Date.now(),
+        id: 'biz_' + Date.now(),
         name: bName,
-        email: email,
+        email,
         password: pass,
-        phone: phone,
-        status: "Active"
+        phone,
+        status: 'Active'
     };
 
     allBusinesses.push(newBiz);
     localStorage.setItem('all_businesses', JSON.stringify(allBusinesses));
 
-    // clear old sessions
+    // Clean session before setting new one
     localStorage.removeItem('session_business_id');
     localStorage.removeItem('session_role');
 
-    // new session
-    localStorage.setItem('session_role', 'business');
     localStorage.setItem('session_business_id', newBiz.id);
-    localStorage.setItem('temp_biz_name', newBiz.name);
+    localStorage.setItem('session_role', 'business');
 
     window.location.href = "dashboard.html";
 }
 
-// =========================
-// Login
-// =========================
+/* =========================
+   LOGIN
+========================= */
 function handleLogin(email, pass) {
-
     // Master
     if (email === "admin@mouneh.com" && pass === "123") {
         localStorage.setItem('session_role', 'master');
@@ -218,26 +221,25 @@ function handleLogin(email, pass) {
         return;
     }
 
-    localStorage.setItem('session_role', 'business');
     localStorage.setItem('session_business_id', biz.id);
-    localStorage.setItem('temp_biz_name', biz.name);
+    localStorage.setItem('session_role', 'business');
 
     window.location.href = "dashboard.html";
 }
 
-// =========================
-// Submit
-// =========================
+/* =========================
+   FORM SUBMIT
+========================= */
 document.getElementById('authForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
     const email = document.getElementById('authEmail').value.trim();
-    const pass = document.getElementById('authPass').value;
+    const pass = document.getElementById('authPass').value.trim();
 
-    if (authMode === "signup") {
-        handleSignup();
-    } else {
+    if (authMode === 'login') {
         handleLogin(email, pass);
+    } else {
+        handleSignup();
     }
 });
 </script>
