@@ -117,9 +117,14 @@
     </div>
 
     <script>
-        // دالة التبديل بين الدخول والتسجيل
-       // 1. Toggle between Login and Signup (No changes to your design)
-function toggleAuth(type) {
+let authMode = "login";
+
+// =========================
+// Toggle Login / Signup
+// =========================
+function toggleAuth(mode) {
+    authMode = mode;
+
     const signupFields = document.getElementById('signupFields');
     const formTitle = document.getElementById('formTitle');
     const formDesc = document.getElementById('formDesc');
@@ -128,7 +133,7 @@ function toggleAuth(type) {
     const loginTab = document.getElementById('loginTab');
     const signupTab = document.getElementById('signupTab');
 
-    if (type === 'signup') {
+    if (mode === 'signup') {
         signupFields.style.display = 'block';
         formTitle.innerText = 'Create Account';
         formDesc.innerText = 'Start your 30-day free trial today.';
@@ -146,22 +151,10 @@ function toggleAuth(type) {
         signupTab.classList.remove('active');
     }
 }
-function toggleAuth(mode) {
-    const isLogin = mode === 'login';
-    
-    // فك القيود عن كل الحقول الإضافية عند الدخول
-    const bizInput = document.getElementById('bizNameInput');
-    const phoneInput = document.getElementById('regPhone');
-    
-    if (bizInput) bizInput.required = !isLogin;
-    if (phoneInput) phoneInput.required = !isLogin;
 
-    // كود التبديل بين الواجهات (اتركه كما هو عندك)
-    if (isLogin) {
-        // ... (كود إظهار/إخفاء الحقول الذي تملكه مسبقاً)
-    }
-}
-// 2. Logic to Save New Business and Link to Master
+// =========================
+// Signup Handler
+// =========================
 function handleSignup() {
     const bName = document.getElementById('bizNameInput').value;
     const email = document.getElementById('authEmail').value;
@@ -169,8 +162,7 @@ function handleSignup() {
     const phone = document.getElementById('regPhone').value;
 
     const newBizId = 'biz_' + Date.now();
-    
-    // Create business object
+
     const businessData = {
         id: newBizId,
         name: bName,
@@ -180,49 +172,63 @@ function handleSignup() {
         status: 'Active'
     };
 
-    // Save to the central list (For Master Control)
     let allBusinesses = JSON.parse(localStorage.getItem('all_businesses') || '[]');
     allBusinesses.push(businessData);
     localStorage.setItem('all_businesses', JSON.stringify(allBusinesses));
 
-    // Save current session data for the dashboard
+    // Auto-login after signup
+    localStorage.setItem('user_role', 'customer');
     localStorage.setItem('temp_biz_id', newBizId);
     localStorage.setItem('temp_biz_name', bName);
-    localStorage.setItem('temp_biz_phone', phone);
+    localStorage.setItem('temp_biz_email', email);
 
-    window.location.href = "verify.html";
+    window.location.href = "dashboard.html";
 }
 
-// 3. Form Submission Handler (Login & Registration)
+// =========================
+// Login Handler
+// =========================
+function handleLogin(email, pass) {
+    // Master account
+    if (email === "admin@mouneh.com" && pass === "123") {
+        localStorage.setItem('user_role', 'master');
+        window.location.href = "master-control.html";
+        return;
+    }
+
+    // Business login
+    const allBusinesses = JSON.parse(localStorage.getItem('all_businesses') || '[]');
+    const foundBiz = allBusinesses.find(b => b.email === email && b.password === pass);
+
+    if (!foundBiz) {
+        alert("Invalid email or password");
+        return;
+    }
+
+    localStorage.setItem('user_role', 'customer');
+    localStorage.setItem('temp_biz_id', foundBiz.id);
+    localStorage.setItem('temp_biz_name', foundBiz.name);
+    localStorage.setItem('temp_biz_email', foundBiz.email);
+
+    window.location.href = "dashboard.html";
+}
+
+// =========================
+// Form Submit
+// =========================
 document.getElementById('authForm').addEventListener('submit', function(e) {
     e.preventDefault();
-   if (isLogin) {
-    // تجاوز أي قيود حقول مخفية عند الدخول
-    document.getElementById('bizNameInput').removeAttribute('required');
-    if(document.getElementById('regPhone')) document.getElementById('regPhone').removeAttribute('required');
-}
+
     const email = document.getElementById('authEmail').value;
     const pass = document.getElementById('authPass').value;
-    const isLogin = document.getElementById('submitBtn').innerText === "Sign In";
 
-    if (isLogin) {
-        // 1. MASTER LOGIN (MOUNEH)
-        if (email === "admin@mouneh.com" && pass === "123") {
-            localStorage.setItem('user_role', 'master');
-            window.location.href = "master-control.html";
-        } 
-        // 2. BUSINESS LOGIN (AMIDIFY and others)
-        else {
-            // CRITICAL STEP: Save the email/session so the Dashboard knows who you are
-            localStorage.setItem('temp_biz_name', email.split('@')[0].toUpperCase()); 
-            localStorage.setItem('user_role', 'customer');
-            window.location.href = "dashboard.html";
-        }
+    if (authMode === "login") {
+        handleLogin(email, pass);
     } else {
-        // 3. NEW REGISTRATION
         handleSignup();
     }
 });
-    </script>
+</script>
+
 </body>
 </html>
