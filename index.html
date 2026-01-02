@@ -125,6 +125,14 @@ let authMode = "login"; // login | signup
 /* =========================
    TOGGLE LOGIN / SIGNUP
 ========================= */
+        function clearSession() {
+  localStorage.removeItem('session_business_id');
+  localStorage.removeItem('session_role');
+  localStorage.removeItem('temp_biz_id');
+  localStorage.removeItem('temp_biz_name');
+  localStorage.removeItem('temp_biz_email');
+}
+
 function toggleAuth(mode) {
     authMode = mode;
 
@@ -174,7 +182,7 @@ function handleSignup() {
 
     const allBusinesses = JSON.parse(localStorage.getItem('all_businesses') || '[]');
 
-    // Prevent duplicate email
+    // منع تكرار الإيميل
     if (allBusinesses.some(b => b.email === email)) {
         alert("Email already registered");
         return;
@@ -192,21 +200,24 @@ function handleSignup() {
     allBusinesses.push(newBiz);
     localStorage.setItem('all_businesses', JSON.stringify(allBusinesses));
 
-    // Clean session before setting new one
+    // تنظيف أي جلسة قديمة
     localStorage.removeItem('session_business_id');
     localStorage.removeItem('session_role');
 
+    // إنشاء جلسة جديدة
     localStorage.setItem('session_business_id', newBiz.id);
     localStorage.setItem('session_role', 'business');
 
-    window.location.href = "dashboard.html";
+    // ⬅️ التعديل المهم
+    window.location.href = "dashboard.html?id=" + newBiz.id;
 }
 
 /* =========================
    LOGIN
 ========================= */
 function handleLogin(email, pass) {
-    // Master
+
+    // حساب الماستر
     if (email === "admin@mouneh.com" && pass === "123") {
         localStorage.setItem('session_role', 'master');
         window.location.href = "master-control.html";
@@ -224,7 +235,8 @@ function handleLogin(email, pass) {
     localStorage.setItem('session_business_id', biz.id);
     localStorage.setItem('session_role', 'business');
 
-    window.location.href = "dashboard.html";
+    // ⬅️ التعديل المهم
+    window.location.href = "dashboard.html?id=" + biz.id;
 }
 
 /* =========================
