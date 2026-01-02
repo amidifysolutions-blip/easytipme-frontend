@@ -60,6 +60,9 @@
     <div class="nav-item active" onclick="showTab('reg')">Team Management</div>
     <div class="nav-item" onclick="showTab('set')">Company Profile</div>
     <div style="margin-top:auto; color:var(--apple-red); cursor:pointer; font-size:13px; padding:10px;" onclick="resetCurrentData()">Reset Account Data</div>
+    <button onclick="logout()" style="margin-top:20px">
+  Logout
+</button>
 </div>
 
 <div class="main">
@@ -147,10 +150,12 @@
 </div>
 
 <script>
+        if (!localStorage.getItem('session_business_id')) {
+  window.location.href = "index.html";
+}
     // جلب المعرف الفريد من الرابط لضمان عزل البيانات
     const params = new URLSearchParams(window.location.search);
     const bizId = params.get('id') || 'default';
-
     // استخدام مفاتيح ديناميكية تعتمد على bizId
     const STAFF_KEY = 'staff_' + bizId;
     const PROFILE_KEY = 'profile_' + bizId;
@@ -167,7 +172,17 @@
         };
         if(input.files[0]) r.readAsDataURL(input.files[0]);
     }
+    
+function logout() {
+  // امسح السيشن فقط (مش كل الداتا)
+  localStorage.removeItem('session_business_id');
+  localStorage.removeItem('session_role');
+  localStorage.removeItem('temp_biz_id');
+  localStorage.removeItem('temp_biz_name');
+  localStorage.removeItem('temp_biz_email');
 
+  window.location.href = "index.html";
+}
     function saveStaff() {
         const name = document.getElementById('nName').value;
         if(!name) { alert("Please enter a name"); return; }
