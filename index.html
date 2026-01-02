@@ -169,15 +169,17 @@ function handleSignup() {
 
     if (isLogin) {
         // فحص دخول الماستر (أنت)
-        if (email === "admin@mouneh.com" && pass === "123") {
-            window.location.href = "master-control.html";
-        } else {
-            // دخول الزبائن المسجلين سابقاً
-            window.location.href = "dashboard.html";
-        }
-    } else {
-        // تسجيل زبون جديد (AMIDIFY مثلاً)
-        handleSignup(); 
+        if (isLogin) {
+    // 1. MASTER LOGIN (MOUNEH)
+    if (email === "admin@mouneh.com" && pass === "123") {
+        localStorage.setItem('user_role', 'master');
+        window.location.href = "master-control.html";
+    } 
+    // 2. BUSINESS OWNERS LOGIN (e.g., AMIDIFY)
+    else {
+        // Since data is already in LocalStorage, allow them to enter their dashboard
+        localStorage.setItem('user_role', 'customer');
+        window.location.href = "dashboard.html";
     }
 });
     </script>
