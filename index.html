@@ -85,9 +85,9 @@
             <form id="authForm">
                 <div id="signupFields">
                     <div class="input-group">
-                        <label>Business Name</label>
-                        <input type="text" id="regBizName" placeholder="e.g. Mouneh Lebanese Gourmet">
-                    </div>
+    <label>Business Name</label>
+    <input type="text" id="bizNameInput" placeholder="Enter Business Name" required>
+</div>
                     <div class="input-group">
                         <label>Owner Name</label>
                         <input type="text" id="regOwnerName" placeholder="Your Full Name">
@@ -145,7 +145,23 @@
                 signupTab.classList.remove('active');
             }
         }
-
+function handleSignup() {
+    // البحث عن الحقل المخصص لاسم العمل أياً كان المكتوب فيه
+// الكود الآن يسحب اسم أي "بيزنس" سواء كان مغسل سيارات أو صالون مساج
+const businessName = document.getElementById('bizNameInput').value; 
+localStorage.setItem('temp_biz_name', businessName);
+    const email = document.querySelector('input[type="email"]').value;
+    
+    // إنشاء ID فريد للمطعم الجديد (مثلاً يعتمد على الوقت)
+    const newBizId = 'biz_' + Date.now();
+    
+    // حفظ البيانات الأساسية مؤقتاً ليتعرف عليها الداشبورد لاحقاً
+    localStorage.setItem('temp_biz_id', newBizId);
+    localStorage.setItem('temp_biz_name', businessName);
+    
+    // الانتقال لصفحة التحقق
+    window.location.href = "verify.html";
+}
         // دالة برمجة زر الدخول والربط بصفحة الماستر
         document.getElementById('authForm').addEventListener('submit', function(e) {
             e.preventDefault();
