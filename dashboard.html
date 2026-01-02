@@ -254,31 +254,20 @@
     }
 
     window.onload = () => {
-    // 1. جلب البيانات التي سجلها الزبون في صفحة الـ Index
+    // جلب البيانات التي سجلها الزبون (أياً كان نوع عمله)
     const tempName = localStorage.getItem('temp_biz_name');
-    const tempPhone = localStorage.getItem('temp_biz_phone');
-
-    // 2. إذا كان الزبون جديداً ولم يملأ بروفايله بعد، نضع له الاسم الذي سجله تلقائياً
-    const cp = JSON.parse(localStorage.getItem(PROFILE_KEY) || '{}');
     
+    const cp = JSON.parse(localStorage.getItem(PROFILE_KEY) || '{}');
+
     if(!cp.name && tempName) {
+        // تعبئة الاسم تلقائياً في الداشبورد
         document.getElementById('set_name').value = tempName;
-        document.getElementById('set_bPhone').value = tempPhone;
         document.getElementById('sideStoreName').innerText = tempName;
-        // حفظ البيانات في البروفايل الرسمي فوراً
         saveCompany(); 
     } else if (cp.name) {
-        // تعبئة البيانات الموجودة مسبقاً (كودك الأصلي)
+        // عرض البيانات المحفوظة سابقاً للزبون القديم
         document.getElementById('set_name').value = cp.name;
-        document.getElementById('set_slogan').value = cp.slogan;
-        document.getElementById('lPrev').src = cp.logo;
         document.getElementById('sideStoreName').innerText = cp.name;
-        document.getElementById('sideLogo').src = cp.logo;
-        document.getElementById('sideLogo').style.display = 'block';
-        document.getElementById('set_address').value = cp.address || '';
-        document.getElementById('set_bEmail').value = cp.email || '';
-        document.getElementById('set_bPhone').value = cp.phone || '';
-        document.getElementById('set_hours').value = cp.hours || '';
     }
     render();
 };
