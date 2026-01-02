@@ -118,66 +118,93 @@
 
     <script>
         // دالة التبديل بين الدخول والتسجيل
-        function toggleAuth(type) {
-            const signupFields = document.getElementById('signupFields');
-            const formTitle = document.getElementById('formTitle');
-            const formDesc = document.getElementById('formDesc');
-            const submitBtn = document.getElementById('submitBtn');
-            const forgotBtn = document.getElementById('forgotBtn');
-            const loginTab = document.getElementById('loginTab');
-            const signupTab = document.getElementById('signupTab');
+       // 1. Toggle between Login and Signup (No changes to your design)
+function toggleAuth(type) {
+    const signupFields = document.getElementById('signupFields');
+    const formTitle = document.getElementById('formTitle');
+    const formDesc = document.getElementById('formDesc');
+    const submitBtn = document.getElementById('submitBtn');
+    const forgotBtn = document.getElementById('forgotBtn');
+    const loginTab = document.getElementById('loginTab');
+    const signupTab = document.getElementById('signupTab');
 
-            if (type === 'signup') {
-                signupFields.style.display = 'block';
-                formTitle.innerText = 'Create Account';
-                formDesc.innerText = 'Start your 30-day free trial today.';
-                submitBtn.innerText = 'Register Business';
-                forgotBtn.style.display = 'none';
-                signupTab.classList.add('active');
-                loginTab.classList.remove('active');
-            } else {
-                signupFields.style.display = 'none';
-                formTitle.innerText = 'Welcome Back';
-                formDesc.innerText = 'Enter your credentials to access your dashboard.';
-                submitBtn.innerText = 'Sign In';
-                forgotBtn.style.display = 'block';
-                loginTab.classList.add('active');
-                signupTab.classList.remove('active');
-            }
-        }
+    if (type === 'signup') {
+        signupFields.style.display = 'block';
+        formTitle.innerText = 'Create Account';
+        formDesc.innerText = 'Start your 30-day free trial today.';
+        submitBtn.innerText = 'Register Business';
+        forgotBtn.style.display = 'none';
+        signupTab.classList.add('active');
+        loginTab.classList.remove('active');
+    } else {
+        signupFields.style.display = 'none';
+        formTitle.innerText = 'Welcome Back';
+        formDesc.innerText = 'Enter your credentials to access your dashboard.';
+        submitBtn.innerText = 'Sign In';
+        forgotBtn.style.display = 'block';
+        loginTab.classList.add('active');
+        signupTab.classList.remove('active');
+    }
+}
+
+// 2. Logic to Save New Business and Link to Master
 function handleSignup() {
-    // يسحب الاسم أياً كان نوع النشاط التجاري من خلال الـ ID
-    const businessName = document.getElementById('bizNameInput').value; 
-    const email = document.querySelector('input[type="email"]').value;
+    const bName = document.getElementById('bizNameInput').value;
+    const email = document.getElementById('authEmail').value;
+    const pass = document.getElementById('authPass').value;
+    const phone = document.getElementById('regPhone').value;
 
-    // إنشاء ID فريد للمشترك الجديد
     const newBizId = 'biz_' + Date.now();
+    
+    // Create business object
+    const businessData = {
+        id: newBizId,
+        name: bName,
+        email: email,
+        password: pass,
+        phone: phone,
+        status: 'Active'
+    };
 
-    // حفظ البيانات بشكل محايد في ذاكرة المتصفح
+    // Save to the central list (For Master Control)
+    let allBusinesses = JSON.parse(localStorage.getItem('all_businesses') || '[]');
+    allBusinesses.push(businessData);
+    localStorage.setItem('all_businesses', JSON.stringify(allBusinesses));
+
+    // Save current session data for the dashboard
     localStorage.setItem('temp_biz_id', newBizId);
-    localStorage.setItem('temp_biz_name', businessName);
+    localStorage.setItem('temp_biz_name', bName);
+    localStorage.setItem('temp_biz_phone', phone);
 
-    // الانتقال لصفحة التحقق
     window.location.href = "verify.html";
 }
-        // دالة برمجة زر الدخول والربط بصفحة الماستر
-        document.getElementById('authForm').addEventListener('submit', function(e) {
+
+// 3. Form Submission Handler (Login & Registration)
+document.getElementById('authForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const email = document.getElementById('authEmail').value;
     const pass = document.getElementById('authPass').value;
     const isLogin = document.getElementById('submitBtn').innerText === "Sign In";
 
     if (isLogin) {
-        // 1. MASTER LOGIN
+        // MASTER LOGIN (MOUNEH)
         if (email === "admin@mouneh.com" && pass === "123") {
             window.location.href = "master-control.html";
         } 
-        // 2. EXISTING BUSINESS LOGIN
+        // BUSINESS LOGIN (Checks if business exists in the list)
         else {
-            window.location.href = "dashboard.html";
+            let allBusinesses = JSON.parse(localStorage.getItem('all_businesses') || '[]');
+            let found = allBusinesses.find(b => b.email === email && b.password === pass);
+            
+            if (found) {
+                localStorage.setItem('temp_biz_id', found.id);
+                localStorage.setItem('temp_biz_name', found.name);
+                window.location.href = "dashboard.html";
+            } else {
+                alert("Incorrect Email or Password. If you are new, please use 'Get Started'.");
+            }
         }
     } else {
-        // 3. NEW REGISTRATION
         handleSignup();
     }
 });
