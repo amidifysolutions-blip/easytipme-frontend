@@ -2,102 +2,70 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up | EazyTipMe</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EasyTipMe | Partner Registration</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --apple-blue: #007AFF; --apple-bg: #F5F5F7; --error-red: #FF3B30; }
-        body { font-family: 'Inter', sans-serif; background: #000; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: #FFF; padding: 20px; }
+        body { font-family: 'Inter', sans-serif; margin: 0; background: #ffffff; color: #1d1d1f; -webkit-font-smoothing: antialiased; }
+        .container { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
         
-        /* الحاوية الرئيسية (المربع الأبيض) */
-        .signup-container { background: #FFF; padding: 50px 40px; border-radius: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); width: 100%; max-width: 440px; text-align: center; color: #000; position: relative; }
-        
-        .brand-header { margin-bottom: 25px; }
-        .logo-img { width: 180px; height: auto; margin-bottom: 10px; }
-        
-        h1 { font-size: 24px; font-weight: 700; margin: 0 0 8px 0; letter-spacing: -0.5px; color: #1D1D1F; }
-        p { color: #86868B; margin-bottom: 30px; font-size: 15px; }
-        
-        .form-group { text-align: left; margin-bottom: 18px; }
-        label { display: block; font-size: 11px; font-weight: 700; color: #86868B; text-transform: uppercase; margin-bottom: 8px; margin-left: 4px; }
-        
-        input { width: 100%; padding: 14px 16px; border: 1px solid #D2D2D7; border-radius: 12px; font-size: 15px; box-sizing: border-box; outline: none; background: #FBFBFD; transition: 0.2s; }
-        input:focus { border-color: #000; background: #FFF; }
+        /* Registration Card */
+        .auth-card { width: 100%; max-width: 400px; padding: 40px 20px; text-align: center; }
+        .logo-text { font-size: 24px; font-weight: 700; letter-spacing: -1px; margin-bottom: 8px; }
+        .subtitle { color: #86868b; font-size: 16px; margin-bottom: 40px; }
 
-        /* صندوق رسالة الخطأ داخل التصميم */
-        #errorBox { display: none; color: var(--error-red); background: rgba(255, 59, 48, 0.08); padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 500; margin-bottom: 20px; border: 1px solid rgba(255, 59, 48, 0.2); }
+        /* Input Styling */
+        .form-group { margin-bottom: 20px; text-align: left; }
+        .form-group label { display: block; font-size: 12px; font-weight: 600; color: #1d1d1f; margin-bottom: 8px; margin-left: 4px; text-transform: uppercase; }
+        .form-group input { 
+            width: 100%; padding: 16px; border-radius: 12px; border: 1px solid #d2d2d7; 
+            font-size: 16px; box-sizing: border-box; outline: none; background: #fbfbfb; transition: 0.2s; 
+        }
+        .form-group input:focus { border-color: #007aff; background: #fff; box-shadow: 0 0 0 4px rgba(0,122,255,0.1); }
 
-        .btn-submit { background: #000; color: #FFF; border: none; padding: 18px; border-radius: 15px; width: 100%; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; margin-top: 10px; }
-        .btn-submit:hover { opacity: 0.9; transform: translateY(-1px); }
-
-        .signature { margin-top: 40px; font-size: 10px; color: #AEAEB2; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; }
+        .btn-primary { 
+            width: 100%; background: #007aff; color: white; border: none; padding: 18px; 
+            border-radius: 14px; font-size: 17px; font-weight: 600; cursor: pointer; margin-top: 10px; 
+        }
+        .btn-primary:active { transform: scale(0.98); }
+        
+        .footer-note { margin-top: 30px; font-size: 13px; color: #86868b; }
     </style>
 </head>
 <body>
 
-<div class="signup-container">
-    <div class="brand-header">
-        <img src="https://i.ibb.co/gLZ6yJMV/image.png" class="logo-img" alt="EazyTipMe Logo">
+<div class="container">
+    <div class="auth-card">
+        <div class="logo-text">EasyTipMe</div>
+        <p class="subtitle">Register your business</p>
+
+        <form id="regForm">
+            <div class="form-group">
+                <label>Business Name</label>
+                <input type="text" id="bizName" placeholder="e.g. Mouneh Lebanese Food" required>
+            </div>
+
+            <div class="form-group">
+                <label>Phone Number (Twilio Ready)</label>
+                <input type="tel" id="bizPhone" placeholder="+1 (555) 000-0000" required>
+            </div>
+
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" id="bizEmail" placeholder="admin@business.com" required>
+            </div>
+
+            <div class="form-group">
+                <label>Create Password</label>
+                <input type="password" id="bizPass" placeholder="••••••••" required>
+            </div>
+
+            <button type="submit" class="btn-primary">Create Account</button>
+        </form>
+
+        <p class="footer-note">By registering, you agree to our Terms of Service.</p>
     </div>
-
-    <h1>Create Account</h1>
-    <p>Setup your secure tipping portal</p>
-
-    <div id="errorBox">Please fill in all required fields.</div>
-
-    <form id="signupForm">
-        <div class="form-group">
-            <label>Business Entity Name</label>
-            <input type="text" id="bizName" placeholder="e.g. Mouneh Store">
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-            <div class="form-group">
-                <label>Work Email</label>
-                <input type="email" id="bizEmail" placeholder="admin@store.com">
-            </div>
-            <div class="form-group">
-                <label>Phone Number</label>
-                <input type="tel" id="bizPhone" placeholder="+1...">
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label>Master Password</label>
-            <input type="password" id="bizPass" placeholder="••••••••">
-        </div>
-
-        <button type="button" class="btn-submit" onclick="startOnboarding()">Create Dashboard →</button>
-    </form>
-
-    <div class="signature">Power by amidify solutions inc</div>
 </div>
 
-<script>
-    function startOnboarding() {
-        const name = document.getElementById('bizName').value;
-        const email = document.getElementById('bizEmail').value;
-        const errorBox = document.getElementById('errorBox');
-
-        // التحقق من البيانات
-        if(!name || !email) {
-            errorBox.style.display = 'block';
-            errorBox.innerText = "Please fill in your business name and email.";
-            return;
-        }
-
-        // إخفاء الخطأ في حال كانت البيانات سليمة
-        errorBox.style.display = 'none';
-
-        // توليد ID للشركة الجديدة
-        const bizId = "Eazy_" + Math.random().toString(36).substr(2, 7);
-        const coreData = { id: bizId, name: name, email: email };
-        
-        localStorage.setItem('config_' + bizId, JSON.stringify(coreData));
-        
-        // التوجيه للداشبورد (المرحلة القادمة)
-        window.location.href = `dashboard.html?id=${bizId}`;
-    }
-</script>
 </body>
 </html>
