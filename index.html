@@ -1,259 +1,299 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Easy Tip Me | Digital Tipping Solution</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; margin: 0; display: flex; min-height: 100vh; background: #fff; color: #1d1d1f; -webkit-font-smoothing: antialiased; }
-        
-        /* الجهة اليسرى: الهوية والمميزات (Black Side) */
-        .brand-side { 
-            flex: 1.2; background: #000; color: #fff; display: flex; flex-direction: column; 
-            justify-content: center; padding: 60px 80px; position: relative;
-        }
-        .logo-section { display: flex; align-items: center; gap: 15px; margin-bottom: 50px; }
-        .logo-box { width: 60px; height: 60px; background: #fff; border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .logo-box img { width: 85%; height: auto; }
-        .brand-name-top { font-size: 26px; font-weight: 700; letter-spacing: -1px; }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>EasyTipMe — Tips, made effortless</title>
+<style>
+  :root{
+    --bg:#ffffff;
+    --bg-soft:#fbfbfd;
+    --ink:#1d1d1f;
+    --ink-soft:#6e6e73;
+    --line:#e8e8ed;
+    --accent:#0071e3;
+    --accent-ink:#0058b9;
+    --green:#34c759;
+    --radius:22px;
+    --maxw:1080px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Helvetica Neue",Arial,sans-serif;
+    color:var(--ink);
+    background:var(--bg);
+    -webkit-font-smoothing:antialiased;
+    line-height:1.5;
+  }
+  a{text-decoration:none;color:inherit}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
 
-        .brand-side h1 { font-size: 52px; font-weight: 700; line-height: 1.1; margin-bottom: 20px; letter-spacing: -2px; }
-        .brand-side p { font-size: 19px; color: #a1a1a6; line-height: 1.5; max-width: 450px; margin-bottom: 40px; }
-        
-        .feature-item { display: flex; align-items: center; margin-bottom: 25px; font-size: 16px; color: #eee; }
-        .feature-item::before { content: "●"; margin-right: 15px; color: #fff; font-size: 10px; }
+  nav{
+    position:sticky;top:0;z-index:50;
+    backdrop-filter:saturate(180%) blur(20px);
+    background:rgba(255,255,255,.72);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-in{display:flex;align-items:center;justify-content:space-between;height:56px}
+  .logo{display:flex;align-items:center;gap:9px;font-weight:600;font-size:19px;letter-spacing:-.02em}
+  .logo .mark{
+    width:26px;height:26px;border-radius:8px;
+    background:linear-gradient(135deg,var(--accent),#00c2ff);
+    display:grid;place-items:center;color:#fff;font-size:15px;font-weight:700;
+  }
+  .nav-links{display:flex;align-items:center;gap:26px;flex-wrap:nowrap}
+  .nav-links .btn{flex-shrink:0}
+  .nav-links a{font-size:14px;color:var(--ink-soft);transition:color .2s}
+  .nav-links a:hover{color:var(--ink)}
+  .nav-links a.btn-primary{color:#fff}
+  .nav-links a.btn-primary:hover{color:#fff}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    font-size:15px;font-weight:500;border-radius:980px;padding:9px 20px;
+    transition:transform .15s ease,background .2s,opacity .2s;cursor:pointer;border:none;
+  }
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-primary:hover{background:var(--accent-ink)}
+  .btn-primary:active{transform:scale(.97)}
+  .btn-ghost{background:transparent;color:var(--accent);padding:9px 6px}
+  .btn-ghost:hover{opacity:.7}
+  .btn-lg{font-size:17px;padding:13px 28px}
 
-        /* الجهة اليمنى: العمليات (White Side) */
-        .action-side { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; background: #fff; position: relative; }
-        .form-container { width: 100%; max-width: 380px; }
-        
-        .auth-toggle { display: flex; background: #f5f5f7; padding: 4px; border-radius: 12px; margin-bottom: 40px; }
-        .toggle-btn { flex: 1; padding: 12px; border: none; background: none; font-size: 14px; font-weight: 600; cursor: pointer; border-radius: 9px; transition: 0.2s; color: #86868b; }
-        .toggle-btn.active { background: #fff; color: #000; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+  header.hero{padding:84px 0 20px;text-align:center;background:
+     radial-gradient(1200px 480px at 50% -120px, #eef6ff 0%, rgba(238,246,255,0) 70%);}
+  .eyebrow{font-size:15px;color:var(--accent);font-weight:600;letter-spacing:.01em;margin-bottom:14px}
+  h1{
+    font-size:clamp(40px,7vw,80px);
+    line-height:1.03;letter-spacing:-.03em;font-weight:700;
+    max-width:16ch;margin:0 auto;
+  }
+  h1 .grad{background:linear-gradient(120deg,var(--accent),#00c6ff 60%,var(--green));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{font-size:clamp(18px,2.4vw,23px);color:var(--ink-soft);max-width:34ch;margin:22px auto 0;letter-spacing:-.01em}
+  .cta-row{display:flex;gap:14px;justify-content:center;align-items:center;margin-top:32px;flex-wrap:wrap}
+  .cta-note{font-size:13px;color:var(--ink-soft);margin-top:16px}
 
-        .form-header h2 { font-size: 32px; font-weight: 700; margin-bottom: 10px; letter-spacing: -1px; }
-        .form-header p { font-size: 15px; color: #86868b; margin-bottom: 35px; }
+  .stage{display:flex;justify-content:center;margin-top:56px;perspective:1400px}
+  .phone{
+    width:300px;background:#fff;border-radius:44px;padding:12px;
+    box-shadow:0 40px 90px -30px rgba(0,50,120,.35),0 0 0 1px rgba(0,0,0,.04);
+    position:relative;
+  }
+  .phone .screen{
+    background:linear-gradient(180deg,#f7fbff,#ffffff 40%);
+    border-radius:34px;overflow:hidden;padding:26px 22px 30px;border:1px solid #eef1f6;
+  }
+  .notch{position:absolute;top:20px;left:50%;transform:translateX(-50%);width:110px;height:26px;background:#000;border-radius:0 0 16px 16px;z-index:2}
+  .avatar{width:64px;height:64px;border-radius:50%;margin:8px auto 10px;
+     background:linear-gradient(135deg,#0071e3,#00c6ff);display:grid;place-items:center;color:#fff;font-size:26px;font-weight:600}
+  .p-name{text-align:center;font-weight:600;font-size:18px}
+  .p-role{text-align:center;color:var(--ink-soft);font-size:13px;margin-bottom:18px}
+  .amts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
+  .amt{border:1.5px solid var(--line);border-radius:14px;padding:12px 0;text-align:center;font-weight:600;font-size:16px}
+  .amt.sel{border-color:var(--accent);background:#f1f8ff;color:var(--accent-ink)}
+  .pay{margin-top:14px;background:#000;color:#fff;border-radius:14px;text-align:center;padding:13px;font-weight:600;font-size:15px;display:flex;align-items:center;justify-content:center;gap:7px}
+  .apple-glyph{font-size:17px}
 
-        .input-group { margin-bottom: 18px; text-align: left; position: relative; }
-        .input-group label { display: block; font-size: 11px; font-weight: 700; margin-bottom: 6px; text-transform: uppercase; color: #1d1d1f; letter-spacing: 0.5px; }
-        .input-group input { width: 100%; padding: 16px; border-radius: 12px; border: 1.5px solid #eee; font-size: 16px; outline: none; transition: 0.2s; box-sizing: border-box; background: #f9f9f9; }
-        .input-group input:focus { border-color: #000; background: #fff; box-shadow: 0 0 0 4px rgba(0,0,0,0.05); }
-        
-        .forgot-link { font-size: 12px; color: #007aff; text-decoration: none; position: absolute; right: 0; top: 0; font-weight: 500; }
+  section{padding:88px 0}
+  .section-head{text-align:center;max-width:640px;margin:0 auto 52px}
+  .section-head h2{font-size:clamp(30px,4.4vw,46px);letter-spacing:-.025em;line-height:1.08;font-weight:700}
+  .section-head p{color:var(--ink-soft);font-size:19px;margin-top:14px;letter-spacing:-.01em}
+  .soft{background:var(--bg-soft)}
 
-        .main-btn { width: 100%; background: #000; color: #fff; border: none; padding: 20px; border-radius: 14px; font-size: 17px; font-weight: 600; cursor: pointer; margin-top: 15px; transition: 0.3s; }
-        .main-btn:hover { background: #333; transform: translateY(-1px); }
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+  .card{
+    background:#fff;border:1px solid var(--line);border-radius:var(--radius);
+    padding:34px;transition:transform .3s ease,box-shadow .3s ease;
+  }
+  .card:hover{transform:translateY(-4px);box-shadow:0 24px 50px -30px rgba(0,40,90,.28)}
+  .ic{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;font-size:22px;margin-bottom:18px;background:#eef6ff}
+  .card h3{font-size:21px;letter-spacing:-.02em;font-weight:600;margin-bottom:8px}
+  .card p{color:var(--ink-soft);font-size:16px}
 
-        .power-by { position: absolute; bottom: 25px; font-size: 11px; color: #c7c7cc; font-weight: 600; letter-spacing: 1px; }
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;counter-reset:s}
+  .step{position:relative;padding-top:8px}
+  .step .n{width:40px;height:40px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-weight:600;margin-bottom:18px}
+  .step h3{font-size:22px;letter-spacing:-.02em;margin-bottom:8px;font-weight:600}
+  .step p{color:var(--ink-soft);font-size:16px}
 
-        #signupFields { display: none; }
+  .banner{background:linear-gradient(135deg,#0b1220,#101a2e);color:#fff;border-radius:32px;padding:64px 44px;text-align:center;margin:0 24px}
+  .banner h2{font-size:clamp(28px,4vw,42px);letter-spacing:-.025em;font-weight:700;max-width:20ch;margin:0 auto}
+  .banner p{color:#aeb6c4;font-size:19px;margin:16px auto 30px;max-width:44ch}
+  .banner .btn-primary{background:#fff;color:#0b1220}
+  .banner .btn-primary:hover{background:#e9eef5}
 
-        @media (max-width: 992px) { .brand-side { display: none; } .action-side { padding: 40px 20px; } }
-    </style>
+  .final{text-align:center}
+  .final h2{font-size:clamp(32px,5vw,54px);letter-spacing:-.03em;font-weight:700;line-height:1.05}
+  .final .cta-row{margin-top:30px}
+
+  footer{border-top:1px solid var(--line);padding:40px 0;background:var(--bg-soft)}
+  .foot-in{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;color:var(--ink-soft);font-size:13px}
+  .foot-links{display:flex;gap:22px}
+
+  .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease}
+  .reveal.in{opacity:1;transform:none}
+
+  @media(max-width:920px){
+    .nav-links a.hide-m{display:none}
+    .nav-links{gap:16px}
+  }
+  @media(max-width:760px){
+    .grid{grid-template-columns:1fr}
+    .steps{grid-template-columns:1fr}
+    .nav-links a.hide-m{display:none}
+    section{padding:64px 0}
+    .banner{padding:48px 26px}
+  }
+</style>
 </head>
 <body>
 
-    <div class="brand-side">
-        <div class="logo-section">
-            <div class="logo-box">
-                <div style="font-weight: 900; color: #000; font-size: 20px;">ETM</div>
-            </div>
-            <span class="brand-name-top">Easy Tip Me</span>
-        </div>
-        <h1>Elevate Service.<br>Simplify Tipping.</h1>
-        <p>The ultimate SaaS platform for modern restaurants and service businesses to manage digital tips.</p>
-        
-        <div class="feature-item">Instant Team Onboarding</div>
-        <div class="feature-item">Real-time Analytics Dashboard</div>
-        <div class="feature-item">Automated SMS Notifications</div>
-        <div class="feature-item">Secure Global Payouts</div>
+<nav>
+  <div class="wrap nav-in">
+    <div class="logo"><span class="mark">E</span> EasyTipMe</div>
+    <div class="nav-links">
+      <a href="#features" class="hide-m">Features</a>
+      <a href="#how" class="hide-m">How it works</a>
+      <a href="signup.html">Log in</a>
+      <a href="signup.html" class="btn btn-primary">Get started</a>
     </div>
+  </div>
+</nav>
 
-    <div class="action-side">
-        <div class="form-container">
-            <div class="auth-toggle">
-                <button class="toggle-btn active" id="loginTab" onclick="toggleAuth('login')">Log In</button>
-                <button class="toggle-btn" id="signupTab" onclick="toggleAuth('signup')">Get Started</button>
-            </div>
-
-            <div class="form-header">
-                <h2 id="formTitle">Welcome Back</h2>
-                <p id="formDesc">Enter your credentials to access your dashboard.</p>
-            </div>
-
-            <form id="authForm" novalidate>
-                <div id="signupFields">
-                    <div class="input-group">
-    <label>Business Name</label>
-    <input type="text" id="bizNameInput" placeholder="Enter Business Name" required>
-</div>
-                    <div class="input-group">
-                        <label>Owner Name</label>
-                        <input type="text" id="regOwnerName" placeholder="Your Full Name">
-                    </div>
-                    <div class="input-group">
-                        <label>Phone Number</label>
-                        <input type="tel" id="regPhone" placeholder="+1 (000) 000-0000">
-                    </div>
-                </div>
-
-                <div class="input-group">
-                    <label>Email Address</label>
-                    <input type="email" id="authEmail" placeholder="manager@business.com" required>
-                </div>
-
-                <div class="input-group">
-                    <label>Password</label>
-                    <a href="javascript:void(0)" class="forgot-link" id="forgotBtn" onclick="alert('Please contact Amidify Solutions support to reset your password.')">Forgot Password?</a>
-                    <input type="password" id="authPass" placeholder="••••••••" required>
-                </div>
-
-                <button type="submit" class="main-btn" id="submitBtn">Sign In</button>
-            </form>
-        </div>
-        
-        <div class="power-by">POWER BY AMIDIFY SOLUTIONS INC</div>
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow reveal">Cashless tipping · Built for teams</div>
+    <h1 class="reveal">Tips, made <span class="grad">effortless.</span></h1>
+    <p class="sub reveal">Your customers scan, tap, and tip in seconds. Your team gets recognized — no cash, no apps, no friction.</p>
+    <div class="cta-row reveal">
+      <a href="signup.html" class="btn btn-primary btn-lg">Get started free</a>
+      <a href="#how" class="btn btn-ghost btn-lg">See how it works ›</a>
     </div>
+    <div class="cta-note reveal">No setup fees · Free to start · Set up in minutes</div>
 
-    <script>
-/* =========================
-   GLOBAL AUTH STATE
-========================= */
-let authMode = "login"; // login | signup
+    <div class="stage reveal">
+      <div class="phone">
+        <div class="notch"></div>
+        <div class="screen">
+          <div class="avatar">S</div>
+          <div class="p-name">Sami</div>
+          <div class="p-role">Senior Barber · Al Zahia</div>
+          <div class="amts">
+            <div class="amt">$5</div>
+            <div class="amt sel">$10</div>
+            <div class="amt">$20</div>
+          </div>
+          <div class="pay"><span class="apple-glyph"></span> Pay</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
 
-/* =========================
-   TOGGLE LOGIN / SIGNUP
-========================= */
-        function clearSession() {
-  localStorage.removeItem('session_business_id');
-  localStorage.removeItem('session_role');
-  localStorage.removeItem('temp_biz_id');
-  localStorage.removeItem('temp_biz_name');
-  localStorage.removeItem('temp_biz_email');
-}
+<section id="features" class="soft">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <h2>Everything you need to get tipped.</h2>
+      <p>A complete tipping platform — set up in minutes, running on autopilot.</p>
+    </div>
+    <div class="grid">
+      <div class="card reveal">
+        <div class="ic">⚡️</div>
+        <h3>Instant team onboarding</h3>
+        <p>Register your shop and add your whole team in minutes. Every member gets their own tip page and QR — automatically.</p>
+      </div>
+      <div class="card reveal">
+        <div class="ic">📊</div>
+        <h3>Real-time dashboard</h3>
+        <p>See who's earning what, live. Track tips by staff, day, and location from one clean dashboard.</p>
+      </div>
+      <div class="card reveal">
+        <div class="ic">🔔</div>
+        <h3>Automatic SMS alerts</h3>
+        <p>Your team gets a text the moment a tip lands. Instant recognition keeps everyone motivated.</p>
+      </div>
+      <div class="card reveal">
+        <div class="ic">🔒</div>
+        <h3>Secure global payouts</h3>
+        <p>Powered by Stripe. Bank-grade security, trusted cards and wallets, money that reaches the right hands.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-function toggleAuth(mode) {
-    authMode = mode;
+<section id="how">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <h2>Live in three steps.</h2>
+      <p>From sign-up to your first tip — faster than making a coffee.</p>
+    </div>
+    <div class="steps">
+      <div class="step reveal">
+        <div class="n">1</div>
+        <h3>Register your shop</h3>
+        <p>Create your business account in under a minute. No paperwork, no hardware.</p>
+      </div>
+      <div class="step reveal">
+        <div class="n">2</div>
+        <h3>Add your team</h3>
+        <p>Add each staff member with a name and photo. We generate their tip page and QR instantly.</p>
+      </div>
+      <div class="step reveal">
+        <div class="n">3</div>
+        <h3>Share &amp; get tipped</h3>
+        <p>Place the QR at the counter. Customers scan, choose an amount, and pay — done.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-    const signupFields = document.getElementById('signupFields');
-    const formTitle = document.getElementById('formTitle');
-    const formDesc = document.getElementById('formDesc');
-    const submitBtn = document.getElementById('submitBtn');
-    const forgotBtn = document.getElementById('forgotBtn');
-    const loginTab = document.getElementById('loginTab');
-    const signupTab = document.getElementById('signupTab');
+<section class="soft">
+  <div class="wrap">
+    <div class="banner reveal">
+      <h2>Not just tips. Give too.</h2>
+      <p>The same effortless flow works for donations — for teams, causes, mosques, churches and organizations. One scan to give.</p>
+      <a href="signup.html" class="btn btn-primary btn-lg">Start collecting</a>
+    </div>
+  </div>
+</section>
 
-    // Reset form values to avoid ghost state
-    document.getElementById('authForm').reset();
+<section id="start" class="final">
+  <div class="wrap">
+    <div class="reveal">
+      <h2>Ready to make tipping<br/>effortless?</h2>
+      <div class="cta-row">
+        <a href="signup.html" class="btn btn-primary btn-lg">Register your shop</a>
+        <a href="signup.html" class="btn btn-ghost btn-lg">I already have an account ›</a>
+      </div>
+      <div class="cta-note">Free to start · No credit card required</div>
+    </div>
+  </div>
+</section>
 
-    if (mode === 'signup') {
-        signupFields.style.display = 'block';
-        formTitle.innerText = 'Create Account';
-        formDesc.innerText = 'Start your 30-day free trial today.';
-        submitBtn.innerText = 'Register Business';
-        forgotBtn.style.display = 'none';
-        signupTab.classList.add('active');
-        loginTab.classList.remove('active');
-    } else {
-        signupFields.style.display = 'none';
-        formTitle.innerText = 'Welcome Back';
-        formDesc.innerText = 'Enter your credentials to access your dashboard.';
-        submitBtn.innerText = 'Sign In';
-        forgotBtn.style.display = 'block';
-        loginTab.classList.add('active');
-        signupTab.classList.remove('active');
-    }
-}
+<footer>
+  <div class="wrap foot-in">
+    <div class="logo"><span class="mark">E</span> EasyTipMe</div>
+    <div class="foot-links">
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="signup.html">Log in</a>
+    </div>
+    <div>© 2026 EasyTipMe · Powered by Amidify Solutions Inc.</div>
+  </div>
+</footer>
 
-/* =========================
-   SIGNUP
-========================= */
-function handleSignup() {
-    const bName = document.getElementById('bizNameInput').value.trim();
-    const email = document.getElementById('authEmail').value.trim();
-    const pass = document.getElementById('authPass').value.trim();
-    const phone = document.getElementById('regPhone').value.trim();
+<script>
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+  },{threshold:.12});
+  document.querySelectorAll('.reveal').forEach((el,i)=>{ el.style.transitionDelay=(i%4*60)+'ms'; io.observe(el); });
 
-    if (!bName || !email || !pass) {
-        alert("Please complete all required fields");
-        return;
-    }
-
-    const allBusinesses = JSON.parse(localStorage.getItem('all_businesses') || '[]');
-
-    // منع تكرار الإيميل
-    if (allBusinesses.some(b => b.email === email)) {
-        alert("Email already registered");
-        return;
-    }
-
-    const newBiz = {
-        id: 'biz_' + Date.now(),
-        name: bName,
-        email,
-        password: pass,
-        phone,
-        status: 'Active'
-    };
-
-    allBusinesses.push(newBiz);
-    localStorage.setItem('all_businesses', JSON.stringify(allBusinesses));
-
-    // تنظيف أي جلسة قديمة
-    localStorage.removeItem('session_business_id');
-    localStorage.removeItem('session_role');
-
-    // إنشاء جلسة جديدة
-    localStorage.setItem('session_business_id', newBiz.id);
-    localStorage.setItem('session_role', 'business');
-
-    // ⬅️ التعديل المهم
-    window.location.href = "dashboard.html?id=" + newBiz.id;
-}
-
-/* =========================
-   LOGIN
-========================= */
-function handleLogin(email, pass) {
-
-    // حساب الماستر
-    if (email === "admin@mouneh.com" && pass === "123") {
-        localStorage.setItem('session_role', 'master');
-        window.location.href = "master-control.html";
-        return;
-    }
-
-    const allBusinesses = JSON.parse(localStorage.getItem('all_businesses') || '[]');
-    const biz = allBusinesses.find(b => b.email === email && b.password === pass);
-
-    if (!biz) {
-        alert("Invalid email or password");
-        return;
-    }
-
-    localStorage.setItem('session_business_id', biz.id);
-    localStorage.setItem('session_role', 'business');
-
-    // ⬅️ التعديل المهم
-    window.location.href = "dashboard.html?id=" + biz.id;
-}
-
-/* =========================
-   FORM SUBMIT
-========================= */
-document.getElementById('authForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    const email = document.getElementById('authEmail').value.trim();
-    const pass = document.getElementById('authPass').value.trim();
-
-    if (authMode === 'login') {
-        handleLogin(email, pass);
-    } else {
-        handleSignup();
-    }
-});
+  document.querySelectorAll('.phone .amt').forEach(a=>{
+    a.addEventListener('click',()=>{
+      document.querySelectorAll('.phone .amt').forEach(x=>x.classList.remove('sel'));
+      a.classList.add('sel');
+    });
+  });
 </script>
 </body>
 </html>

@@ -1,291 +1,394 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EazyTipMe - Global Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root { --apple-bg: #F5F5F7; --apple-blue: #007AFF; --apple-red: #FF3B30; --apple-green: #34C759; }
-        body { font-family: 'Inter', -apple-system, sans-serif; margin: 0; display: flex; height: 100vh; background: var(--apple-bg); color: #1D1D1F; overflow: hidden; }
-        
-        /* Sidebar */
-        .sidebar { width: 260px; background: #000; color: white; padding: 30px 20px; display: flex; flex-direction: column; }
-        .nav-item { padding: 14px 18px; cursor: pointer; border-radius: 12px; margin-bottom: 8px; transition: 0.3s; opacity: 0.6; font-size: 14px; }
-        .nav-item:hover { background: #222; opacity: 1; transform: translateX(5px); }
-        .nav-item.active { background: #333; opacity: 1; font-weight: 600; }
-
-        .main { flex: 1; padding: 40px; overflow-y: auto; position: relative; } /* Added position relative for signature */
-        .section { display: none; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .card { background: #FFF; padding: 30px; border-radius: 24px; box-shadow: 0 4px 24px rgba(0,0,0,0.04); margin-bottom: 25px; border: 1px solid #E5E5E7; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
-        
-        label { display: block; font-size: 11px; font-weight: 700; margin-bottom: 8px; color: #86868B; text-transform: uppercase; }
-        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #D2D2D7; border-radius: 12px; font-size: 14px; margin-bottom: 15px; background: #FBFBFD; outline: none; box-sizing: border-box; }
-        
-        /* Working Days Buttons */
-        .days-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px; }
-        .day-btn { padding: 8px 12px; border: 1px solid #D2D2D7; border-radius: 10px; cursor: pointer; font-size: 11px; background: #FFF; transition: 0.2s; }
-        .day-btn.selected { background: #000; color: #FFF; border-color: #000; }
-
-        /* Publish Switch */
-        .switch { position: relative; display: inline-block; width: 42px; height: 22px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
-        input:checked + .slider { background-color: var(--apple-green); }
-
-        .btn-main { background: #000; color: #FFF; border: none; padding: 16px; border-radius: 14px; width: 100%; cursor: pointer; font-weight: 600; font-size: 16px; transition: 0.3s; }
-        .btn-main:hover { background: #333; }
-
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th { text-align: left; color: #86868B; font-size: 10px; padding: 15px; border-bottom: 1px solid #E5E5E7; }
-        td { padding: 15px; border-bottom: 1px solid #F5F5F7; font-size: 13px; }
-        
-        .img-prev { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background: #f0f0f2; margin-top: 5px; border: 1px solid #eee; }
-        .logo-prev { width: 80px; height: 80px; border-radius: 15px; object-fit: contain; background: #fff; border: 1px solid #eee; }
-
-        /* Signature Style */
-        .amidify-sig { text-align: right; font-size: 10px; color: #AEAEB2; font-weight: 700; letter-spacing: 1.5px; margin-top: 40px; text-transform: uppercase; }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>EasyTipMe — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f5f5f7;--card:#fff;--ink:#1d1d1f;--soft:#6e6e73;--line:#e3e3e6;
+    --blue:#0071e3;--blue-d:#0058b9;--red:#e5484d;--orange:#f5820b;--green:#1f9d55;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;color:var(--ink);background:var(--bg);
+    display:flex;min-height:100vh;-webkit-font-smoothing:antialiased}
+  /* sidebar */
+  .sidebar{width:250px;background:#000;color:#fff;padding:26px 18px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+  .brand{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .brand .mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--blue),#00c2ff);display:grid;place-items:center;font-weight:700}
+  .brand b{font-size:16px}
+  .bizname{font-size:13px;color:#9b9b9f;margin:0 0 26px 40px;word-break:break-word}
+  .nav{padding:12px 15px;border-radius:12px;margin-bottom:6px;cursor:pointer;opacity:.62;font-size:14px;transition:.2s}
+  .nav:hover{background:#1c1c1e;opacity:1}
+  .nav.active{background:#2c2c2e;opacity:1;font-weight:600}
+  .side-bottom{margin-top:auto;display:flex;flex-direction:column;gap:6px}
+  .logout{background:none;border:none;color:#ff6b6b;text-align:left;padding:12px 15px;cursor:pointer;font:inherit;font-size:14px;border-radius:12px}
+  .logout:hover{background:#1c1c1e}
+  /* main */
+  .main{flex:1;padding:34px 40px 80px;overflow-y:auto;max-width:1000px}
+  .section{display:none;animation:fade .35s ease}
+  .section.show{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  h1{font-size:24px;letter-spacing:-.02em;margin-bottom:4px}
+  .sub{color:var(--soft);font-size:14px;margin-bottom:22px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:24px;margin-bottom:20px}
+  .card h3{font-size:16px;margin-bottom:16px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 22px}
+  @media(max-width:720px){.grid2{grid-template-columns:1fr}.sidebar{width:70px}.brand b,.bizname,.nav span{display:none}.main{padding:24px 18px}}
+  label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;color:var(--soft);margin-bottom:6px}
+  input[type=text],input[type=email],input[type=tel],input[type=time],select,textarea{width:100%;border:1.5px solid var(--line);
+    border-radius:11px;padding:11px 13px;font-size:14px;font-family:inherit;background:#fbfbfd;margin-bottom:16px;outline:none;transition:.15s}
+  input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,113,227,.12);background:#fff}
+  textarea{resize:vertical;min-height:60px}
+  .days{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+  .day{padding:8px 12px;border:1.5px solid var(--line);border-radius:10px;cursor:pointer;font-size:12px;background:#fff;user-select:none}
+  .day.on{background:#000;color:#fff;border-color:#000}
+  .times{display:flex;gap:10px;align-items:center}
+  .times input{margin-bottom:16px}
+  .btn{background:var(--blue);color:#fff;border:none;padding:13px 22px;border-radius:12px;font-weight:600;font-size:15px;cursor:pointer;font-family:inherit;transition:.2s}
+  .btn:hover{background:var(--blue-d)}.btn:active{transform:scale(.98)}
+  .btn.full{width:100%}
+  .btn.ghost{background:#f0f0f3;color:var(--ink)}
+  .btn.sm{padding:8px 14px;font-size:13px}
+  .photo-pick{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+  .prev{width:52px;height:52px;border-radius:50%;object-fit:cover;background:#eee;border:1px solid var(--line)}
+  .logoprev{width:76px;height:76px;border-radius:16px;object-fit:contain;background:#fff;border:1px solid var(--line)}
+  table{width:100%;border-collapse:collapse;margin-top:6px}
+  th{text-align:left;color:var(--soft);font-size:10px;text-transform:uppercase;letter-spacing:.04em;padding:12px;border-bottom:1px solid var(--line)}
+  td{padding:12px;border-bottom:1px solid #f0f0f2;font-size:13px;vertical-align:middle}
+  .tav{width:38px;height:38px;border-radius:50%;object-fit:cover;background:linear-gradient(135deg,var(--blue),#00c2ff);display:grid;place-items:center;color:#fff;font-weight:600}
+  .switch{position:relative;display:inline-block;width:42px;height:24px}
+  .switch input{opacity:0;width:0;height:0}
+  .slider{position:absolute;inset:0;background:#ccc;border-radius:34px;transition:.3s;cursor:pointer}
+  .slider:before{content:"";position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}
+  .switch input:checked+.slider{background:var(--green)}
+  .switch input:checked+.slider:before{transform:translateX(18px)}
+  .link{color:var(--red);background:none;border:none;cursor:pointer;font:inherit;font-size:13px}
+  .link.b{color:var(--blue)}
+  .qrbox{display:flex;gap:22px;align-items:center;flex-wrap:wrap}
+  .qrbox img{border:1px solid var(--line);border-radius:14px;padding:8px;background:#fff}
+  .linkrow{display:flex;gap:8px;max-width:440px}
+  .linkrow input{margin-bottom:0;font-size:12px;color:var(--soft)}
+  .msg{font-size:13px;border-radius:10px;padding:9px 12px;margin-top:12px;display:none}
+  .msg.ok{display:block;background:#eef7ee;color:var(--green)}
+  .msg.err{display:block;background:#fdecec;color:var(--red)}
+  .center{margin:auto;color:var(--soft)}
+  .presetrow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+  .presetrow input{width:90px;margin-bottom:0;text-align:center}
+  .sig{color:#c7c7cc;font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin-top:36px}
+</style>
 </head>
 <body>
+  <div id="loading" class="center">Loading…</div>
 
-<div class="sidebar">
-    <div style="text-align: center; margin-bottom: 40px;">
-        <img id="sideLogo" src="" style="width: 55px; border-radius: 14px; display: none; margin: 0 auto 10px;">
-        <h2 id="sideStoreName" style="font-size: 18px; margin: 0;">Admin</h2>
+  <div id="app" style="display:none;width:100%">
+    <div class="sidebar">
+      <div class="brand"><div class="mark">E</div><b>EasyTipMe</b></div>
+      <div class="bizname" id="sideBiz"></div>
+      <div class="nav active" data-tab="team"><span>Team management</span></div>
+      <div class="nav" data-tab="profile"><span>Company profile</span></div>
+      <div class="nav" data-tab="analytics"><span>Analytics</span></div>
+      <div class="nav" data-tab="settings"><span>Settings</span></div>
+      <div class="side-bottom">
+        <button class="logout" id="logout">Log out</button>
+      </div>
     </div>
-    <div class="nav-item active" onclick="showTab('reg')">Team Management</div>
-    <div class="nav-item" onclick="showTab('set')">Company Profile</div>
-    <div style="margin-top:auto; color:var(--apple-red); cursor:pointer; font-size:13px; padding:10px;" onclick="resetCurrentData()">Reset Account Data</div>
-    <button onclick="logout()" style="margin-top:20px">
-  Logout
-</button>
-</div>
 
-<div class="main">
-    <div id="section-reg" class="section" style="display:block;">
+    <div class="main">
+      <!-- TEAM -->
+      <div class="section show" id="sec-team">
+        <h1 id="teamTitle">Your team</h1>
+        <div class="sub">Add your staff, set their schedule, and print your shop QR.</div>
+
         <div class="card">
-            <h3 style="margin-top:0;">Register New Specialist</h3>
-            <div class="grid">
-                <div>
-                    <label>Public Nickname</label> <input type="text" id="nName" placeholder="e.g. Shani">
-                    <label>Official Real Name</label> <input type="text" id="rName">
-                    <label>Contact Email</label> <input type="email" id="email">
-                    <label>Phone Number</label> <input type="text" id="phone">
-                    <label>Specialist Photo</label> 
-                    <input type="file" id="staffImg" accept="image/*" onchange="preview(this, 'sPrev')">
-                    <img id="sPrev" class="img-prev" src="">
-                </div>
-                <div>
-                    <label>Job Title</label> <input type="text" id="job" placeholder="e.g. Nail Technician">
-                    <label>Working Days</label>
-                    <div class="days-row" id="daysPicker">
-                        <div class="day-btn" onclick="this.classList.toggle('selected')">Mon</div>
-                        <div class="day-btn" onclick="this.classList.toggle('selected')">Tue</div>
-                        <div class="day-btn" onclick="this.classList.toggle('selected')">Wed</div>
-                        <div class="day-btn" onclick="this.classList.toggle('selected')">Thu</div>
-                        <div class="day-btn" onclick="this.classList.toggle('selected')">Fri</div>
-                        <div class="day-btn" onclick="this.classList.toggle('selected')">Sat</div>
-                        <div class="day-btn" onclick="this.classList.toggle('selected')">Sun</div>
-                    </div>
-                    <label>Shift 1 (Standard)</label>
-                    <div style="display:flex; gap:10px;">
-                        <input type="time" id="s1_s"> <input type="time" id="s1_e">
-                    </div>
-                    <label>Shift 2 (Optional)</label>
-                    <div style="display:flex; gap:10px;">
-                        <input type="time" id="s2_s"> <input type="time" id="s2_e">
-                    </div>
-                </div>
+          <h3>Your shop QR code</h3>
+          <div class="qrbox">
+            <img id="shopQr" width="150" height="150" alt="Shop QR">
+            <div style="flex:1;min-width:240px">
+              <p style="color:var(--soft);font-size:14px;margin-bottom:12px">One permanent code. Print it once — it always shows your currently-available team. On-leave or off-shift staff are hidden automatically.</p>
+              <div class="linkrow">
+                <input type="text" id="shopLink" readonly>
+                <button class="btn ghost sm" id="copyShop">Copy</button>
+                <button class="btn sm" id="openShop">Open</button>
+              </div>
             </div>
-            <button class="btn-main" onclick="saveStaff()">Register Specialist</button>
+          </div>
         </div>
 
         <div class="card">
+          <h3 id="formTitle">Register a specialist</h3>
+          <div class="grid2">
+            <div>
+              <label>Public nickname</label><input type="text" id="f_nick" placeholder="e.g. Shani">
+              <label>Official real name</label><input type="text" id="f_real">
+              <label>Contact email</label><input type="email" id="f_email">
+              <label>Phone number</label><input type="tel" id="f_phone">
+              <label>Photo</label>
+              <div class="photo-pick"><img id="f_prev" class="prev" alt=""><input type="file" id="f_photo" accept="image/*" style="margin-bottom:0"></div>
+            </div>
+            <div>
+              <label>Job title</label><input type="text" id="f_job" placeholder="e.g. Barber">
+              <label>Working days</label>
+              <div class="days" id="days">
+                <div class="day" data-d="Mon">Mon</div><div class="day" data-d="Tue">Tue</div><div class="day" data-d="Wed">Wed</div>
+                <div class="day" data-d="Thu">Thu</div><div class="day" data-d="Fri">Fri</div><div class="day" data-d="Sat">Sat</div><div class="day" data-d="Sun">Sun</div>
+              </div>
+              <label>Shift 1</label><div class="times"><input type="time" id="f_s1s"><span style="margin-bottom:16px">–</span><input type="time" id="f_s1e"></div>
+              <label>Shift 2 (optional)</label><div class="times"><input type="time" id="f_s2s"><span style="margin-bottom:16px">–</span><input type="time" id="f_s2e"></div>
+            </div>
+          </div>
+          <button class="btn full" id="saveStaff">Register specialist</button>
+          <button class="btn ghost full" id="cancelEdit" style="display:none;margin-top:10px">Cancel edit</button>
+          <div id="staffMsg" class="msg"></div>
+        </div>
+
+        <div class="card">
+          <h3>Team members <span id="count" style="color:var(--soft);font-weight:400"></span></h3>
+          <div style="overflow-x:auto">
             <table>
-                <thead>
-                    <tr><th>Photo</th><th>Name & Job</th><th>Schedule & Shifts</th><th>Publish</th><th>Actions</th></tr>
-                </thead>
-                <tbody id="staffTable"></tbody>
+              <thead><tr><th>Photo</th><th>Name & job</th><th>Schedule</th><th>Published</th><th>Actions</th></tr></thead>
+              <tbody id="staffTable"></tbody>
             </table>
+          </div>
+          <div id="emptyStaff" style="color:var(--soft);text-align:center;padding:24px 0">No team members yet.</div>
         </div>
-    </div>
+      </div>
 
-    <div id="section-set" class="section">
+      <!-- PROFILE -->
+      <div class="section" id="sec-profile">
+        <h1>Company profile</h1>
+        <div class="sub">This is what your customers see on your tipping page.</div>
         <div class="card">
-            <h3>Public Business Identity</h3>
-            <div class="grid">
-                <div>
-                    <label>Business Name</label> <input type="text" id="set_name" placeholder="Business Name">
-                    <label>Slogan (Max 90 chars)</label> <textarea id="set_slogan" maxlength="90"></textarea>
-                </div>
-                <div>
-                    <label>Official Company Logo</label>
-                    <input type="file" id="logoFile" accept="image/*" onchange="preview(this, 'lPrev')">
-                    <img id="lPrev" class="logo-prev" src="">
-                </div>
+          <h3>Public identity</h3>
+          <div class="grid2">
+            <div>
+              <label>Business name</label><input type="text" id="p_name">
+              <label>Slogan (max 90)</label><textarea id="p_slogan" maxlength="90"></textarea>
             </div>
+            <div>
+              <label>Logo</label>
+              <div class="photo-pick"><img id="p_logoPrev" class="logoprev" alt=""><input type="file" id="p_logo" accept="image/*" style="margin-bottom:0"></div>
+            </div>
+          </div>
         </div>
+        <div class="card" style="border-left:4px solid #000">
+          <h3>Business info (private)</h3>
+          <div class="grid2">
+            <div>
+              <label>Address</label><input type="text" id="p_address">
+              <label>Business email</label><input type="email" id="p_bemail">
+            </div>
+            <div>
+              <label>Business phone</label><input type="tel" id="p_bphone">
+              <label>Operating hours</label><input type="text" id="p_hours" placeholder="e.g. 10am – 8pm">
+            </div>
+          </div>
+          <button class="btn" id="saveProfile">Save profile</button>
+          <div id="profileMsg" class="msg"></div>
+        </div>
+      </div>
 
-        <div class="card" style="border-left: 5px solid #000;">
-            <h3>Official Admin Info (Private)</h3>
-            <div class="grid">
-                <div>
-                    <label>Legal Address</label> <input type="text" id="set_address">
-                    <label>Business Email</label> <input type="email" id="set_bEmail">
-                </div>
-                <div>
-                    <label>Business Phone</label> <input type="text" id="set_bPhone">
-                    <label>Operating Hours</label> <input type="text" id="set_hours" placeholder="e.g. 9 AM - 10 PM">
-                </div>
-            </div>
-            <button class="btn-main" onclick="saveCompany()">Update Global Profile</button>
+      <!-- SETTINGS -->
+      <div class="section" id="sec-settings">
+        <h1>Settings</h1>
+        <div class="sub">Tip amounts, currency, and notifications.</div>
+        <div class="card">
+          <h3>Tip amounts</h3>
+          <label>Preset amounts shown to customers</label>
+          <div class="presetrow">
+            <input type="text" id="tp1" inputmode="decimal"><input type="text" id="tp2" inputmode="decimal"><input type="text" id="tp3" inputmode="decimal"><input type="text" id="tp4" inputmode="decimal">
+          </div>
+          <label>Currency</label>
+          <select id="s_curr" style="max-width:220px">
+            <option value="CAD">CAD — Canadian Dollar ($)</option>
+            <option value="USD">USD — US Dollar ($)</option>
+            <option value="EUR">EUR — Euro (€)</option>
+            <option value="GBP">GBP — British Pound (£)</option>
+            <option value="AED">AED — UAE Dirham</option>
+            <option value="SAR">SAR — Saudi Riyal</option>
+            <option value="AUD">AUD — Australian Dollar ($)</option>
+            <option value="QAR">QAR — Qatari Riyal</option>
+            <option value="KWD">KWD — Kuwaiti Dinar</option>
+            <option value="BHD">BHD — Bahraini Dinar</option>
+            <option value="OMR">OMR — Omani Rial</option>
+            <option value="LBP">LBP — Lebanese Pound</option>
+          </select>
         </div>
+        <div class="card">
+          <h3>Notifications</h3>
+          <label style="display:flex;align-items:center;gap:10px;text-transform:none;font-size:14px;font-weight:400;color:var(--ink)">
+            <input type="checkbox" id="s_notifyEmail" checked style="width:auto;margin:0"> Email staff when they receive a tip
+          </label>
+        </div>
+        <button class="btn" id="saveSettings">Save settings</button>
+        <div id="settingsMsg" class="msg"></div>
+        <div class="sig">Powered by Amidify Solutions Inc.</div>
+      </div>
+
+      <!-- ANALYTICS -->
+      <div class="section" id="sec-analytics">
+        <h1>Analytics</h1>
+        <div class="sub">Tips your team has received.</div>
+        <div class="card" style="display:flex;gap:32px;flex-wrap:wrap">
+          <div><div style="font-size:11px;color:var(--soft);text-transform:uppercase;letter-spacing:.04em">Total tips</div><div id="anTotal" style="font-size:30px;font-weight:700">—</div></div>
+          <div><div style="font-size:11px;color:var(--soft);text-transform:uppercase;letter-spacing:.04em">Number of tips</div><div id="anCount" style="font-size:30px;font-weight:700">—</div></div>
+          <div><div style="font-size:11px;color:var(--soft);text-transform:uppercase;letter-spacing:.04em">Avg rating</div><div id="anRating" style="font-size:30px;font-weight:700">—</div></div>
+        </div>
+        <div class="card"><h3>By team member</h3><div id="anByStaff"></div></div>
+        <div class="card"><h3>Recent tips</h3>
+          <div style="overflow-x:auto"><table><thead><tr><th>To</th><th>Tip</th><th>Rating</th></tr></thead><tbody id="anRecent"></tbody></table></div>
+          <div id="anEmpty" style="color:var(--soft);text-align:center;padding:20px 0">No tips yet.</div>
+        </div>
+      </div>
     </div>
-    
-    <div class="amidify-sig">Power by amidify solutions inc</div>
-</div>
+  </div>
 
-<script>
-        if (!localStorage.getItem('session_business_id')) {
-  window.location.href = "index.html";
-}
-    // جلب المعرف الفريد من الرابط لضمان عزل البيانات
-    const params = new URLSearchParams(window.location.search);
-    const bizId = params.get('id') || 'default';
-    // استخدام مفاتيح ديناميكية تعتمد على bizId
-    const STAFF_KEY = 'staff_' + bizId;
-    const PROFILE_KEY = 'profile_' + bizId;
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {apiKey:"AIzaSyBsY_pCxvbbJUtvRb7ClwgWQ25hGzNTgBM",authDomain:"easy-tip-me.firebaseapp.com",projectId:"easy-tip-me",storageBucket:"easy-tip-me.firebasestorage.app",messagingSenderId:"189382420404",appId:"1:189382420404:web:2f6075c986c81484eab4e1",measurementId:"G-GDY85BQ4FX"};
+    firebase.initializeApp(firebaseConfig);
+    const auth=firebase.auth(), db=firebase.firestore();
+    const $=id=>document.getElementById(id);
+    let BID=null, editId=null, fPhoto="", pLogo="";
 
-    let staffList = JSON.parse(localStorage.getItem(STAFF_KEY) || '[]');
-    let sImg = "", lImg = "";
+    // tabs
+    document.querySelectorAll('.nav').forEach(n=>n.onclick=()=>{
+      document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));
+      n.classList.add('active');
+      document.querySelectorAll('.section').forEach(s=>s.classList.remove('show'));
+      $('sec-'+n.dataset.tab).classList.add('show');
+      if(n.dataset.tab==='analytics') loadAnalytics();
+    });
+    // days toggle
+    $('days').querySelectorAll('.day').forEach(d=>d.onclick=()=>d.classList.toggle('on'));
 
-    function preview(input, id) {
-        const r = new FileReader();
-        r.onload = (e) => {
-            document.getElementById(id).src = e.target.result;
-            if(id === 'sPrev') sImg = e.target.result;
-            if(id === 'lPrev') lImg = e.target.result;
-        };
-        if(input.files[0]) r.readAsDataURL(input.files[0]);
-    }
-    
-function logout() {
-  // امسح السيشن فقط (مش كل الداتا)
-  localStorage.removeItem('session_business_id');
-  localStorage.removeItem('session_role');
-  localStorage.removeItem('temp_biz_id');
-  localStorage.removeItem('temp_biz_name');
-  localStorage.removeItem('temp_biz_email');
+    auth.onAuthStateChanged(async u=>{
+      if(!u){ location.href='signup.html'; return; }
+      BID=u.uid;
+      const doc = await db.collection('businesses').doc(BID).get();
+      const b = doc.exists?doc.data():{};
+      $('sideBiz').textContent=b.businessName||u.email;
+      $('teamTitle').textContent=(b.businessName||'Your')+' — team';
+      // fill profile + settings
+      $('p_name').value=b.businessName||''; $('p_slogan').value=b.slogan||'';
+      $('p_address').value=b.address||''; $('p_bemail').value=b.businessEmail||'';
+      $('p_bphone').value=b.businessPhone||''; $('p_hours').value=b.hours||'';
+      if(b.logo){ pLogo=b.logo; $('p_logoPrev').src=b.logo; }
+      const presets=b.tipPresets||[5,10,20,''];
+      ['tp1','tp2','tp3','tp4'].forEach((id,i)=>$(id).value=presets[i]!=null?presets[i]:'');
+      $('s_curr').value=b.currency||'CAD';
+      $('s_notifyEmail').checked=b.notifyEmail!==false;
+      const url=shopUrl();
+      $('shopLink').value=url;
+      $('shopQr').src='https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=0&data='+encodeURIComponent(url);
+      $('loading').style.display='none'; $('app').style.display='flex';
+      loadStaff();
+    });
 
-  window.location.href = "index.html";
-}
-    function saveStaff() {
-        const name = document.getElementById('nName').value;
-        if(!name) { alert("Please enter a name"); return; }
-        const member = {
-            id: Date.now(),
-            nName: name, rName: document.getElementById('rName').value,
-            email: document.getElementById('email').value, phone: document.getElementById('phone').value,
-            job: document.getElementById('job').value,
-            days: Array.from(document.querySelectorAll('#daysPicker .day-btn.selected')).map(d => d.innerText),
-            s1: { s: document.getElementById('s1_s').value, e: document.getElementById('s1_e').value },
-            s2: { s: document.getElementById('s2_s').value, e: document.getElementById('s2_e').value },
-            img: sImg || 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
-            published: false
-        };
-        staffList.push(member);
-        localStorage.setItem(STAFF_KEY, JSON.stringify(staffList));
-        sImg = ""; document.getElementById('sPrev').src = "";
-        render();
-        alert("Staff Registered Successfully!");
-    }
+    $('logout').onclick=()=>auth.signOut().then(()=>location.href='signup.html');
+    $('copyShop').onclick=()=>{navigator.clipboard.writeText($('shopLink').value);$('copyShop').textContent='Copied';setTimeout(()=>$('copyShop').textContent='Copy',1200);};
+    $('openShop').onclick=()=>window.open($('shopLink').value,'_blank');
 
-    function render() {
-        const table = document.getElementById('staffTable');
-        table.innerHTML = staffList.map(s => `
-            <tr>
-                <td><img src="${s.img}" style="width:40px; height:40px; border-radius:50%; object-fit:cover;"></td>
-                <td><b>${s.nName}</b><br><small>${s.job}</small></td>
-                <td><small>${s.days.join(', ')}<br>S1: ${s.s1.s || '--'} to ${s.s1.e || '--'}</small></td>
-                <td>
-                    <label class="switch">
-                        <input type="checkbox" ${s.published ? 'checked' : ''} onchange="togglePublish(${s.id})">
-                        <span class="slider"></span>
-                    </label>
-                </td>
-                <td><button onclick="del(${s.id})" style="color:red; border:none; background:none; cursor:pointer;">Delete</button></td>
-            </tr>
-        `).join('');
-    }
+    $('f_photo').onchange=e=>{const f=e.target.files[0];if(!f){fPhoto="";$('f_prev').src="";return;}resize(f,256,d=>{fPhoto=d;$('f_prev').src=d;});};
+    $('p_logo').onchange=e=>{const f=e.target.files[0];if(!f)return;resize(f,300,d=>{pLogo=d;$('p_logoPrev').src=d;});};
 
-    function togglePublish(id) {
-        const i = staffList.findIndex(s => s.id === id);
-        staffList[i].published = !staffList[i].published;
-        localStorage.setItem(STAFF_KEY, JSON.stringify(staffList));
-    }
+    $('saveStaff').onclick=async()=>{
+      const nick=$('f_nick').value.trim();
+      if(!nick){ msg('staffMsg','Please enter a nickname.','err'); return; }
+      const data={
+        nickname:nick, realName:$('f_real').value.trim(), email:$('f_email').value.trim(),
+        phone:$('f_phone').value.trim(), job:$('f_job').value.trim(),
+        days:Array.from($('days').querySelectorAll('.day.on')).map(d=>d.dataset.d),
+        shift1:{s:$('f_s1s').value,e:$('f_s1e').value}, shift2:{s:$('f_s2s').value,e:$('f_s2e').value}
+      };
+      if(fPhoto) data.photo=fPhoto;
+      const btn=$('saveStaff'); btn.disabled=true; btn.textContent='Saving…';
+      try{
+        const col=db.collection('businesses').doc(BID).collection('staff');
+        if(editId){ await col.doc(editId).update(data); }
+        else{ data.published=true; data.createdAt=firebase.firestore.FieldValue.serverTimestamp(); await col.add(data); }
+        resetForm(); msg('staffMsg','Saved ✓','ok'); setTimeout(()=>$('staffMsg').className='msg',1500); loadStaff();
+      }catch(err){ msg('staffMsg',err.message,'err'); }
+      btn.disabled=false; btn.textContent=editId?'Update specialist':'Register specialist';
+    };
+    $('cancelEdit').onclick=resetForm;
 
-    function del(id) {
-        if(confirm("Delete?")){
-            staffList = staffList.filter(s => s.id !== id);
-            localStorage.setItem(STAFF_KEY, JSON.stringify(staffList));
-            render();
-        }
-    }
-
-    function saveCompany() {
-        const comp = {
-            name: document.getElementById('set_name').value,
-            slogan: document.getElementById('set_slogan').value,
-            logo: lImg || document.getElementById('lPrev').src,
-            address: document.getElementById('set_address').value,
-            email: document.getElementById('set_bEmail').value,
-            phone: document.getElementById('set_bPhone').value,
-            hours: document.getElementById('set_hours').value
-        };
-        localStorage.setItem(PROFILE_KEY, JSON.stringify(comp));
-        document.getElementById('sideStoreName').innerText = comp.name;
-        document.getElementById('sideLogo').src = comp.logo;
-        document.getElementById('sideLogo').style.display = 'block';
-        alert("Business Profile Updated!");
+    async function loadStaff(){
+      const tb=$('staffTable'); tb.innerHTML='';
+      const snap=await db.collection('businesses').doc(BID).collection('staff').orderBy('createdAt','desc').get();
+      $('count').textContent=snap.size?'('+snap.size+')':'';
+      $('emptyStaff').style.display=snap.size?'none':'block';
+      snap.forEach(d=>{
+        const s=d.data(), pub=s.published!==false;
+        const av=s.photo?`<img class="tav" src="${s.photo}">`:`<div class="tav">${(s.nickname||'?').charAt(0).toUpperCase()}</div>`;
+        const sched=(s.days&&s.days.length?s.days.join(', '):'—')+'<br><small style="color:var(--soft)">'+(s.shift1&&s.shift1.s?s.shift1.s+'–'+(s.shift1.e||''):'no shift')+(s.shift2&&s.shift2.s?' , '+s.shift2.s+'–'+(s.shift2.e||''):'')+'</small>';
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td>${av}</td>
+          <td><b>${esc(s.nickname||'')}</b><br><small style="color:var(--soft)">${esc(s.job||'')}</small></td>
+          <td>${sched}</td>
+          <td><label class="switch"><input type="checkbox" ${pub?'checked':''}><span class="slider"></span></label></td>
+          <td><button class="link b editBtn">Edit</button> &nbsp; <button class="link delBtn">Delete</button></td>`;
+        tr.querySelector('.switch input').onchange=e=>db.collection('businesses').doc(BID).collection('staff').doc(d.id).update({published:e.target.checked});
+        tr.querySelector('.editBtn').onclick=()=>editStaff(d.id,s);
+        tr.querySelector('.delBtn').onclick=async()=>{if(confirm('Delete '+(s.nickname||'this member')+'?')){await db.collection('businesses').doc(BID).collection('staff').doc(d.id).delete();loadStaff();}};
+        tb.appendChild(tr);
+      });
     }
 
-    function showTab(t) {
-        document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
-        document.getElementById('section-' + t).style.display = 'block';
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        event.currentTarget.classList.add('active');
+    function editStaff(id,s){
+      editId=id;
+      $('f_nick').value=s.nickname||''; $('f_real').value=s.realName||''; $('f_email').value=s.email||'';
+      $('f_phone').value=s.phone||''; $('f_job').value=s.job||'';
+      $('f_s1s').value=s.shift1?.s||''; $('f_s1e').value=s.shift1?.e||'';
+      $('f_s2s').value=s.shift2?.s||''; $('f_s2e').value=s.shift2?.e||'';
+      fPhoto=s.photo||""; $('f_prev').src=s.photo||'';
+      $('days').querySelectorAll('.day').forEach(d=>d.classList.toggle('on',(s.days||[]).includes(d.dataset.d)));
+      $('formTitle').textContent='Edit '+(s.nickname||'specialist');
+      $('saveStaff').textContent='Update specialist'; $('cancelEdit').style.display='block';
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+    function resetForm(){
+      editId=null; fPhoto="";
+      ['f_nick','f_real','f_email','f_phone','f_job','f_s1s','f_s1e','f_s2s','f_s2e'].forEach(id=>$(id).value='');
+      $('f_prev').src=''; $('f_photo').value='';
+      $('days').querySelectorAll('.day').forEach(d=>d.classList.remove('on'));
+      $('formTitle').textContent='Register a specialist'; $('saveStaff').textContent='Register specialist'; $('cancelEdit').style.display='none';
     }
 
-    function resetCurrentData() {
-        if(confirm('Clear all data for this account?')){
-            localStorage.removeItem(STAFF_KEY);
-            localStorage.removeItem(PROFILE_KEY);
-            location.reload();
-        }
-    }
+    $('saveProfile').onclick=async()=>{
+      const data={businessName:$('p_name').value.trim(),slogan:$('p_slogan').value.trim(),address:$('p_address').value.trim(),
+        businessEmail:$('p_bemail').value.trim(),businessPhone:$('p_bphone').value.trim(),hours:$('p_hours').value.trim()};
+      if(pLogo) data.logo=pLogo;
+      try{ await db.collection('businesses').doc(BID).set(data,{merge:true}); $('sideBiz').textContent=data.businessName||''; msg('profileMsg','Saved ✓','ok'); setTimeout(()=>$('profileMsg').className='msg',1500); }
+      catch(err){ msg('profileMsg',err.message,'err'); }
+    };
 
-    window.onload = () => {
-    // جلب البيانات التي سجلها الزبون (أياً كان نوع عمله)
-    const tempName = localStorage.getItem('temp_biz_name');
-    
-    const cp = JSON.parse(localStorage.getItem(PROFILE_KEY) || '{}');
+    $('saveSettings').onclick=async()=>{
+      const presets=['tp1','tp2','tp3','tp4'].map(id=>parseFloat($(id).value)).filter(v=>!isNaN(v)&&v>0);
+      try{ await db.collection('businesses').doc(BID).set({tipPresets:presets,currency:$('s_curr').value,notifyEmail:$('s_notifyEmail').checked},{merge:true});
+        msg('settingsMsg','Saved ✓','ok'); setTimeout(()=>$('settingsMsg').className='msg',1500); }
+      catch(err){ msg('settingsMsg',err.message,'err'); }
+    };
 
-    if(!cp.name && tempName) {
-        // تعبئة الاسم تلقائياً في الداشبورد
-        document.getElementById('set_name').value = tempName;
-        document.getElementById('sideStoreName').innerText = tempName;
-        saveCompany(); 
-    } else if (cp.name) {
-        // عرض البيانات المحفوظة سابقاً للزبون القديم
-        document.getElementById('set_name').value = cp.name;
-        document.getElementById('sideStoreName').innerText = cp.name;
+    const CURSYM={CAD:'$',USD:'$',AUD:'$',EUR:'€',GBP:'£',AED:'AED',SAR:'SAR',QAR:'QAR',KWD:'KWD',BHD:'BHD',OMR:'OMR',LBP:'LBP'};
+    async function loadAnalytics(){
+      const sym=CURSYM[$('s_curr').value]||'$';
+      const snap=await db.collection('businesses').doc(BID).collection('tips').orderBy('createdAt','desc').get();
+      let total=0,rs=0,rc=0; const per={}; const recent=[];
+      snap.forEach(d=>{const t=d.data(); total+=(t.tip||0); if(t.rating){rs+=t.rating;rc++;} const n=t.recipientName||'—'; per[n]=(per[n]||0)+(t.tip||0); recent.push(t);});
+      $('anTotal').textContent=sym+total.toFixed(2);
+      $('anCount').textContent=snap.size;
+      $('anRating').textContent=rc?(rs/rc).toFixed(1)+' ★':'—';
+      const by=$('anByStaff'); by.innerHTML=Object.keys(per).length?'':'<div style="color:var(--soft)">No tips yet.</div>';
+      Object.entries(per).sort((a,b)=>b[1]-a[1]).forEach(([n,v])=>by.insertAdjacentHTML('beforeend',`<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #f0f0f2"><span>${esc(n)}</span><b>${sym}${v.toFixed(2)}</b></div>`));
+      const rec=$('anRecent'); rec.innerHTML=''; $('anEmpty').style.display=snap.size?'none':'block';
+      recent.slice(0,25).forEach(t=>rec.insertAdjacentHTML('beforeend',`<tr><td>${esc(t.recipientName||'—')}</td><td>${sym}${(t.tip||0).toFixed(2)}</td><td>${t.rating?'★'.repeat(t.rating):'—'}</td></tr>`));
     }
-    render();
-};
-</script>
+    function shopUrl(){ return location.origin+location.pathname.replace(/[^/]*$/,'')+'shop.html?s='+BID; }
+    function resize(file,max,cb){const r=new FileReader();r.onload=ev=>{const img=new Image();img.onload=()=>{let{width:w,height:h}=img;if(w>h){if(w>max){h*=max/w;w=max;}}else{if(h>max){w*=max/h;h=max;}}const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);cb(c.toDataURL('image/jpeg',.82));};img.src=ev.target.result;};r.readAsDataURL(file);}
+    function msg(id,t,type){const m=$(id);m.textContent=t;m.className='msg '+type;}
+    function esc(s){return(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  </script>
 </body>
 </html>

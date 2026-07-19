@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>EasyTipMe — Register your shop</title>
+<style>
+  :root{
+    --bg:#ffffff;--bg-soft:#fbfbfd;--ink:#1d1d1f;--ink-soft:#6e6e73;
+    --line:#e8e8ed;--accent:#0071e3;--accent-ink:#0058b9;--danger:#e5484d;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Helvetica Neue",Arial,sans-serif;
+    color:var(--ink);background:radial-gradient(1000px 500px at 50% -160px,#eef6ff,rgba(238,246,255,0) 70%),var(--bg);
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;-webkit-font-smoothing:antialiased}
+  a{color:var(--accent);text-decoration:none}
+  .top{width:100%;max-width:1080px;padding:20px 24px;display:flex;align-items:center;gap:9px}
+  .logo{display:flex;align-items:center;gap:9px;font-weight:600;font-size:19px;letter-spacing:-.02em}
+  .logo .mark{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,var(--accent),#00c2ff);
+    display:grid;place-items:center;color:#fff;font-size:15px;font-weight:700}
+  .card{width:100%;max-width:440px;margin:26px 20px 60px;background:#fff;border:1px solid var(--line);
+    border-radius:24px;padding:36px 32px;box-shadow:0 30px 70px -40px rgba(0,50,120,.28)}
+  h1{font-size:27px;letter-spacing:-.02em;font-weight:700;text-align:center}
+  .sub{text-align:center;color:var(--ink-soft);font-size:15px;margin:8px 0 24px}
+  .field{margin-bottom:14px}
+  label{display:block;font-size:13px;color:var(--ink-soft);margin-bottom:6px;font-weight:500}
+  input{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;font-size:16px;
+    font-family:inherit;transition:border .15s,box-shadow .15s;outline:none}
+  input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,113,227,.12)}
+  .btn{width:100%;border:none;background:var(--accent);color:#fff;font-weight:600;font-size:16px;
+    border-radius:980px;padding:13px;cursor:pointer;margin-top:8px;transition:background .2s,transform .1s;font-family:inherit}
+  .btn:hover{background:var(--accent-ink)}
+  .btn:active{transform:scale(.98)}
+  .btn:disabled{opacity:.6;cursor:default}
+  .switch{text-align:center;font-size:14px;color:var(--ink-soft);margin-top:18px}
+  .msg{font-size:14px;border-radius:10px;padding:10px 12px;margin-bottom:14px;display:none}
+  .msg.err{display:block;background:#fdecec;color:var(--danger);border:1px solid #f6cdcf}
+  .msg.ok{display:block;background:#eef7ee;color:#237a3a;border:1px solid #cde8d1}
+  .hide{display:none}
+  .foot{color:var(--ink-soft);font-size:12px;margin-bottom:30px}
+</style>
+</head>
+<body>
+  <div class="top">
+    <a href="index.html" class="logo"><span class="mark">E</span> EasyTipMe</a>
+  </div>
+
+  <div class="card">
+    <h1 id="title">Register your shop</h1>
+    <p class="sub" id="subtitle">Create your business account — it takes a minute.</p>
+
+    <div id="msg" class="msg"></div>
+
+    <!-- REGISTER -->
+    <form id="registerForm">
+      <div class="field"><label>Business name</label><input id="r_business" type="text" autocomplete="organization" required></div>
+      <div class="field"><label>Owner name</label><input id="r_owner" type="text" autocomplete="name" required></div>
+      <div class="field"><label>Phone number</label><input id="r_phone" type="tel" autocomplete="tel" required></div>
+      <div class="field"><label>Email address</label><input id="r_email" type="email" autocomplete="email" required></div>
+      <div class="field"><label>Password</label><input id="r_pass" type="password" autocomplete="new-password" minlength="6" required></div>
+      <button class="btn" type="submit" id="r_btn">Create account</button>
+      <div class="switch">Already have an account? <a href="#" id="toLogin">Log in</a></div>
+    </form>
+
+    <!-- LOGIN -->
+    <form id="loginForm" class="hide">
+      <div class="field"><label>Email address</label><input id="l_email" type="email" autocomplete="email" required></div>
+      <div class="field"><label>Password</label><input id="l_pass" type="password" autocomplete="current-password" required></div>
+      <button class="btn" type="submit" id="l_btn">Log in</button>
+      <div class="switch">New here? <a href="#" id="toRegister">Register your shop</a></div>
+    </form>
+  </div>
+
+  <div class="foot">© 2026 EasyTipMe · Powered by Amidify Solutions Inc.</div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBsY_pCxvbbJUtvRb7ClwgWQ25hGzNTgBM",
+      authDomain: "easy-tip-me.firebaseapp.com",
+      projectId: "easy-tip-me",
+      storageBucket: "easy-tip-me.firebasestorage.app",
+      messagingSenderId: "189382420404",
+      appId: "1:189382420404:web:2f6075c986c81484eab4e1",
+      measurementId: "G-GDY85BQ4FX"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    const registerForm = document.getElementById('registerForm');
+    const loginForm = document.getElementById('loginForm');
+    const msg = document.getElementById('msg');
+    const title = document.getElementById('title');
+    const subtitle = document.getElementById('subtitle');
+
+    function showMsg(text, type){ msg.textContent = text; msg.className = 'msg ' + type; }
+    function clearMsg(){ msg.className = 'msg'; msg.textContent=''; }
+
+    document.getElementById('toLogin').onclick = (e)=>{ e.preventDefault(); clearMsg();
+      registerForm.classList.add('hide'); loginForm.classList.remove('hide');
+      title.textContent='Welcome back'; subtitle.textContent='Log in to your dashboard.'; };
+    document.getElementById('toRegister').onclick = (e)=>{ e.preventDefault(); clearMsg();
+      loginForm.classList.add('hide'); registerForm.classList.remove('hide');
+      title.textContent='Register your shop'; subtitle.textContent='Create your business account — it takes a minute.'; };
+
+    // If already logged in, go to dashboard
+    auth.onAuthStateChanged(u=>{ if(u && !sessionStorage.getItem('justRegistered')) { /* stay unless navigating */ } });
+
+    registerForm.addEventListener('submit', async (e)=>{
+      e.preventDefault(); clearMsg();
+      const btn = document.getElementById('r_btn'); btn.disabled=true; btn.textContent='Creating...';
+      const data = {
+        businessName: document.getElementById('r_business').value.trim(),
+        ownerName: document.getElementById('r_owner').value.trim(),
+        phone: document.getElementById('r_phone').value.trim(),
+        email: document.getElementById('r_email').value.trim().toLowerCase()
+      };
+      try{
+        const cred = await auth.createUserWithEmailAndPassword(data.email, document.getElementById('r_pass').value);
+        await db.collection('businesses').doc(cred.user.uid).set({
+          ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        showMsg('Account created! Redirecting…','ok');
+        setTimeout(()=>{ window.location.href='dashboard.html'; }, 900);
+      }catch(err){
+        btn.disabled=false; btn.textContent='Create account';
+        showMsg(prettyError(err),'err');
+      }
+    });
+
+    loginForm.addEventListener('submit', async (e)=>{
+      e.preventDefault(); clearMsg();
+      const btn = document.getElementById('l_btn'); btn.disabled=true; btn.textContent='Logging in...';
+      try{
+        await auth.signInWithEmailAndPassword(
+          document.getElementById('l_email').value.trim().toLowerCase(),
+          document.getElementById('l_pass').value);
+        window.location.href='dashboard.html';
+      }catch(err){
+        btn.disabled=false; btn.textContent='Log in';
+        showMsg(prettyError(err),'err');
+      }
+    });
+
+    function prettyError(err){
+      const c = (err && err.code) || '';
+      if(c.includes('email-already-in-use')) return 'This email is already registered. Try logging in.';
+      if(c.includes('invalid-email')) return 'Please enter a valid email address.';
+      if(c.includes('weak-password')) return 'Password should be at least 6 characters.';
+      if(c.includes('wrong-password') || c.includes('invalid-credential')) return 'Wrong email or password.';
+      if(c.includes('user-not-found')) return 'No account found with this email.';
+      if(c.includes('operation-not-allowed')) return 'Email/Password sign-in is not enabled yet in Firebase.';
+      if(c.includes('network')) return 'Network error. Check your connection.';
+      return (err && err.message) ? err.message : 'Something went wrong. Please try again.';
+    }
+  </script>
+</body>
+</html>

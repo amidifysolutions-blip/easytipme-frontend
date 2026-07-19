@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Leave a tip — EasyTipMe</title>
+<script src="https://js.stripe.com/v3/"></script>
+<style>
+  :root{--bg:#f0f0f2;--card:#fff;--ink:#1d1d1f;--soft:#8a8a8e;--line:#e6e6ea;--accent:#0071e3;--accent-d:#0058b9;--danger:#e5484d;--on:#34c759;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",Arial,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;min-height:100vh}
+  .wrap{max-width:520px;margin:0 auto;padding:18px 16px 90px}
+  .card{background:var(--card);border-radius:20px;padding:22px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+  .shophead{display:flex;align-items:center;gap:14px}
+  .shophead img{width:52px;height:52px;border-radius:13px;object-fit:contain;background:#fff;border:1px solid var(--line)}
+  .shophead .nm{font-size:21px;font-weight:700;letter-spacing:-.02em}
+  .shophead .sl{font-size:13px;color:var(--soft)}
+  .pick-title{text-align:center;font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1.25;margin:18px 8px 14px}
+  .multi-row{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:16px;font-size:16px;color:var(--ink)}
+  .switch{position:relative;display:inline-block;width:52px;height:30px}
+  .switch input{opacity:0;width:0;height:0}
+  .sl-track{position:absolute;inset:0;background:#d0d0d5;border-radius:34px;transition:.25s;cursor:pointer}
+  .sl-track:before{content:"";position:absolute;height:24px;width:24px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.25s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .switch input:checked+.sl-track{background:var(--danger)}
+  .switch input:checked+.sl-track:before{transform:translateX(22px)}
+  .search{width:100%;border:none;background:#e4e4ea;border-radius:14px;padding:14px 16px;font-size:15px;font-family:inherit;outline:none;margin-bottom:14px}
+  .srow{display:flex;align-items:center;gap:14px;background:#fff;border-radius:18px;padding:15px 18px;margin-bottom:12px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.04);transition:transform .1s;border:2px solid transparent}
+  .srow:active{transform:scale(.99)}
+  .srow.sel{border-color:var(--accent)}
+  .pic{width:54px;height:54px;border-radius:50%;object-fit:cover;flex-shrink:0;display:grid;place-items:center;color:#fff;font-weight:600;font-size:20px;background:linear-gradient(135deg,var(--accent),#00c2ff)}
+  .srow .info{flex:1}
+  .srow .nm{font-size:18px;font-weight:700}
+  .srow .role{font-size:14px;color:var(--soft)}
+  .chk{width:26px;height:26px;border-radius:7px;border:2px solid #cfcfd4;flex-shrink:0;display:grid;place-items:center;color:#fff;font-size:16px}
+  .srow.sel .chk{background:var(--accent);border-color:var(--accent)}
+  .qtitle{font-size:20px;font-weight:600;margin-bottom:16px;letter-spacing:-.01em}
+  .amts{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:12px}
+  .amt{border:1.5px solid var(--line);border-radius:14px;padding:16px 4px;text-align:center;cursor:pointer;background:#fff;transition:.15s;font-weight:700;font-size:19px}
+  .amt small{font-size:12px;color:var(--soft);font-weight:600;margin-left:2px}
+  .amt.sel{background:var(--accent);border-color:var(--accent);color:#fff}
+  .amt.sel small{color:#dbeeff}
+  .custom{display:flex;align-items:center;gap:8px;border:1.5px solid var(--line);border-radius:14px;padding:14px 16px}
+  .custom input{border:none;outline:none;font-size:16px;font-family:inherit;width:100%;background:none}
+  .stars{display:flex;gap:8px}.star{font-size:30px;color:#d6d6db;cursor:pointer;transition:.1s;line-height:1}.star.on{color:#f5b301}
+  .btn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:16px;padding:16px;font-size:17px;font-weight:600;cursor:pointer;font-family:inherit;transition:.2s}
+  .btn:hover{background:var(--accent-d)}.btn:active{transform:scale(.99)}.btn:disabled{opacity:.55}
+  .btn.dark{background:#000}.btn.dark:hover{background:#222}
+  .sticky{position:fixed;left:0;right:0;bottom:0;padding:12px 16px 18px;background:linear-gradient(to top,var(--bg) 70%,transparent);max-width:520px;margin:0 auto}
+  .link{display:block;text-align:center;color:var(--soft);font-size:14px;margin-top:14px;background:none;border:none;width:100%;cursor:pointer;font-family:inherit}
+  .link.b{color:var(--accent)}
+  .breakdown .r{display:flex;justify-content:space-between;padding:4px 0;font-size:14px;color:var(--soft)}
+  .breakdown .tot{color:var(--ink);font-weight:700;font-size:17px;border-top:1px solid var(--line);margin-top:6px;padding-top:10px}
+  .msg{font-size:14px;border-radius:10px;padding:10px 12px;margin-top:12px;display:none}.msg.err{display:block;background:#fdecec;color:var(--danger)}
+  .hide{display:none}
+  .center{display:grid;place-items:center;min-height:80vh;color:var(--soft)}
+  .thanks{text-align:center;padding:40px 10px}.thanks .big{font-size:52px}.thanks h1{font-size:26px;margin:14px 0 6px}.thanks p{color:var(--soft)}
+  .powered{text-align:center;color:#c2c2c7;font-size:12px;margin-top:18px}
+</style>
+</head>
+<body>
+  <div id="loading" class="center">Loading…</div>
+  <div class="wrap hide" id="wrap">
+
+    <div id="step-pick">
+      <div class="card shophead">
+        <img id="shopLogo" alt="" style="display:none">
+        <div><div class="nm" id="shopName"></div><div class="sl" id="shopSlogan"></div></div>
+      </div>
+      <div class="pick-title">Please choose a member of our team you would like to tip</div>
+      <div class="multi-row">
+        <label class="switch"><input type="checkbox" id="multiToggle"><span class="sl-track"></span></label>
+        <span>Select multiple team members</span>
+      </div>
+      <input class="search" id="search" placeholder="Search by name">
+      <div id="staffList"></div>
+      <div id="noStaff" style="text-align:center;color:var(--soft);padding:30px 0;display:none">No team members available right now.</div>
+      <div class="powered">Powered by Amidify Solutions Inc.</div>
+    </div>
+    <div class="sticky hide" id="multiBar"><button class="btn" id="multiContinue">Continue</button></div>
+
+    <div id="step-tip" class="hide">
+      <div class="card shophead" id="recipHead"></div>
+      <div class="card">
+        <div class="qtitle">Would you like to leave a tip?</div>
+        <div class="amts" id="amts"></div>
+        <div class="custom"><span>☕</span><input id="customAmt" inputmode="decimal" placeholder="Enter the tip amount"></div>
+      </div>
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <span class="qtitle" style="margin:0">Rate your visit</span>
+          <div class="stars" id="stars"><span class="star" data-v="1">★</span><span class="star" data-v="2">★</span><span class="star" data-v="3">★</span><span class="star" data-v="4">★</span><span class="star" data-v="5">★</span></div>
+        </div>
+      </div>
+      <button class="btn" id="toPay">Continue</button>
+      <button class="link" id="backPick">← Choose someone else</button>
+    </div>
+
+    <div id="step-pay" class="hide">
+      <div class="card">
+        <div class="qtitle">Payment</div>
+        <div class="breakdown">
+          <div class="r"><span>Tip</span><span id="bkTip"></span></div>
+          <div class="r"><span id="bkFeeLabel">Service fee</span><span id="bkFee"></span></div>
+          <div class="r tot"><span>Total</span><span id="bkTot"></span></div>
+        </div>
+        <div id="payment-element"></div>
+        <div id="payMsg" class="msg"></div>
+      </div>
+      <button class="btn dark" id="payBtn">Pay <span id="payAmt"></span></button>
+      <button class="link" id="backTip">← Back</button>
+    </div>
+
+    <div id="step-done" class="hide">
+      <div class="card thanks"><div class="big">🎉</div><h1>Thank you!</h1><p id="doneMsg"></p></div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig={apiKey:"AIzaSyBsY_pCxvbbJUtvRb7ClwgWQ25hGzNTgBM",authDomain:"easy-tip-me.firebaseapp.com",projectId:"easy-tip-me",storageBucket:"easy-tip-me.firebasestorage.app",messagingSenderId:"189382420404",appId:"1:189382420404:web:2f6075c986c81484eab4e1"};
+    firebase.initializeApp(firebaseConfig);
+    const db=firebase.firestore();
+    const BACKEND="https://easytipme-backend.onrender.com";
+    const STRIPE_PK="pk_test_51Tv0VwP5hdbiGSZm3ZvwUwurp74VQp3A6H7apAP0RRdJfYh05OM8kilyIoZyYwFz7Paw4NzFUAY71eKnhIBrFB2m0051mWN0tV";
+    let FEE=0.05;
+    const $=id=>document.getElementById(id);
+    const BID=new URLSearchParams(location.search).get('s');
+    const CURSYM={CAD:'$',USD:'$',AUD:'$',EUR:'€',GBP:'£',AED:'AED',SAR:'SAR',QAR:'QAR',KWD:'KWD',BHD:'BHD',OMR:'OMR',LBP:'LBP'};
+
+    let shop={}, curr='CAD', sym='$', presets=[15,30,50,100], allStaff=[], recipient=null, tip=0, rating=0;
+    let multiMode=false, selected=new Set(), stripe=null, elements=null;
+
+    if(!BID){ $('loading').textContent='Invalid link.'; } else init();
+
+    async function init(){
+      try{
+        const bd=await db.collection('businesses').doc(BID).get();
+        if(!bd.exists){ $('loading').textContent='Shop not found.'; return; }
+        shop=bd.data(); curr=shop.currency||'CAD'; sym=CURSYM[curr]||'$';
+        try{const cfg=await db.collection('config').doc('platform').get(); if(cfg.exists && cfg.data().commissionPercent!=null) FEE=cfg.data().commissionPercent/100;}catch(e){}
+        if(shop.tipPresets&&shop.tipPresets.length) presets=shop.tipPresets.slice(0,4);
+        $('shopName').textContent=shop.businessName||'Leave a tip';
+        if(shop.slogan) $('shopSlogan').textContent=shop.slogan;
+        if(shop.logo){ $('shopLogo').src=shop.logo; $('shopLogo').style.display='block'; }
+        const snap=await db.collection('businesses').doc(BID).collection('staff').orderBy('createdAt','desc').get();
+        allStaff=[]; snap.forEach(d=>{const s=d.data(); s.id=d.id; if(s.published!==false) allStaff.push(s);});
+        drawStaff(allStaff);
+        $('noStaff').style.display=allStaff.length?'none':'block';
+        $('loading').style.display='none'; $('wrap').classList.remove('hide');
+      }catch(e){ $('loading').textContent='Something went wrong. '+e.message; }
+    }
+
+    $('multiToggle').onchange=e=>{ multiMode=e.target.checked; selected.clear(); drawStaff(currentList()); updateMultiBar(); };
+    $('search').oninput=()=>drawStaff(currentList());
+    function currentList(){ const q=$('search').value.toLowerCase(); return allStaff.filter(s=>(s.nickname||'').toLowerCase().includes(q)); }
+
+    function drawStaff(list){
+      const el=$('staffList'); el.innerHTML='';
+      list.forEach(s=>{
+        const pic=s.photo?`<img class="pic" src="${s.photo}">`:`<div class="pic">${(s.nickname||'?').charAt(0).toUpperCase()}</div>`;
+        const row=document.createElement('div'); row.className='srow'+(selected.has(s.id)?' sel':'');
+        row.innerHTML=`${pic}<div class="info"><div class="nm">${esc(s.nickname||'')}</div><div class="role">${esc(s.job||'Team member')}</div></div>${multiMode?`<div class="chk">${selected.has(s.id)?'✓':''}</div>`:''}`;
+        row.onclick=()=>{ if(multiMode){ toggleSel(s.id); } else { pickSingle(s); } };
+        el.appendChild(row);
+      });
+    }
+    function toggleSel(id){ if(selected.has(id)) selected.delete(id); else selected.add(id); drawStaff(currentList()); updateMultiBar(); }
+    function updateMultiBar(){
+      if(multiMode&&selected.size>0){ $('multiBar').classList.remove('hide'); $('multiContinue').textContent='Continue · '+selected.size+' selected'; }
+      else $('multiBar').classList.add('hide');
+    }
+    $('multiContinue').onclick=()=>{
+      const members=allStaff.filter(s=>selected.has(s.id));
+      recipient={multiple:true, members, nickname:members.length+' team members'};
+      openTip();
+    };
+
+    function pickSingle(s){ recipient={multiple:false, members:[s], id:s.id, nickname:s.nickname, job:s.job, photo:s.photo}; openTip(); }
+
+    function openTip(){
+      tip=0; rating=0;
+      let pic;
+      if(recipient.multiple){ pic=`<div class="pic" style="background:#111">👥</div>`; }
+      else pic=recipient.photo?`<img class="pic" src="${recipient.photo}">`:`<div class="pic">${(recipient.nickname||'?').charAt(0).toUpperCase()}</div>`;
+      $('recipHead').innerHTML=`${pic}<div><div class="nm">${esc(recipient.nickname||'')}</div><div class="sl">${esc(recipient.multiple?'Split equally':(recipient.job||''))}</div></div>`;
+      $('amts').innerHTML=presets.map(p=>`<div class="amt" data-v="${p}">${p}<small>${sym}</small></div>`).join('');
+      $('amts').querySelectorAll('.amt').forEach(a=>a.onclick=()=>{tip=parseFloat(a.dataset.v);$('customAmt').value='';markAmt(a);});
+      $('customAmt').value='';
+      $('stars').querySelectorAll('.star').forEach(st=>{st.classList.remove('on');st.onclick=()=>setRating(+st.dataset.v);});
+      show('step-tip');
+    }
+    function markAmt(sel){$('amts').querySelectorAll('.amt').forEach(x=>x.classList.remove('sel'));if(sel)sel.classList.add('sel');}
+    $('customAmt').oninput=e=>{tip=parseFloat(e.target.value)||0;markAmt(null);};
+    function setRating(v){rating=v;$('stars').querySelectorAll('.star').forEach(st=>st.classList.toggle('on',+st.dataset.v<=v));}
+    $('backPick').onclick=()=>show('step-pick');
+
+    $('toPay').onclick=async()=>{
+      if(!tip||tip<=0){ alert('Please choose or enter a tip amount.'); return; }
+      const fee=r2(tip*FEE), total=r2(tip+fee);
+      $('bkFeeLabel').textContent='Service fee ('+(+(FEE*100).toFixed(2))+'%)';
+      $('bkTip').textContent=sym+tip.toFixed(2); $('bkFee').textContent=sym+fee.toFixed(2); $('bkTot').textContent=sym+total.toFixed(2); $('payAmt').textContent=sym+total.toFixed(2);
+      show('step-pay');
+      const btn=$('payBtn'); btn.disabled=true;
+      try{
+        const res=await fetch(BACKEND+'/create-payment-intent',{method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({amount:Math.round(total*100),currency:curr.toLowerCase(),metadata:{recipient:recipient.nickname||'team',shop:BID}})});
+        const {clientSecret}=await res.json();
+        stripe=Stripe(STRIPE_PK); elements=stripe.elements({clientSecret}); elements.create('payment').mount('#payment-element'); btn.disabled=false;
+      }catch(e){ pmsg('Could not start payment. '+e.message); }
+    };
+    $('backTip').onclick=()=>show('step-tip');
+
+    $('payBtn').onclick=async()=>{
+      const btn=$('payBtn'); btn.disabled=true; btn.textContent='Processing…';
+      const {error,paymentIntent}=await stripe.confirmPayment({elements,redirect:'if_required'});
+      if(error){ pmsg(error.message); btn.disabled=false; btn.innerHTML='Pay '+sym+r2(tip*(1+FEE)).toFixed(2); return; }
+      const fee=r2(tip*FEE);
+      try{ await db.collection('businesses').doc(BID).collection('tips').add({
+        recipientIds:recipient.members.map(m=>m.id), recipientName:recipient.nickname||'team', multiple:!!recipient.multiple,
+        tip, fee, total:tip+fee, currency:curr, rating, paymentId:paymentIntent?.id||'', createdAt:firebase.firestore.FieldValue.serverTimestamp() }); }catch(e){}
+      $('doneMsg').textContent=`Your ${sym}${tip.toFixed(2)} tip to ${recipient.nickname||'the team'} is on its way.`;
+      show('step-done');
+    };
+
+    function show(id){['step-pick','step-tip','step-pay','step-done'].forEach(s=>$(s).classList.add('hide'));$(id).classList.remove('hide');if(id!=='step-pick')$('multiBar').classList.add('hide');else updateMultiBar();window.scrollTo(0,0);}
+    function r2(n){return Math.round(n*100)/100;}
+    function pmsg(t){const m=$('payMsg');m.textContent=t;m.className='msg err';}
+    function esc(s){return(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  </script>
+</body>
+</html>
