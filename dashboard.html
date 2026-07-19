@@ -219,6 +219,19 @@
             <input type="checkbox" id="s_notifyEmail" checked style="width:auto;margin:0"> Email staff when they receive a tip
           </label>
         </div>
+        <div class="card">
+          <h3>Tip sharing (optional)</h3>
+          <label style="display:flex;align-items:center;gap:10px;text-transform:none;font-size:14px;font-weight:400;color:var(--ink)">
+            <input type="checkbox" id="s_shareOn" style="width:auto;margin:0"> Share a portion of team tips with the business (tip pool)
+          </label>
+          <div id="shareRow" style="display:none;margin-top:14px">
+            <label style="text-transform:none;font-size:13px;color:var(--soft)">Business share of each tip (%)</label>
+            <input type="number" id="s_sharePct" min="0" max="15" step="0.5" value="0" style="max-width:140px">
+          </div>
+          <p style="font-size:12px;color:var(--soft);line-height:1.5;margin:12px 0 0">
+            When enabled, the chosen percentage of each tip goes to the business (shared tip pool) and the rest goes to the team member. Capped at 15% to protect your team. This is optional — leave it off and your team keeps 100% of every tip. You are responsible for ensuring tip-pooling complies with your local labour laws.
+          </p>
+        </div>
         <button class="btn" id="saveSettings">Save settings</button>
         <div id="settingsMsg" class="msg"></div>
         <div class="sig">Powered by Amidify Solutions Inc.</div>
@@ -232,6 +245,7 @@
           <div><div style="font-size:11px;color:var(--soft);text-transform:uppercase;letter-spacing:.04em">Total tips</div><div id="anTotal" style="font-size:30px;font-weight:700">—</div></div>
           <div><div style="font-size:11px;color:var(--soft);text-transform:uppercase;letter-spacing:.04em">Number of tips</div><div id="anCount" style="font-size:30px;font-weight:700">—</div></div>
           <div><div style="font-size:11px;color:var(--soft);text-transform:uppercase;letter-spacing:.04em">Avg rating</div><div id="anRating" style="font-size:30px;font-weight:700">—</div></div>
+          <div id="anShareBox" style="display:none"><div style="font-size:11px;color:var(--soft);text-transform:uppercase;letter-spacing:.04em">Your share</div><div id="anShare" style="font-size:30px;font-weight:700">—</div></div>
         </div>
         <div class="card"><h3>By team member</h3><div id="anByStaff"></div></div>
         <div class="card"><h3>Recent tips</h3>
@@ -279,6 +293,10 @@
       ['tp1','tp2','tp3','tp4'].forEach((id,i)=>$(id).value=presets[i]!=null?presets[i]:'');
       $('s_curr').value=b.currency||'CAD';
       $('s_notifyEmail').checked=b.notifyEmail!==false;
+      $('s_shareOn').checked=b.tipShareEnabled===true;
+      $('s_sharePct').value=(b.tipSharePercent!=null?b.tipSharePercent:0);
+      $('shareRow').style.display=$('s_shareOn').checked?'block':'none';
+      $('s_shareOn').onchange=()=>{ $('shareRow').style.display=$('s_shareOn').checked?'block':'none'; };
       const url=shopUrl();
       $('shopLink').value=url;
       $('shopQr').src='https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=0&data='+encodeURIComponent(url);
@@ -366,7 +384,7 @@
 
     $('saveSettings').onclick=async()=>{
       const presets=['tp1','tp2','tp3','tp4'].map(id=>parseFloat($(id).value)).filter(v=>!isNaN(v)&&v>0);
-      try{ await db.collection('businesses').doc(BID).set({tipPresets:presets,currency:$('s_curr').value,notifyEmail:$('s_notifyEmail').checked},{merge:true});
+      try{ await db.collection('businesses').doc(BID).set({tipPresets:presets,currency:$('s_curr').value,notifyEmail:$('s_notifyEmail').checked,tipShareEnabled:$('s_shareOn').checked,tipSharePercent:Math.min(15,Math.max(0,parseFloat($('s_sharePct').value)||0))},{merge:true});
         msg('settingsMsg','Saved ✓','ok'); setTimeout(()=>$('settingsMsg').className='msg',1500); }
       catch(err){ msg('settingsMsg',err.message,'err'); }
     };
@@ -375,8 +393,9 @@
     async function loadAnalytics(){
       const sym=CURSYM[$('s_curr').value]||'$';
       const snap=await db.collection('businesses').doc(BID).collection('tips').orderBy('createdAt','desc').get();
-      let total=0,rs=0,rc=0; const per={}; const recent=[];
-      snap.forEach(d=>{const t=d.data(); total+=(t.tip||0); if(t.rating){rs+=t.rating;rc++;} const n=t.recipientName||'—'; per[n]=(per[n]||0)+(t.tip||0); recent.push(t);});
+      let total=0,rs=0,rc=0,share=0; const per={}; const recent=[];
+      snap.forEach(d=>{const t=d.data(); total+=(t.tip||0); share+=(t.ownerShare||0); if(t.rating){rs+=t.rating;rc++;} const n=t.recipientName||'—'; per[n]=(per[n]||0)+(t.tip||0); recent.push(t);});
+      if(share>0){ $('anShareBox').style.display='block'; $('anShare').textContent=sym+share.toFixed(2); } else { $('anShareBox').style.display='none'; }
       $('anTotal').textContent=sym+total.toFixed(2);
       $('anCount').textContent=snap.size;
       $('anRating').textContent=rc?(rs/rc).toFixed(1)+' ★':'—';
