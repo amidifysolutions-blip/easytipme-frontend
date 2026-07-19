@@ -219,6 +219,11 @@
       try{ await db.collection('businesses').doc(BID).collection('tips').add({
         recipientIds:recipient.members.map(m=>m.id), recipientName:recipient.nickname||'team', multiple:!!recipient.multiple,
         tip, fee, total:tip+fee, currency:curr, rating, paymentId:paymentIntent?.id||'', createdAt:firebase.firestore.FieldValue.serverTimestamp() }); }catch(e){}
+      if(shop.notifyEmail!==false){ try{
+        const perAmt=recipient.multiple?tip/recipient.members.length:tip;
+        fetch(BACKEND+'/notify-tip',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+          recipients:recipient.members.map(m=>({name:m.nickname,email:m.email})), amount:perAmt, currency:curr, shopName:shop.businessName||'' })});
+      }catch(e){} }
       $('doneMsg').textContent=`Your ${sym}${tip.toFixed(2)} tip to ${recipient.nickname||'the team'} is on its way.`;
       show('step-done');
     };
