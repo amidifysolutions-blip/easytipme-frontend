@@ -43,11 +43,9 @@
   .amt small{font-size:12px;color:var(--soft);font-weight:600;margin-left:2px}
   .amt.sel{background:var(--accent);border-color:var(--accent);color:#fff}
   .amt.sel small{color:#dbeeff}
-  .amt.gift{background:#eef3fb;border:1.5px dashed #b9cdec;position:relative}
-  .amt.gift::after{content:"gift";position:absolute;top:5px;right:7px;font-size:8px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#9fb4d6}
-  .amt.gift.sel{background:var(--accent);border-style:solid;border-color:var(--accent);color:#fff}
-  .amt.gift.sel::after{content:""}
-  .amt.gift.sel::before{content:"🎁 "}
+  .amt.bill{grid-column:span 2;padding:0;border:2px solid transparent;background:none;overflow:hidden;border-radius:12px;font-size:0;line-height:0}
+  .amt.bill svg{display:block;width:100%;height:auto;border-radius:10px}
+  .amt.bill.sel{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,113,227,.25)}
   .custom{display:flex;align-items:center;gap:8px;border:1.5px solid var(--line);border-radius:14px;padding:14px 16px}
   .custom input{border:none;outline:none;font-size:16px;font-family:inherit;width:100%;background:none}
   .stars{display:flex;gap:8px}.star{font-size:30px;color:#d6d6db;cursor:pointer;transition:.1s;line-height:1}.star.on{color:#f5b301}
@@ -214,6 +212,30 @@
 
     function pickSingle(s){ recipient={multiple:false, members:[s], id:s.id, nickname:s.nickname, job:s.job, photo:s.photo}; openTip(); }
 
+    function billTile(denom,c1,c2,circleBg,line){
+      const svg=`<svg viewBox="0 0 320 132" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="bg${denom}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient></defs>
+        <rect width="320" height="132" rx="10" fill="url(#bg${denom})"/>
+        <rect x="6" y="6" width="308" height="120" rx="7" fill="none" stroke="#ffffff" stroke-opacity=".55" stroke-width="1.5"/>
+        <g fill="#0071e3" opacity=".26"><path d="M64 30 l4 6 -4 6 -4 -6z"/><path d="M300 62 l5 7 -5 7 -5 -7z"/><path d="M118 102 l3 5 -3 5 -3 -5z"/></g>
+        <g fill="#ffffff" opacity=".6"><path d="M284 34 l4 6 -4 6 -4 -6z"/><path d="M42 98 l3 5 -3 5 -3 -5z"/><path d="M150 40 l3 5 -3 5 -3 -5z"/></g>
+        <rect x="150" y="14" width="2" height="104" fill="${line}" opacity=".6"/>
+        <text x="20" y="40" fill="#0071e3" font-family="Inter,sans-serif" font-weight="800" font-size="22">${denom}</text>
+        <text x="300" y="36" text-anchor="end" fill="#0071e3" font-family="Inter,sans-serif" font-weight="800" font-size="15" letter-spacing="1.5">GIFT</text>
+        <circle cx="226" cy="74" r="38" fill="${circleBg}"/>
+        <g transform="translate(196,44) scale(0.6)">
+          <rect x="30" y="26" width="10" height="48" rx="5" fill="#0071e3"/>
+          <rect x="30" y="26" width="34" height="10" rx="5" fill="#0071e3"/>
+          <rect x="30" y="64" width="34" height="10" rx="5" fill="#0071e3"/>
+          <rect x="30" y="45" width="22" height="10" rx="5" fill="#0071e3"/>
+          <circle cx="63" cy="50" r="9" fill="#0071e3"/><circle cx="63" cy="50" r="4.5" fill="#fff"/>
+        </g>
+        <text x="20" y="113" fill="#1d1d1f" font-family="Inter,sans-serif" font-weight="700" font-size="14">EasyTipMe</text>
+        <text x="300" y="116" text-anchor="end" fill="#0071e3" font-family="Inter,sans-serif" font-weight="800" font-size="30">${denom}</text>
+      </svg>`;
+      return `<div class="amt bill" data-v="${denom}">${svg}</div>`;
+    }
+
     function openTip(){
       tip=0; rating=0;
       let pic;
@@ -221,7 +243,7 @@
       else pic=recipient.photo?`<img class="pic" src="${recipient.photo}">`:`<div class="pic">${(recipient.nickname||'?').charAt(0).toUpperCase()}</div>`;
       $('recipHead').innerHTML=`${pic}<div><div class="nm">${esc(recipient.nickname||'')}</div><div class="sl">${esc(recipient.multiple?'Split equally':(recipient.job||''))}</div></div>`;
       $('amts').innerHTML=presets.map(p=>`<div class="amt" data-v="${p}">${p}<small>${sym}</small></div>`).join('')
-        + `<div class="amt gift" data-v="50">50</div><div class="amt gift" data-v="100">100</div>`;
+        + billTile(50,'#f8dcc4','#f0ad81','#fdf3ed','#dd6a5f') + billTile(100,'#e2edcf','#bcda9c','#fbe7ee','#dd6a5f');
       $('amts').querySelectorAll('.amt').forEach(a=>a.onclick=()=>{tip=parseFloat(a.dataset.v);$('customAmt').value='';markAmt(a);});
       $('customAmt').value='';
       $('stars').querySelectorAll('.star').forEach(st=>{st.classList.remove('on');st.onclick=()=>setRating(+st.dataset.v);});
