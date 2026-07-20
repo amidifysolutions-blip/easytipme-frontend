@@ -440,9 +440,16 @@
       catch(err){ msg('profileMsg',err.message,'err'); }
     };
 
+    $('s_sharePct').oninput=()=>{
+      const v=parseFloat($('s_sharePct').value);
+      if(v>15){ msg('settingsMsg','Maximum is 15% — this protects your team.','err'); }
+      else if($('settingsMsg').textContent.indexOf('15%')>-1){ $('settingsMsg').className='msg'; }
+    };
     $('saveSettings').onclick=async()=>{
       const presets=['tp1','tp2','tp3','tp4'].map(id=>parseFloat($(id).value)).filter(v=>!isNaN(v)&&v>0);
-      try{ await db.collection('businesses').doc(BID).set({tipPresets:presets,currency:$('s_curr').value,notifyEmail:$('s_notifyEmail').checked,tipShareEnabled:$('s_shareOn').checked,tipSharePercent:Math.min(15,Math.max(0,parseFloat($('s_sharePct').value)||0))},{merge:true});
+      const rawShare=parseFloat($('s_sharePct').value)||0;
+      if($('s_shareOn').checked && rawShare>15){ msg('settingsMsg','Tip sharing can’t exceed 15% — it protects your team. Please lower it.','err'); $('s_sharePct').focus(); return; }
+      try{ await db.collection('businesses').doc(BID).set({tipPresets:presets,currency:$('s_curr').value,notifyEmail:$('s_notifyEmail').checked,tipShareEnabled:$('s_shareOn').checked,tipSharePercent:Math.min(15,Math.max(0,rawShare))},{merge:true});
         msg('settingsMsg','Saved ✓','ok'); setTimeout(()=>$('settingsMsg').className='msg',1500); }
       catch(err){ msg('settingsMsg',err.message,'err'); }
     };

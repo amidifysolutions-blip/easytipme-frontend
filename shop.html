@@ -26,6 +26,8 @@
   .switch input:checked+.sl-track{background:var(--danger)}
   .switch input:checked+.sl-track:before{transform:translateX(22px)}
   .search{width:100%;border:none;background:#e4e4ea;border-radius:14px;padding:14px 16px;font-size:15px;font-family:inherit;outline:none;margin-bottom:14px}
+  .selall{width:100%;border:1.5px solid var(--accent);background:#eef5ff;color:var(--accent);border-radius:14px;padding:12px;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;margin-bottom:14px;transition:.15s}
+  .selall.on{background:var(--accent);color:#fff}
   .srow{display:flex;align-items:center;gap:14px;background:#fff;border-radius:18px;padding:15px 18px;margin-bottom:12px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.04);transition:transform .1s;border:2px solid transparent}
   .srow:active{transform:scale(.99)}
   .srow.sel{border-color:var(--accent)}
@@ -41,6 +43,11 @@
   .amt small{font-size:12px;color:var(--soft);font-weight:600;margin-left:2px}
   .amt.sel{background:var(--accent);border-color:var(--accent);color:#fff}
   .amt.sel small{color:#dbeeff}
+  .amt.gift{background:#eef3fb;border:1.5px dashed #b9cdec;position:relative}
+  .amt.gift::after{content:"gift";position:absolute;top:5px;right:7px;font-size:8px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#9fb4d6}
+  .amt.gift.sel{background:var(--accent);border-style:solid;border-color:var(--accent);color:#fff}
+  .amt.gift.sel::after{content:""}
+  .amt.gift.sel::before{content:"🎁 "}
   .custom{display:flex;align-items:center;gap:8px;border:1.5px solid var(--line);border-radius:14px;padding:14px 16px}
   .custom input{border:none;outline:none;font-size:16px;font-family:inherit;width:100%;background:none}
   .stars{display:flex;gap:8px}.star{font-size:30px;color:#d6d6db;cursor:pointer;transition:.1s;line-height:1}.star.on{color:#f5b301}
@@ -74,6 +81,7 @@
         <span>Select multiple team members</span>
       </div>
       <input class="search" id="search" placeholder="Search by name">
+      <button class="selall hide" id="selectAll">Select all</button>
       <div id="staffList"></div>
       <div id="noStaff" style="text-align:center;color:var(--soft);padding:30px 0;display:none">No team members available right now.</div>
       <div class="powered">Powered by Amidify Solutions Inc.</div>
@@ -151,10 +159,21 @@
         drawStaff(allStaff);
         $('noStaff').style.display=allStaff.length?'none':'block';
         $('loading').style.display='none'; $('wrap').classList.remove('hide');
+        fetch(BACKEND+'/health').catch(()=>{}); // warm the payment backend so checkout is fast
       }catch(e){ $('loading').textContent='Something went wrong. '+e.message; }
     }
 
-    $('multiToggle').onchange=e=>{ multiMode=e.target.checked; selected.clear(); drawStaff(currentList()); updateMultiBar(); };
+    $('multiToggle').onchange=e=>{ multiMode=e.target.checked; selected.clear(); $('selectAll').classList.toggle('hide',!multiMode); updateSelAll(); drawStaff(currentList()); updateMultiBar(); };
+    $('selectAll').onclick=()=>{
+      if(selected.size>=allStaff.length){ selected.clear(); }
+      else { allStaff.forEach(s=>selected.add(s.id)); }
+      updateSelAll(); drawStaff(currentList()); updateMultiBar();
+    };
+    function updateSelAll(){
+      const all=allStaff.length>0 && selected.size>=allStaff.length;
+      $('selectAll').textContent=all?'Clear all':'Select all';
+      $('selectAll').classList.toggle('on',all);
+    }
     $('search').oninput=()=>drawStaff(currentList());
     function cmpStaff(a,b){
       const ja=(a.job||'').trim().toLowerCase(), jb=(b.job||'').trim().toLowerCase();
@@ -167,16 +186,7 @@
     function drawStaff(list){
       const el=$('staffList'); el.innerHTML='';
       if(allStaff.length){ $('noStaff').style.display=list.length?'none':'block'; $('noStaff').textContent=list.length?'':'No matching team members.'; }
-      let lastJob=null;
       list.forEach(s=>{
-        const jobLabel=(s.job||'').trim()||'Team';
-        if(jobLabel!==lastJob){
-          lastJob=jobLabel;
-          const h=document.createElement('div');
-          h.style.cssText='font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--soft);margin:16px 4px 8px';
-          h.textContent=jobLabel;
-          el.appendChild(h);
-        }
         const pic=s.photo?`<img class="pic" src="${s.photo}">`:`<div class="pic">${(s.nickname||'?').charAt(0).toUpperCase()}</div>`;
         const row=document.createElement('div'); row.className='srow'+(selected.has(s.id)?' sel':'');
         row.innerHTML=`${pic}<div class="info"><div class="nm">${esc(s.nickname||'')}</div><div class="role">${esc(s.job||'Team member')}</div></div>${multiMode?`<div class="chk">${selected.has(s.id)?'✓':''}</div>`:''}`;
@@ -184,7 +194,7 @@
         el.appendChild(row);
       });
     }
-    function toggleSel(id){ if(selected.has(id)) selected.delete(id); else selected.add(id); drawStaff(currentList()); updateMultiBar(); }
+    function toggleSel(id){ if(selected.has(id)) selected.delete(id); else selected.add(id); updateSelAll(); drawStaff(currentList()); updateMultiBar(); }
     function updateMultiBar(){
       if(multiMode&&selected.size>0){ $('multiBar').classList.remove('hide'); $('multiContinue').textContent='Continue · '+selected.size+' selected'; }
       else $('multiBar').classList.add('hide');
@@ -203,7 +213,8 @@
       if(recipient.multiple){ pic=`<div class="pic" style="background:#111">👥</div>`; }
       else pic=recipient.photo?`<img class="pic" src="${recipient.photo}">`:`<div class="pic">${(recipient.nickname||'?').charAt(0).toUpperCase()}</div>`;
       $('recipHead').innerHTML=`${pic}<div><div class="nm">${esc(recipient.nickname||'')}</div><div class="sl">${esc(recipient.multiple?'Split equally':(recipient.job||''))}</div></div>`;
-      $('amts').innerHTML=presets.map(p=>`<div class="amt" data-v="${p}">${p}<small>${sym}</small></div>`).join('');
+      $('amts').innerHTML=presets.map(p=>`<div class="amt" data-v="${p}">${p}<small>${sym}</small></div>`).join('')
+        + `<div class="amt gift" data-v="50">50</div><div class="amt gift" data-v="100">100</div>`;
       $('amts').querySelectorAll('.amt').forEach(a=>a.onclick=()=>{tip=parseFloat(a.dataset.v);$('customAmt').value='';markAmt(a);});
       $('customAmt').value='';
       $('stars').querySelectorAll('.star').forEach(st=>{st.classList.remove('on');st.onclick=()=>setRating(+st.dataset.v);});
@@ -217,16 +228,17 @@
     $('toPay').onclick=async()=>{
       if(!tip||tip<=0){ alert('Please choose or enter a tip amount.'); return; }
       const fee=r2(tip*FEE), total=r2(tip+fee);
-      $('bkFeeLabel').textContent='Service fee ('+(+(FEE*100).toFixed(2))+'%)';
+      $('bkFeeLabel').textContent='Service fee';
       $('bkTip').textContent=sym+tip.toFixed(2); $('bkFee').textContent=sym+fee.toFixed(2); $('bkTot').textContent=sym+total.toFixed(2); $('payAmt').textContent=sym+total.toFixed(2);
       show('step-pay');
       const btn=$('payBtn'); btn.disabled=true;
+      $('payment-element').innerHTML='<div style="text-align:center;color:var(--soft);padding:26px 0">Preparing secure checkout…</div>';
       try{
         const res=await fetch(BACKEND+'/create-payment-intent',{method:'POST',headers:{'Content-Type':'application/json'},
           body:JSON.stringify({amount:Math.round(total*100),currency:curr.toLowerCase(),metadata:{recipient:recipient.nickname||'team',shop:BID}})});
         const {clientSecret}=await res.json();
-        stripe=Stripe(STRIPE_PK); elements=stripe.elements({clientSecret}); elements.create('payment').mount('#payment-element'); btn.disabled=false;
-      }catch(e){ pmsg('Could not start payment. '+e.message); }
+        stripe=Stripe(STRIPE_PK); elements=stripe.elements({clientSecret}); $('payment-element').innerHTML=''; elements.create('payment').mount('#payment-element'); btn.disabled=false;
+      }catch(e){ $('payment-element').innerHTML=''; pmsg('Could not start payment. '+e.message); }
     };
     $('backTip').onclick=()=>show('step-tip');
 
