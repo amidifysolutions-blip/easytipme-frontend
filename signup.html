@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>EasyTipMe — Register your shop</title>
+<title>EasyTipMe — Register your business</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="favicon.svg">
 <style>
@@ -48,7 +48,7 @@
   </div>
 
   <div class="card">
-    <h1 id="title">Register your shop</h1>
+    <h1 id="title">Register your business</h1>
     <p class="sub" id="subtitle">Create your business account — it takes a minute.</p>
 
     <div id="msg" class="msg"></div>
@@ -69,7 +69,7 @@
       <div class="field"><label>Email address</label><input id="l_email" type="email" autocomplete="email" required></div>
       <div class="field"><label>Password</label><input id="l_pass" type="password" autocomplete="current-password" required></div>
       <button class="btn" type="submit" id="l_btn">Log in</button>
-      <div class="switch">New here? <a href="#" id="toRegister">Register your shop</a></div>
+      <div class="switch">New here? <a href="#" id="toRegister">Register your business</a></div>
     </form>
   </div>
 
@@ -106,7 +106,7 @@
       title.textContent='Welcome back'; subtitle.textContent='Log in to your dashboard.'; };
     document.getElementById('toRegister').onclick = (e)=>{ e.preventDefault(); clearMsg();
       loginForm.classList.add('hide'); registerForm.classList.remove('hide');
-      title.textContent='Register your shop'; subtitle.textContent='Create your business account — it takes a minute.'; };
+      title.textContent='Register your business'; subtitle.textContent='Create your business account — it takes a minute.'; };
 
     // If already logged in, go to dashboard
     auth.onAuthStateChanged(u=>{ if(u && !sessionStorage.getItem('justRegistered')) { /* stay unless navigating */ } });
