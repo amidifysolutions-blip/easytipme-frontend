@@ -137,6 +137,18 @@
         </div>
 
         <div class="card">
+          <h3>Team app link</h3>
+          <div style="flex:1">
+            <p style="color:var(--soft);font-size:14px;margin-bottom:12px">Share this link with your team. Each member signs in with the <b>same email</b> you added for them and can see their own tips and earnings.</p>
+            <div class="linkrow">
+              <input type="text" id="staffLink" readonly>
+              <button class="btn ghost sm" id="copyStaff">Copy</button>
+              <button class="btn sm" id="openStaff">Open</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
           <h3 id="formTitle">Register a specialist</h3>
           <div class="grid2">
             <div>
@@ -333,6 +345,7 @@
       $('s_shareOn').onchange=()=>{ $('shareRow').style.display=$('s_shareOn').checked?'block':'none'; };
       const url=shopUrl();
       $('shopLink').value=url;
+      $('staffLink').value=staffUrl();
       $('shopQr').src='https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=0&data='+encodeURIComponent(url);
       $('loading').style.display='none'; $('app').style.display='flex';
       loadStaff();
@@ -341,6 +354,8 @@
     $('logout').onclick=()=>auth.signOut().then(()=>location.href='signup.html');
     $('copyShop').onclick=()=>{navigator.clipboard.writeText($('shopLink').value);$('copyShop').textContent='Copied';setTimeout(()=>$('copyShop').textContent='Copy',1200);};
     $('openShop').onclick=()=>window.open($('shopLink').value,'_blank');
+    $('copyStaff').onclick=()=>{navigator.clipboard.writeText($('staffLink').value);$('copyStaff').textContent='Copied';setTimeout(()=>$('copyStaff').textContent='Copy',1200);};
+    $('openStaff').onclick=()=>window.open($('staffLink').value,'_blank');
 
     $('f_photo').onchange=e=>{const f=e.target.files[0];if(!f){fPhoto="";$('f_prev').src="";return;}resize(f,256,d=>{fPhoto=d;$('f_prev').src=d;});};
     $('p_logo').onchange=e=>{const f=e.target.files[0];if(!f)return;resize(f,300,d=>{pLogo=d;$('p_logoPrev').src=d;});};
@@ -349,7 +364,7 @@
       const nick=$('f_nick').value.trim();
       if(!nick){ msg('staffMsg','Please enter a nickname.','err'); return; }
       const data={
-        nickname:nick, realName:$('f_real').value.trim(), email:$('f_email').value.trim(),
+        nickname:nick, realName:$('f_real').value.trim(), email:$('f_email').value.trim().toLowerCase(),
         phone:$('f_phone').value.trim(), job:$('f_job').value.trim(),
         days:Array.from($('days').querySelectorAll('.day.on')).map(d=>d.dataset.d),
         shift1:{s:$('f_s1s').value,e:$('f_s1e').value}, shift2:{s:$('f_s2s').value,e:$('f_s2e').value}
@@ -470,6 +485,7 @@
       recent.slice(0,25).forEach(t=>rec.insertAdjacentHTML('beforeend',`<tr><td>${esc(t.recipientName||'—')}</td><td>${sym}${(t.tip||0).toFixed(2)}</td><td>${t.rating?'★'.repeat(t.rating):'—'}</td></tr>`));
     }
     function shopUrl(){ return location.origin+location.pathname.replace(/[^/]*$/,'')+'shop.html?s='+BID; }
+    function staffUrl(){ return location.origin+location.pathname.replace(/[^/]*$/,'')+'staff.html?s='+BID; }
     function resize(file,max,cb){const r=new FileReader();r.onload=ev=>{const img=new Image();img.onload=()=>{let{width:w,height:h}=img;if(w>h){if(w>max){h*=max/w;w=max;}}else{if(h>max){w*=max/h;h=max;}}const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);cb(c.toDataURL('image/jpeg',.82));};img.src=ev.target.result;};r.readAsDataURL(file);}
     function msg(id,t,type){const m=$(id);m.textContent=t;m.className='msg '+type;}
     function esc(s){return(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}

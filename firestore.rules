@@ -26,10 +26,24 @@ service cloud.firestore {
         allow write: if request.auth != null && request.auth.uid == uid;
       }
 
-      // Tips — a customer (unauthenticated) can create one; only the owner can read them.
+      // Tips — a customer (unauthenticated) can create one. The owner can read all of
+      // their business's tips; a signed-in team member can read only the tips whose
+      // recipientEmails array contains their own account email.
       match /tips/{tipId} {
         allow create: if true;
-        allow get, list: if request.auth != null && request.auth.uid == uid;
+        allow get, list: if (request.auth != null && request.auth.uid == uid)
+          || (request.auth != null
+              && request.auth.token.email in resource.data.recipientEmails);
+        allow update, delete: if false;
+      }
+
+      // Tip-sharing consents — a signed-in team member records their own agreement.
+      // Owner can read all; a team member can read only their own consent rows.
+      match /consents/{consentId} {
+        allow create: if request.auth != null
+                      && request.resource.data.email == request.auth.token.email;
+        allow get, list: if (request.auth != null && request.auth.uid == uid)
+          || (request.auth != null && resource.data.email == request.auth.token.email);
         allow update, delete: if false;
       }
     }

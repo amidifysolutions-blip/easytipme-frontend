@@ -299,7 +299,7 @@
       const ownerShare=r2(tip*sharePct/100);
       const staffShare=r2(tip-ownerShare);
       try{ await db.collection('businesses').doc(BID).collection('tips').add({
-        recipientIds:recipient.members.map(m=>m.id), recipientName:recipient.nickname||'team', multiple:!!recipient.multiple,
+        recipientIds:recipient.members.map(m=>m.id), recipientEmails:recipient.members.map(m=>(m.email||'').toLowerCase()).filter(Boolean), recipientName:recipient.nickname||'team', multiple:!!recipient.multiple,
         tip, fee, total:tip+fee, currency:curr, rating, ownerShare, staffShare, paymentId:paymentIntent?.id||'', createdAt:firebase.firestore.FieldValue.serverTimestamp() }); }catch(e){}
       if(shop.notifyEmail!==false){ try{
         const perAmt=recipient.multiple?tip/recipient.members.length:tip;

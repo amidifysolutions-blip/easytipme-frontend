@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>EasyTipMe — Team</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="favicon.svg">
+<link rel="manifest" href="staff.webmanifest">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="EasyTipMe">
+<style>
+  :root{--bg:#f0f0f2;--card:#fff;--ink:#1d1d1f;--soft:#8a8a8e;--line:#e6e6ea;--accent:#0071e3;--accent-d:#0058b9;--danger:#e5484d;--green:#1f9d55;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",Arial,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;min-height:100vh}
+  .wrap{max-width:520px;margin:0 auto;padding:18px 16px 90px}
+  .brandbar{display:flex;align-items:center;gap:9px;padding:6px 2px 16px}
+  .brandbar .mk{width:30px;height:30px}
+  .brandbar b{font-size:17px;letter-spacing:-.02em}
+  .card{background:var(--card);border-radius:20px;padding:22px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+  h1{font-size:24px;letter-spacing:-.02em;margin-bottom:4px}
+  .sub{color:var(--soft);font-size:14px;margin-bottom:18px}
+  label{display:block;font-size:13px;color:var(--soft);margin-bottom:6px;font-weight:500}
+  input{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:13px 14px;font-size:16px;font-family:inherit;outline:none;margin-bottom:14px;background:#fbfbfd}
+  input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,113,227,.12);background:#fff}
+  .pwrap{position:relative}
+  .pwrap input{padding-right:46px}
+  .eye{position:absolute;right:6px;top:44%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:8px;display:flex;align-items:center}
+  .eye svg{display:block}
+  .btn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:14px;padding:15px;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;transition:.2s}
+  .btn:hover{background:var(--accent-d)}.btn:active{transform:scale(.99)}.btn:disabled{opacity:.55;cursor:default}
+  .btn.dark{background:#0a0a0a}.btn.ghost{background:#eef2f7;color:var(--ink)}
+  .switch{text-align:center;font-size:14px;color:var(--soft);margin-top:16px}
+  .switch a{color:var(--accent);text-decoration:none;cursor:pointer}
+  .msg{font-size:14px;border-radius:10px;padding:10px 12px;margin-bottom:14px;display:none}
+  .msg.err{display:block;background:#fdecec;color:var(--danger)}
+  .msg.ok{display:block;background:#eef7ee;color:var(--green)}
+  .center{display:grid;place-items:center;min-height:80vh;color:var(--soft)}
+  .hide{display:none}
+  /* profile header */
+  .phead{display:flex;align-items:center;gap:14px}
+  .pic{width:60px;height:60px;border-radius:50%;object-fit:cover;flex-shrink:0;display:grid;place-items:center;color:#fff;font-weight:700;font-size:24px;background:linear-gradient(135deg,var(--accent),#00c2ff)}
+  .phead .nm{font-size:20px;font-weight:700}
+  .phead .rl{font-size:14px;color:var(--soft)}
+  /* earnings */
+  .earn{text-align:center;padding:26px 22px}
+  .earn .big{font-size:44px;font-weight:800;letter-spacing:-.03em;line-height:1}
+  .earn .lbl{font-size:13px;color:var(--soft);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+  .stats{display:flex;gap:14px;margin-top:20px}
+  .stat{flex:1;background:#f7f8fa;border-radius:14px;padding:14px;text-align:center}
+  .stat .n{font-size:20px;font-weight:700}
+  .stat .t{font-size:11px;color:var(--soft);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
+  .h3{font-size:16px;font-weight:600;margin-bottom:14px}
+  .tip-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid #f0f0f2}
+  .tip-row:last-child{border-bottom:none}
+  .tip-amt{font-weight:700;color:var(--green)}
+  .tip-date{font-size:12px;color:var(--soft)}
+  .badge{display:inline-block;font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px;background:#eef5ff;color:var(--accent)}
+  .payoff{opacity:.75}
+  .soon{display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--orange,#f5820b);background:#fff5e9;padding:3px 9px;border-radius:20px;margin-left:8px}
+  .note{font-size:12px;color:var(--soft);line-height:1.5;margin-top:8px}
+  .consent-row{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:14px}
+  .powered{text-align:center;color:#c2c2c7;font-size:12px;margin-top:20px}
+  .logout{display:block;text-align:center;color:var(--soft);font-size:14px;background:none;border:none;width:100%;cursor:pointer;font-family:inherit;margin-top:6px}
+</style>
+</head>
+<body>
+  <div id="loading" class="center">Loading…</div>
+
+  <!-- AUTH -->
+  <div id="auth" class="wrap hide">
+    <div class="brandbar"><span class="mk" id="mk1"></span><b>EasyTipMe</b></div>
+    <div class="card">
+      <h1 id="authTitle">Team sign in</h1>
+      <p class="sub" id="authSub">Sign in to see your tips and earnings.</p>
+      <div id="authMsg" class="msg"></div>
+      <div id="shopCodeWrap" class="hide">
+        <label>Workplace code</label>
+        <input id="shopCode" type="text" placeholder="Ask your workplace for the code" autocomplete="off">
+      </div>
+      <label>Email</label>
+      <input id="email" type="email" autocomplete="email" placeholder="you@email.com">
+      <label>Password</label>
+      <div class="pwrap"><input id="pass" type="password" autocomplete="current-password"><button type="button" class="eye" id="eyeBtn" aria-label="Show password"></button></div>
+      <button class="btn" id="loginBtn">Sign in</button>
+      <button class="btn ghost hide" id="registerBtn" style="margin-top:10px">Create account</button>
+      <div class="switch" id="switchLine">New here? <a id="toRegister">Create your team account</a></div>
+    </div>
+    <div class="powered">Powered by Amidify Solutions Inc.</div>
+  </div>
+
+  <!-- HOME -->
+  <div id="home" class="wrap hide">
+    <div class="brandbar"><span class="mk" id="mk2"></span><b>EasyTipMe</b></div>
+
+    <div class="card phead">
+      <div id="pPic" class="pic"></div>
+      <div><div class="nm" id="pName"></div><div class="rl" id="pRole"></div></div>
+    </div>
+
+    <div class="card earn">
+      <div class="lbl">Your tips</div>
+      <div class="big" id="eTotal">—</div>
+      <div class="stats">
+        <div class="stat"><div class="n" id="eCount">—</div><div class="t">Tips</div></div>
+        <div class="stat"><div class="n" id="eRating">—</div><div class="t">Avg rating</div></div>
+      </div>
+    </div>
+
+    <div class="card" id="shareCard" style="display:none">
+      <div class="h3">Tip sharing</div>
+      <div id="shareText" style="font-size:14px;color:#333"></div>
+      <div class="consent-row" id="consentRow">
+        <input type="checkbox" id="consentChk" style="width:auto;margin:0">
+        <label for="consentChk" style="margin:0;text-transform:none;font-weight:400;color:var(--ink)">I understand and agree to the tip-sharing arrangement.</label>
+      </div>
+      <div id="consentDone" class="badge hide" style="margin-top:10px">Agreed ✓</div>
+    </div>
+
+    <div class="card payoff">
+      <div class="h3">Get paid <span class="soon">Coming soon</span></div>
+      <div class="note">Bank payouts are being activated. Soon you'll connect your bank account here to receive your tips directly. For now, your workplace can see and settle your tips.</div>
+      <button class="btn dark" disabled style="margin-top:14px">Connect bank account</button>
+    </div>
+
+    <div class="card">
+      <div class="h3">Recent tips</div>
+      <div id="tipsList"></div>
+      <div id="noTips" style="color:var(--soft);text-align:center;padding:16px 0">No tips yet.</div>
+    </div>
+
+    <button class="logout" id="logoutBtn">Log out</button>
+    <div class="powered">Powered by Amidify Solutions Inc.</div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {apiKey:"AIzaSyBsY_pCxvbbJUtvRb7ClwgWQ25hGzNTgBM",authDomain:"easy-tip-me.firebaseapp.com",projectId:"easy-tip-me",storageBucket:"easy-tip-me.firebasestorage.app",messagingSenderId:"189382420404",appId:"1:189382420404:web:2f6075c986c81484eab4e1"};
+    firebase.initializeApp(firebaseConfig);
+    const auth=firebase.auth(), db=firebase.firestore();
+    const $=id=>document.getElementById(id);
+    const CURSYM={CAD:'$',USD:'$',AUD:'$',EUR:'€',GBP:'£',AED:'AED',SAR:'SAR',QAR:'QAR',KWD:'KWD',BHD:'BHD',OMR:'OMR',LBP:'LBP'};
+    const params=new URLSearchParams(location.search);
+    let BID=params.get('s')||localStorage.getItem('etm_staff_bid')||'';
+    let staffDoc=null, staffId=null, shop=null, registerMode=false;
+
+    // logo mark
+    const LOGO='<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00c2ff"/><stop offset="1" stop-color="#0071e3"/></linearGradient></defs><rect width="100" height="100" rx="24" fill="#0a0a0a"/><rect x="30" y="26" width="10" height="48" rx="5" fill="url(#lg)"/><rect x="30" y="26" width="34" height="10" rx="5" fill="url(#lg)"/><rect x="30" y="64" width="34" height="10" rx="5" fill="url(#lg)"/><rect x="30" y="45" width="22" height="10" rx="5" fill="url(#lg)"/><circle cx="63" cy="50" r="9" fill="#fff"/><circle cx="63" cy="50" r="4.5" fill="url(#lg)"/></svg>';
+    $('mk1').innerHTML=LOGO; $('mk2').innerHTML=LOGO;
+
+    // eye toggle
+    const EYE='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8e8e93" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1.8 12S5.3 5 12 5s10.2 7 10.2 7-3.5 7-10.2 7S1.8 12 1.8 12z"/><circle cx="12" cy="12" r="3.1"/></svg>';
+    const EYEOFF='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8e8e93" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 5.2A9.6 9.6 0 0 1 12 5c6.7 0 10.2 7 10.2 7a17 17 0 0 1-3.1 3.8M6.3 6.3A17 17 0 0 0 1.8 12S5.3 19 12 19a9.5 9.5 0 0 0 4.1-.9"/><path d="M9.9 9.9a3.1 3.1 0 0 0 4.4 4.4"/><line x1="3" y1="3" x2="21" y2="21"/></svg>';
+    $('eyeBtn').innerHTML=EYE;
+    $('eyeBtn').onclick=()=>{const p=$('pass');const r=p.type==='password';p.type=r?'text':'password';$('eyeBtn').innerHTML=r?EYEOFF:EYE;};
+
+    if(!BID){ $('shopCodeWrap').classList.remove('hide'); }
+
+    function amsg(t,type){const m=$('authMsg');m.textContent=t;m.className='msg '+(type||'err');}
+    function prettyErr(e){const c=(e&&e.code)||'';
+      if(c.includes('email-already-in-use'))return 'This email already has an account. Try signing in.';
+      if(c.includes('invalid-email'))return 'Enter a valid email.';
+      if(c.includes('weak-password'))return 'Password must be at least 6 characters.';
+      if(c.includes('wrong-password')||c.includes('invalid-credential'))return 'Wrong email or password.';
+      if(c.includes('user-not-found'))return 'No account with this email. Create one.';
+      return (e&&e.message)||'Something went wrong.';
+    }
+
+    $('toRegister').onclick=()=>{ registerMode=!registerMode;
+      $('authTitle').textContent=registerMode?'Create team account':'Team sign in';
+      $('authSub').textContent=registerMode?'Use the same email your workplace added for you.':'Sign in to see your tips and earnings.';
+      $('loginBtn').classList.toggle('hide',registerMode);
+      $('registerBtn').classList.toggle('hide',!registerMode);
+      $('switchLine').innerHTML=registerMode?'Already have an account? <a id="toRegister2">Sign in</a>':'New here? <a id="toRegister3">Create your team account</a>';
+      const alt=$('switchLine').querySelector('a'); if(alt) alt.onclick=$('toRegister').onclick;
+    };
+
+    $('loginBtn').onclick=async()=>{ await doAuth(false); };
+    $('registerBtn').onclick=async()=>{ await doAuth(true); };
+
+    async function doAuth(create){
+      const email=$('email').value.trim().toLowerCase(), pass=$('pass').value;
+      if($('shopCodeWrap').classList.contains('hide')===false){ BID=$('shopCode').value.trim(); }
+      if(!BID){ amsg('Enter your workplace code.'); return; }
+      if(!email||!pass){ amsg('Enter your email and password.'); return; }
+      const btn=create?$('registerBtn'):$('loginBtn'); btn.disabled=true;
+      try{
+        if(create) await auth.createUserWithEmailAndPassword(email,pass);
+        else await auth.signInWithEmailAndPassword(email,pass);
+        localStorage.setItem('etm_staff_bid',BID);
+      }catch(e){ btn.disabled=false; amsg(prettyErr(e)); }
+    }
+
+    auth.onAuthStateChanged(async u=>{
+      if(!u){ show('auth'); return; }
+      // find staff record by email in this business
+      try{
+        if(!BID){ show('auth'); amsg('Enter your workplace code to continue.'); return; }
+        const sd=await db.collection('businesses').doc(BID).get();
+        if(!sd.exists){ show('auth'); amsg('Workplace not found. Check the code.'); return; }
+        shop=sd.data();
+        const snap=await db.collection('businesses').doc(BID).collection('staff').where('email','==',(u.email||'').toLowerCase()).limit(1).get();
+        if(snap.empty){ show('auth'); amsg('This email isn’t registered at '+(shop.businessName||'your workplace')+'. Ask them to add you with this email.'); return; }
+        staffDoc=snap.docs[0].data(); staffId=snap.docs[0].id;
+        renderHome(u);
+      }catch(e){ show('auth'); amsg('Could not load your profile. '+e.message); }
+    });
+
+    async function renderHome(u){
+      const sym=CURSYM[shop.currency||'CAD']||'$';
+      // header
+      $('pPic').innerHTML = staffDoc.photo?`<img src="${staffDoc.photo}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`:(staffDoc.nickname||'?').charAt(0).toUpperCase();
+      $('pName').textContent = staffDoc.nickname||u.email;
+      $('pRole').textContent = (staffDoc.job?staffDoc.job+' · ':'')+(shop.businessName||'');
+      // tip sharing
+      if(shop.tipShareEnabled){
+        const pct=Math.min(15,Math.max(0,shop.tipSharePercent||0));
+        $('shareCard').style.display='block';
+        $('shareText').innerHTML='Your workplace shares <b>'+pct+'%</b> of each tip as a team pool. You keep the remaining <b>'+(100-pct)+'%</b>.';
+      }
+      // earnings
+      let total=0,count=0,rs=0,rc=0; const rows=[];
+      try{
+        const tips=await db.collection('businesses').doc(BID).collection('tips').where('recipientEmails','array-contains',(u.email||'').toLowerCase()).orderBy('createdAt','desc').limit(50).get();
+        tips.forEach(d=>{const t=d.data();
+          const n=(t.recipientIds&&t.recipientIds.length)||1;
+          const share=(t.staffShare!=null?t.staffShare:(t.tip||0));
+          const mine= t.multiple? share/n : share;
+          total+=mine; count++;
+          if(t.rating){rs+=t.rating;rc++;}
+          rows.push({amt:mine, date:t.createdAt, rating:t.rating});
+        });
+      }catch(e){ /* index may be building */ }
+      $('eTotal').textContent=sym+total.toFixed(2);
+      $('eCount').textContent=count;
+      $('eRating').textContent=rc?(rs/rc).toFixed(1)+'★':'—';
+      const el=$('tipsList'); el.innerHTML=''; $('noTips').style.display=rows.length?'none':'block';
+      rows.slice(0,20).forEach(r=>{
+        const dt=r.date&&r.date.toDate?r.date.toDate():null;
+        const ds=dt?dt.toLocaleDateString(undefined,{month:'short',day:'numeric'}):'';
+        el.insertAdjacentHTML('beforeend',`<div class="tip-row"><div><div class="tip-amt">+${sym}${r.amt.toFixed(2)}</div><div class="tip-date">${ds}${r.rating?' · '+'★'.repeat(r.rating):''}</div></div></div>`);
+      });
+      // consent state
+      try{
+        const cq=await db.collection('businesses').doc(BID).collection('consents').where('email','==',(u.email||'').toLowerCase()).limit(1).get();
+        if(!cq.empty){ $('consentChk').checked=true; $('consentChk').disabled=true; $('consentDone').classList.remove('hide'); $('consentRow').style.display='none'; }
+      }catch(e){}
+      $('consentChk').onchange=async()=>{
+        if(!$('consentChk').checked) return;
+        try{ await db.collection('businesses').doc(BID).collection('consents').add({email:(u.email||'').toLowerCase(), staffId, sharePercent:(shop.tipSharePercent||0), agreedAt:firebase.firestore.FieldValue.serverTimestamp()});
+          $('consentChk').disabled=true; $('consentDone').classList.remove('hide'); $('consentRow').style.display='none';
+        }catch(e){ alert('Could not save. '+e.message); $('consentChk').checked=false; }
+      };
+      show('home');
+    }
+
+    $('logoutBtn').onclick=()=>auth.signOut().then(()=>{ staffDoc=null; show('auth'); });
+
+    function show(id){['loading','auth','home'].forEach(x=>$(x).classList.add('hide'));$(id).classList.remove('hide');window.scrollTo(0,0);}
+  </script>
+</body>
+</html>
