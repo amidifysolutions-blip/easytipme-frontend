@@ -165,6 +165,7 @@
 
         <div class="card">
           <h3>Team members <span id="count" style="color:var(--soft);font-weight:400"></span></h3>
+          <input type="text" id="staffSearch" placeholder="Search by name or job…" autocomplete="off" style="margin-bottom:14px">
           <div style="overflow-x:auto">
             <table>
               <thead><tr><th>Photo</th><th>Name & job</th><th>Schedule</th><th>Published</th><th>Actions</th></tr></thead>
@@ -357,13 +358,36 @@
     };
     $('cancelEdit').onclick=resetForm;
 
+    let dashStaff=[];
     async function loadStaff(){
+      const snap=await db.collection('businesses').doc(BID).collection('staff').get();
+      dashStaff=[]; snap.forEach(d=>{const s=d.data(); s._id=d.id; dashStaff.push(s);});
+      dashStaff.sort(cmpStaff);
+      $('count').textContent=dashStaff.length?'('+dashStaff.length+')':'';
+      renderStaffTable();
+    }
+    function cmpStaff(a,b){
+      const ja=(a.job||'').trim().toLowerCase(), jb=(b.job||'').trim().toLowerCase();
+      if(ja!==jb){ if(!ja) return 1; if(!jb) return -1; return ja<jb?-1:1; }
+      const na=(a.nickname||'').trim().toLowerCase(), nb=(b.nickname||'').trim().toLowerCase();
+      return na<nb?-1:(na>nb?1:0);
+    }
+    function renderStaffTable(){
+      const q=($('staffSearch').value||'').trim().toLowerCase();
+      const list = q.length>=2 ? dashStaff.filter(s=>((s.nickname||'')+' '+(s.realName||'')+' '+(s.job||'')).toLowerCase().includes(q)) : dashStaff;
       const tb=$('staffTable'); tb.innerHTML='';
-      const snap=await db.collection('businesses').doc(BID).collection('staff').orderBy('createdAt','desc').get();
-      $('count').textContent=snap.size?'('+snap.size+')':'';
-      $('emptyStaff').style.display=snap.size?'none':'block';
-      snap.forEach(d=>{
-        const s=d.data(), pub=s.published!==false;
+      $('emptyStaff').style.display=list.length?'none':'block';
+      $('emptyStaff').textContent=(dashStaff.length&&!list.length)?'No matches.':'No team members yet.';
+      let lastJob=null;
+      list.forEach(s=>{
+        const jobLabel=(s.job||'').trim()||'Other';
+        if(jobLabel!==lastJob){
+          lastJob=jobLabel;
+          const hr=document.createElement('tr');
+          hr.innerHTML=`<td colspan="5" style="background:#fafafb;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--soft);padding:9px 12px">${esc(jobLabel)}</td>`;
+          tb.appendChild(hr);
+        }
+        const pub=s.published!==false;
         const av=s.photo?`<img class="tav" src="${s.photo}">`:`<div class="tav">${(s.nickname||'?').charAt(0).toUpperCase()}</div>`;
         const sched=(s.days&&s.days.length?s.days.join(', '):'—')+'<br><small style="color:var(--soft)">'+(s.shift1&&s.shift1.s?s.shift1.s+'–'+(s.shift1.e||''):'no shift')+(s.shift2&&s.shift2.s?' , '+s.shift2.s+'–'+(s.shift2.e||''):'')+'</small>';
         const tr=document.createElement('tr');
@@ -372,12 +396,13 @@
           <td>${sched}</td>
           <td><label class="switch"><input type="checkbox" ${pub?'checked':''}><span class="slider"></span></label></td>
           <td><button class="link b editBtn">Edit</button> &nbsp; <button class="link delBtn">Delete</button></td>`;
-        tr.querySelector('.switch input').onchange=e=>db.collection('businesses').doc(BID).collection('staff').doc(d.id).update({published:e.target.checked});
-        tr.querySelector('.editBtn').onclick=()=>editStaff(d.id,s);
-        tr.querySelector('.delBtn').onclick=async()=>{if(confirm('Delete '+(s.nickname||'this member')+'?')){await db.collection('businesses').doc(BID).collection('staff').doc(d.id).delete();loadStaff();}};
+        tr.querySelector('.switch input').onchange=e=>db.collection('businesses').doc(BID).collection('staff').doc(s._id).update({published:e.target.checked});
+        tr.querySelector('.editBtn').onclick=()=>editStaff(s._id,s);
+        tr.querySelector('.delBtn').onclick=async()=>{if(confirm('Delete '+(s.nickname||'this member')+'?')){await db.collection('businesses').doc(BID).collection('staff').doc(s._id).delete();loadStaff();}};
         tb.appendChild(tr);
       });
     }
+    $('staffSearch').oninput=renderStaffTable;
 
     function editStaff(id,s){
       editId=id;

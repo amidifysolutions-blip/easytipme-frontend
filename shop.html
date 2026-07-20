@@ -145,8 +145,9 @@
         $('shopName').textContent=shop.businessName||'Leave a tip';
         if(shop.slogan) $('shopSlogan').textContent=shop.slogan;
         if(shop.logo){ $('shopLogo').src=shop.logo; $('shopLogo').style.display='block'; }
-        const snap=await db.collection('businesses').doc(BID).collection('staff').orderBy('createdAt','desc').get();
+        const snap=await db.collection('businesses').doc(BID).collection('staff').get();
         allStaff=[]; snap.forEach(d=>{const s=d.data(); s.id=d.id; if(s.published!==false) allStaff.push(s);});
+        allStaff.sort(cmpStaff);
         drawStaff(allStaff);
         $('noStaff').style.display=allStaff.length?'none':'block';
         $('loading').style.display='none'; $('wrap').classList.remove('hide');
@@ -155,11 +156,27 @@
 
     $('multiToggle').onchange=e=>{ multiMode=e.target.checked; selected.clear(); drawStaff(currentList()); updateMultiBar(); };
     $('search').oninput=()=>drawStaff(currentList());
-    function currentList(){ const q=$('search').value.toLowerCase(); return allStaff.filter(s=>(s.nickname||'').toLowerCase().includes(q)); }
+    function cmpStaff(a,b){
+      const ja=(a.job||'').trim().toLowerCase(), jb=(b.job||'').trim().toLowerCase();
+      if(ja!==jb){ if(!ja) return 1; if(!jb) return -1; return ja<jb?-1:1; }
+      const na=(a.nickname||'').trim().toLowerCase(), nb=(b.nickname||'').trim().toLowerCase();
+      return na<nb?-1:(na>nb?1:0);
+    }
+    function currentList(){ const q=$('search').value.trim().toLowerCase(); if(q.length<2) return allStaff; return allStaff.filter(s=>((s.nickname||'')+' '+(s.job||'')).toLowerCase().includes(q)); }
 
     function drawStaff(list){
       const el=$('staffList'); el.innerHTML='';
+      if(allStaff.length){ $('noStaff').style.display=list.length?'none':'block'; $('noStaff').textContent=list.length?'':'No matching team members.'; }
+      let lastJob=null;
       list.forEach(s=>{
+        const jobLabel=(s.job||'').trim()||'Team';
+        if(jobLabel!==lastJob){
+          lastJob=jobLabel;
+          const h=document.createElement('div');
+          h.style.cssText='font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--soft);margin:16px 4px 8px';
+          h.textContent=jobLabel;
+          el.appendChild(h);
+        }
         const pic=s.photo?`<img class="pic" src="${s.photo}">`:`<div class="pic">${(s.nickname||'?').charAt(0).toUpperCase()}</div>`;
         const row=document.createElement('div'); row.className='srow'+(selected.has(s.id)?' sel':'');
         row.innerHTML=`${pic}<div class="info"><div class="nm">${esc(s.nickname||'')}</div><div class="role">${esc(s.job||'Team member')}</div></div>${multiMode?`<div class="chk">${selected.has(s.id)?'✓':''}</div>`:''}`;
