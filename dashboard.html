@@ -376,7 +376,7 @@
         const col=db.collection('businesses').doc(BID).collection('staff');
         if(editId){ await col.doc(editId).update(data); }
         else{ data.published=true; data.createdAt=firebase.firestore.FieldValue.serverTimestamp(); await col.add(data);
-          if(data.email){ fetch(BACKEND+'/notify-welcome',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:data.email,name:data.nickname,shopName:($('sideBiz').textContent||''),staffLink:staffUrl()})}).catch(()=>{}); }
+          if(data.email){ fetch(BACKEND+'/notify-welcome',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:data.email,name:data.nickname,shopName:($('sideBiz').textContent||''),staffLink:staffUrl()+'&new=1'})}).catch(()=>{}); }
         }
         resetForm(); msg('staffMsg', (editId?'Saved ✓':'Saved ✓ — invite email sent'),'ok'); setTimeout(()=>$('staffMsg').className='msg',2200); loadStaff();
       }catch(err){ msg('staffMsg',err.message,'err'); }

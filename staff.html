@@ -94,10 +94,22 @@
         <label>Workplace code</label>
         <input id="shopCode" type="text" placeholder="Ask your workplace for the code" autocomplete="off">
       </div>
+      <div id="regNameWrap" class="hide">
+        <div style="display:flex;gap:10px">
+          <div style="flex:1"><label>First name</label><input id="f_first" type="text" autocomplete="given-name" placeholder="First"></div>
+          <div style="flex:1"><label>Last name</label><input id="f_last" type="text" autocomplete="family-name" placeholder="Last"></div>
+        </div>
+      </div>
       <label>Email</label>
       <input id="email" type="email" autocomplete="email" placeholder="you@email.com">
       <label>Password</label>
-      <div class="pwrap"><input id="pass" type="password" autocomplete="current-password"><button type="button" class="eye" id="eyeBtn" aria-label="Show password"></button></div>
+      <div class="pwrap"><input id="pass" type="password" autocomplete="current-password" placeholder="At least 6 characters"><button type="button" class="eye" id="eyeBtn" aria-label="Show password"></button></div>
+      <div id="regConfirmWrap" class="hide">
+        <label>Confirm password</label>
+        <div class="pwrap"><input id="pass2" type="password" autocomplete="new-password" placeholder="Re-enter password"><button type="button" class="eye" id="eyeBtn2" aria-label="Show password"></button></div>
+        <label>Phone <span style="color:var(--soft);font-weight:400">(optional)</span></label>
+        <input id="f_phone" type="tel" autocomplete="tel" placeholder="e.g. +1 604 555 0199">
+      </div>
       <button class="btn" id="loginBtn">Sign in</button>
       <button class="btn ghost hide" id="registerBtn" style="margin-top:10px">Create account</button>
       <div class="switch" id="switchLine">New here? <a id="toRegister">Create your team account</a></div>
@@ -199,6 +211,8 @@
     const EYEOFF='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8e8e93" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 5.2A9.6 9.6 0 0 1 12 5c6.7 0 10.2 7 10.2 7a17 17 0 0 1-3.1 3.8M6.3 6.3A17 17 0 0 0 1.8 12S5.3 19 12 19a9.5 9.5 0 0 0 4.1-.9"/><path d="M9.9 9.9a3.1 3.1 0 0 0 4.4 4.4"/><line x1="3" y1="3" x2="21" y2="21"/></svg>';
     $('eyeBtn').innerHTML=EYE;
     $('eyeBtn').onclick=()=>{const p=$('pass');const r=p.type==='password';p.type=r?'text':'password';$('eyeBtn').innerHTML=r?EYEOFF:EYE;};
+    $('eyeBtn2').innerHTML=EYE;
+    $('eyeBtn2').onclick=()=>{const p=$('pass2');const r=p.type==='password';p.type=r?'text':'password';$('eyeBtn2').innerHTML=r?EYEOFF:EYE;};
 
     if(!BID){ $('shopCodeWrap').classList.remove('hide'); }
 
@@ -215,14 +229,20 @@
       return 'Something went wrong. Please try again.';
     }
 
-    $('toRegister').onclick=()=>{ registerMode=!registerMode;
-      $('authTitle').textContent=registerMode?'Create team account':'Team sign in';
+    function applyMode(){
+      $('authTitle').textContent=registerMode?'Create your account':'Team sign in';
       $('authSub').textContent=registerMode?'Use the same email your workplace added for you.':'Sign in to see your tips and earnings.';
       $('loginBtn').classList.toggle('hide',registerMode);
       $('registerBtn').classList.toggle('hide',!registerMode);
-      $('switchLine').innerHTML=registerMode?'Already have an account? <a id="toRegister2">Sign in</a>':'New here? <a id="toRegister3">Create your team account</a>';
-      const alt=$('switchLine').querySelector('a'); if(alt) alt.onclick=$('toRegister').onclick;
-    };
+      $('regNameWrap').classList.toggle('hide',!registerMode);
+      $('regConfirmWrap').classList.toggle('hide',!registerMode);
+      $('switchLine').innerHTML=registerMode?'Already have an account? <a id="toSignin">Sign in</a>':'New here? <a id="toReg">Create your team account</a>';
+      const alt=$('switchLine').querySelector('a'); if(alt) alt.onclick=toggleMode;
+    }
+    function toggleMode(){ registerMode=!registerMode; applyMode(); }
+    $('toRegister').onclick=toggleMode;
+    // invite link (from the welcome email) opens straight into Create account
+    if(params.get('new')==='1' || params.get('r')==='1'){ registerMode=true; applyMode(); }
 
     $('loginBtn').onclick=async()=>{ await doAuth(false); };
     $('registerBtn').onclick=async()=>{ await doAuth(true); };
@@ -232,10 +252,20 @@
       if($('shopCodeWrap').classList.contains('hide')===false){ BID=$('shopCode').value.trim(); }
       if(!BID){ amsg('Enter your workplace code.'); return; }
       if(!email||!pass){ amsg('Enter your email and password.'); return; }
+      let first='',last='',phone='';
+      if(create){
+        first=$('f_first').value.trim(); last=$('f_last').value.trim(); phone=$('f_phone').value.trim();
+        if(!first||!last){ amsg('Enter your first and last name.'); return; }
+        if(pass.length<6){ amsg('Password must be at least 6 characters.'); return; }
+        if(pass!==$('pass2').value){ amsg('Passwords don’t match.'); return; }
+      }
       const btn=create?$('registerBtn'):$('loginBtn'); btn.disabled=true;
       try{
         if(create){
           const cred=await auth.createUserWithEmailAndPassword(email,pass);
+          try{ await cred.user.updateProfile({displayName:(first+' '+last).trim()}); }catch(_){}
+          // keep the staff's self-entered details (used later to pre-fill Stripe payouts)
+          try{ localStorage.setItem('etm_staff_profile', JSON.stringify({firstName:first,lastName:last,phone:phone,email:email})); }catch(_){}
           try{ await cred.user.sendEmailVerification(); }catch(_){}
         } else {
           await auth.signInWithEmailAndPassword(email,pass);
