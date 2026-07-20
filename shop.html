@@ -159,7 +159,7 @@
         if(shop.slogan) $('shopSlogan').textContent=shop.slogan;
         if(shop.logo){ $('shopLogo').src=shop.logo; $('shopLogo').style.display='block'; }
         const snap=await db.collection('businesses').doc(BID).collection('staff').get();
-        allStaff=[]; snap.forEach(d=>{const s=d.data(); s.id=d.id; if(s.published!==false) allStaff.push(s);});
+        allStaff=[]; snap.forEach(d=>{const s=d.data(); s.id=d.id; if(s.published!==false && s.status!=='removed' && s.leftByStaff!==true) allStaff.push(s);});
         allStaff.sort(cmpStaff);
         drawStaff(allStaff);
         $('noStaff').style.display=allStaff.length?'none':'block';

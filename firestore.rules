@@ -23,7 +23,16 @@ service cloud.firestore {
       // Before launch we should split these into a private sub-doc so they are NOT public.
       match /staff/{staffId} {
         allow get, list: if true;
-        allow write: if request.auth != null && request.auth.uid == uid;
+        allow create, delete: if request.auth != null && request.auth.uid == uid;   // owner adds/removes
+        // Owner can fully edit. A signed-in team member whose email matches the record
+        // (and that isn't already claimed by another account) may update ONLY their own
+        // claim / self / leave fields — never status, published, email, nickname, etc.
+        allow update: if (request.auth != null && request.auth.uid == uid)
+          || ( request.auth != null
+               && resource.data.email == request.auth.token.email
+               && (!('claimedUid' in resource.data) || resource.data.claimedUid == request.auth.uid)
+               && request.resource.data.diff(resource.data).affectedKeys()
+                    .hasOnly(['claimedUid','claimedAt','leftByStaff','leftAt','selfFirstName','selfLastName','selfPhone']) );
       }
 
       // Tips — a customer (unauthenticated) can create one. The owner can read all of

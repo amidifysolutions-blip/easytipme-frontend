@@ -172,6 +172,7 @@
     </div>
 
     <button class="logout" id="logoutBtn">Log out</button>
+    <button class="logout" id="leaveBtn" style="color:#e5484d">Leave this workplace</button>
     <div class="powered">Powered by Amidify Solutions Inc.</div>
   </div>
 
@@ -300,6 +301,11 @@
         if(snap.empty){ show('auth'); amsg('This email isn’t registered at '+(shop.businessName||'your workplace')+'. Ask them to add you with this email.'); return; }
         staffDoc=snap.docs[0].data(); staffId=snap.docs[0].id;
         if(staffDoc.status==='removed'){ show('auth'); amsg('You’re no longer active at '+(shop.businessName||'this workplace')+'. Contact them if this is a mistake.'); return; }
+        if(staffDoc.leftByStaff===true){ show('auth'); amsg('You left '+(shop.businessName||'this workplace')+'. Ask them to add you again to rejoin.'); return; }
+        // bind this staff record to the signed-in account (stable identity, not the mutable email)
+        if(!staffDoc.claimedUid){
+          try{ await db.collection('businesses').doc(BID).collection('staff').doc(staffId).update({claimedUid:u.uid, claimedAt:firebase.firestore.FieldValue.serverTimestamp()}); staffDoc.claimedUid=u.uid; }catch(_){}
+        }
         renderHome(u);
       }catch(e){ show('auth'); amsg('Could not load your profile. '+e.message); }
     }
@@ -370,6 +376,13 @@
     }
 
     $('logoutBtn').onclick=()=>auth.signOut().then(()=>{ staffDoc=null; show('auth'); });
+    $('leaveBtn').onclick=async()=>{
+      if(!confirm('Leave '+(shop&&shop.businessName||'this workplace')+'?\n\nYou will stop appearing on their tip page. Your past tips stay recorded. They can add you again to rejoin.')) return;
+      try{
+        await db.collection('businesses').doc(BID).collection('staff').doc(staffId).update({leftByStaff:true, leftAt:firebase.firestore.FieldValue.serverTimestamp()});
+        await auth.signOut(); staffDoc=null; show('auth'); amsg('You left '+(shop&&shop.businessName||'this workplace')+'.', 'ok');
+      }catch(e){ alert('Could not leave right now. '+prettyErr(e)); }
+    };
 
     function show(id){['loading','auth','verify','home'].forEach(x=>$(x).classList.add('hide'));$(id).classList.remove('hide');window.scrollTo(0,0);}
   </script>
