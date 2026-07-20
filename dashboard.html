@@ -148,7 +148,15 @@
               <div class="photo-pick"><img id="f_prev" class="prev" alt=""><input type="file" id="f_photo" accept="image/*" style="margin-bottom:0"></div>
             </div>
             <div>
-              <label>Job title</label><input type="text" id="f_job" placeholder="e.g. Barber">
+              <label>Job title (optional)</label><input type="text" id="f_job" list="jobList" placeholder="Choose or type your own…" autocomplete="off">
+              <datalist id="jobList">
+                <option value="Barber"></option><option value="Hairstylist"></option><option value="Colorist"></option><option value="Nail Technician"></option><option value="Manicurist"></option><option value="Esthetician"></option><option value="Makeup Artist"></option><option value="Lash Technician"></option><option value="Massage Therapist"></option><option value="Spa Therapist"></option><option value="Tattoo Artist"></option>
+                <option value="Waiter"></option><option value="Server"></option><option value="Bartender"></option><option value="Barista"></option><option value="Host / Hostess"></option><option value="Busser"></option><option value="Food Runner"></option><option value="Chef"></option><option value="Cook"></option><option value="Kitchen Staff"></option><option value="Dishwasher"></option><option value="Delivery Driver"></option>
+                <option value="Receptionist"></option><option value="Concierge"></option><option value="Bellhop / Porter"></option><option value="Housekeeper"></option><option value="Room Attendant"></option><option value="Valet"></option><option value="Doorman"></option><option value="Pool Attendant"></option><option value="Tour Guide"></option><option value="Driver"></option>
+                <option value="Nurse"></option><option value="Caregiver"></option><option value="Nursing Assistant"></option><option value="Orderly"></option><option value="Physiotherapist"></option><option value="Home Care Aide"></option><option value="Cleaner"></option>
+                <option value="Cabin Steward"></option><option value="Steward"></option><option value="Deckhand"></option><option value="Cruise Staff"></option>
+                <option value="Security Guard"></option><option value="Parking Attendant"></option><option value="Car Wash Attendant"></option><option value="Personal Trainer"></option><option value="Yoga Instructor"></option><option value="Golf Caddy"></option><option value="Pet Groomer"></option>
+              </datalist>
               <label>Working days</label>
               <div class="days" id="days">
                 <div class="day" data-d="Mon">Mon</div><div class="day" data-d="Tue">Tue</div><div class="day" data-d="Wed">Wed</div>
