@@ -59,6 +59,9 @@
   .link.b{color:var(--accent)}
   .breakdown .r{display:flex;justify-content:space-between;padding:4px 0;font-size:14px;color:var(--soft)}
   .breakdown .tot{color:var(--ink);font-weight:700;font-size:17px;border-top:1px solid var(--line);margin-top:6px;padding-top:10px}
+  #express-wrap{margin-top:16px}
+  .ordiv{display:flex;align-items:center;gap:12px;color:var(--soft);font-size:13px;margin:16px 0 10px}
+  .ordiv:before,.ordiv:after{content:"";flex:1;height:1px;background:var(--line)}
   .msg{font-size:14px;border-radius:10px;padding:10px 12px;margin-top:12px;display:none}.msg.err{display:block;background:#fdecec;color:var(--danger)}
   .hide{display:none}
   .center{display:grid;place-items:center;min-height:80vh;color:var(--soft)}
@@ -112,6 +115,10 @@
           <div class="r"><span>Tip</span><span id="bkTip"></span></div>
           <div class="r"><span id="bkFeeLabel">Service fee</span><span id="bkFee"></span></div>
           <div class="r tot"><span>Total</span><span id="bkTot"></span></div>
+        </div>
+        <div id="express-wrap" class="hide">
+          <div id="express-checkout"></div>
+          <div class="ordiv"><span>or pay with card</span></div>
         </div>
         <div id="payment-element"></div>
         <div id="payMsg" class="msg"></div>
@@ -232,12 +239,27 @@
       $('bkTip').textContent=sym+tip.toFixed(2); $('bkFee').textContent=sym+fee.toFixed(2); $('bkTot').textContent=sym+total.toFixed(2); $('payAmt').textContent=sym+total.toFixed(2);
       show('step-pay');
       const btn=$('payBtn'); btn.disabled=true;
+      $('express-wrap').classList.add('hide'); $('express-checkout').innerHTML='';
       $('payment-element').innerHTML='<div style="text-align:center;color:var(--soft);padding:26px 0">Preparing secure checkout…</div>';
       try{
         const res=await fetch(BACKEND+'/create-payment-intent',{method:'POST',headers:{'Content-Type':'application/json'},
           body:JSON.stringify({amount:Math.round(total*100),currency:curr.toLowerCase(),metadata:{recipient:recipient.nickname||'team',shop:BID}})});
         const {clientSecret}=await res.json();
-        stripe=Stripe(STRIPE_PK); elements=stripe.elements({clientSecret}); $('payment-element').innerHTML=''; elements.create('payment').mount('#payment-element'); btn.disabled=false;
+        stripe=Stripe(STRIPE_PK);
+        elements=stripe.elements({clientSecret});
+        $('payment-element').innerHTML='';
+        elements.create('payment').mount('#payment-element');
+        try{
+          const ece=elements.create('expressCheckout');
+          ece.on('ready',e=>{ if(e && e.availablePaymentMethods){ $('express-wrap').classList.remove('hide'); } });
+          ece.on('confirm',async()=>{
+            const {error,paymentIntent}=await stripe.confirmPayment({elements,clientSecret,redirect:'if_required'});
+            if(error){ pmsg(error.message); return; }
+            recordTip(paymentIntent);
+          });
+          ece.mount('#express-checkout');
+        }catch(ex){/* wallets unavailable — card still works */}
+        btn.disabled=false;
       }catch(e){ $('payment-element').innerHTML=''; pmsg('Could not start payment. '+e.message); }
     };
     $('backTip').onclick=()=>show('step-tip');
@@ -246,6 +268,10 @@
       const btn=$('payBtn'); btn.disabled=true; btn.textContent='Processing…';
       const {error,paymentIntent}=await stripe.confirmPayment({elements,redirect:'if_required'});
       if(error){ pmsg(error.message); btn.disabled=false; btn.innerHTML='Pay '+sym+r2(tip*(1+FEE)).toFixed(2); return; }
+      recordTip(paymentIntent);
+    };
+
+    async function recordTip(paymentIntent){
       const fee=r2(tip*FEE);
       const sharePct=shop.tipShareEnabled?Math.min(15,Math.max(0,shop.tipSharePercent||0)):0;
       const ownerShare=r2(tip*sharePct/100);
@@ -260,7 +286,7 @@
       }catch(e){} }
       $('doneMsg').textContent=`Your ${sym}${tip.toFixed(2)} tip to ${recipient.nickname||'the team'} is on its way.`;
       show('step-done');
-    };
+    }
 
     function show(id){['step-pick','step-tip','step-pay','step-done'].forEach(s=>$(s).classList.add('hide'));$(id).classList.remove('hide');if(id!=='step-pick')$('multiBar').classList.add('hide');else updateMultiBar();window.scrollTo(0,0);}
     function r2(n){return Math.round(n*100)/100;}
