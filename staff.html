@@ -225,7 +225,7 @@
       // earnings
       let total=0,count=0,rs=0,rc=0; const rows=[];
       try{
-        const tips=await db.collection('businesses').doc(BID).collection('tips').where('recipientEmails','array-contains',(u.email||'').toLowerCase()).orderBy('createdAt','desc').limit(50).get();
+        const tips=await db.collection('businesses').doc(BID).collection('tips').where('recipientEmails','array-contains',(u.email||'').toLowerCase()).limit(200).get();
         tips.forEach(d=>{const t=d.data();
           const n=(t.recipientIds&&t.recipientIds.length)||1;
           const share=(t.staffShare!=null?t.staffShare:(t.tip||0));
@@ -234,7 +234,8 @@
           if(t.rating){rs+=t.rating;rc++;}
           rows.push({amt:mine, date:t.createdAt, rating:t.rating});
         });
-      }catch(e){ /* index may be building */ }
+      }catch(e){ /* permission or data issue — leave earnings at zero */ }
+      rows.sort((a,b)=>{const ta=a.date&&a.date.toMillis?a.date.toMillis():0;const tb=b.date&&b.date.toMillis?b.date.toMillis():0;return tb-ta;});
       $('eTotal').textContent=sym+total.toFixed(2);
       $('eCount').textContent=count;
       $('eRating').textContent=rc?(rs/rc).toFixed(1)+'★':'—';
