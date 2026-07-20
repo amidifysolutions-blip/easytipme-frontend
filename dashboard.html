@@ -10,7 +10,7 @@
     --blue:#0071e3;--blue-d:#0058b9;--red:#e5484d;--orange:#f5820b;--green:#1f9d55;}
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;color:var(--ink);background:var(--bg);
-    display:flex;min-height:100vh;-webkit-font-smoothing:antialiased}
+    display:flex;min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden}
   /* sidebar */
   .sidebar{width:250px;background:#000;color:#fff;padding:26px 18px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
   .brand{display:flex;align-items:center;gap:10px;margin-bottom:8px}
@@ -20,6 +20,8 @@
   .nav{padding:12px 15px;border-radius:12px;margin-bottom:6px;cursor:pointer;opacity:.62;font-size:14px;transition:.2s}
   .nav:hover{background:#1c1c1e;opacity:1}
   .nav.active{background:#2c2c2e;opacity:1;font-weight:600}
+  .navwrap{display:flex;flex-direction:column;flex:1;width:100%}
+  .menuBtn{display:none;margin-left:auto;background:none;border:none;color:#fff;font-size:22px;line-height:1;cursor:pointer;padding:4px 8px}
   .side-bottom{margin-top:auto;display:flex;flex-direction:column;gap:6px}
   .logout{background:none;border:none;color:#ff6b6b;text-align:left;padding:12px 15px;cursor:pointer;font:inherit;font-size:14px;border-radius:12px}
   .logout:hover{background:#1c1c1e}
@@ -33,7 +35,21 @@
   .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:24px;margin-bottom:20px}
   .card h3{font-size:16px;margin-bottom:16px}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 22px}
-  @media(max-width:720px){.grid2{grid-template-columns:1fr}.sidebar{width:70px}.brand b,.bizname,.nav span{display:none}.main{padding:24px 18px}}
+  @media(max-width:720px){
+    body{flex-direction:column}
+    .grid2{grid-template-columns:1fr}
+    .sidebar{width:100%;height:auto;position:sticky;top:0;flex-direction:row;flex-wrap:wrap;align-items:center;padding:12px 16px;z-index:60}
+    .brand{margin-bottom:0;width:100%}
+    .menuBtn{display:block}
+    .bizname{display:none}
+    .navwrap{display:none;width:100%;margin-top:10px;flex:none}
+    .sidebar.open .navwrap{display:flex}
+    .nav{margin-bottom:2px}
+    .side-bottom{margin-top:8px}
+    .main{max-width:100%;width:100%;padding:22px 16px 80px}
+    .linkrow{max-width:100%;flex-wrap:wrap}
+    .linkrow input{flex:1 1 100%}
+  }
   label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;color:var(--soft);margin-bottom:6px}
   input[type=text],input[type=email],input[type=tel],input[type=time],select,textarea{width:100%;border:1.5px solid var(--line);
     border-radius:11px;padding:11px 13px;font-size:14px;font-family:inherit;background:#fbfbfd;margin-bottom:16px;outline:none;transition:.15s}
@@ -81,15 +97,17 @@
   <div id="loading" class="center">Loading…</div>
 
   <div id="app" style="display:none;width:100%">
-    <div class="sidebar">
-      <div class="brand"><div class="mark">E</div><b>EasyTipMe</b></div>
+    <div class="sidebar" id="sidebar">
+      <div class="brand"><div class="mark">E</div><b>EasyTipMe</b><button class="menuBtn" id="menuBtn" aria-label="Menu">☰</button></div>
       <div class="bizname" id="sideBiz"></div>
-      <div class="nav active" data-tab="team"><span>Team management</span></div>
-      <div class="nav" data-tab="profile"><span>Company profile</span></div>
-      <div class="nav" data-tab="analytics"><span>Analytics</span></div>
-      <div class="nav" data-tab="settings"><span>Settings</span></div>
-      <div class="side-bottom">
-        <button class="logout" id="logout">Log out</button>
+      <div class="navwrap">
+        <div class="nav active" data-tab="team"><span>Team management</span></div>
+        <div class="nav" data-tab="profile"><span>Company profile</span></div>
+        <div class="nav" data-tab="analytics"><span>Analytics</span></div>
+        <div class="nav" data-tab="settings"><span>Settings</span></div>
+        <div class="side-bottom">
+          <button class="logout" id="logout">Log out</button>
+        </div>
       </div>
     </div>
 
@@ -273,7 +291,10 @@
       document.querySelectorAll('.section').forEach(s=>s.classList.remove('show'));
       $('sec-'+n.dataset.tab).classList.add('show');
       if(n.dataset.tab==='analytics') loadAnalytics();
+      $('sidebar').classList.remove('open');
+      window.scrollTo(0,0);
     });
+    $('menuBtn').onclick=()=>$('sidebar').classList.toggle('open');
     // days toggle
     $('days').querySelectorAll('.day').forEach(d=>d.onclick=()=>d.classList.toggle('on'));
 
