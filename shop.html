@@ -272,7 +272,7 @@
         $('payment-element').innerHTML='';
         elements.create('payment',{fields:{billingDetails:{address:'never'}},wallets:{applePay:'auto',googlePay:'auto'}}).mount('#payment-element');
         try{
-          const ece=elements.create('expressCheckout');
+          const ece=elements.create('expressCheckout',{paymentMethods:{link:'never',paypal:'never',amazonPay:'never'}});
           ece.on('ready',e=>{ if(e && e.availablePaymentMethods){ $('express-wrap').classList.remove('hide'); } });
           ece.on('confirm',async()=>{
             const {error,paymentIntent}=await stripe.confirmPayment({elements,clientSecret,redirect:'if_required'});
