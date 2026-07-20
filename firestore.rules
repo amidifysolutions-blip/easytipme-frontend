@@ -1,0 +1,49 @@
+rules_version = '2';
+// EasyTipMe — Firestore security rules (baseline hardening)
+// Replaces open "test mode". Apply in Firebase Console → Firestore → Rules.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email == 'amidifysolutions@gmail.com';
+    }
+
+    // Business account (owner) — a shop can be read by its known ID (customer page),
+    // but the full list can only be enumerated by the platform admin.
+    match /businesses/{uid} {
+      allow get: if true;                                   // shop page reads one shop by ID
+      allow list: if isAdmin();                             // only admin can query all shops
+      allow create, update: if request.auth != null
+                            && request.auth.uid == uid;     // owner edits only their own shop
+      allow delete: if false;
+
+      // Team members — shown publicly on the tipping page.
+      // NOTE: staff docs currently include private fields (real name, email, phone).
+      // Before launch we should split these into a private sub-doc so they are NOT public.
+      match /staff/{staffId} {
+        allow get, list: if true;
+        allow write: if request.auth != null && request.auth.uid == uid;
+      }
+
+      // Tips — a customer (unauthenticated) can create one; only the owner can read them.
+      match /tips/{tipId} {
+        allow create: if true;
+        allow get, list: if request.auth != null && request.auth.uid == uid;
+        allow update, delete: if false;
+      }
+    }
+
+    // Platform config (commission, min/max) — readable by everyone, writable by admin only.
+    match /config/{docId} {
+      allow get: if true;
+      allow list: if false;
+      allow write: if isAdmin();
+    }
+
+    // Deny everything else by default.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
