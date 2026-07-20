@@ -124,6 +124,10 @@
   <div id="home" class="wrap hide">
     <div class="brandbar"><span class="mk" id="mk2"></span><b>Easy<span style="color:#0071e3">Tip</span>Me</b></div>
     <div id="connBadge" class="hide" style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--green);background:#eef7ee;border-radius:20px;padding:6px 12px;width:fit-content;margin:-4px 2px 14px;font-weight:600">✓ <span id="connShop"></span></div>
+    <div id="verifyBanner" class="hide" style="background:#fff4e5;border:1px solid #ffe0b3;color:#8a5a00;border-radius:12px;padding:10px 12px;font-size:13px;margin:0 2px 14px;display:flex;gap:8px;align-items:center;justify-content:space-between">
+      <span>Verify your email to secure your account.</span>
+      <button id="vbResend" style="background:none;border:none;color:#0071e3;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">Resend</button>
+    </div>
 
     <div class="card phead">
       <div id="pPic" class="pic"></div>
@@ -205,7 +209,10 @@
       if(c.includes('weak-password'))return 'Password must be at least 6 characters.';
       if(c.includes('wrong-password')||c.includes('invalid-credential'))return 'Wrong email or password.';
       if(c.includes('user-not-found'))return 'No account with this email. Create one.';
-      return (e&&e.message)||'Something went wrong.';
+      if(c.includes('too-many-requests'))return 'Too many attempts. Please wait a minute, then try again.';
+      if(c.includes('network-request-failed'))return 'Network problem. Check your connection and try again.';
+      if(c.includes('missing-password'))return 'Enter your password.';
+      return 'Something went wrong. Please try again.';
     }
 
     $('toRegister').onclick=()=>{ registerMode=!registerMode;
@@ -244,9 +251,12 @@
     $('verCheck').onclick=async()=>{ $('verCheck').disabled=true; try{ await auth.currentUser.reload(); if(auth.currentUser.emailVerified){ loadMembership(auth.currentUser); } else { vmsg('Not verified yet — open the link in the email first.'); } }catch(e){ vmsg(prettyErr(e)); } $('verCheck').disabled=false; };
     $('verLogout').onclick=()=>auth.signOut().then(()=>{ registerMode=false; show('auth'); });
 
+    // Verification is currently a soft reminder (banner on home), not a hard wall,
+    // until the reliable branded verification email (via Brevo) is live. Flip to true to enforce.
+    const ENFORCE_VERIFY=false;
     auth.onAuthStateChanged(async u=>{
       if(!u){ show('auth'); return; }
-      if(!u.emailVerified){ showVerify(u); return; }
+      if(ENFORCE_VERIFY && !u.emailVerified){ showVerify(u); return; }
       loadMembership(u);
     });
 
@@ -272,6 +282,9 @@
       $('pRole').textContent = (staffDoc.job?staffDoc.job+' · ':'')+(shop.businessName||'');
       $('connShop').textContent = 'Connected to '+(shop.businessName||'your workplace');
       $('connBadge').classList.remove('hide');
+      // soft email-verification reminder (banner)
+      $('verifyBanner').classList.toggle('hide', !!u.emailVerified);
+      $('vbResend').onclick=async()=>{ $('vbResend').disabled=true; $('vbResend').textContent='Sending…'; try{ await u.sendEmailVerification(); $('vbResend').textContent='Sent ✓'; }catch(e){ alert(prettyErr(e)); $('vbResend').textContent='Resend'; } $('vbResend').disabled=false; };
       // tip sharing — subtle review link only (details live in the one-time modal)
       const shareOn=!!shop.tipShareEnabled;
       $('shareReview').classList.toggle('hide', !shareOn);
