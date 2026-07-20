@@ -84,7 +84,7 @@
 
   <!-- AUTH -->
   <div id="auth" class="wrap hide">
-    <div class="brandbar"><span class="mk" id="mk1"></span><b>EasyTipMe</b></div>
+    <div class="brandbar"><span class="mk" id="mk1"></span><b>Easy<span style="color:#0071e3">Tip</span>Me</b></div>
     <div class="card">
       <h1 id="authTitle">Team sign in</h1>
       <p class="sub" id="authSub">Sign in to see your tips and earnings.</p>
@@ -106,7 +106,7 @@
 
   <!-- HOME -->
   <div id="home" class="wrap hide">
-    <div class="brandbar"><span class="mk" id="mk2"></span><b>EasyTipMe</b></div>
+    <div class="brandbar"><span class="mk" id="mk2"></span><b>Easy<span style="color:#0071e3">Tip</span>Me</b></div>
 
     <div class="card phead">
       <div id="pPic" class="pic"></div>
@@ -170,7 +170,8 @@
 
     // logo mark
     const LOGO='<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00c2ff"/><stop offset="1" stop-color="#0071e3"/></linearGradient></defs><rect width="100" height="100" rx="24" fill="#0a0a0a"/><rect x="30" y="26" width="10" height="48" rx="5" fill="url(#lg)"/><rect x="30" y="26" width="34" height="10" rx="5" fill="url(#lg)"/><rect x="30" y="64" width="34" height="10" rx="5" fill="url(#lg)"/><rect x="30" y="45" width="22" height="10" rx="5" fill="url(#lg)"/><circle cx="63" cy="50" r="9" fill="#fff"/><circle cx="63" cy="50" r="4.5" fill="url(#lg)"/></svg>';
-    $('mk1').innerHTML=LOGO; $('mk2').innerHTML=LOGO;
+    // unique gradient id per instance (a shared/hidden id stops the gradient from painting)
+    $('mk1').innerHTML=LOGO.replace(/lg/g,'lgA'); $('mk2').innerHTML=LOGO.replace(/lg/g,'lgB');
 
     // eye toggle
     const EYE='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8e8e93" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1.8 12S5.3 5 12 5s10.2 7 10.2 7-3.5 7-10.2 7S1.8 12 1.8 12z"/><circle cx="12" cy="12" r="3.1"/></svg>';
