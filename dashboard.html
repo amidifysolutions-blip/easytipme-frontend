@@ -413,18 +413,24 @@
           hr.innerHTML=`<td colspan="5" style="background:#fafafb;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--soft);padding:9px 12px">${esc(jobLabel)}</td>`;
           tb.appendChild(hr);
         }
-        const pub=s.published!==false;
+        const removed=s.status==='removed';
+        const pub=s.published!==false && !removed;
         const av=s.photo?`<img class="tav" src="${s.photo}">`:`<div class="tav">${(s.nickname||'?').charAt(0).toUpperCase()}</div>`;
         const sched=(s.days&&s.days.length?s.days.join(', '):'—')+'<br><small style="color:var(--soft)">'+(s.shift1&&s.shift1.s?s.shift1.s+'–'+(s.shift1.e||''):'no shift')+(s.shift2&&s.shift2.s?' , '+s.shift2.s+'–'+(s.shift2.e||''):'')+'</small>';
         const tr=document.createElement('tr');
+        if(removed) tr.style.opacity='.5';
         tr.innerHTML=`<td>${av}</td>
-          <td><b>${esc(s.nickname||'')}</b><br><small style="color:var(--soft)">${esc(s.job||'')}</small></td>
+          <td><b>${esc(s.nickname||'')}</b>${removed?' <small style="color:#e5484d">(removed)</small>':''}<br><small style="color:var(--soft)">${esc(s.job||'')}</small></td>
           <td>${sched}</td>
-          <td><label class="switch"><input type="checkbox" ${pub?'checked':''}><span class="slider"></span></label></td>
-          <td><button class="link b editBtn">Edit</button> &nbsp; <button class="link delBtn">Delete</button></td>`;
+          <td><label class="switch"><input type="checkbox" ${pub?'checked':''} ${removed?'disabled':''}><span class="slider"></span></label></td>
+          <td><button class="link b editBtn">Edit</button> &nbsp; <button class="link delBtn">${removed?'Restore':'Remove'}</button></td>`;
         tr.querySelector('.switch input').onchange=e=>db.collection('businesses').doc(BID).collection('staff').doc(s._id).update({published:e.target.checked});
         tr.querySelector('.editBtn').onclick=()=>editStaff(s._id,s);
-        tr.querySelector('.delBtn').onclick=async()=>{if(confirm('Delete '+(s.nickname||'this member')+'?')){await db.collection('businesses').doc(BID).collection('staff').doc(s._id).delete();loadStaff();}};
+        tr.querySelector('.delBtn').onclick=async()=>{
+          const ref=db.collection('businesses').doc(BID).collection('staff').doc(s._id);
+          if(removed){ await ref.update({status:'active',published:true}); loadStaff(); return; }
+          if(confirm('Remove '+(s.nickname||'this member')+'?\n\nThey stop receiving tips here and are hidden from your QR, but their tip history stays saved and you can restore them anytime.')){ await ref.update({status:'removed',published:false}); loadStaff(); }
+        };
         tb.appendChild(tr);
       });
     }
@@ -433,6 +439,7 @@
     function editStaff(id,s){
       editId=id;
       $('f_nick').value=s.nickname||''; $('f_real').value=s.realName||''; $('f_email').value=s.email||'';
+      $('f_email').readOnly=true; $('f_email').title='Email is locked for security. To change it, remove this member and add them again.'; $('f_email').style.background='#f1f1f4';
       $('f_phone').value=s.phone||''; $('f_job').value=s.job||'';
       $('f_s1s').value=s.shift1?.s||''; $('f_s1e').value=s.shift1?.e||'';
       $('f_s2s').value=s.shift2?.s||''; $('f_s2e').value=s.shift2?.e||'';
@@ -444,6 +451,7 @@
     }
     function resetForm(){
       editId=null; fPhoto="";
+      $('f_email').readOnly=false; $('f_email').title=''; $('f_email').style.background='';
       ['f_nick','f_real','f_email','f_phone','f_job','f_s1s','f_s1e','f_s2s','f_s2e'].forEach(id=>$(id).value='');
       $('f_prev').src=''; $('f_photo').value='';
       $('days').querySelectorAll('.day').forEach(d=>d.classList.remove('on'));

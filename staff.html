@@ -104,9 +104,25 @@
     <div class="powered">Powered by Amidify Solutions Inc.</div>
   </div>
 
+  <!-- VERIFY EMAIL -->
+  <div id="verify" class="wrap hide">
+    <div class="brandbar"><span class="mk" id="mk3"></span><b>Easy<span style="color:#0071e3">Tip</span>Me</b></div>
+    <div class="card" style="text-align:center">
+      <div style="font-size:36px;margin-bottom:4px">📧</div>
+      <h1 style="font-size:22px">Verify your email</h1>
+      <p class="sub">We sent a verification link to <b id="verEmail"></b>. Open it, then come back and tap continue.</p>
+      <div id="verMsg" class="msg"></div>
+      <button class="btn" id="verCheck">I've verified — continue</button>
+      <button class="btn ghost" id="verResend" style="margin-top:10px">Resend email</button>
+      <button class="logout" id="verLogout" style="margin-top:14px">Use a different email</button>
+    </div>
+    <div class="powered">Powered by Amidify Solutions Inc.</div>
+  </div>
+
   <!-- HOME -->
   <div id="home" class="wrap hide">
     <div class="brandbar"><span class="mk" id="mk2"></span><b>Easy<span style="color:#0071e3">Tip</span>Me</b></div>
+    <div id="connBadge" class="hide" style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--green);background:#eef7ee;border-radius:20px;padding:6px 12px;width:fit-content;margin:-4px 2px 14px;font-weight:600">✓ <span id="connShop"></span></div>
 
     <div class="card phead">
       <div id="pPic" class="pic"></div>
@@ -171,7 +187,7 @@
     // logo mark
     const LOGO='<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00c2ff"/><stop offset="1" stop-color="#0071e3"/></linearGradient></defs><rect width="100" height="100" rx="24" fill="#0a0a0a"/><rect x="30" y="26" width="10" height="48" rx="5" fill="url(#lg)"/><rect x="30" y="26" width="34" height="10" rx="5" fill="url(#lg)"/><rect x="30" y="64" width="34" height="10" rx="5" fill="url(#lg)"/><rect x="30" y="45" width="22" height="10" rx="5" fill="url(#lg)"/><circle cx="63" cy="50" r="9" fill="#fff"/><circle cx="63" cy="50" r="4.5" fill="url(#lg)"/></svg>';
     // unique gradient id per instance (a shared/hidden id stops the gradient from painting)
-    $('mk1').innerHTML=LOGO.replace(/lg/g,'lgA'); $('mk2').innerHTML=LOGO.replace(/lg/g,'lgB');
+    $('mk1').innerHTML=LOGO.replace(/lg/g,'lgA'); $('mk2').innerHTML=LOGO.replace(/lg/g,'lgB'); $('mk3').innerHTML=LOGO.replace(/lg/g,'lgC');
 
     // eye toggle
     const EYE='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8e8e93" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1.8 12S5.3 5 12 5s10.2 7 10.2 7-3.5 7-10.2 7S1.8 12 1.8 12z"/><circle cx="12" cy="12" r="3.1"/></svg>';
@@ -210,15 +226,30 @@
       if(!email||!pass){ amsg('Enter your email and password.'); return; }
       const btn=create?$('registerBtn'):$('loginBtn'); btn.disabled=true;
       try{
-        if(create) await auth.createUserWithEmailAndPassword(email,pass);
-        else await auth.signInWithEmailAndPassword(email,pass);
+        if(create){
+          const cred=await auth.createUserWithEmailAndPassword(email,pass);
+          try{ await cred.user.sendEmailVerification(); }catch(_){}
+        } else {
+          await auth.signInWithEmailAndPassword(email,pass);
+        }
         localStorage.setItem('etm_staff_bid',BID);
       }catch(e){ btn.disabled=false; amsg(prettyErr(e)); }
     }
 
+    // verify-email screen
+    function vmsg(t,type){const m=$('verMsg');m.textContent=t;m.className='msg '+(type||'err');}
+    function showVerify(u){ $('verEmail').textContent=u.email||''; vmsg('',''); $('verMsg').className='msg'; show('verify'); }
+    $('verResend').onclick=async()=>{ try{ await auth.currentUser.sendEmailVerification(); vmsg('Verification email sent. Check your inbox (and spam).','ok'); }catch(e){ vmsg(prettyErr(e)); } };
+    $('verCheck').onclick=async()=>{ $('verCheck').disabled=true; try{ await auth.currentUser.reload(); if(auth.currentUser.emailVerified){ loadMembership(auth.currentUser); } else { vmsg('Not verified yet — open the link in the email first.'); } }catch(e){ vmsg(prettyErr(e)); } $('verCheck').disabled=false; };
+    $('verLogout').onclick=()=>auth.signOut().then(()=>{ registerMode=false; show('auth'); });
+
     auth.onAuthStateChanged(async u=>{
       if(!u){ show('auth'); return; }
-      // find staff record by email in this business
+      if(!u.emailVerified){ showVerify(u); return; }
+      loadMembership(u);
+    });
+
+    async function loadMembership(u){
       try{
         if(!BID){ show('auth'); amsg('Enter your workplace code to continue.'); return; }
         const sd=await db.collection('businesses').doc(BID).get();
@@ -227,9 +258,10 @@
         const snap=await db.collection('businesses').doc(BID).collection('staff').where('email','==',(u.email||'').toLowerCase()).limit(1).get();
         if(snap.empty){ show('auth'); amsg('This email isn’t registered at '+(shop.businessName||'your workplace')+'. Ask them to add you with this email.'); return; }
         staffDoc=snap.docs[0].data(); staffId=snap.docs[0].id;
+        if(staffDoc.status==='removed'){ show('auth'); amsg('You’re no longer active at '+(shop.businessName||'this workplace')+'. Contact them if this is a mistake.'); return; }
         renderHome(u);
       }catch(e){ show('auth'); amsg('Could not load your profile. '+e.message); }
-    });
+    }
 
     async function renderHome(u){
       const sym=CURSYM[shop.currency||'CAD']||'$';
@@ -237,6 +269,8 @@
       $('pPic').innerHTML = staffDoc.photo?`<img src="${staffDoc.photo}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`:(staffDoc.nickname||'?').charAt(0).toUpperCase();
       $('pName').textContent = staffDoc.nickname||u.email;
       $('pRole').textContent = (staffDoc.job?staffDoc.job+' · ':'')+(shop.businessName||'');
+      $('connShop').textContent = 'Connected to '+(shop.businessName||'your workplace');
+      $('connBadge').classList.remove('hide');
       // tip sharing — subtle review link only (details live in the one-time modal)
       const shareOn=!!shop.tipShareEnabled;
       $('shareReview').classList.toggle('hide', !shareOn);
@@ -293,7 +327,7 @@
 
     $('logoutBtn').onclick=()=>auth.signOut().then(()=>{ staffDoc=null; show('auth'); });
 
-    function show(id){['loading','auth','home'].forEach(x=>$(x).classList.add('hide'));$(id).classList.remove('hide');window.scrollTo(0,0);}
+    function show(id){['loading','auth','verify','home'].forEach(x=>$(x).classList.add('hide'));$(id).classList.remove('hide');window.scrollTo(0,0);}
   </script>
 </body>
 </html>
