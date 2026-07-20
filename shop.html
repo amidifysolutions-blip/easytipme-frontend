@@ -270,7 +270,7 @@
         stripe=Stripe(STRIPE_PK);
         elements=stripe.elements({clientSecret});
         $('payment-element').innerHTML='';
-        elements.create('payment').mount('#payment-element');
+        elements.create('payment',{fields:{billingDetails:{address:'never'}},wallets:{applePay:'auto',googlePay:'auto'}}).mount('#payment-element');
         try{
           const ece=elements.create('expressCheckout');
           ece.on('ready',e=>{ if(e && e.availablePaymentMethods){ $('express-wrap').classList.remove('hide'); } });
