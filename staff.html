@@ -39,6 +39,19 @@
   .msg.ok{display:block;background:#eef7ee;color:var(--green)}
   .center{display:grid;place-items:center;min-height:80vh;color:var(--soft)}
   .hide{display:none}
+  /* consent modal */
+  .modal-wrap{position:fixed;inset:0;background:rgba(10,10,12,.55);backdrop-filter:blur(3px);display:flex;align-items:flex-end;justify-content:center;z-index:100;padding:0}
+  @media(min-width:520px){.modal-wrap{align-items:center;padding:20px}}
+  .modal{background:#fff;width:100%;max-width:460px;border-radius:24px 24px 0 0;padding:26px 24px calc(24px + env(safe-area-inset-bottom));box-shadow:0 -6px 30px rgba(0,0,0,.2);animation:cmUp .28s ease}
+  @media(min-width:520px){.modal{border-radius:24px}}
+  @keyframes cmUp{from{transform:translateY(30px);opacity:.6}to{transform:translateY(0);opacity:1}}
+  .modal-ic{font-size:34px;text-align:center;margin-bottom:6px}
+  .modal h2{font-size:21px;text-align:center;margin-bottom:12px;letter-spacing:-.02em}
+  .modal p{font-size:14.5px;color:#3a3a3d;line-height:1.55;margin-bottom:12px}
+  .modal .cm-now{background:#f2f8ff;border:1px solid #dceafe;border-radius:12px;padding:11px 13px;color:#1d1d1f}
+  .modal .cm-fine{font-size:12.5px;color:var(--soft)}
+  .modal .btn{margin-top:6px}
+  .modal .btn.ghost{margin-top:10px}
   /* profile header */
   .phead{display:flex;align-items:center;gap:14px}
   .pic{width:60px;height:60px;border-radius:50%;object-fit:cover;flex-shrink:0;display:grid;place-items:center;color:#fff;font-weight:700;font-size:24px;background:linear-gradient(135deg,var(--accent),#00c2ff)}
@@ -109,14 +122,8 @@
       </div>
     </div>
 
-    <div class="card" id="shareCard" style="display:none">
-      <div class="h3">Tip sharing</div>
-      <div id="shareText" style="font-size:14px;color:#333"></div>
-      <div class="consent-row" id="consentRow">
-        <input type="checkbox" id="consentChk" style="width:auto;margin:0">
-        <label for="consentChk" style="margin:0;text-transform:none;font-weight:400;color:var(--ink)">I understand and agree to the tip-sharing arrangement.</label>
-      </div>
-      <div id="consentDone" class="badge hide" style="margin-top:10px">Agreed ✓</div>
+    <div id="shareReview" class="hide" style="text-align:center;margin:-2px 0 14px">
+      <button id="reviewShare" style="background:none;border:none;color:var(--soft);font-size:13px;cursor:pointer;font-family:inherit;text-decoration:underline;padding:4px">Tip-sharing terms</button>
     </div>
 
     <div class="card payoff">
@@ -133,6 +140,19 @@
 
     <button class="logout" id="logoutBtn">Log out</button>
     <div class="powered">Powered by Amidify Solutions Inc.</div>
+  </div>
+
+  <!-- Tip-sharing consent modal (one-time) -->
+  <div id="consentModal" class="modal-wrap hide">
+    <div class="modal">
+      <div class="modal-ic">🤝</div>
+      <h2 id="cmTitle">Tip sharing</h2>
+      <p><b id="cmShop">Your workplace</b> uses a team tip pool. They may keep <b>up to 15% maximum</b> of each tip as a shared pool — you keep the rest.</p>
+      <p class="cm-now">Right now they share <b id="cmPct">0%</b>, so you keep <b id="cmKeep">100%</b> of every tip.</p>
+      <p class="cm-fine">Standard Stripe payment-processing fees also apply. By agreeing you accept this tip-sharing arrangement. You can review these terms anytime.</p>
+      <button class="btn" id="cmAgree">I understand &amp; agree</button>
+      <button class="btn ghost" id="cmLater">Maybe later</button>
+    </div>
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -216,12 +236,9 @@
       $('pPic').innerHTML = staffDoc.photo?`<img src="${staffDoc.photo}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`:(staffDoc.nickname||'?').charAt(0).toUpperCase();
       $('pName').textContent = staffDoc.nickname||u.email;
       $('pRole').textContent = (staffDoc.job?staffDoc.job+' · ':'')+(shop.businessName||'');
-      // tip sharing
-      if(shop.tipShareEnabled){
-        const pct=Math.min(15,Math.max(0,shop.tipSharePercent||0));
-        $('shareCard').style.display='block';
-        $('shareText').innerHTML='Your workplace shares <b>'+pct+'%</b> of each tip as a team pool. You keep the remaining <b>'+(100-pct)+'%</b>.';
-      }
+      // tip sharing — subtle review link only (details live in the one-time modal)
+      const shareOn=!!shop.tipShareEnabled;
+      $('shareReview').classList.toggle('hide', !shareOn);
       // earnings
       let total=0,count=0,rs=0,rc=0; const rows=[];
       try{
@@ -245,16 +262,30 @@
         const ds=dt?dt.toLocaleDateString(undefined,{month:'short',day:'numeric'}):'';
         el.insertAdjacentHTML('beforeend',`<div class="tip-row"><div><div class="tip-amt">+${sym}${r.amt.toFixed(2)}</div><div class="tip-date">${ds}${r.rating?' · '+'★'.repeat(r.rating):''}</div></div></div>`);
       });
-      // consent state
+      // tip-sharing consent — one-time modal, then never in their face again
+      const pct=shareOn?Math.min(15,Math.max(0,shop.tipSharePercent||0)):0;
+      $('cmShop').textContent=shop.businessName||'Your workplace';
+      $('cmPct').textContent=pct+'%';
+      $('cmKeep').textContent=(100-pct)+'%';
+      let consented=false;
       try{
         const cq=await db.collection('businesses').doc(BID).collection('consents').where('email','==',(u.email||'').toLowerCase()).limit(1).get();
-        if(!cq.empty){ $('consentChk').checked=true; $('consentChk').disabled=true; $('consentDone').classList.remove('hide'); $('consentRow').style.display='none'; }
+        consented=!cq.empty;
       }catch(e){}
-      $('consentChk').onchange=async()=>{
-        if(!$('consentChk').checked) return;
+      function openConsent(review){
+        $('cmAgree').classList.toggle('hide', !!review);
+        $('cmLater').textContent = review ? 'Close' : 'Maybe later';
+        $('consentModal').classList.remove('hide');
+      }
+      // show automatically only if sharing is on AND not yet agreed
+      if(shareOn && !consented) openConsent(false);
+      $('reviewShare').onclick=()=>openConsent(true);
+      $('cmLater').onclick=()=>$('consentModal').classList.add('hide');
+      $('cmAgree').onclick=async()=>{
+        $('cmAgree').disabled=true;
         try{ await db.collection('businesses').doc(BID).collection('consents').add({email:(u.email||'').toLowerCase(), staffId, sharePercent:(shop.tipSharePercent||0), agreedAt:firebase.firestore.FieldValue.serverTimestamp()});
-          $('consentChk').disabled=true; $('consentDone').classList.remove('hide'); $('consentRow').style.display='none';
-        }catch(e){ alert('Could not save. '+e.message); $('consentChk').checked=false; }
+          consented=true; $('consentModal').classList.add('hide');
+        }catch(e){ alert('Could not save. '+e.message); $('cmAgree').disabled=false; }
       };
       show('home');
     }

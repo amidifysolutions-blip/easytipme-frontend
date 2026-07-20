@@ -307,6 +307,7 @@
     firebase.initializeApp(firebaseConfig);
     const auth=firebase.auth(), db=firebase.firestore();
     const $=id=>document.getElementById(id);
+    const BACKEND="https://easytipme-backend.onrender.com";
     let BID=null, editId=null, fPhoto="", pLogo="";
 
     // tabs
@@ -374,8 +375,10 @@
       try{
         const col=db.collection('businesses').doc(BID).collection('staff');
         if(editId){ await col.doc(editId).update(data); }
-        else{ data.published=true; data.createdAt=firebase.firestore.FieldValue.serverTimestamp(); await col.add(data); }
-        resetForm(); msg('staffMsg','Saved ✓','ok'); setTimeout(()=>$('staffMsg').className='msg',1500); loadStaff();
+        else{ data.published=true; data.createdAt=firebase.firestore.FieldValue.serverTimestamp(); await col.add(data);
+          if(data.email){ fetch(BACKEND+'/notify-welcome',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:data.email,name:data.nickname,shopName:($('sideBiz').textContent||''),staffLink:staffUrl()})}).catch(()=>{}); }
+        }
+        resetForm(); msg('staffMsg', (editId?'Saved ✓':'Saved ✓ — invite email sent'),'ok'); setTimeout(()=>$('staffMsg').className='msg',2200); loadStaff();
       }catch(err){ msg('staffMsg',err.message,'err'); }
       btn.disabled=false; btn.textContent=editId?'Update specialist':'Register specialist';
     };
