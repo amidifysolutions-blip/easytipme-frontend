@@ -411,9 +411,8 @@
       your_country:"Your country", select_country:"Select country…", country_hint:"Where your bank account is. This sets up your payouts and can't be changed later.",
       available:"Available", pending:"Pending", withdraw_speed:"Withdrawal speed", withdraw_now:"Withdraw",
       free:"Free", recent_payouts:"Recent payouts", bal_unavailable:"Balance is loading — check back in a moment.",
-      tier_instant:"Instant", tier_instant_d:"Arrives in minutes", tier_weekly:"Weekly", tier_weekly_d:"Every week",
-      tier_15day:"Every 15 days", tier_15day_d:"Twice a month", tier_monthly:"Monthly", tier_monthly_d:"Once a month · best value",
-      withdraw_disclaimer:"The % is EasyTipMe's fee for faster access; standard Stripe transfer fees also apply. You always see the exact amount before you confirm.",
+      tier_instant:"Instant", tier_instant_d:"Arrives in minutes", tier_standard:"Standard", tier_standard_d:"Free · 1–2 business days",
+      withdraw_disclaimer:"Instant carries a 3.5% fee for arriving in minutes (Stripe's own fee is included). Standard payouts are free. You always see the exact amount before you confirm.",
       withdraw_soon:"Withdrawals are being switched on. Here's what you'd receive:",
       leave_wp:"Leave workplace", leave_desc:"Stop appearing on your workplace's tip page. Your past tips stay recorded.",
       nav_home:"Home", nav_insights:"Insights", nav_settings:"Settings",
@@ -468,9 +467,8 @@
       your_country:"بلدك", select_country:"اختر البلد…", country_hint:"وين حسابك البنكي. هيدا بيجهّز تحويلاتك وما بيتغيّر بعدين.",
       available:"المتاح", pending:"قيد الانتظار", withdraw_speed:"سرعة السحب", withdraw_now:"اسحب",
       free:"مجاني", recent_payouts:"آخر التحويلات", bal_unavailable:"عم يحمّل الرصيد — رجاع بعد شوي.",
-      tier_instant:"فوري", tier_instant_d:"بيوصل خلال دقائق", tier_weekly:"أسبوعي", tier_weekly_d:"كل أسبوع",
-      tier_15day:"كل ١٥ يوم", tier_15day_d:"مرتين بالشهر", tier_monthly:"شهري", tier_monthly_d:"مرة بالشهر · الأوفر",
-      withdraw_disclaimer:"النسبة هي رسوم EasyTipMe للوصول الأسرع؛ بتنطبق كمان رسوم تحويل Stripe القياسية. دايمًا بتشوف المبلغ بالضبط قبل ما تأكّد.",
+      tier_instant:"فوري", tier_instant_d:"بيوصل خلال دقائق", tier_standard:"عادي", tier_standard_d:"مجاني · يوم-يومين عمل",
+      withdraw_disclaimer:"الفوري عليه رسم ٣.٥٪ لأنه بيوصل خلال دقائق (رسم Stripe مشمول). السحب العادي مجاني. دايمًا بتشوف المبلغ بالضبط قبل ما تأكّد.",
       withdraw_soon:"عم نفعّل السحب. هيدا يلي رح تستلمه:",
       leave_wp:"مغادرة مكان العمل", leave_desc:"بتوقف تظهر بصفحة بقشيش مكان عملك. بقشيشك السابق بيضل مسجّل.",
       nav_home:"الرئيسية", nav_insights:"التحليلات", nav_settings:"الإعدادات",
@@ -1132,10 +1130,8 @@
     // top of Stripe's own transfer fees. These numbers are shown transparently so
     // the worker always sees exactly what lands in their bank.
     const PAYOUT_TIERS=[
-      { id:'instant', pct:3.5, key:'tier_instant', dkey:'tier_instant_d' },
-      { id:'weekly',  pct:2.5, key:'tier_weekly',  dkey:'tier_weekly_d' },
-      { id:'15day',   pct:1.5, key:'tier_15day',   dkey:'tier_15day_d' },
-      { id:'monthly', pct:0,   key:'tier_monthly', dkey:'tier_monthly_d' }
+      { id:'instant',  pct:3.5, key:'tier_instant',  dkey:'tier_instant_d' },
+      { id:'standard', pct:0,   key:'tier_standard', dkey:'tier_standard_d' }
     ];
     let BAL_CUR='CAD';
     async function loadBalance(accId){
@@ -1156,7 +1152,7 @@
       const opts=PAYOUT_TIERS.map(tr=>{
         const fee=avail*tr.pct/100, net=avail-fee;
         return `<label class="tier" data-id="${tr.id}">
-          <input type="radio" name="tier" value="${tr.id}" ${tr.id==='monthly'?'checked':''} style="acc-color:var(--accent)">
+          <input type="radio" name="tier" value="${tr.id}" ${tr.id==='standard'?'checked':''} style="acc-color:var(--accent)">
           <span class="tinfo"><b>${t(tr.key)}</b><span class="tdesc">${t(tr.dkey)}</span></span>
           <span class="tfee">${tr.pct?('−'+tr.pct+'%'):t('free')}<span class="tnet">${fmtMoney(net)}</span></span>
         </label>`;
