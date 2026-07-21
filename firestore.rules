@@ -14,9 +14,10 @@ service cloud.firestore {
     match /businesses/{uid} {
       allow get: if true;                                   // shop page reads one shop by ID
       allow list: if isAdmin();                             // only admin can query all shops
-      allow create, update: if request.auth != null
-                            && request.auth.uid == uid;     // owner edits only their own shop
-      allow delete: if false;
+      allow create: if request.auth != null && request.auth.uid == uid;
+      allow update: if (request.auth != null && request.auth.uid == uid) // owner edits their own shop
+                    || isAdmin();                           // platform admin can moderate (block/fix) any shop
+      allow delete: if isAdmin();                           // only the platform admin can remove a shop
 
       // Team members — shown publicly on the tipping page.
       // NOTE: staff docs currently include private fields (real name, email, phone).
@@ -39,7 +40,8 @@ service cloud.firestore {
       // their business's tips; a signed-in team member can read only the tips whose
       // recipientEmails array contains their own account email.
       match /tips/{tipId} {
-        allow create: if true;
+        // A customer can leave a tip only if the shop is not blocked by the platform admin.
+        allow create: if get(/databases/$(database)/documents/businesses/$(uid)).data.blocked != true;
         allow get, list: if (request.auth != null && request.auth.uid == uid)
           || (request.auth != null
               && request.auth.token.email in resource.data.recipientEmails);

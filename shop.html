@@ -161,6 +161,7 @@
         const bd=await db.collection('businesses').doc(BID).get();
         if(!bd.exists){ $('loading').textContent='Shop not found.'; return; }
         shop=bd.data(); curr=shop.currency||'CAD'; sym=CURSYM[curr]||'$';
+        if(shop.blocked){ $('loading').innerHTML='<div style="text-align:center;color:var(--soft);max-width:320px;margin:0 auto"><div style="font-size:34px;margin-bottom:10px">🚫</div>This tip page is currently unavailable.</div>'; return; }
         try{const cfg=await db.collection('config').doc('platform').get(); if(cfg.exists && cfg.data().commissionPercent!=null) FEE=cfg.data().commissionPercent/100;}catch(e){}
         if(shop.tipPresets&&shop.tipPresets.length) presets=shop.tipPresets.slice(0,4);
         $('shopName').textContent=shop.businessName||'Leave a tip';

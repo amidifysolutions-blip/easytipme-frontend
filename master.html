@@ -57,6 +57,20 @@
   .badge{display:inline-block;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px}
   .badge.g{background:#12331f;color:var(--green)}.badge.m{background:#2a2d34;color:var(--soft)}
   .num{font-variant-numeric:tabular-nums}
+  .badge.r{background:#3a1512;color:var(--danger)}.badge.a{background:#3a2a10;color:var(--amber)}
+  tr.blocked{opacity:.5}
+  .chip{background:#22252b;color:var(--soft);border:1px solid var(--line);border-radius:20px;padding:7px 13px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+  .chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .act{display:flex;gap:6px}
+  .act button{background:#22252b;border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:5px 9px;font-size:12px;cursor:pointer;font-family:inherit}
+  .act button.blk{color:var(--amber)}.act button.del{color:var(--danger)}
+  .act button:hover{background:#2c3038}
+  .modal-wrap{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px}
+  .modal{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px;width:100%;max-width:420px}
+  .modal h3{font-size:18px;margin-bottom:16px}
+  .modal label{margin-top:10px}
+  .modal input{margin-bottom:6px}
+  .modal .row2{display:flex;gap:10px;margin-top:16px}
   .msg{font-size:13px;border-radius:9px;padding:9px 12px;margin-top:12px;display:none}
   .msg.ok{display:block;background:#12331f;color:var(--green)}
   .msg.err{display:block;background:#3a1512;color:var(--danger)}
@@ -129,7 +143,13 @@
 
       <div class="card">
         <h3>Businesses <span class="sub" style="margin:0" id="bizCount"></span></h3>
-        <div class="toolbar"><input id="bizSearch" placeholder="Search business or email…"><button class="btn ghost sm" id="exportCsv">Export CSV</button></div>
+        <div class="toolbar">
+          <input id="bizSearch" placeholder="Search business or email…">
+          <button class="chip on" id="fAll" data-f="all">All</button>
+          <button class="chip" id="fDup" data-f="dup">Duplicates (0)</button>
+          <button class="chip" id="fBlk" data-f="blocked">Blocked (0)</button>
+          <button class="btn ghost sm" id="exportCsv" style="margin-left:auto">Export CSV</button>
+        </div>
         <div style="overflow-x:auto"><table>
           <thead><tr>
             <th data-sort="name">Business</th>
@@ -140,6 +160,7 @@
             <th data-sort="feePct">Admin fee</th>
             <th data-sort="joined">Joined</th>
             <th data-sort="last">Last tip</th>
+            <th>Actions</th>
           </tr></thead>
           <tbody id="bizTable"></tbody>
         </table></div>
@@ -147,6 +168,18 @@
       </div>
 
       <div class="sub" style="text-align:center;opacity:.6">Powered by Amidify Solutions Inc.</div>
+    </div>
+  </div>
+
+  <!-- Edit business modal -->
+  <div id="bizModal" class="modal-wrap hide">
+    <div class="modal">
+      <h3 id="bmTitle">Edit business</h3>
+      <label>Business name</label><input id="bm_name" type="text">
+      <label>Owner email</label><input id="bm_email" type="email">
+      <label>Admin fee % (0–15)</label><input id="bm_fee" type="number" min="0" max="15" step="0.5">
+      <div id="bmMsg" class="msg"></div>
+      <div class="row2"><button class="btn" id="bmSave" style="flex:1">Save fix</button><button class="btn ghost" id="bmCancel" style="flex:1">Cancel</button></div>
     </div>
   </div>
 
@@ -218,9 +251,16 @@
         let activeStaff=0; staffSnap.forEach(s=>{ const sd=s.data(); if(sd.status!=='removed' && sd.leftByStaff!==true) activeStaff++; });
         const feePct=(d.tipShareEnabled? (d.tipSharePercent||0):0);
         tRev+=rev; tVol+=vol; tN+=tipsSnap.size; tStaff+=activeStaff; if(tipsSnap.size>0) activeBiz++;
-        bizRows.push({ id:b.id, name:d.businessName||'—', email:d.email||d.businessEmail||'', staff:activeStaff,
-          tipsN:tipsSnap.size, vol, rev, feePct, joined:ms(d.createdAt), last, code:d.shopCode||'' });
+        const bemail=(d.email||d.businessEmail||'');
+        bizRows.push({ id:b.id, name:d.businessName||'—', email:bemail, staff:activeStaff,
+          tipsN:tipsSnap.size, vol, rev, feePct, joined:ms(d.createdAt), last, code:d.shopCode||'',
+          blocked:!!d.blocked, nkey:(d.businessName||'').toLowerCase().replace(/\s+/g,' ').trim(), ekey:bemail.toLowerCase().trim() });
       }
+      // duplicate detection — flag shops that share an owner email or an identical name
+      const ec={}, nc={}; bizRows.forEach(r=>{ if(r.ekey) ec[r.ekey]=(ec[r.ekey]||0)+1; if(r.nkey) nc[r.nkey]=(nc[r.nkey]||0)+1; });
+      bizRows.forEach(r=>{ r.dup = (r.ekey && ec[r.ekey]>1) || (r.nkey && nc[r.nkey]>1); });
+      const dupN=bizRows.filter(r=>r.dup).length, blkN=bizRows.filter(r=>r.blocked).length;
+      $('fDup').textContent='Duplicates ('+dupN+')'; $('fBlk').textContent='Blocked ('+blkN+')';
       // KPIs
       $('stRev').textContent=money(tRev);
       $('stRevM').textContent='take rate '+(tVol>0?(tRev/tVol*100).toFixed(1):'0')+'%'; $('stRevM').className='d up';
@@ -243,9 +283,12 @@
       renderBiz();
     }
 
+    let filterMode='all';
     function renderBiz(){
       const q=($('bizSearch').value||'').toLowerCase().trim();
       let rows=bizRows.filter(r=> !q || (r.name+' '+r.email).toLowerCase().includes(q));
+      if(filterMode==='dup') rows=rows.filter(r=>r.dup);
+      if(filterMode==='blocked') rows=rows.filter(r=>r.blocked);
       rows.sort((a,b)=>{ let x=a[sortKey], y=b[sortKey];
         if(typeof x==='string'){ x=(x||'').toLowerCase(); y=(y||'').toLowerCase(); return x<y?-sortDir:x>y?sortDir:0; }
         return ((x||0)-(y||0))*sortDir; });
@@ -254,8 +297,9 @@
       $('bizCount').textContent='· '+rows.length+' shown';
       rows.forEach(r=>{
         const active=r.last && (Date.now()-r.last)<45*86400000;
-        tb.insertAdjacentHTML('beforeend',`<tr class="biz">
-          <td><b>${esc(r.name)}</b>${r.code?` <span class="badge m">${esc(r.code)}</span>`:''}<br><span style="color:var(--soft);font-size:11px">${esc(r.email)}</span></td>
+        const flags=(r.dup?'<span class="badge r">DUP</span> ':'')+(r.blocked?'<span class="badge a">BLOCKED</span> ':'');
+        tb.insertAdjacentHTML('beforeend',`<tr class="biz${r.blocked?' blocked':''}">
+          <td>${flags}<b>${esc(r.name)}</b>${r.code?` <span class="badge m">${esc(r.code)}</span>`:''}<br><span style="color:var(--soft);font-size:11px">${esc(r.email)}</span></td>
           <td class="num">${r.staff}</td>
           <td class="num">${r.tipsN}</td>
           <td class="num">${money(r.vol)}</td>
@@ -263,9 +307,55 @@
           <td class="num">${r.feePct?r.feePct+'%':'—'}</td>
           <td style="color:var(--soft)">${dstr(r.joined)}</td>
           <td>${r.last?`<span class="badge ${active?'g':'m'}">${dstr(r.last)}</span>`:'<span style="color:var(--soft)">—</span>'}</td>
+          <td><div class="act">
+            <button data-act="edit" data-id="${r.id}">Edit</button>
+            <button class="blk" data-act="block" data-id="${r.id}">${r.blocked?'Unblock':'Block'}</button>
+            <button class="del" data-act="delete" data-id="${r.id}">Delete</button>
+          </div></td>
         </tr>`);
       });
+      tb.querySelectorAll('button[data-act]').forEach(b=>{ b.onclick=()=>doAct(b.getAttribute('data-act'), b.getAttribute('data-id')); });
     }
+
+    document.querySelectorAll('.chip[data-f]').forEach(c=>{ c.onclick=()=>{ filterMode=c.getAttribute('data-f');
+      document.querySelectorAll('.chip[data-f]').forEach(x=>x.classList.toggle('on',x===c)); renderBiz(); }; });
+
+    // ---- moderation actions ----
+    async function doAct(act, id){
+      const r=bizRows.find(x=>x.id===id); if(!r) return;
+      if(act==='edit'){ openEdit(r); return; }
+      if(act==='block'){
+        const to=!r.blocked;
+        if(to && !confirm('Block "'+r.name+'"? Their tip page will stop accepting tips until you unblock them.')) return;
+        try{ await db.collection('businesses').doc(id).update({blocked:to, blockedAt: to?firebase.firestore.FieldValue.serverTimestamp():firebase.firestore.FieldValue.delete()}); r.blocked=to; renderBiz(); }
+        catch(e){ alert('Could not update: '+e.message); }
+        return;
+      }
+      if(act==='delete'){
+        if(!confirm('PERMANENTLY delete "'+r.name+'"?\n\nThis removes the business record entirely. Use this only for fake/abusive shops. This cannot be undone.')) return;
+        if(!confirm('Are you absolutely sure? Type-check: this deletes "'+r.name+'" for good.')) return;
+        try{ await db.collection('businesses').doc(id).delete(); bizRows=bizRows.filter(x=>x.id!==id); renderBiz(); }
+        catch(e){ alert('Could not delete: '+e.message); }
+        return;
+      }
+    }
+
+    let editId=null;
+    function openEdit(r){ editId=r.id; $('bmTitle').textContent='Edit '+r.name; $('bm_name').value=r.name==='—'?'':r.name; $('bm_email').value=r.email||''; $('bm_fee').value=r.feePct||0; $('bmMsg').className='msg'; $('bizModal').classList.remove('hide'); }
+    $('bmCancel').onclick=()=>$('bizModal').classList.add('hide');
+    $('bmSave').onclick=async()=>{
+      if(!editId) return;
+      const name=$('bm_name').value.trim(), email=$('bm_email').value.trim().toLowerCase(), fee=parseFloat($('bm_fee').value);
+      if(!name){ msg('bmMsg','Enter a business name.','err'); return; }
+      if(isNaN(fee)||fee<0||fee>15){ msg('bmMsg','Admin fee must be 0–15%.','err'); return; }
+      $('bmSave').disabled=true;
+      try{
+        await db.collection('businesses').doc(editId).update({ businessName:name, email:email, tipSharePercent:fee, tipShareEnabled:fee>0 });
+        const r=bizRows.find(x=>x.id===editId); if(r){ r.name=name; r.email=email; r.feePct=fee; }
+        $('bizModal').classList.add('hide'); renderBiz();
+      }catch(e){ msg('bmMsg','Could not save: '+e.message,'err'); }
+      $('bmSave').disabled=false;
+    };
 
     $('bizSearch').oninput=renderBiz;
     document.querySelectorAll('th[data-sort]').forEach(th=>{ th.onclick=()=>{
