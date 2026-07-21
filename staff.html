@@ -833,7 +833,7 @@
     // ---- Stripe Connect (staff payouts) ----
     // Flip CONNECT_LIVE to true ONLY after Connect is enabled in the Stripe
     // dashboard and tested. While false, the button stays disabled ("Coming soon").
-    const CONNECT_LIVE=false;
+    const CONNECT_LIVE=true;
     async function setupPayout(u){
       const btn=$('connectBtn'), stat=$('payoutStatus'), soon=$('payoutSoon');
       if(!CONNECT_LIVE){ btn.disabled=true; return; }
