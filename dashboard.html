@@ -308,6 +308,14 @@
         </div>
         <button class="btn" id="saveSettings">Save settings</button>
         <div id="settingsMsg" class="msg"></div>
+
+        <div class="card" style="margin-top:20px">
+          <h3>💳 Get paid</h3>
+          <p style="font-size:12px;color:var(--soft);line-height:1.5;margin-bottom:12px">Connect your bank once. Stripe then pays your admin fee (and any tips you collect) straight to your account — automatically, on a schedule. Verifying your identity + bank is required by law.</p>
+          <div id="ownerPayoutStatus" style="margin:0 0 12px;font-size:14px;font-weight:600"></div>
+          <button class="btn" id="ownerConnectBtn" disabled>Connect bank account</button>
+        </div>
+
         <div class="sig">Powered by Amidify Solutions Inc.</div>
       </div>
 
@@ -339,7 +347,8 @@
     const auth=firebase.auth(), db=firebase.firestore();
     const $=id=>document.getElementById(id);
     const BACKEND="https://easytipme-backend.onrender.com";
-    let BID=null, editId=null, fPhoto="", pLogo="";
+    let BID=null, editId=null, fPhoto="", pLogo="", bizData={};
+    const OWNER_CONNECT_LIVE=true; // owner bank connect (test key) — flip with launch
 
     // tabs
     document.querySelectorAll('.nav').forEach(n=>n.onclick=()=>{
@@ -359,7 +368,7 @@
       if(!u){ location.href='signup.html'; return; }
       BID=u.uid;
       const doc = await db.collection('businesses').doc(BID).get();
-      const b = doc.exists?doc.data():{};
+      const b = doc.exists?doc.data():{}; bizData=b;
       $('sideBiz').textContent=b.businessName||u.email;
       $('teamTitle').textContent=(b.businessName||'Your')+' — team';
       // fill profile + settings
@@ -382,7 +391,32 @@
       $('loading').style.display='none'; $('app').style.display='flex';
       ensureShopCode(b.shopCode);
       loadStaff();
+      setupOwnerPayout();
     });
+
+    // ---- Owner bank connect (Stripe Connect) ----
+    async function setupOwnerPayout(){
+      const btn=$('ownerConnectBtn'), stat=$('ownerPayoutStatus');
+      if(!OWNER_CONNECT_LIVE){ btn.disabled=true; stat.textContent=''; return; }
+      btn.disabled=false; btn.onclick=startOwnerConnect;
+      const accId=bizData.ownerConnectAccountId;
+      if(accId){
+        try{ const r=await fetch(BACKEND+'/connect/status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accountId:accId})}); const j=await r.json();
+          if(j.payouts_enabled){ stat.style.color='var(--green)'; stat.textContent='✓ Bank connected — payouts are set up.'; btn.style.display='none'; }
+          else if(j.details_submitted){ stat.style.color='var(--amber)'; stat.textContent='Almost there — finish verification.'; btn.textContent='Continue setup'; }
+        }catch(_){}
+      }
+    }
+    async function startOwnerConnect(){
+      const btn=$('ownerConnectBtn'); btn.disabled=true;
+      try{
+        const idToken=await auth.currentUser.getIdToken();
+        const cr=await fetch(BACKEND+'/connect/create-owner-account',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken, bid:BID, email:auth.currentUser.email, country:(bizData.country||'CA')})});
+        const cj=await cr.json(); if(!cj.accountId) throw new Error(cj.error||'no account');
+        const lr=await fetch(BACKEND+'/connect/onboarding-link',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accountId:cj.accountId, returnUrl:location.origin+'/dashboard.html'})});
+        const lj=await lr.json(); if(lj.url){ location.href=lj.url; } else { throw new Error('no link'); }
+      }catch(e){ alert('Could not start bank setup right now. '+(e.message||'')); btn.disabled=false; }
+    }
 
     // Short, shareable workplace code (maps to this business). Generated once, then reused.
     async function ensureShopCode(existing){
