@@ -247,9 +247,10 @@
           <span class="val"><span id="setVerified"></span> <button id="setResend" class="linkbtn hide" data-i18n="resend_short">Resend</button></span></div>
       </div>
       <div class="card payoff">
-        <div class="h3"><span data-i18n="get_paid">Get paid</span> <span class="soon" data-i18n="coming_soon">Coming soon</span></div>
+        <div class="h3"><span data-i18n="get_paid">Get paid</span> <span class="soon" id="payoutSoon" data-i18n="coming_soon">Coming soon</span></div>
         <div class="note" data-i18n="payout_note">Bank payouts are being activated. Soon you'll connect your bank account here to receive your tips directly. For now, your workplace can see and settle your tips.</div>
-        <button class="btn dark" disabled style="margin-top:14px" data-i18n="connect_bank">Connect bank account</button>
+        <div id="payoutStatus" class="hide" style="margin-top:12px;font-size:14px;font-weight:600"></div>
+        <button class="btn dark" id="connectBtn" disabled style="margin-top:14px" data-i18n="connect_bank">Connect bank account</button>
       </div>
       <div class="card">
         <button class="linkbtn" id="reviewShare" data-i18n="tip_terms">Tip-sharing terms</button>
@@ -355,7 +356,8 @@
       m_not_verified_yet:"Not verified yet — open the link in the email first.", m_leave_wrong_pass:"Wrong password. Please try again.", m_save_fail:"Could not save.",
       e_email_in_use:"This email already has an account. Try signing in.", e_invalid_email:"Enter a valid email.", e_weak_pass:"Password must be at least 6 characters.",
       e_wrong_pass:"Wrong email or password.", e_no_user:"No account with this email. Create one.", e_too_many:"Too many attempts. Please wait a minute, then try again.",
-      e_network:"Network problem. Check your connection and try again.", e_missing_pass:"Enter your password.", e_generic:"Something went wrong. Please try again."
+      e_network:"Network problem. Check your connection and try again.", e_missing_pass:"Enter your password.", e_generic:"Something went wrong. Please try again.",
+      payout_connected:"✓ Bank connected — you're set to receive payouts.", payout_continue:"Finish connecting your bank", payout_start_fail:"Couldn't start bank setup right now. Please try again."
     };
     DICT.ar={
       signin_title:"تسجيل دخول الفريق", signin_sub:"سجّل دخولك لتشوف بقشيشك وأرباحك.",
@@ -761,7 +763,7 @@
         });
       }catch(e){ /* leave empty */ }
       allRows.sort((a,b)=>b.ms-a.ms);
-      renderHomeStats(); renderRecent(); renderInsights(); renderSettings(u); setupConsent(u);
+      renderHomeStats(); renderRecent(); renderInsights(); renderSettings(u); setupPayout(u); setupConsent(u);
       show('app'); switchTab('home');
     }
 
@@ -826,6 +828,37 @@
       $('setVerified').innerHTML = ver?`<span class="pill g">${t('verified')}</span>`:`<span class="pill o">${t('not_verified')}</span>`;
       $('setResend').classList.toggle('hide', !!ver);
       $('setResend').onclick=async()=>{ $('setResend').disabled=true; const res=await sendVerify(u); alert(res==='ok'?t('m_verify_sent'):res==='rate'?t('m_verify_wait'):t('m_verify_fail')); $('setResend').disabled=false; };
+    }
+
+    // ---- Stripe Connect (staff payouts) ----
+    // Flip CONNECT_LIVE to true ONLY after Connect is enabled in the Stripe
+    // dashboard and tested. While false, the button stays disabled ("Coming soon").
+    const CONNECT_LIVE=false;
+    async function setupPayout(u){
+      const btn=$('connectBtn'), stat=$('payoutStatus'), soon=$('payoutSoon');
+      if(!CONNECT_LIVE){ btn.disabled=true; return; }
+      soon.classList.add('hide'); btn.disabled=false;
+      const accId = staffDoc.connectAccountId || null;
+      // returning from Stripe onboarding
+      if(params.get('connect')==='done' && accId){
+        try{ const r=await fetch(BACKEND+'/connect/status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accountId:accId})}); const j=await r.json(); paintPayout(j); }catch(_){}
+      } else if(accId){
+        try{ const r=await fetch(BACKEND+'/connect/status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accountId:accId})}); const j=await r.json(); paintPayout(j); }catch(_){}
+      }
+      btn.onclick=()=>startConnect(u);
+      function paintPayout(j){
+        if(j && j.payouts_enabled){ stat.classList.remove('hide'); stat.style.color='var(--green)'; stat.textContent=t('payout_connected'); btn.classList.add('hide'); }
+        else if(j && j.details_submitted){ stat.classList.remove('hide'); stat.style.color='var(--orange)'; stat.textContent=t('payout_continue'); btn.textContent=t('payout_continue'); }
+      }
+    }
+    async function startConnect(u){
+      const btn=$('connectBtn'); btn.disabled=true;
+      try{
+        const cr=await fetch(BACKEND+'/connect/create-account',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({bid:BID, staffId, email:u.email, country:(shop.country||'CA')})});
+        const cj=await cr.json(); if(!cj.accountId) throw new Error('no account');
+        const lr=await fetch(BACKEND+'/connect/onboarding-link',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accountId:cj.accountId, returnUrl:location.origin+'/staff.html?s='+encodeURIComponent(BID)})});
+        const lj=await lr.json(); if(lj.url){ location.href=lj.url; } else { throw new Error('no link'); }
+      }catch(e){ alert(t('payout_start_fail')); btn.disabled=false; }
     }
 
     // ---- tip-sharing consent (one-time) ----
