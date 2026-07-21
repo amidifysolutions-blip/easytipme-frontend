@@ -102,6 +102,10 @@
           <div class="stars" id="stars"><span class="star" data-v="1">★</span><span class="star" data-v="2">★</span><span class="star" data-v="3">★</span><span class="star" data-v="4">★</span><span class="star" data-v="5">★</span></div>
         </div>
       </div>
+      <div class="card">
+        <div class="qtitle" style="margin-bottom:8px">Add your name <span style="color:var(--soft);font-weight:400;font-size:13px">(optional)</span></div>
+        <div class="custom"><span>🙂</span><input id="fromName" maxlength="40" placeholder="So they know it's from you"></div>
+      </div>
       <button class="btn" id="toPay">Continue</button>
       <button class="link" id="backPick">← Choose someone else</button>
     </div>
@@ -245,7 +249,7 @@
       $('amts').innerHTML=presets.map(p=>`<div class="amt" data-v="${p}">${p}<small>${sym}</small></div>`).join('')
         + billTile(50,'#f8dcc4','#f0ad81','#fdf3ed','#dd6a5f') + billTile(100,'#e2edcf','#bcda9c','#fbe7ee','#dd6a5f');
       $('amts').querySelectorAll('.amt').forEach(a=>a.onclick=()=>{tip=parseFloat(a.dataset.v);$('customAmt').value='';markAmt(a);});
-      $('customAmt').value='';
+      $('customAmt').value=''; $('fromName').value='';
       $('stars').querySelectorAll('.star').forEach(st=>{st.classList.remove('on');st.onclick=()=>setRating(+st.dataset.v);});
       show('step-tip');
     }
@@ -298,13 +302,14 @@
       const sharePct=shop.tipShareEnabled?Math.min(15,Math.max(0,shop.tipSharePercent||0)):0;
       const ownerShare=r2(tip*sharePct/100);
       const staffShare=r2(tip-ownerShare);
+      const fromName=(($('fromName')&&$('fromName').value)||'').trim().slice(0,40);
       try{ await db.collection('businesses').doc(BID).collection('tips').add({
         recipientIds:recipient.members.map(m=>m.id), recipientEmails:recipient.members.map(m=>(m.email||'').toLowerCase()).filter(Boolean), recipientName:recipient.nickname||'team', multiple:!!recipient.multiple,
-        tip, fee, total:tip+fee, currency:curr, rating, ownerShare, staffShare, paymentId:paymentIntent?.id||'', createdAt:firebase.firestore.FieldValue.serverTimestamp() }); }catch(e){}
+        fromName:fromName, tip, fee, total:tip+fee, currency:curr, rating, ownerShare, staffShare, paymentId:paymentIntent?.id||'', createdAt:firebase.firestore.FieldValue.serverTimestamp() }); }catch(e){}
       if(shop.notifyEmail!==false){ try{
         const perAmt=recipient.multiple?tip/recipient.members.length:tip;
         fetch(BACKEND+'/notify-tip',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-          recipients:recipient.members.map(m=>({name:m.nickname,email:m.email})), amount:perAmt, currency:curr, shopName:shop.businessName||'' })});
+          recipients:recipient.members.map(m=>({name:m.nickname,email:m.email})), amount:perAmt, currency:curr, shopName:shop.businessName||'', fromName:fromName })});
       }catch(e){} }
       $('doneMsg').textContent=`Your ${sym}${tip.toFixed(2)} tip to ${recipient.nickname||'the team'} is on its way.`;
       show('step-done');

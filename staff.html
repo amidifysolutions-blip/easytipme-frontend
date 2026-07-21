@@ -334,7 +334,7 @@
           const mine= t.multiple? share/n : share;
           total+=mine; count++;
           if(t.rating){rs+=t.rating;rc++;}
-          rows.push({amt:mine, date:t.createdAt, rating:t.rating});
+          rows.push({amt:mine, date:t.createdAt, rating:t.rating, from:(t.fromName||'')});
         });
       }catch(e){ /* permission or data issue — leave earnings at zero */ }
       rows.sort((a,b)=>{const ta=a.date&&a.date.toMillis?a.date.toMillis():0;const tb=b.date&&b.date.toMillis?b.date.toMillis():0;return tb-ta;});
@@ -345,7 +345,8 @@
       rows.slice(0,20).forEach(r=>{
         const dt=r.date&&r.date.toDate?r.date.toDate():null;
         const ds=dt?dt.toLocaleDateString(undefined,{month:'short',day:'numeric'}):'';
-        el.insertAdjacentHTML('beforeend',`<div class="tip-row"><div><div class="tip-amt">+${sym}${r.amt.toFixed(2)}</div><div class="tip-date">${ds}${r.rating?' · '+'★'.repeat(r.rating):''}</div></div></div>`);
+        const fromTxt=r.from?(' · from '+r.from.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))):'';
+        el.insertAdjacentHTML('beforeend',`<div class="tip-row"><div><div class="tip-amt">+${sym}${r.amt.toFixed(2)}</div><div class="tip-date">${ds}${fromTxt}${r.rating?' · '+'★'.repeat(r.rating):''}</div></div></div>`);
       });
       // tip-sharing consent — one-time modal, then never in their face again
       const pct=shareOn?Math.min(15,Math.max(0,shop.tipSharePercent||0)):0;
