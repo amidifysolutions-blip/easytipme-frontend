@@ -121,6 +121,30 @@
   .nav button.on{color:var(--accent)}
   .tabpanel{animation:fade .2s ease}
   @keyframes fade{from{opacity:.4}to{opacity:1}}
+  /* ===== Dark mode (staff can toggle in Settings) ===== */
+  html[data-theme="dark"]{--bg:#0f0f14;--card:#1a1a21;--ink:#f2f2f5;--soft:#9a9aa4;--line:#2b2b34;--accent:#2f9bff;--accent-d:#0a84ff;}
+  html[data-theme="dark"] input{background:#141419;color:var(--ink)}
+  html[data-theme="dark"] input:focus{background:#1c1c23}
+  html[data-theme="dark"] input::placeholder{color:#5f5f6a}
+  html[data-theme="dark"] .btn.ghost{background:#26262e;color:var(--ink)}
+  html[data-theme="dark"] .btn.dark{background:#26262e}
+  html[data-theme="dark"] .nav{background:rgba(18,18,24,.92);border-top-color:var(--line)}
+  html[data-theme="dark"] .langsel select{background:#1a1a21;color:var(--ink)}
+  html[data-theme="dark"] .langsel select option{background:#1a1a21;color:var(--ink)}
+  html[data-theme="dark"] .modal{background:#1a1a21}
+  html[data-theme="dark"] .stat{background:#22222a}
+  html[data-theme="dark"] .seg{background:#22222a}
+  html[data-theme="dark"] .seg button.on{background:#3a3a44;color:var(--ink)}
+  html[data-theme="dark"] .modal .cm-now{background:#12233a;border-color:#1e3a5f;color:var(--ink)}
+  html[data-theme="dark"] .modal p{color:#c9c9d2}
+  html[data-theme="dark"] .msg.err{background:#3a1a1c;color:#ff8a8a}
+  html[data-theme="dark"] .msg.ok{background:#12301e;color:#48d17e}
+  html[data-theme="dark"] .tip-row,html[data-theme="dark"] .kv,html[data-theme="dark"] .srow{border-bottom-color:#26262e}
+  html[data-theme="dark"] .bar.empty{background:#26262e}
+  html[data-theme="dark"] .pill.g{background:#12301e}html[data-theme="dark"] .pill.o{background:#3a2a10}
+  .themeseg{display:inline-flex;background:var(--line);border-radius:10px;padding:3px;gap:3px}
+  .themeseg button{border:none;background:none;font-family:inherit;font-size:13px;font-weight:600;color:var(--soft);padding:6px 14px;border-radius:8px;cursor:pointer}
+  .themeseg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.15)}
 </style>
 </head>
 <body>
@@ -242,6 +266,8 @@
       <div class="card">
         <div class="srow"><span class="lab" data-i18n="language">Language</span>
           <span class="langsel"><select id="langSet"></select></span></div>
+        <div class="srow"><span class="lab" data-i18n="theme">Theme</span>
+          <span class="themeseg" id="themeSeg"><button data-th="light" data-i18n="light">Light</button><button data-th="dark" data-i18n="dark_mode">Dark</button></span></div>
       </div>
       <div class="card">
         <div class="h3" data-i18n="profile">Profile</div>
@@ -379,7 +405,8 @@
       payout_connected:"✓ Bank connected — you're set to receive payouts.", payout_continue:"Finish connecting your bank", payout_start_fail:"Couldn't start bank setup right now. Please try again.",
       forgot_pw:"Forgot password?", m_forgot_need_email:"Enter your email above first, then tap Forgot password.", m_reset_sent:"If an account exists for that email, a reset link is on its way. Check your inbox (and spam).",
       change:"Change", change_email_title:"Change your email", change_email_desc:"Your email is your login and is linked to your payouts. Enter your new email and your current password to update it.", new_email_ph:"New email", change_email_btn:"Update email",
-      m_email_same:"That's already your email.", m_email_changed:"Email updated. Please sign in again with your new email.", m_email_change_fail:"Couldn't change your email right now. Please try again.", m_reauth_needed:"For security, please sign out and back in, then try again."
+      m_email_same:"That's already your email.", m_email_changed:"Email updated. Please sign in again with your new email.", m_email_change_fail:"Couldn't change your email right now. Please try again.", m_reauth_needed:"For security, please sign out and back in, then try again.",
+      theme:"Theme", light:"Light", dark_mode:"Dark"
     };
     DICT.ar={
       signin_title:"تسجيل دخول الفريق", signin_sub:"سجّل دخولك لتشوف بقشيشك وأرباحك.",
@@ -424,7 +451,11 @@
       m_not_verified_yet:"لسا ما تفعّل — افتح الرابط بالإيميل أولاً.", m_leave_wrong_pass:"كلمة مرور خطأ. جرّب مرة تانية.", m_save_fail:"ما قدرنا نحفظ.",
       e_email_in_use:"هالإيميل عنده حساب. جرّب تسجّل دخول.", e_invalid_email:"أدخل إيميل صحيح.", e_weak_pass:"كلمة المرور لازم ٦ أحرف على الأقل.",
       e_wrong_pass:"إيميل أو كلمة مرور خطأ.", e_no_user:"ما في حساب بهالإيميل. أنشئ واحد.", e_too_many:"محاولات كتير. استنى دقيقة وجرّب.",
-      e_network:"مشكلة بالشبكة. تأكد من اتصالك وجرّب.", e_missing_pass:"أدخل كلمة المرور.", e_generic:"صار خطأ. جرّب مرة تانية."
+      e_network:"مشكلة بالشبكة. تأكد من اتصالك وجرّب.", e_missing_pass:"أدخل كلمة المرور.", e_generic:"صار خطأ. جرّب مرة تانية.",
+      forgot_pw:"نسيت كلمة المرور؟", m_forgot_need_email:"اكتب إيميلك فوق أول، وبعدين اضغط نسيت كلمة المرور.", m_reset_sent:"إذا في حساب بهالإيميل، رح يوصلك رابط لإعادة تعيين كلمة المرور. تفقّد بريدك (والـ spam).",
+      change:"تغيير", change_email_title:"غيّر إيميلك", change_email_desc:"إيميلك هو تسجيل دخولك ومربوط بأرباحك. اكتب الإيميل الجديد وكلمة مرورك الحالية لتغييره.", new_email_ph:"الإيميل الجديد", change_email_btn:"تحديث الإيميل",
+      m_email_same:"هيدا أصلاً إيميلك.", m_email_changed:"تغيّر الإيميل. سجّل دخول من جديد بالإيميل الجديد.", m_email_change_fail:"ما قدرنا نغيّر الإيميل هلق. جرّب مرة تانية.", m_reauth_needed:"للأمان، سجّل خروج وادخل من جديد، وبعدين جرّب.",
+      theme:"المظهر", light:"فاتح", dark_mode:"داكن"
     };
     DICT.fr={
       signin_title:"Connexion équipe", signin_sub:"Connectez-vous pour voir vos pourboires et gains.",
@@ -637,6 +668,11 @@
     fillLangSelect($('langAuth')); fillLangSelect($('langSet'));
     $('langAuth').onchange=e=>onLangChange(e.target.value);
     $('langSet').onchange=e=>onLangChange(e.target.value);
+
+    // ---------- theme (light / dark) ----------
+    function applyTheme(th){ th=(th==='dark')?'dark':'light'; document.documentElement.setAttribute('data-theme',th); try{localStorage.setItem('etm_theme',th);}catch(_){}; document.querySelectorAll('#themeSeg button').forEach(b=>b.classList.toggle('on',b.getAttribute('data-th')===th)); }
+    document.querySelectorAll('#themeSeg button').forEach(b=>{ b.onclick=()=>applyTheme(b.getAttribute('data-th')); });
+    applyTheme(localStorage.getItem('etm_theme')||'light');
 
     // send verification via branded Brevo email (reliable); fall back to Firebase default sender.
     async function sendVerify(user, name){
