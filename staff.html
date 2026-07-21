@@ -996,8 +996,10 @@
 
     // verify-email hard screen (off by default)
     function vmsg(txt,type){const m=$('verMsg');m.textContent=txt;m.className='msg '+(type||'err');}
-    function showVerify(u){ $('verEmail').textContent=u.email||''; $('verCode').value=''; $('verMsg').className='msg'; show('verify'); sendVerify(u).then(res=>{ if(res==='ok') vmsg(t('m_verify_sent'),'ok'); else if(res!=='rate') vmsg(t('m_verify_fail'),'err'); }); }
-    $('verResend').onclick=async()=>{ $('verResend').disabled=true; const res=await sendVerify(auth.currentUser); vmsg(res==='ok'?t('m_verify_sent'):res==='rate'?t('m_verify_wait'):t('m_verify_fail'), res==='ok'?'ok':'err'); $('verResend').disabled=false; };
+    function showVerify(u){ $('verEmail').textContent=u.email||''; $('verCode').value=''; $('verMsg').className='msg'; show('verify'); startResendCD(25); sendVerify(u).then(res=>{ if(res==='ok') vmsg(t('m_verify_sent'),'ok'); else if(res!=='rate') vmsg(t('m_verify_fail'),'err'); }); }
+    let resendTimer=null;
+    function startResendCD(secs){ const btn=$('verResend'); if(!btn) return; clearInterval(resendTimer); const base=t('resend_code'); btn.disabled=true; const tick=()=>{ if(secs<=0){ clearInterval(resendTimer); btn.disabled=false; btn.textContent=base; return; } btn.textContent=base+' ('+secs+'s)'; secs--; }; tick(); resendTimer=setInterval(tick,1000); }
+    $('verResend').onclick=async()=>{ startResendCD(25); const res=await sendVerify(auth.currentUser); vmsg(res==='ok'?t('m_verify_sent'):res==='rate'?t('m_verify_wait'):t('m_verify_fail'), res==='ok'?'ok':'err'); };
     $('verCheck').onclick=async()=>{
       const code=($('verCode').value||'').trim();
       if(code.length<6){ vmsg(t('m_enter_code6')); return; }

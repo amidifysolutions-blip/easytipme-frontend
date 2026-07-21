@@ -422,18 +422,18 @@
       $('app').style.display='none';
       $('vgEmail').textContent=u.email||'';
       $('verifyGate').style.display='flex';
+      let cdTimer=null;
+      const startCD=(secs)=>{ const btn=$('vgResend'); if(!btn) return; clearInterval(cdTimer); btn.disabled=true; const tick=()=>{ if(secs<=0){ clearInterval(cdTimer); btn.disabled=false; btn.textContent='Resend code'; return; } btn.textContent='Resend code ('+secs+'s)'; secs--; }; tick(); cdTimer=setInterval(tick,1000); };
       const sendCode=async(manual)=>{
-        if(manual){ $('vgResend').disabled=true; $('vgResend').textContent='Sending…'; }
-        vgmsg('');
+        vgmsg(''); startCD(25);
         try{
           const idToken=await u.getIdToken();
           const r=await fetch(BACKEND+'/send-code',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,name:name||''})});
           const j=await r.json().catch(()=>({}));
           if(j&&j.sent===1) vgmsg('Code sent — check your inbox and spam folder.', true);
-          else if(j&&j.error==='slow-down'){ if(manual) vgmsg('A code was just sent — check your email.', true); }
+          else if(j&&j.error==='slow-down'){ if(manual) vgmsg('A code was just sent — check your inbox and spam.', true); }
           else vgmsg('Could not send the code. Try again in a moment.', false);
         }catch(_){ vgmsg('Could not send. Check your connection.', false); }
-        if(manual){ $('vgResend').disabled=false; $('vgResend').textContent='Resend code'; }
       };
       $('vgResend').onclick=()=>sendCode(true);
       $('vgCheck').onclick=async()=>{
