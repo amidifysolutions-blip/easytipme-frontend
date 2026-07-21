@@ -126,6 +126,37 @@
 <body>
   <div id="loading" class="center"><div><div class="etm-spin"></div><div class="loadlbl">EasyTipMe</div></div></div>
 
+  <!-- Email confirmation gate (shown before the dashboard until the owner confirms) -->
+  <div id="verifyGate" style="display:none;min-height:100vh;align-items:center;justify-content:center;padding:24px">
+    <div style="max-width:420px;width:100%;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:34px 26px;text-align:center">
+      <div style="font-size:42px;margin-bottom:6px">📧</div>
+      <h2 style="font-size:22px;margin-bottom:8px">Confirm your email</h2>
+      <p style="color:var(--soft);font-size:14px;line-height:1.6;margin-bottom:6px">We sent a confirmation link to <b id="vgEmail"></b>.</p>
+      <p style="color:var(--soft);font-size:13px;line-height:1.6;margin-bottom:18px">Open it (check your spam folder too), then tap continue. This secures your business and your payouts.</p>
+      <div id="vgMsg" style="font-size:13px;margin-bottom:12px;min-height:16px"></div>
+      <button class="btn" id="vgCheck" style="width:100%">I've confirmed — continue</button>
+      <button class="btn" id="vgResend" style="width:100%;margin-top:10px;background:transparent;border:1px solid var(--line);color:#fff">Resend email</button>
+      <button id="vgLogout" style="background:none;border:none;color:var(--soft);margin-top:16px;cursor:pointer;font-family:inherit;font-size:13px">Use a different account</button>
+    </div>
+  </div>
+
+  <!-- Change login email (owner) -->
+  <div id="ownerEmailModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:center;justify-content:center;padding:20px">
+    <div style="max-width:400px;width:100%;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px">
+      <h3 style="margin-bottom:6px">Change login email</h3>
+      <p style="font-size:12px;color:var(--soft);line-height:1.5;margin-bottom:14px">For security, enter your current password, then your new email. You'll confirm the new email and sign in with it.</p>
+      <label style="font-size:12px;color:var(--soft)">Current password</label>
+      <input id="oemPass" type="password" style="width:100%;margin:4px 0 10px" autocomplete="current-password">
+      <label style="font-size:12px;color:var(--soft)">New email</label>
+      <input id="oemNew" type="email" style="width:100%;margin:4px 0 10px" autocomplete="email">
+      <div id="oemMsg" class="msg"></div>
+      <div style="display:flex;gap:10px;margin-top:8px">
+        <button class="btn" id="oemConfirm" style="flex:1">Update email</button>
+        <button class="btn" id="oemCancel" style="flex:1;background:transparent;border:1px solid var(--line);color:#fff">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <div id="app" style="display:none;width:100%">
     <div class="sidebar" id="sidebar">
       <div class="brand"><div class="mark"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00c2ff"/><stop offset="1" stop-color="#0071e3"/></linearGradient></defs><rect width="100" height="100" rx="24" fill="#0a0a0a" stroke="rgba(255,255,255,.2)" stroke-width="3"/><rect x="30" y="26" width="10" height="48" rx="5" fill="url(#lg)"/><rect x="30" y="26" width="34" height="10" rx="5" fill="url(#lg)"/><rect x="30" y="64" width="34" height="10" rx="5" fill="url(#lg)"/><rect x="30" y="45" width="22" height="10" rx="5" fill="url(#lg)"/><circle cx="63" cy="50" r="9" fill="#fff"/><circle cx="63" cy="50" r="4.5" fill="url(#lg)"/></svg></div><b>EasyTipMe</b><span class="rolebadge">Business</span><button class="menuBtn" id="menuBtn" aria-label="Menu">☰</button></div>
@@ -168,7 +199,7 @@
         <div class="card">
           <h3>Team app link</h3>
           <div style="flex:1">
-            <p style="color:var(--soft);font-size:14px;margin-bottom:12px">Share this link with your team. Each member signs in with the <b>same email</b> you added for them and can see their own tips and earnings.</p>
+            <p style="color:var(--soft);font-size:14px;margin-bottom:12px">When you add a team member, we email them a login and a temporary password automatically — they just open the app and sign in. This is the app link if they ever need it directly.</p>
             <div class="linkrow">
               <input type="text" id="staffLink" readonly>
               <button class="btn ghost sm" id="copyStaff">Copy</button>
@@ -268,6 +299,14 @@
       <div class="section" id="sec-settings">
         <h1>Settings</h1>
         <div class="sub">Tip amounts, currency, and notifications.</div>
+        <div class="card">
+          <h3>Account login</h3>
+          <p style="font-size:12px;color:var(--soft);line-height:1.5;margin-bottom:10px">This is the email you sign in with. Changing it keeps your connected bank/Stripe payouts intact.</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+            <div style="font-size:14px"><span style="color:var(--soft)">Email:</span> <b id="acctEmail">—</b></div>
+            <button class="btn" id="changeOwnerEmail" style="padding:9px 16px">Change email</button>
+          </div>
+        </div>
         <div class="card">
           <h3>Tip amounts</h3>
           <label>Preset amounts shown to customers</label>
@@ -373,19 +412,62 @@
     // days toggle
     $('days').querySelectorAll('.day').forEach(d=>d.onclick=()=>d.classList.toggle('on'));
 
+    function vgmsg(txt,ok){ const m=$('vgMsg'); if(!m) return; m.textContent=txt||''; m.style.color= ok ? 'var(--green)' : '#ff8a8a'; }
+    function showVerifyGate(u, name){
+      $('app').style.display='none';
+      $('vgEmail').textContent=u.email||'';
+      $('verifyGate').style.display='flex';
+      $('vgResend').onclick=async()=>{
+        $('vgResend').disabled=true; $('vgResend').textContent='Sending…'; vgmsg('');
+        try{
+          const r=await fetch(BACKEND+'/send-verification',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:u.email,name:name||'',continueUrl:location.origin+'/dashboard.html'})});
+          const j=await r.json().catch(()=>({}));
+          if(j&&j.sent===1) vgmsg('Sent — check your inbox and spam folder.', true);
+          else vgmsg('Could not send right now. Try again in a moment.', false);
+        }catch(_){ vgmsg('Could not send. Check your connection.', false); }
+        $('vgResend').disabled=false; $('vgResend').textContent='Resend email';
+      };
+      $('vgCheck').onclick=async()=>{
+        $('vgCheck').disabled=true; vgmsg('');
+        try{ await u.reload(); if(u.emailVerified){ location.reload(); } else { vgmsg('Not confirmed yet — open the link in your email first.', false); } }
+        catch(_){ vgmsg('Try again.', false); }
+        $('vgCheck').disabled=false;
+      };
+      $('vgLogout').onclick=()=>auth.signOut().then(()=>location.href='signup.html');
+    }
+
+    // ---- Owner change login email ----
+    $('changeOwnerEmail').onclick=()=>{ $('oemPass').value=''; $('oemNew').value=''; $('oemMsg').className='msg'; $('ownerEmailModal').style.display='flex'; };
+    $('oemCancel').onclick=()=>$('ownerEmailModal').style.display='none';
+    $('oemConfirm').onclick=async()=>{
+      const pass=$('oemPass').value, ne=$('oemNew').value.trim().toLowerCase();
+      if(!pass){ msg('oemMsg','Enter your current password.','err'); return; }
+      if(!ne||!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(ne)){ msg('oemMsg','Enter a valid new email.','err'); return; }
+      $('oemConfirm').disabled=true;
+      try{
+        const u=auth.currentUser;
+        const cred=firebase.auth.EmailAuthProvider.credential(u.email, pass);
+        await u.reauthenticateWithCredential(cred);
+        const idToken=await u.getIdToken(true);
+        const r=await fetch(BACKEND+'/owner/change-email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken, bid:BID, newEmail:ne})});
+        const j=await r.json().catch(()=>({}));
+        if(!r.ok||j.error){ msg('oemMsg', j.error==='email-in-use'?'That email is already in use.':'Could not change email.','err'); $('oemConfirm').disabled=false; return; }
+        await auth.signOut();
+        try{ await auth.signInWithEmailAndPassword(ne, pass); }catch(_){}
+        location.reload();
+      }catch(e){ const c=(e&&e.code)||''; msg('oemMsg', (c.includes('wrong-password')||c.includes('invalid-credential'))?'Wrong password.':('Could not change email. '+(e.message||'')),'err'); $('oemConfirm').disabled=false; }
+    };
+
     auth.onAuthStateChanged(async u=>{
       if(!u){ location.href='signup.html'; return; }
       BID=u.uid;
       const doc = await db.collection('businesses').doc(BID).get();
       const b = doc.exists?doc.data():{}; bizData=b;
-      // Email verification banner (respectable-company nudge)
+      // HARD GATE: confirm email before the dashboard loads at all.
       try{ await u.reload(); }catch(_){}
-      $('verifyBanner').style.display = u.emailVerified ? 'none' : 'block';
-      $('verifyResend').onclick=async()=>{
-        $('verifyResend').disabled=true; $('verifyResend').textContent='Sending…';
-        try{ await fetch(BACKEND+'/send-verification',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:u.email, name:(b.ownerName||''), continueUrl:location.origin+'/dashboard.html'})}); $('verifyResend').textContent='Sent ✓'; }
-        catch(_){ $('verifyResend').textContent='Try again'; $('verifyResend').disabled=false; }
-      };
+      if(!u.emailVerified){ $('loading').style.display='none'; showVerifyGate(u, b.ownerName||''); return; }
+      $('verifyBanner').style.display='none';
+      $('acctEmail').textContent=u.email||'—';
       $('sideBiz').textContent=b.businessName||u.email;
       $('teamTitle').textContent=(b.businessName||'Your')+' — team';
       // fill profile + settings
