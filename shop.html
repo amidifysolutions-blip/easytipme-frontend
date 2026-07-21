@@ -145,6 +145,9 @@
     firebase.initializeApp(firebaseConfig);
     const db=firebase.firestore();
     const BACKEND="https://easytipme-backend.onrender.com";
+    // Fallback only. The real key comes from the backend (/create-payment-intent
+    // returns publishableKey) so it ALWAYS matches the backend's test/live mode
+    // and can never drift out of sync. Do not rely on this constant.
     const STRIPE_PK="pk_live_51Tv0VwP5hdbiGSZmrDrfJOML8K1dssKuI3tmWdw3pKn6pQJnMCWYKP5Mf0VslQcBftlKy2QsPueNeXQjZ1o6inaF00cns9RH1p";
     let FEE=0.05;
     const $=id=>document.getElementById(id);
@@ -275,8 +278,9 @@
       try{
         const res=await fetch(BACKEND+'/create-payment-intent',{method:'POST',headers:{'Content-Type':'application/json'},
           body:JSON.stringify({amount:Math.round(total*100),currency:curr.toLowerCase(),metadata:{recipient:recipient.nickname||'team',shop:BID}})});
-        const {clientSecret}=await res.json();
-        stripe=Stripe(STRIPE_PK);
+        const {clientSecret,publishableKey}=await res.json();
+        if(!clientSecret){ $('payment-element').innerHTML=''; pmsg('Could not start payment. Please try again.'); btn.disabled=false; return; }
+        stripe=Stripe(publishableKey||STRIPE_PK);
         elements=stripe.elements({clientSecret});
         $('payment-element').innerHTML='';
         elements.create('payment',{wallets:{applePay:'auto',googlePay:'auto'}}).mount('#payment-element');
@@ -285,7 +289,7 @@
           ece.on('ready',e=>{ if(e && e.availablePaymentMethods){ $('express-wrap').classList.remove('hide'); } });
           ece.on('confirm',async()=>{
             try{
-              const {error,paymentIntent}=await stripe.confirmPayment({elements,clientSecret,redirect:'if_required'});
+              const {error,paymentIntent}=await stripe.confirmPayment({elements,redirect:'if_required'});
               if(error){ pmsg(error.message); return; }
               recordTip(paymentIntent);
             }catch(ex){ pmsg((ex&&ex.message)||'Payment could not be completed. Please try again.'); }
