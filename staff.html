@@ -207,9 +207,11 @@
       try{
         const r=await fetch(BACKEND+'/send-verification',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:(user.email||'').toLowerCase(), name:name||user.displayName||''})});
         const j=await r.json().catch(()=>({}));
-        if(j && j.sent===1) return true;
+        if(j && j.sent===1) return 'ok';
+        if(j && j.error && /TOO_MANY_ATTEMPTS|too-many-requests/i.test(j.error)) return 'rate';
       }catch(_){}
-      try{ await user.sendEmailVerification(); return true; }catch(_){ return false; }
+      try{ await user.sendEmailVerification(); return 'ok'; }
+      catch(e){ if(e && /too-many-requests|TOO_MANY_ATTEMPTS/i.test((e.code||'')+(e.message||''))) return 'rate'; return 'fail'; }
     }
 
     // logo mark
@@ -294,7 +296,7 @@
     // verify-email screen
     function vmsg(t,type){const m=$('verMsg');m.textContent=t;m.className='msg '+(type||'err');}
     function showVerify(u){ $('verEmail').textContent=u.email||''; vmsg('',''); $('verMsg').className='msg'; show('verify'); }
-    $('verResend').onclick=async()=>{ $('verResend').disabled=true; const ok=await sendVerify(auth.currentUser); vmsg(ok?'Verification email sent. Check your inbox (and spam).':'Could not send right now. Try again in a moment.', ok?'ok':'err'); $('verResend').disabled=false; };
+    $('verResend').onclick=async()=>{ $('verResend').disabled=true; const res=await sendVerify(auth.currentUser); vmsg(res==='ok'?'Verification email sent. Check your inbox (and spam).':res==='rate'?'Too many requests just now. Please wait a few minutes, then tap Resend again.':'Could not send right now. Try again in a moment.', res==='ok'?'ok':'err'); $('verResend').disabled=false; };
     $('verCheck').onclick=async()=>{ $('verCheck').disabled=true; try{ await auth.currentUser.reload(); if(auth.currentUser.emailVerified){ loadMembership(auth.currentUser); } else { vmsg('Not verified yet — open the link in the email first.'); } }catch(e){ vmsg(prettyErr(e)); } $('verCheck').disabled=false; };
     $('verLogout').onclick=()=>auth.signOut().then(()=>{ registerMode=false; show('auth'); });
 
@@ -336,7 +338,7 @@
       $('connBadge').classList.remove('hide');
       // soft email-verification reminder (banner)
       $('verifyBanner').classList.toggle('hide', !!u.emailVerified);
-      $('vbResend').onclick=async()=>{ $('vbResend').disabled=true; $('vbResend').textContent='Sending…'; const ok=await sendVerify(u); $('vbResend').textContent= ok?'Sent ✓':'Resend'; if(!ok) alert('Could not send right now. Try again in a moment.'); $('vbResend').disabled=false; };
+      $('vbResend').onclick=async()=>{ $('vbResend').disabled=true; $('vbResend').textContent='Sending…'; const res=await sendVerify(u); $('vbResend').textContent= res==='ok'?'Sent ✓':'Resend'; if(res==='rate') alert('Too many requests just now. Please wait a few minutes, then tap Resend again.'); else if(res!=='ok') alert('Could not send right now. Try again in a moment.'); $('vbResend').disabled=false; };
       // tip sharing — subtle review link only (details live in the one-time modal)
       const shareOn=!!shop.tipShareEnabled;
       $('shareReview').classList.toggle('hide', !shareOn);
