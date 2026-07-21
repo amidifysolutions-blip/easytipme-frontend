@@ -644,8 +644,11 @@
               const idToken=await auth.currentUser.getIdToken();
               const ir=await fetch(BACKEND+'/staff/invite',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken, bid:BID, staffId:docRef.id, email:data.email, name:data.nickname, shopName:(bizData.businessName||$('sideBiz').textContent||''), shopCode:(bizData.shopCode||''), staffLink:staffUrl()})});
               const ij=await ir.json().catch(()=>({}));
-              if(ij && ij.sent===1) savedMsg='Saved ✓ — login details emailed to '+data.email;
-              else { savedMsg='Saved ✓ — but the invite email didn’t send. Double-check the address.'; savedType='err'; }
+              if(ij && ij.sent===1){
+                savedMsg = ij.created
+                  ? ('Saved ✓ — login + temporary password emailed to '+data.email)
+                  : ('Saved ✓ — '+data.email+' already has an EasyTipMe account. They log in with their existing password (workplace code emailed).');
+              } else { savedMsg='Saved ✓ — but the invite email didn’t send. Double-check the address.'; savedType='err'; }
             }catch(_){ savedMsg='Saved ✓ — invite email couldn’t be sent right now.'; savedType='err'; }
           }
         }
@@ -704,9 +707,15 @@
         };
         const purge=tr.querySelector('.purgeBtn');
         if(purge) purge.onclick=async()=>{
-          if(confirm('Permanently delete '+(s.nickname||'this member')+'?\n\nThis erases their profile completely so you can add them again fresh. Past tip records stay in your reports. This cannot be undone.')){
-            try{ await db.collection('businesses').doc(BID).collection('staff').doc(s._id).delete(); loadStaff(); }
-            catch(e){ alert('Could not delete: '+e.message); }
+          if(confirm('Permanently delete '+(s.nickname||'this member')+'?\n\nThis erases their profile AND their EasyTipMe login account, so their email can be added fresh again. Past tip records stay in your reports. This cannot be undone.')){
+            purge.disabled=true; purge.textContent='Deleting…';
+            try{
+              const idToken=await auth.currentUser.getIdToken();
+              const r=await fetch(BACKEND+'/staff/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken, bid:BID, staffId:s._id})});
+              const j=await r.json().catch(()=>({}));
+              if(!r.ok||j.error){ alert('Could not delete: '+(j.error||'please try again')); purge.disabled=false; purge.textContent='Delete'; return; }
+              loadStaff();
+            }catch(e){ alert('Could not delete: '+e.message); purge.disabled=false; purge.textContent='Delete'; }
           }
         };
         tb.appendChild(tr);
