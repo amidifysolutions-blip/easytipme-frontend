@@ -111,6 +111,25 @@
   html[dir=rtl] .srow .val{text-align:left}
   .pill{display:inline-block;font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px}
   .pill.g{background:#eef7ee;color:var(--green)}.pill.o{background:#fff5e9;color:var(--orange)}
+  /* balance + withdrawal */
+  .balhead{display:flex;justify-content:space-between;align-items:flex-end;padding:14px 16px;border-radius:14px;background:var(--card2,#f5f6f8);border:1px solid var(--line)}
+  html[data-theme=dark] .balhead{background:#14141b}
+  .ballab{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--soft)}
+  .balbig{font-size:28px;font-weight:800;letter-spacing:-.02em}
+  .balpend{font-size:16px;font-weight:600;color:var(--soft)}
+  .withdrawlab{font-size:12px;font-weight:700;color:var(--soft);margin:16px 0 8px;text-transform:uppercase;letter-spacing:.04em}
+  .tiers{display:flex;flex-direction:column;gap:8px}
+  .tier{display:flex;align-items:center;gap:11px;padding:11px 13px;border:1px solid var(--line);border-radius:13px;cursor:pointer;transition:border-color .15s,background .15s}
+  .tier:has(input:checked){border-color:var(--accent);background:rgba(0,113,227,.06)}
+  .tier input{width:18px;height:18px;flex:0 0 auto;accent-color:var(--accent)}
+  .tier .tinfo{display:flex;flex-direction:column;flex:1}
+  .tier .tinfo b{font-size:14px}
+  .tier .tdesc{font-size:11.5px;color:var(--soft)}
+  .tier .tfee{display:flex;flex-direction:column;align-items:flex-end;font-size:13px;font-weight:700;color:var(--soft)}
+  .tier .tnet{font-size:14px;font-weight:800;color:var(--text,#111)}
+  html[data-theme=dark] .tier .tnet{color:#fff}
+  .payhist .prow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 2px;border-bottom:1px solid var(--line);font-size:13px}
+  .payhist .prow:last-child{border-bottom:none}
   .linkbtn{background:none;border:none;color:var(--accent);font-weight:600;font-family:inherit;font-size:14px;cursor:pointer;padding:0}
   .powered{text-align:center;color:#c2c2c7;font-size:12px;margin-top:18px}
   /* bottom nav */
@@ -282,6 +301,7 @@
         <div class="note" data-i18n="payout_note">Bank payouts are being activated. Soon you'll connect your bank account here to receive your tips directly. For now, your workplace can see and settle your tips.</div>
         <div id="payoutStatus" class="hide" style="margin-top:12px;font-size:14px;font-weight:600"></div>
         <button class="btn dark" id="connectBtn" disabled style="margin-top:14px" data-i18n="connect_bank">Connect bank account</button>
+        <div id="balanceBox" class="hide" style="margin-top:16px"></div>
       </div>
       <div class="card">
         <button class="linkbtn" id="reviewShare" data-i18n="tip_terms">Tip-sharing terms</button>
@@ -383,6 +403,12 @@
       get_paid:"Get paid", coming_soon:"Coming soon",
       payout_note:"Bank payouts are being activated. Soon you'll connect your bank account here to receive your tips directly. For now, your workplace can see and settle your tips.",
       connect_bank:"Connect bank account", tip_terms:"Tip-sharing terms", log_out:"Log out",
+      available:"Available", pending:"Pending", withdraw_speed:"Withdrawal speed", withdraw_now:"Withdraw",
+      free:"Free", recent_payouts:"Recent payouts", bal_unavailable:"Balance is loading — check back in a moment.",
+      tier_instant:"Instant", tier_instant_d:"Arrives in minutes", tier_weekly:"Weekly", tier_weekly_d:"Every week",
+      tier_15day:"Every 15 days", tier_15day_d:"Twice a month", tier_monthly:"Monthly", tier_monthly_d:"Once a month · best value",
+      withdraw_disclaimer:"The % is EasyTipMe's fee for faster access; standard Stripe transfer fees also apply. You always see the exact amount before you confirm.",
+      withdraw_soon:"Withdrawals are being switched on. Here's what you'd receive:",
       leave_wp:"Leave workplace", leave_desc:"Stop appearing on your workplace's tip page. Your past tips stay recorded.",
       nav_home:"Home", nav_insights:"Insights", nav_settings:"Settings",
       cm_title:"Tip pooling & fees", cm_body1:"applies its own administrative fee to each tip — this fee goes to your workplace, not to EasyTipMe. The fee is", cm_body2:"capped at 15% maximum", cm_body3:"— the rest is always yours.",
@@ -433,6 +459,12 @@
       get_paid:"استلام الأموال", coming_soon:"قريبًا",
       payout_note:"يتم تفعيل التحويلات البنكية. قريبًا رح تربط حسابك البنكي هون لتستلم بقشيشك مباشرة. حاليًا، مكان عملك بيشوف بقشيشك ويسوّيه.",
       connect_bank:"اربط الحساب البنكي", tip_terms:"شروط تقاسم البقشيش", log_out:"تسجيل الخروج",
+      available:"المتاح", pending:"قيد الانتظار", withdraw_speed:"سرعة السحب", withdraw_now:"اسحب",
+      free:"مجاني", recent_payouts:"آخر التحويلات", bal_unavailable:"عم يحمّل الرصيد — رجاع بعد شوي.",
+      tier_instant:"فوري", tier_instant_d:"بيوصل خلال دقائق", tier_weekly:"أسبوعي", tier_weekly_d:"كل أسبوع",
+      tier_15day:"كل ١٥ يوم", tier_15day_d:"مرتين بالشهر", tier_monthly:"شهري", tier_monthly_d:"مرة بالشهر · الأوفر",
+      withdraw_disclaimer:"النسبة هي رسوم EasyTipMe للوصول الأسرع؛ بتنطبق كمان رسوم تحويل Stripe القياسية. دايمًا بتشوف المبلغ بالضبط قبل ما تأكّد.",
+      withdraw_soon:"عم نفعّل السحب. هيدا يلي رح تستلمه:",
       leave_wp:"مغادرة مكان العمل", leave_desc:"بتوقف تظهر بصفحة بقشيش مكان عملك. بقشيشك السابق بيضل مسجّل.",
       nav_home:"الرئيسية", nav_insights:"التحليلات", nav_settings:"الإعدادات",
       cm_title:"رسوم وتجميع البقشيش", cm_body1:"بيطبّق رسوم إدارية خاصة فيه على كل بقشيش — هالرسوم بتروح لمكان عملك، مش لـ EasyTipMe. الرسوم", cm_body2:"بحد أقصى ١٥٪", cm_body3:"— والباقي دايمًا إلك.",
@@ -1076,9 +1108,65 @@
       }
       btn.onclick=()=>startConnect(u);
       function paintPayout(j){
-        if(j && j.payouts_enabled){ stat.classList.remove('hide'); stat.style.color='var(--green)'; stat.textContent=t('payout_connected'); btn.classList.add('hide'); }
+        if(j && j.payouts_enabled){ stat.classList.remove('hide'); stat.style.color='var(--green)'; stat.textContent=t('payout_connected'); btn.classList.add('hide'); loadBalance(accId); }
         else if(j && j.details_submitted){ stat.classList.remove('hide'); stat.style.color='var(--orange)'; stat.textContent=t('payout_continue'); btn.textContent=t('payout_continue'); }
       }
+    }
+
+    // Withdrawal fee tiers (base rule for everyone at launch). Platform % is on
+    // top of Stripe's own transfer fees. These numbers are shown transparently so
+    // the worker always sees exactly what lands in their bank.
+    const PAYOUT_TIERS=[
+      { id:'instant', pct:3.5, key:'tier_instant', dkey:'tier_instant_d' },
+      { id:'weekly',  pct:2.5, key:'tier_weekly',  dkey:'tier_weekly_d' },
+      { id:'15day',   pct:1.5, key:'tier_15day',   dkey:'tier_15day_d' },
+      { id:'monthly', pct:0,   key:'tier_monthly', dkey:'tier_monthly_d' }
+    ];
+    let BAL_CUR='CAD';
+    async function loadBalance(accId){
+      const box=$('balanceBox'); if(!accId) return;
+      box.classList.remove('hide');
+      box.innerHTML='<div style="text-align:center;padding:14px 0"><div class="etm-spin" style="width:22px;height:22px;border-width:3px"></div></div>';
+      try{
+        const r=await fetch(BACKEND+'/connect/balance',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accountId:accId})});
+        const j=await r.json(); if(j.error) throw new Error(j.error);
+        BAL_CUR=(j.currency||'cad').toUpperCase();
+        renderBalance(j);
+      }catch(e){ box.innerHTML='<div class="note" style="color:var(--orange)">'+t('bal_unavailable')+'</div>'; }
+    }
+    function fmtMoney(n){ try{ return new Intl.NumberFormat(LANG||'en',{style:'currency',currency:BAL_CUR}).format(n||0); }catch(_){ return (BAL_CUR+' '+(n||0).toFixed(2)); } }
+    function renderBalance(j){
+      const box=$('balanceBox');
+      const avail=+j.available||0, pend=+j.pending||0;
+      const opts=PAYOUT_TIERS.map(tr=>{
+        const fee=avail*tr.pct/100, net=avail-fee;
+        return `<label class="tier" data-id="${tr.id}">
+          <input type="radio" name="tier" value="${tr.id}" ${tr.id==='monthly'?'checked':''} style="acc-color:var(--accent)">
+          <span class="tinfo"><b>${t(tr.key)}</b><span class="tdesc">${t(tr.dkey)}</span></span>
+          <span class="tfee">${tr.pct?('−'+tr.pct+'%'):t('free')}<span class="tnet">${fmtMoney(net)}</span></span>
+        </label>`;
+      }).join('');
+      const rows=(j.payouts||[]).slice(0,5).map(p=>{
+        const d=p.arrival_date?new Date(p.arrival_date*1000):(p.created?new Date(p.created*1000):null);
+        const ds=d?d.toLocaleDateString(LANG||'en',{month:'short',day:'numeric'}):'—';
+        const st=p.status==='paid'?'g':(p.status==='pending'||p.status==='in_transit')?'o':'';
+        return `<div class="prow"><span>${ds}${p.method==='instant'?' ⚡':''}</span><span class="pill ${st}">${p.status}</span><b>${fmtMoney(p.amount)}</b></div>`;
+      }).join('');
+      box.innerHTML=`
+        <div class="balhead">
+          <div><div class="ballab">${t('available')}</div><div class="balbig">${fmtMoney(avail)}</div></div>
+          <div style="text-align:right"><div class="ballab">${t('pending')}</div><div class="balpend">${fmtMoney(pend)}</div></div>
+        </div>
+        <div class="withdrawlab">${t('withdraw_speed')}</div>
+        <div class="tiers">${opts}</div>
+        <button class="btn dark" id="withdrawBtn" ${avail<=0?'disabled':''} style="margin-top:12px">${t('withdraw_now')}</button>
+        <div class="note" style="margin-top:8px;font-size:11.5px">${t('withdraw_disclaimer')}</div>
+        ${rows?`<div class="payhist"><div class="ballab" style="margin:14px 0 6px">${t('recent_payouts')}</div>${rows}</div>`:''}`;
+      const wb=$('withdrawBtn'); if(wb) wb.onclick=()=>{
+        const sel=(box.querySelector('input[name=tier]:checked')||{}).value||'monthly';
+        const tr=PAYOUT_TIERS.find(x=>x.id===sel); const fee=avail*tr.pct/100;
+        alert(t('withdraw_soon')+'\n\n'+t('available')+': '+fmtMoney(avail)+'\n'+t(tr.key)+' · '+(tr.pct?('−'+tr.pct+'% = '+fmtMoney(avail-fee)):t('free')));
+      };
     }
     async function startConnect(u){
       const btn=$('connectBtn'); btn.disabled=true;

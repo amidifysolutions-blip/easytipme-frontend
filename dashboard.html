@@ -314,6 +314,7 @@
           <p style="font-size:12px;color:var(--soft);line-height:1.5;margin-bottom:12px">Connect your bank once. Stripe then pays your admin fee (and any tips you collect) straight to your account — automatically, on a schedule. Verifying your identity + bank is required by law.</p>
           <div id="ownerPayoutStatus" style="margin:0 0 12px;font-size:14px;font-weight:600"></div>
           <button class="btn" id="ownerConnectBtn" disabled>Connect bank account</button>
+          <div id="ownerBalanceBox" style="display:none;margin-top:16px"></div>
         </div>
 
         <div class="sig">Powered by Amidify Solutions Inc.</div>
@@ -426,10 +427,34 @@
       const accId=bizData.ownerConnectAccountId;
       if(accId){
         try{ const r=await fetch(BACKEND+'/connect/status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accountId:accId})}); const j=await r.json();
-          if(j.payouts_enabled){ stat.style.color='var(--green)'; stat.textContent='✓ Bank connected — payouts are set up.'; btn.style.display='none'; }
+          if(j.payouts_enabled){ stat.style.color='var(--green)'; stat.textContent='✓ Bank connected — payouts are set up.'; btn.style.display='none'; loadOwnerBalance(accId); }
           else if(j.details_submitted){ stat.style.color='var(--amber)'; stat.textContent='Almost there — finish verification.'; btn.textContent='Continue setup'; }
         }catch(_){}
       }
+    }
+    let OBAL_CUR='CAD';
+    function ofmt(n){ try{ return new Intl.NumberFormat('en',{style:'currency',currency:OBAL_CUR}).format(n||0); }catch(_){ return OBAL_CUR+' '+(n||0).toFixed(2); } }
+    async function loadOwnerBalance(accId){
+      const box=$('ownerBalanceBox'); if(!accId||!box) return;
+      box.style.display='block';
+      box.innerHTML='<div style="text-align:center;padding:12px 0;color:var(--soft)">Loading balance…</div>';
+      try{
+        const r=await fetch(BACKEND+'/connect/balance',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accountId:accId})});
+        const j=await r.json(); if(j.error) throw new Error(j.error);
+        OBAL_CUR=(j.currency||'cad').toUpperCase();
+        const rows=(j.payouts||[]).slice(0,5).map(p=>{
+          const d=p.arrival_date?new Date(p.arrival_date*1000):(p.created?new Date(p.created*1000):null);
+          const ds=d?d.toLocaleDateString('en',{month:'short',day:'numeric'}):'—';
+          return `<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px"><span style="color:var(--soft)">${ds}${p.method==='instant'?' ⚡':''}</span><span>${p.status}</span><b>${ofmt(p.amount)}</b></div>`;
+        }).join('');
+        box.innerHTML=`
+          <div style="display:flex;justify-content:space-between;align-items:flex-end;padding:14px 16px;border-radius:14px;background:#14141b;border:1px solid var(--line)">
+            <div><div style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--soft)">Available</div><div style="font-size:26px;font-weight:800">${ofmt(j.available)}</div></div>
+            <div style="text-align:right"><div style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--soft)">Pending</div><div style="font-size:15px;font-weight:600;color:var(--soft)">${ofmt(j.pending)}</div></div>
+          </div>
+          <p style="font-size:12px;color:var(--soft);margin:10px 0 0;line-height:1.5">Your admin fee lands here and Stripe pays it to your bank automatically on a schedule — no manual withdrawal needed.</p>
+          ${rows?`<div style="margin-top:12px"><div style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--soft);margin-bottom:4px">Recent payouts</div>${rows}</div>`:''}`;
+      }catch(e){ box.innerHTML='<div style="color:var(--amber);font-size:13px">Balance is loading — check back in a moment.</div>'; }
     }
     async function startOwnerConnect(){
       const btn=$('ownerConnectBtn'); btn.disabled=true;
