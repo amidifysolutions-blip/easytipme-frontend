@@ -12,26 +12,30 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="EasyTipMe">
 <style>
-  :root{--bg:#f0f0f2;--card:#fff;--ink:#1d1d1f;--soft:#8a8a8e;--line:#e6e6ea;--accent:#0071e3;--accent-d:#0058b9;--danger:#e5484d;--green:#1f9d55;}
+  :root{--bg:#f0f0f2;--card:#fff;--ink:#1d1d1f;--soft:#8a8a8e;--line:#e6e6ea;--accent:#0071e3;--accent-d:#0058b9;--danger:#e5484d;--green:#1f9d55;--orange:#f5820b;}
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",Arial,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;min-height:100vh}
-  .wrap{max-width:520px;margin:0 auto;padding:18px 16px 90px}
+  .wrap{max-width:520px;margin:0 auto;padding:18px 16px 96px}
   .brandbar{display:flex;align-items:center;gap:9px;padding:6px 2px 16px}
   .brandbar .mk{width:30px;height:30px}
   .brandbar b{font-size:17px;letter-spacing:-.02em}
+  .brandbar .sp{flex:1}
   .card{background:var(--card);border-radius:20px;padding:22px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
   h1{font-size:24px;letter-spacing:-.02em;margin-bottom:4px}
   .sub{color:var(--soft);font-size:14px;margin-bottom:18px}
   label{display:block;font-size:13px;color:var(--soft);margin-bottom:6px;font-weight:500}
-  input{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:13px 14px;font-size:16px;font-family:inherit;outline:none;margin-bottom:14px;background:#fbfbfd}
+  input{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:13px 14px;font-size:16px;font-family:inherit;outline:none;margin-bottom:14px;background:#fbfbfd;color:var(--ink)}
   input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,113,227,.12);background:#fff}
   .pwrap{position:relative}
   .pwrap input{padding-right:46px}
   .eye{position:absolute;right:6px;top:44%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:8px;display:flex;align-items:center}
+  html[dir=rtl] .pwrap input{padding-right:14px;padding-left:46px}
+  html[dir=rtl] .eye{right:auto;left:6px}
   .eye svg{display:block}
   .btn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:14px;padding:15px;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;transition:.2s}
   .btn:hover{background:var(--accent-d)}.btn:active{transform:scale(.99)}.btn:disabled{opacity:.55;cursor:default}
   .btn.dark{background:#0a0a0a}.btn.ghost{background:#eef2f7;color:var(--ink)}
+  .btn.danger{background:#fdecec;color:var(--danger)}
   .switch{text-align:center;font-size:14px;color:var(--soft);margin-top:16px}
   .switch a{color:var(--accent);text-decoration:none;cursor:pointer}
   .msg{font-size:14px;border-radius:10px;padding:10px 12px;margin-bottom:14px;display:none}
@@ -39,7 +43,13 @@
   .msg.ok{display:block;background:#eef7ee;color:var(--green)}
   .center{display:grid;place-items:center;min-height:80vh;color:var(--soft)}
   .hide{display:none}
-  /* consent modal */
+  /* language picker */
+  .langsel{position:relative}
+  .langsel select{-webkit-appearance:none;appearance:none;border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:7px 30px 7px 12px;font-size:13px;font-family:inherit;color:var(--ink);cursor:pointer;margin:0}
+  .langsel::after{content:"▾";position:absolute;right:11px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--soft);font-size:11px}
+  html[dir=rtl] .langsel select{padding:7px 12px 7px 30px}
+  html[dir=rtl] .langsel::after{right:auto;left:11px}
+  /* modal */
   .modal-wrap{position:fixed;inset:0;background:rgba(10,10,12,.55);backdrop-filter:blur(3px);display:flex;align-items:flex-end;justify-content:center;z-index:100;padding:0}
   .modal-wrap.hide{display:none}
   @media(min-width:520px){.modal-wrap{align-items:center;padding:20px}}
@@ -62,22 +72,51 @@
   .earn{text-align:center;padding:26px 22px}
   .earn .big{font-size:44px;font-weight:800;letter-spacing:-.03em;line-height:1}
   .earn .lbl{font-size:13px;color:var(--soft);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
-  .stats{display:flex;gap:14px;margin-top:20px}
-  .stat{flex:1;background:#f7f8fa;border-radius:14px;padding:14px;text-align:center}
-  .stat .n{font-size:20px;font-weight:700}
+  .stats{display:flex;gap:12px;margin-top:20px}
+  .stat{flex:1;background:#f7f8fa;border-radius:14px;padding:14px 10px;text-align:center}
+  .stat .n{font-size:19px;font-weight:700}
   .stat .t{font-size:11px;color:var(--soft);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
   .h3{font-size:16px;font-weight:600;margin-bottom:14px}
   .tip-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid #f0f0f2}
   .tip-row:last-child{border-bottom:none}
   .tip-amt{font-weight:700;color:var(--green)}
   .tip-date{font-size:12px;color:var(--soft)}
-  .badge{display:inline-block;font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px;background:#eef5ff;color:var(--accent)}
-  .payoff{opacity:.75}
-  .soon{display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--orange,#f5820b);background:#fff5e9;padding:3px 9px;border-radius:20px;margin-left:8px}
+  .soon{display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--orange);background:#fff5e9;padding:3px 9px;border-radius:20px;margin-left:8px}
+  html[dir=rtl] .soon{margin-left:0;margin-right:8px}
   .note{font-size:12px;color:var(--soft);line-height:1.5;margin-top:8px}
-  .consent-row{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:14px}
-  .powered{text-align:center;color:#c2c2c7;font-size:12px;margin-top:20px}
-  .logout{display:block;text-align:center;color:var(--soft);font-size:14px;background:none;border:none;width:100%;cursor:pointer;font-family:inherit;margin-top:6px}
+  .payoff{opacity:.85}
+  /* range toggle */
+  .seg{display:flex;background:#eef0f3;border-radius:12px;padding:4px;gap:4px;margin-bottom:16px}
+  .seg button{flex:1;border:none;background:none;font-family:inherit;font-size:13px;font-weight:600;color:var(--soft);padding:9px 6px;border-radius:9px;cursor:pointer}
+  .seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+  /* chart */
+  .chart{display:flex;align-items:flex-end;gap:5px;height:120px;margin:6px 0 4px}
+  .bar{flex:1;background:linear-gradient(180deg,#00c2ff,var(--accent));border-radius:6px 6px 3px 3px;min-height:3px;transition:height .3s}
+  .bar.empty{background:#edeef1}
+  .xlabels{display:flex;gap:5px;margin-top:6px}
+  .xlabels span{flex:1;text-align:center;font-size:9px;color:var(--soft)}
+  .kv{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #f0f0f2;font-size:14px}
+  .kv:last-child{border-bottom:none}
+  .kv .k{color:var(--soft)}
+  .kv .v{font-weight:700}
+  /* settings rows */
+  .srow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid #f0f0f2}
+  .srow:last-child{border-bottom:none}
+  .srow .lab{font-size:14px}
+  .srow .val{font-size:14px;color:var(--soft);text-align:right}
+  html[dir=rtl] .srow .val{text-align:left}
+  .pill{display:inline-block;font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px}
+  .pill.g{background:#eef7ee;color:var(--green)}.pill.o{background:#fff5e9;color:var(--orange)}
+  .linkbtn{background:none;border:none;color:var(--accent);font-weight:600;font-family:inherit;font-size:14px;cursor:pointer;padding:0}
+  .powered{text-align:center;color:#c2c2c7;font-size:12px;margin-top:18px}
+  /* bottom nav */
+  .nav{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border-top:1px solid var(--line);display:flex;z-index:50;padding-bottom:env(safe-area-inset-bottom)}
+  .nav button{flex:1;background:none;border:none;font-family:inherit;padding:9px 0 8px;cursor:pointer;color:var(--soft);display:flex;flex-direction:column;align-items:center;gap:3px}
+  .nav button .ic{width:24px;height:24px;display:block}
+  .nav button .lb{font-size:11px;font-weight:600}
+  .nav button.on{color:var(--accent)}
+  .tabpanel{animation:fade .2s ease}
+  @keyframes fade{from{opacity:.4}to{opacity:1}}
 </style>
 </head>
 <body>
@@ -85,107 +124,184 @@
 
   <!-- AUTH -->
   <div id="auth" class="wrap hide">
-    <div class="brandbar"><span class="mk" id="mk1"></span><b>Easy<span style="color:#0071e3">Tip</span>Me</b></div>
+    <div class="brandbar"><span class="mk" id="mk1"></span><b>Easy<span style="color:#0071e3">Tip</span>Me</b><span class="sp"></span>
+      <span class="langsel"><select id="langAuth"></select></span>
+    </div>
     <div class="card">
-      <h1 id="authTitle">Team sign in</h1>
-      <p class="sub" id="authSub">Sign in to see your tips and earnings.</p>
+      <h1 id="authTitle" data-i18n="signin_title">Team sign in</h1>
+      <p class="sub" id="authSub" data-i18n="signin_sub">Sign in to see your tips and earnings.</p>
       <div id="authMsg" class="msg"></div>
       <div id="shopCodeWrap" class="hide">
-        <label>Workplace code</label>
-        <input id="shopCode" type="text" placeholder="Ask your workplace for the code" autocomplete="off">
+        <label data-i18n="wcode">Workplace code</label>
+        <input id="shopCode" type="text" data-i18n-ph="wcode_ph" placeholder="Ask your workplace for the code" autocomplete="off">
       </div>
       <div id="regNameWrap" class="hide">
         <div style="display:flex;gap:10px">
-          <div style="flex:1"><label>First name</label><input id="f_first" type="text" autocomplete="given-name" placeholder="First"></div>
-          <div style="flex:1"><label>Last name</label><input id="f_last" type="text" autocomplete="family-name" placeholder="Last"></div>
+          <div style="flex:1"><label data-i18n="first">First name</label><input id="f_first" type="text" autocomplete="given-name" data-i18n-ph="first_ph" placeholder="First"></div>
+          <div style="flex:1"><label data-i18n="last">Last name</label><input id="f_last" type="text" autocomplete="family-name" data-i18n-ph="last_ph" placeholder="Last"></div>
         </div>
       </div>
-      <label>Email</label>
+      <label data-i18n="email">Email</label>
       <input id="email" type="email" autocomplete="email" placeholder="you@email.com">
-      <label>Password</label>
-      <div class="pwrap"><input id="pass" type="password" autocomplete="current-password" placeholder="At least 6 characters"><button type="button" class="eye" id="eyeBtn" aria-label="Show password"></button></div>
+      <label data-i18n="password">Password</label>
+      <div class="pwrap"><input id="pass" type="password" autocomplete="current-password" data-i18n-ph="pass_ph" placeholder="At least 6 characters"><button type="button" class="eye" id="eyeBtn" aria-label="Show password"></button></div>
       <div id="regConfirmWrap" class="hide">
-        <label>Confirm password</label>
-        <div class="pwrap"><input id="pass2" type="password" autocomplete="new-password" placeholder="Re-enter password"><button type="button" class="eye" id="eyeBtn2" aria-label="Show password"></button></div>
-        <label>Phone <span style="color:var(--soft);font-weight:400">(optional)</span></label>
+        <label data-i18n="confirm">Confirm password</label>
+        <div class="pwrap"><input id="pass2" type="password" autocomplete="new-password" data-i18n-ph="confirm_ph" placeholder="Re-enter password"><button type="button" class="eye" id="eyeBtn2" aria-label="Show password"></button></div>
+        <label><span data-i18n="phone">Phone</span> <span style="color:var(--soft);font-weight:400" data-i18n="optional">(optional)</span></label>
         <input id="f_phone" type="tel" autocomplete="tel" placeholder="e.g. +1 604 555 0199">
       </div>
-      <button class="btn" id="loginBtn">Sign in</button>
-      <button class="btn ghost hide" id="registerBtn" style="margin-top:10px">Create account</button>
-      <div class="switch" id="switchLine">New here? <a id="toRegister">Create your team account</a></div>
+      <button class="btn" id="loginBtn" data-i18n="signin_btn">Sign in</button>
+      <button class="btn ghost hide" id="registerBtn" style="margin-top:10px" data-i18n="create_btn">Create account</button>
+      <div class="switch" id="switchLine"></div>
     </div>
-    <div class="powered">Powered by Amidify Solutions Inc.</div>
+    <div class="powered" data-i18n="powered">Powered by Amidify Solutions Inc.</div>
   </div>
 
-  <!-- VERIFY EMAIL -->
+  <!-- VERIFY EMAIL (hard gate, off by default) -->
   <div id="verify" class="wrap hide">
     <div class="brandbar"><span class="mk" id="mk3"></span><b>Easy<span style="color:#0071e3">Tip</span>Me</b></div>
     <div class="card" style="text-align:center">
       <div style="font-size:36px;margin-bottom:4px">📧</div>
-      <h1 style="font-size:22px">Verify your email</h1>
-      <p class="sub">We sent a verification link to <b id="verEmail"></b>. Open it, then come back and tap continue.</p>
+      <h1 style="font-size:22px" data-i18n="verify_title">Verify your email</h1>
+      <p class="sub"><span data-i18n="verify_sub1">We sent a verification link to</span> <b id="verEmail"></b>. <span data-i18n="verify_sub2">Open it, then come back and tap continue.</span></p>
       <div id="verMsg" class="msg"></div>
-      <button class="btn" id="verCheck">I've verified — continue</button>
-      <button class="btn ghost" id="verResend" style="margin-top:10px">Resend email</button>
-      <button class="logout" id="verLogout" style="margin-top:14px">Use a different email</button>
+      <button class="btn" id="verCheck" data-i18n="verified_continue">I've verified — continue</button>
+      <button class="btn ghost" id="verResend" style="margin-top:10px" data-i18n="resend">Resend email</button>
+      <button class="linkbtn" id="verLogout" style="margin-top:16px;color:var(--soft);width:100%" data-i18n="use_diff">Use a different email</button>
     </div>
-    <div class="powered">Powered by Amidify Solutions Inc.</div>
   </div>
 
-  <!-- HOME -->
-  <div id="home" class="wrap hide">
+  <!-- APP (tabbed dashboard) -->
+  <div id="app" class="wrap hide">
     <div class="brandbar"><span class="mk" id="mk2"></span><b>Easy<span style="color:#0071e3">Tip</span>Me</b></div>
     <div id="connBadge" class="hide" style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--green);background:#eef7ee;border-radius:20px;padding:6px 12px;width:fit-content;margin:-4px 2px 14px;font-weight:600">✓ <span id="connShop"></span></div>
     <div id="verifyBanner" class="hide" style="background:#fff4e5;border:1px solid #ffe0b3;color:#8a5a00;border-radius:12px;padding:10px 12px;font-size:13px;margin:0 2px 14px;display:flex;gap:8px;align-items:center;justify-content:space-between">
-      <span>Verify your email to secure your account.</span>
-      <button id="vbResend" style="background:none;border:none;color:#0071e3;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">Resend</button>
+      <span data-i18n="verify_banner">Verify your email to secure your account.</span>
+      <button id="vbResend" style="background:none;border:none;color:#0071e3;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap" data-i18n="resend_short">Resend</button>
     </div>
 
-    <div class="card phead">
-      <div id="pPic" class="pic"></div>
-      <div><div class="nm" id="pName"></div><div class="rl" id="pRole"></div></div>
-    </div>
-
-    <div class="card earn">
-      <div class="lbl">Your tips</div>
-      <div class="big" id="eTotal">—</div>
-      <div class="stats">
-        <div class="stat"><div class="n" id="eCount">—</div><div class="t">Tips</div></div>
-        <div class="stat"><div class="n" id="eRating">—</div><div class="t">Avg rating</div></div>
+    <!-- HOME TAB -->
+    <div id="tab-home" class="tabpanel">
+      <div class="card phead">
+        <div id="pPic" class="pic"></div>
+        <div><div class="nm" id="pName"></div><div class="rl" id="pRole"></div></div>
+      </div>
+      <div class="card earn">
+        <div class="lbl" data-i18n="your_tips">Your tips</div>
+        <div class="big" id="eTotal">—</div>
+        <div class="stats">
+          <div class="stat"><div class="n" id="eCount">—</div><div class="t" data-i18n="tips">Tips</div></div>
+          <div class="stat"><div class="n" id="eAvg">—</div><div class="t" data-i18n="avg_tip">Avg tip</div></div>
+          <div class="stat"><div class="n" id="eRating">—</div><div class="t" data-i18n="avg_rating">Avg rating</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="h3" data-i18n="recent_tips">Recent tips</div>
+        <div id="tipsList"></div>
+        <div id="noTips" style="color:var(--soft);text-align:center;padding:16px 0" data-i18n="no_tips">No tips yet.</div>
       </div>
     </div>
 
-    <div id="shareReview" class="hide" style="text-align:center;margin:-2px 0 14px">
-      <button id="reviewShare" style="background:none;border:none;color:var(--soft);font-size:13px;cursor:pointer;font-family:inherit;text-decoration:underline;padding:4px">Tip-sharing terms</button>
+    <!-- INSIGHTS TAB -->
+    <div id="tab-insights" class="tabpanel hide">
+      <h1 style="margin:2px 2px 14px" data-i18n="insights_title">Insights</h1>
+      <div class="seg" id="rangeSeg">
+        <button data-r="week" class="on" data-i18n="this_week">This week</button>
+        <button data-r="month" data-i18n="this_month">This month</button>
+        <button data-r="all" data-i18n="all_time">All time</button>
+      </div>
+      <div class="card">
+        <div class="stats" style="margin-top:0">
+          <div class="stat"><div class="n" id="inEarned">—</div><div class="t" data-i18n="earned">Earned</div></div>
+          <div class="stat"><div class="n" id="inCount">—</div><div class="t" data-i18n="tips">Tips</div></div>
+          <div class="stat"><div class="n" id="inAvg">—</div><div class="t" data-i18n="average">Average</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="h3" data-i18n="daily_earnings">Daily earnings (last 14 days)</div>
+        <div class="chart" id="chart"></div>
+        <div class="xlabels" id="xlabels"></div>
+      </div>
+      <div class="card" id="breakCard">
+        <div class="kv"><span class="k" data-i18n="top_day">Best day</span><span class="v" id="inTop">—</span></div>
+        <div class="kv"><span class="k" data-i18n="named_tips">With a name</span><span class="v" id="inNamed">—</span></div>
+        <div class="kv"><span class="k" data-i18n="anon_tips">Anonymous</span><span class="v" id="inAnon">—</span></div>
+        <div class="kv"><span class="k" data-i18n="rating_avg">Average rating</span><span class="v" id="inRate">—</span></div>
+      </div>
     </div>
 
-    <div class="card payoff">
-      <div class="h3">Get paid <span class="soon">Coming soon</span></div>
-      <div class="note">Bank payouts are being activated. Soon you'll connect your bank account here to receive your tips directly. For now, your workplace can see and settle your tips.</div>
-      <button class="btn dark" disabled style="margin-top:14px">Connect bank account</button>
+    <!-- SETTINGS TAB -->
+    <div id="tab-settings" class="tabpanel hide">
+      <h1 style="margin:2px 2px 14px" data-i18n="settings_title">Settings</h1>
+      <div class="card">
+        <div class="srow"><span class="lab" data-i18n="language">Language</span>
+          <span class="langsel"><select id="langSet"></select></span></div>
+      </div>
+      <div class="card">
+        <div class="h3" data-i18n="profile">Profile</div>
+        <div class="srow"><span class="lab" data-i18n="name_label">Name</span><span class="val" id="setName">—</span></div>
+        <div class="srow"><span class="lab" data-i18n="email_label">Email</span><span class="val" id="setEmail">—</span></div>
+        <div class="srow"><span class="lab" data-i18n="phone_label">Phone</span><span class="val" id="setPhone">—</span></div>
+        <div class="srow"><span class="lab" data-i18n="email_status">Email verification</span>
+          <span class="val"><span id="setVerified"></span> <button id="setResend" class="linkbtn hide" data-i18n="resend_short">Resend</button></span></div>
+      </div>
+      <div class="card payoff">
+        <div class="h3"><span data-i18n="get_paid">Get paid</span> <span class="soon" data-i18n="coming_soon">Coming soon</span></div>
+        <div class="note" data-i18n="payout_note">Bank payouts are being activated. Soon you'll connect your bank account here to receive your tips directly. For now, your workplace can see and settle your tips.</div>
+        <button class="btn dark" disabled style="margin-top:14px" data-i18n="connect_bank">Connect bank account</button>
+      </div>
+      <div class="card">
+        <button class="linkbtn" id="reviewShare" data-i18n="tip_terms">Tip-sharing terms</button>
+      </div>
+      <div class="card">
+        <button class="btn ghost" id="logoutBtn" data-i18n="log_out">Log out</button>
+      </div>
+      <div class="card" style="border:1px solid #fadcdc">
+        <div class="h3" style="color:var(--danger)" data-i18n="leave_wp">Leave workplace</div>
+        <div class="note" data-i18n="leave_desc">Stop appearing on your workplace's tip page. Your past tips stay recorded.</div>
+        <button class="btn danger" id="leaveBtn" style="margin-top:14px" data-i18n="leave_wp">Leave workplace</button>
+      </div>
+      <div class="powered" data-i18n="powered">Powered by Amidify Solutions Inc.</div>
     </div>
 
-    <div class="card">
-      <div class="h3">Recent tips</div>
-      <div id="tipsList"></div>
-      <div id="noTips" style="color:var(--soft);text-align:center;padding:16px 0">No tips yet.</div>
+    <!-- bottom nav -->
+    <div class="nav">
+      <button data-tab="home" class="on" id="navHome">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
+        <span class="lb" data-i18n="nav_home">Home</span></button>
+      <button data-tab="insights" id="navInsights">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/></svg>
+        <span class="lb" data-i18n="nav_insights">Insights</span></button>
+      <button data-tab="settings" id="navSettings">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2 2 2 0 1 1-4 0 1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1h.1a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+        <span class="lb" data-i18n="nav_settings">Settings</span></button>
     </div>
-
-    <button class="logout" id="logoutBtn">Log out</button>
-    <button class="logout" id="leaveBtn" style="color:#e5484d">Leave this workplace</button>
-    <div class="powered">Powered by Amidify Solutions Inc.</div>
   </div>
 
   <!-- Tip-sharing consent modal (one-time) -->
   <div id="consentModal" class="modal-wrap hide">
     <div class="modal">
       <div class="modal-ic">🤝</div>
-      <h2 id="cmTitle">Tip sharing</h2>
-      <p><b id="cmShop">Your workplace</b> uses a team tip pool. They may keep <b>up to 15% maximum</b> of each tip as a shared pool — you keep the rest.</p>
-      <p class="cm-now">Right now they share <b id="cmPct">0%</b>, so you keep <b id="cmKeep">100%</b> of every tip.</p>
-      <p class="cm-fine">Standard Stripe payment-processing fees also apply. By agreeing you accept this tip-sharing arrangement. You can review these terms anytime.</p>
-      <button class="btn" id="cmAgree">I understand &amp; agree</button>
-      <button class="btn ghost" id="cmLater">Maybe later</button>
+      <h2 id="cmTitle" data-i18n="cm_title">Tip sharing</h2>
+      <p><b id="cmShop">Your workplace</b> <span data-i18n="cm_body1">uses a team tip pool. They may keep</span> <b data-i18n="cm_body2">up to 15% maximum</b> <span data-i18n="cm_body3">of each tip as a shared pool — you keep the rest.</span></p>
+      <p class="cm-now"><span data-i18n="cm_now1">Right now they share</span> <b id="cmPct">0%</b>, <span data-i18n="cm_now2">so you keep</span> <b id="cmKeep">100%</b> <span data-i18n="cm_now3">of every tip.</span></p>
+      <p class="cm-fine" data-i18n="cm_fine">Standard Stripe payment-processing fees also apply. By agreeing you accept this tip-sharing arrangement. You can review these terms anytime.</p>
+      <button class="btn" id="cmAgree" data-i18n="cm_agree">I understand &amp; agree</button>
+      <button class="btn ghost" id="cmLater" data-i18n="cm_later">Maybe later</button>
+    </div>
+  </div>
+
+  <!-- Leave-workplace confirm modal (password protected) -->
+  <div id="leaveModal" class="modal-wrap hide">
+    <div class="modal">
+      <div class="modal-ic">👋</div>
+      <h2 id="lvTitle" data-i18n="leave_modal_title">Leave workplace?</h2>
+      <p id="lvDesc" data-i18n="leave_modal_desc">Enter your password to confirm. You'll stop appearing on their tip page. Your past tips stay recorded, and they can add you again to rejoin.</p>
+      <div id="lvMsg" class="msg"></div>
+      <div class="pwrap"><input id="lvPass" type="password" data-i18n-ph="password_confirm_ph" placeholder="Your password" autocomplete="current-password"><button type="button" class="eye" id="eyeBtn3" aria-label="Show password"></button></div>
+      <button class="btn danger" id="lvConfirm" data-i18n="confirm_leave">Leave workplace</button>
+      <button class="btn ghost" id="lvCancel" data-i18n="cancel">Cancel</button>
     </div>
   </div>
 
@@ -193,6 +309,280 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script>
+    // ---------- i18n ----------
+    const LANGS=[['en','English'],['ar','العربية'],['fr','Français'],['es','Español'],['zh','中文'],['ru','Русский']];
+    const DICT={};
+    DICT.en={
+      signin_title:"Team sign in", signin_sub:"Sign in to see your tips and earnings.",
+      register_title:"Create your account", register_sub:"Use the same email your workplace added for you.",
+      wcode:"Workplace code", wcode_ph:"Ask your workplace for the code",
+      first:"First name", first_ph:"First", last:"Last name", last_ph:"Last",
+      email:"Email", password:"Password", pass_ph:"At least 6 characters",
+      confirm:"Confirm password", confirm_ph:"Re-enter password", phone:"Phone", optional:"(optional)",
+      signin_btn:"Sign in", create_btn:"Create account",
+      new_here:"New here?", create_team:"Create your team account",
+      have_account:"Already have an account?", switch_signin:"Sign in",
+      powered:"Powered by Amidify Solutions Inc.",
+      verify_title:"Verify your email", verify_sub1:"We sent a verification link to", verify_sub2:"Open it, then come back and tap continue.",
+      verified_continue:"I've verified — continue", resend:"Resend email", use_diff:"Use a different email",
+      verify_banner:"Verify your email to secure your account.", resend_short:"Resend",
+      your_tips:"Your tips", tips:"Tips", avg_tip:"Avg tip", avg_rating:"Avg rating",
+      recent_tips:"Recent tips", no_tips:"No tips yet.", from:"from",
+      insights_title:"Insights", this_week:"This week", this_month:"This month", all_time:"All time",
+      earned:"Earned", average:"Average", daily_earnings:"Daily earnings (last 14 days)",
+      top_day:"Best day", named_tips:"With a name", anon_tips:"Anonymous", rating_avg:"Average rating", no_data:"No data for this period yet.",
+      settings_title:"Settings", language:"Language", profile:"Profile",
+      name_label:"Name", email_label:"Email", phone_label:"Phone", email_status:"Email verification",
+      verified:"Verified ✓", not_verified:"Not verified",
+      get_paid:"Get paid", coming_soon:"Coming soon",
+      payout_note:"Bank payouts are being activated. Soon you'll connect your bank account here to receive your tips directly. For now, your workplace can see and settle your tips.",
+      connect_bank:"Connect bank account", tip_terms:"Tip-sharing terms", log_out:"Log out",
+      leave_wp:"Leave workplace", leave_desc:"Stop appearing on your workplace's tip page. Your past tips stay recorded.",
+      nav_home:"Home", nav_insights:"Insights", nav_settings:"Settings",
+      cm_title:"Tip sharing", cm_body1:"uses a team tip pool. They may keep", cm_body2:"up to 15% maximum", cm_body3:"of each tip as a shared pool — you keep the rest.",
+      cm_now1:"Right now they share", cm_now2:"so you keep", cm_now3:"of every tip.",
+      cm_fine:"Standard Stripe payment-processing fees also apply. By agreeing you accept this tip-sharing arrangement. You can review these terms anytime.",
+      cm_agree:"I understand & agree", cm_later:"Maybe later", cm_close:"Close",
+      leave_modal_title:"Leave {shop}?", leave_modal_desc:"Enter your password to confirm. You'll stop appearing on their tip page. Your past tips stay recorded, and they can add you again to rejoin.",
+      password_confirm_ph:"Your password", confirm_leave:"Leave workplace", cancel:"Cancel",
+      connected_to:"Connected to {shop}",
+      m_enter_code:"Enter your workplace code.", m_enter_email_pass:"Enter your email and password.",
+      m_enter_names:"Enter your first and last name.", m_pass_min:"Password must be at least 6 characters.", m_pass_match:"Passwords don’t match.",
+      m_wp_not_found:"Workplace not found. Check the code.", m_not_registered:"This email isn’t registered at {shop}. Ask them to add you with this email.",
+      m_removed:"You’re no longer active at {shop}. Contact them if this is a mistake.", m_left:"You left {shop}. Ask them to add you again to rejoin.",
+      m_left_ok:"You left {shop}.", m_load_fail:"Could not load your profile.",
+      m_verify_sent:"Verification email sent. Check your inbox (and spam).", m_verify_wait:"Too many requests just now. Please wait a few minutes, then tap Resend again.", m_verify_fail:"Could not send right now. Try again in a moment.",
+      m_not_verified_yet:"Not verified yet — open the link in the email first.", m_leave_wrong_pass:"Wrong password. Please try again.", m_save_fail:"Could not save.",
+      e_email_in_use:"This email already has an account. Try signing in.", e_invalid_email:"Enter a valid email.", e_weak_pass:"Password must be at least 6 characters.",
+      e_wrong_pass:"Wrong email or password.", e_no_user:"No account with this email. Create one.", e_too_many:"Too many attempts. Please wait a minute, then try again.",
+      e_network:"Network problem. Check your connection and try again.", e_missing_pass:"Enter your password.", e_generic:"Something went wrong. Please try again."
+    };
+    DICT.ar={
+      signin_title:"تسجيل دخول الفريق", signin_sub:"سجّل دخولك لتشوف بقشيشك وأرباحك.",
+      register_title:"أنشئ حسابك", register_sub:"استعمل نفس الإيميل يلي أضافك فيه مكان عملك.",
+      wcode:"كود مكان العمل", wcode_ph:"اطلب الكود من مكان عملك",
+      first:"الاسم الأول", first_ph:"الاسم", last:"اسم العائلة", last_ph:"العائلة",
+      email:"الإيميل", password:"كلمة المرور", pass_ph:"٦ أحرف على الأقل",
+      confirm:"تأكيد كلمة المرور", confirm_ph:"أعد إدخال كلمة المرور", phone:"رقم الهاتف", optional:"(اختياري)",
+      signin_btn:"تسجيل الدخول", create_btn:"إنشاء حساب",
+      new_here:"جديد هون؟", create_team:"أنشئ حساب فريقك",
+      have_account:"عندك حساب؟", switch_signin:"سجّل الدخول",
+      powered:"مشغّل بواسطة Amidify Solutions Inc.",
+      verify_title:"فعّل إيميلك", verify_sub1:"بعتنا رابط تفعيل على", verify_sub2:"افتحه، ورجاع اضغط متابعة.",
+      verified_continue:"فعّلت — متابعة", resend:"إعادة إرسال الإيميل", use_diff:"استخدم إيميل آخر",
+      verify_banner:"فعّل إيميلك لتأمين حسابك.", resend_short:"إعادة إرسال",
+      your_tips:"بقشيشك", tips:"البقشيش", avg_tip:"متوسط البقشيش", avg_rating:"متوسط التقييم",
+      recent_tips:"آخر البقشيش", no_tips:"ما في بقشيش بعد.", from:"من",
+      insights_title:"التحليلات", this_week:"هالأسبوع", this_month:"هالشهر", all_time:"الكل",
+      earned:"المكتسب", average:"المتوسط", daily_earnings:"الأرباح اليومية (آخر ١٤ يوم)",
+      top_day:"أفضل يوم", named_tips:"مع اسم", anon_tips:"بدون اسم", rating_avg:"متوسط التقييم", no_data:"ما في بيانات لهالفترة بعد.",
+      settings_title:"الإعدادات", language:"اللغة", profile:"الملف الشخصي",
+      name_label:"الاسم", email_label:"الإيميل", phone_label:"الهاتف", email_status:"تفعيل الإيميل",
+      verified:"مفعّل ✓", not_verified:"غير مفعّل",
+      get_paid:"استلام الأموال", coming_soon:"قريبًا",
+      payout_note:"يتم تفعيل التحويلات البنكية. قريبًا رح تربط حسابك البنكي هون لتستلم بقشيشك مباشرة. حاليًا، مكان عملك بيشوف بقشيشك ويسوّيه.",
+      connect_bank:"اربط الحساب البنكي", tip_terms:"شروط تقاسم البقشيش", log_out:"تسجيل الخروج",
+      leave_wp:"مغادرة مكان العمل", leave_desc:"بتوقف تظهر بصفحة بقشيش مكان عملك. بقشيشك السابق بيضل مسجّل.",
+      nav_home:"الرئيسية", nav_insights:"التحليلات", nav_settings:"الإعدادات",
+      cm_title:"تقاسم البقشيش", cm_body1:"بيستعمل نظام تجميع بقشيش. ممكن ياخدوا", cm_body2:"حتى ١٥٪ كحد أقصى", cm_body3:"من كل بقشيش كحصة مشتركة — والباقي إلك.",
+      cm_now1:"حاليًا بياخدوا", cm_now2:"فبيبقالك", cm_now3:"من كل بقشيش.",
+      cm_fine:"بتنطبق كمان رسوم معالجة الدفع من Stripe. بموافقتك إنت بتقبل ترتيب تقاسم البقشيش. فيك تراجع الشروط بأي وقت.",
+      cm_agree:"فهمت وأوافق", cm_later:"ربما لاحقًا", cm_close:"إغلاق",
+      leave_modal_title:"مغادرة {shop}؟", leave_modal_desc:"أدخل كلمة المرور للتأكيد. بتوقف تظهر بصفحة بقشيشهم. بقشيشك السابق بيضل مسجّل، وبيقدروا يضيفوك مرة تانية.",
+      password_confirm_ph:"كلمة مرورك", confirm_leave:"غادر مكان العمل", cancel:"إلغاء",
+      connected_to:"متصل بـ {shop}",
+      m_enter_code:"أدخل كود مكان عملك.", m_enter_email_pass:"أدخل الإيميل وكلمة المرور.",
+      m_enter_names:"أدخل اسمك الأول واسم العائلة.", m_pass_min:"كلمة المرور لازم ٦ أحرف على الأقل.", m_pass_match:"كلمتا المرور مش متطابقتين.",
+      m_wp_not_found:"مكان العمل غير موجود. تأكد من الكود.", m_not_registered:"هالإيميل مش مسجّل بـ {shop}. اطلب منهم يضيفوك بهالإيميل.",
+      m_removed:"ما عدت فعّال بـ {shop}. تواصل معهم إذا في خطأ.", m_left:"غادرت {shop}. اطلب منهم يضيفوك مرة تانية.",
+      m_left_ok:"غادرت {shop}.", m_load_fail:"ما قدرنا نحمّل ملفك.",
+      m_verify_sent:"انبعت إيميل التفعيل. تفقّد بريدك (والـ spam).", m_verify_wait:"طلبات كتير هلق. استنى شوي وبعدها اضغط إعادة إرسال.", m_verify_fail:"ما قدرنا نبعت هلق. جرّب بعد شوي.",
+      m_not_verified_yet:"لسا ما تفعّل — افتح الرابط بالإيميل أولاً.", m_leave_wrong_pass:"كلمة مرور خطأ. جرّب مرة تانية.", m_save_fail:"ما قدرنا نحفظ.",
+      e_email_in_use:"هالإيميل عنده حساب. جرّب تسجّل دخول.", e_invalid_email:"أدخل إيميل صحيح.", e_weak_pass:"كلمة المرور لازم ٦ أحرف على الأقل.",
+      e_wrong_pass:"إيميل أو كلمة مرور خطأ.", e_no_user:"ما في حساب بهالإيميل. أنشئ واحد.", e_too_many:"محاولات كتير. استنى دقيقة وجرّب.",
+      e_network:"مشكلة بالشبكة. تأكد من اتصالك وجرّب.", e_missing_pass:"أدخل كلمة المرور.", e_generic:"صار خطأ. جرّب مرة تانية."
+    };
+    DICT.fr={
+      signin_title:"Connexion équipe", signin_sub:"Connectez-vous pour voir vos pourboires et gains.",
+      register_title:"Créez votre compte", register_sub:"Utilisez le même e-mail que votre lieu de travail a ajouté.",
+      wcode:"Code du lieu de travail", wcode_ph:"Demandez le code à votre lieu de travail",
+      first:"Prénom", first_ph:"Prénom", last:"Nom", last_ph:"Nom",
+      email:"E-mail", password:"Mot de passe", pass_ph:"Au moins 6 caractères",
+      confirm:"Confirmer le mot de passe", confirm_ph:"Ressaisir le mot de passe", phone:"Téléphone", optional:"(facultatif)",
+      signin_btn:"Se connecter", create_btn:"Créer un compte",
+      new_here:"Nouveau ici ?", create_team:"Créez votre compte d'équipe",
+      have_account:"Déjà un compte ?", switch_signin:"Se connecter",
+      powered:"Propulsé par Amidify Solutions Inc.",
+      verify_title:"Vérifiez votre e-mail", verify_sub1:"Nous avons envoyé un lien de vérification à", verify_sub2:"Ouvrez-le, puis revenez et appuyez sur continuer.",
+      verified_continue:"J'ai vérifié — continuer", resend:"Renvoyer l'e-mail", use_diff:"Utiliser un autre e-mail",
+      verify_banner:"Vérifiez votre e-mail pour sécuriser votre compte.", resend_short:"Renvoyer",
+      your_tips:"Vos pourboires", tips:"Pourboires", avg_tip:"Pourboire moyen", avg_rating:"Note moyenne",
+      recent_tips:"Pourboires récents", no_tips:"Aucun pourboire pour l'instant.", from:"de",
+      insights_title:"Analyses", this_week:"Cette semaine", this_month:"Ce mois", all_time:"Tout",
+      earned:"Gagné", average:"Moyenne", daily_earnings:"Gains quotidiens (14 derniers jours)",
+      top_day:"Meilleur jour", named_tips:"Avec un nom", anon_tips:"Anonyme", rating_avg:"Note moyenne", no_data:"Pas encore de données pour cette période.",
+      settings_title:"Paramètres", language:"Langue", profile:"Profil",
+      name_label:"Nom", email_label:"E-mail", phone_label:"Téléphone", email_status:"Vérification e-mail",
+      verified:"Vérifié ✓", not_verified:"Non vérifié",
+      get_paid:"Être payé", coming_soon:"Bientôt",
+      payout_note:"Les virements bancaires sont en cours d'activation. Bientôt, vous connecterez votre compte bancaire ici pour recevoir vos pourboires directement. Pour l'instant, votre lieu de travail peut voir et régler vos pourboires.",
+      connect_bank:"Connecter un compte bancaire", tip_terms:"Conditions de partage des pourboires", log_out:"Se déconnecter",
+      leave_wp:"Quitter le lieu de travail", leave_desc:"Ne plus apparaître sur la page de pourboires de votre lieu de travail. Vos pourboires passés restent enregistrés.",
+      nav_home:"Accueil", nav_insights:"Analyses", nav_settings:"Paramètres",
+      cm_title:"Partage des pourboires", cm_body1:"utilise une cagnotte d'équipe. Ils peuvent garder", cm_body2:"jusqu'à 15% maximum", cm_body3:"de chaque pourboire comme cagnotte partagée — vous gardez le reste.",
+      cm_now1:"Actuellement, ils partagent", cm_now2:"donc vous gardez", cm_now3:"de chaque pourboire.",
+      cm_fine:"Les frais standard de traitement des paiements Stripe s'appliquent aussi. En acceptant, vous acceptez cet arrangement de partage. Vous pouvez consulter ces conditions à tout moment.",
+      cm_agree:"Je comprends et j'accepte", cm_later:"Plus tard", cm_close:"Fermer",
+      leave_modal_title:"Quitter {shop} ?", leave_modal_desc:"Entrez votre mot de passe pour confirmer. Vous n'apparaîtrez plus sur leur page de pourboires. Vos pourboires passés restent enregistrés et ils peuvent vous réajouter.",
+      password_confirm_ph:"Votre mot de passe", confirm_leave:"Quitter le lieu de travail", cancel:"Annuler",
+      connected_to:"Connecté à {shop}",
+      m_enter_code:"Entrez le code de votre lieu de travail.", m_enter_email_pass:"Entrez votre e-mail et mot de passe.",
+      m_enter_names:"Entrez votre prénom et nom.", m_pass_min:"Le mot de passe doit contenir au moins 6 caractères.", m_pass_match:"Les mots de passe ne correspondent pas.",
+      m_wp_not_found:"Lieu de travail introuvable. Vérifiez le code.", m_not_registered:"Cet e-mail n'est pas enregistré chez {shop}. Demandez-leur de vous ajouter avec cet e-mail.",
+      m_removed:"Vous n'êtes plus actif chez {shop}. Contactez-les en cas d'erreur.", m_left:"Vous avez quitté {shop}. Demandez-leur de vous réajouter.",
+      m_left_ok:"Vous avez quitté {shop}.", m_load_fail:"Impossible de charger votre profil.",
+      m_verify_sent:"E-mail de vérification envoyé. Vérifiez votre boîte (et les spams).", m_verify_wait:"Trop de demandes. Attendez quelques minutes puis réessayez.", m_verify_fail:"Impossible d'envoyer maintenant. Réessayez bientôt.",
+      m_not_verified_yet:"Pas encore vérifié — ouvrez d'abord le lien dans l'e-mail.", m_leave_wrong_pass:"Mot de passe incorrect. Réessayez.", m_save_fail:"Impossible d'enregistrer.",
+      e_email_in_use:"Cet e-mail a déjà un compte. Essayez de vous connecter.", e_invalid_email:"Entrez un e-mail valide.", e_weak_pass:"Le mot de passe doit contenir au moins 6 caractères.",
+      e_wrong_pass:"E-mail ou mot de passe incorrect.", e_no_user:"Aucun compte avec cet e-mail. Créez-en un.", e_too_many:"Trop de tentatives. Attendez une minute puis réessayez.",
+      e_network:"Problème de réseau. Vérifiez votre connexion et réessayez.", e_missing_pass:"Entrez votre mot de passe.", e_generic:"Une erreur s'est produite. Réessayez."
+    };
+    DICT.es={
+      signin_title:"Acceso del equipo", signin_sub:"Inicia sesión para ver tus propinas y ganancias.",
+      register_title:"Crea tu cuenta", register_sub:"Usa el mismo correo que tu lugar de trabajo agregó.",
+      wcode:"Código del lugar de trabajo", wcode_ph:"Pide el código a tu lugar de trabajo",
+      first:"Nombre", first_ph:"Nombre", last:"Apellido", last_ph:"Apellido",
+      email:"Correo", password:"Contraseña", pass_ph:"Al menos 6 caracteres",
+      confirm:"Confirmar contraseña", confirm_ph:"Reingresa la contraseña", phone:"Teléfono", optional:"(opcional)",
+      signin_btn:"Iniciar sesión", create_btn:"Crear cuenta",
+      new_here:"¿Nuevo aquí?", create_team:"Crea tu cuenta de equipo",
+      have_account:"¿Ya tienes cuenta?", switch_signin:"Iniciar sesión",
+      powered:"Con tecnología de Amidify Solutions Inc.",
+      verify_title:"Verifica tu correo", verify_sub1:"Enviamos un enlace de verificación a", verify_sub2:"Ábrelo, luego vuelve y toca continuar.",
+      verified_continue:"Ya verifiqué — continuar", resend:"Reenviar correo", use_diff:"Usar otro correo",
+      verify_banner:"Verifica tu correo para proteger tu cuenta.", resend_short:"Reenviar",
+      your_tips:"Tus propinas", tips:"Propinas", avg_tip:"Propina prom.", avg_rating:"Calif. prom.",
+      recent_tips:"Propinas recientes", no_tips:"Aún no hay propinas.", from:"de",
+      insights_title:"Análisis", this_week:"Esta semana", this_month:"Este mes", all_time:"Todo",
+      earned:"Ganado", average:"Promedio", daily_earnings:"Ganancias diarias (últimos 14 días)",
+      top_day:"Mejor día", named_tips:"Con nombre", anon_tips:"Anónimo", rating_avg:"Calificación promedio", no_data:"Aún no hay datos para este período.",
+      settings_title:"Ajustes", language:"Idioma", profile:"Perfil",
+      name_label:"Nombre", email_label:"Correo", phone_label:"Teléfono", email_status:"Verificación de correo",
+      verified:"Verificado ✓", not_verified:"No verificado",
+      get_paid:"Recibir pagos", coming_soon:"Próximamente",
+      payout_note:"Los pagos bancarios se están activando. Pronto conectarás tu cuenta bancaria aquí para recibir tus propinas directamente. Por ahora, tu lugar de trabajo puede ver y liquidar tus propinas.",
+      connect_bank:"Conectar cuenta bancaria", tip_terms:"Términos de reparto de propinas", log_out:"Cerrar sesión",
+      leave_wp:"Salir del lugar de trabajo", leave_desc:"Dejar de aparecer en la página de propinas de tu lugar de trabajo. Tus propinas pasadas quedan registradas.",
+      nav_home:"Inicio", nav_insights:"Análisis", nav_settings:"Ajustes",
+      cm_title:"Reparto de propinas", cm_body1:"usa un fondo común de propinas. Pueden quedarse con", cm_body2:"hasta un 15% máximo", cm_body3:"de cada propina como fondo común — tú te quedas con el resto.",
+      cm_now1:"Ahora mismo reparten", cm_now2:"así que te quedas con", cm_now3:"de cada propina.",
+      cm_fine:"También aplican las tarifas estándar de procesamiento de pagos de Stripe. Al aceptar, aceptas este acuerdo de reparto. Puedes revisar estos términos cuando quieras.",
+      cm_agree:"Entiendo y acepto", cm_later:"Quizás luego", cm_close:"Cerrar",
+      leave_modal_title:"¿Salir de {shop}?", leave_modal_desc:"Ingresa tu contraseña para confirmar. Dejarás de aparecer en su página de propinas. Tus propinas pasadas quedan registradas y pueden volver a agregarte.",
+      password_confirm_ph:"Tu contraseña", confirm_leave:"Salir del lugar de trabajo", cancel:"Cancelar",
+      connected_to:"Conectado a {shop}",
+      m_enter_code:"Ingresa el código de tu lugar de trabajo.", m_enter_email_pass:"Ingresa tu correo y contraseña.",
+      m_enter_names:"Ingresa tu nombre y apellido.", m_pass_min:"La contraseña debe tener al menos 6 caracteres.", m_pass_match:"Las contraseñas no coinciden.",
+      m_wp_not_found:"Lugar de trabajo no encontrado. Revisa el código.", m_not_registered:"Este correo no está registrado en {shop}. Pídeles que te agreguen con este correo.",
+      m_removed:"Ya no estás activo en {shop}. Contáctalos si es un error.", m_left:"Saliste de {shop}. Pídeles que te vuelvan a agregar.",
+      m_left_ok:"Saliste de {shop}.", m_load_fail:"No se pudo cargar tu perfil.",
+      m_verify_sent:"Correo de verificación enviado. Revisa tu bandeja (y spam).", m_verify_wait:"Demasiadas solicitudes. Espera unos minutos y vuelve a intentar.", m_verify_fail:"No se pudo enviar ahora. Inténtalo pronto.",
+      m_not_verified_yet:"Aún no verificado — abre primero el enlace del correo.", m_leave_wrong_pass:"Contraseña incorrecta. Inténtalo de nuevo.", m_save_fail:"No se pudo guardar.",
+      e_email_in_use:"Este correo ya tiene una cuenta. Intenta iniciar sesión.", e_invalid_email:"Ingresa un correo válido.", e_weak_pass:"La contraseña debe tener al menos 6 caracteres.",
+      e_wrong_pass:"Correo o contraseña incorrectos.", e_no_user:"No hay cuenta con este correo. Crea una.", e_too_many:"Demasiados intentos. Espera un minuto e inténtalo.",
+      e_network:"Problema de red. Revisa tu conexión e inténtalo.", e_missing_pass:"Ingresa tu contraseña.", e_generic:"Algo salió mal. Inténtalo de nuevo."
+    };
+    DICT.zh={
+      signin_title:"团队登录", signin_sub:"登录以查看您的小费和收入。",
+      register_title:"创建您的账户", register_sub:"请使用您工作单位为您添加的同一邮箱。",
+      wcode:"工作单位代码", wcode_ph:"向您的工作单位索取代码",
+      first:"名字", first_ph:"名字", last:"姓氏", last_ph:"姓氏",
+      email:"邮箱", password:"密码", pass_ph:"至少6个字符",
+      confirm:"确认密码", confirm_ph:"再次输入密码", phone:"电话", optional:"（选填）",
+      signin_btn:"登录", create_btn:"创建账户",
+      new_here:"新用户？", create_team:"创建您的团队账户",
+      have_account:"已有账户？", switch_signin:"登录",
+      powered:"由 Amidify Solutions Inc. 提供支持",
+      verify_title:"验证您的邮箱", verify_sub1:"我们已发送验证链接至", verify_sub2:"打开它，然后返回并点击继续。",
+      verified_continue:"我已验证 — 继续", resend:"重新发送邮件", use_diff:"使用其他邮箱",
+      verify_banner:"验证您的邮箱以保护账户安全。", resend_short:"重新发送",
+      your_tips:"您的小费", tips:"小费", avg_tip:"平均小费", avg_rating:"平均评分",
+      recent_tips:"最近的小费", no_tips:"暂无小费。", from:"来自",
+      insights_title:"数据分析", this_week:"本周", this_month:"本月", all_time:"全部",
+      earned:"已赚", average:"平均", daily_earnings:"每日收入（最近14天）",
+      top_day:"最佳日", named_tips:"有署名", anon_tips:"匿名", rating_avg:"平均评分", no_data:"此期间暂无数据。",
+      settings_title:"设置", language:"语言", profile:"个人资料",
+      name_label:"姓名", email_label:"邮箱", phone_label:"电话", email_status:"邮箱验证",
+      verified:"已验证 ✓", not_verified:"未验证",
+      get_paid:"收款", coming_soon:"即将推出",
+      payout_note:"银行转账正在启用中。很快您就能在此连接银行账户以直接收取小费。目前，您的工作单位可以查看并结算您的小费。",
+      connect_bank:"连接银行账户", tip_terms:"小费分享条款", log_out:"退出登录",
+      leave_wp:"离开工作单位", leave_desc:"不再出现在您工作单位的小费页面上。您过往的小费仍会保留记录。",
+      nav_home:"主页", nav_insights:"分析", nav_settings:"设置",
+      cm_title:"小费分享", cm_body1:"使用团队小费池。他们最多可保留", cm_body2:"每笔小费的15%", cm_body3:"作为共享池 — 其余归您。",
+      cm_now1:"目前他们分享", cm_now2:"因此您保留", cm_now3:"每笔小费的。",
+      cm_fine:"标准的 Stripe 支付处理费用同样适用。同意即表示您接受此小费分享安排。您可随时查看这些条款。",
+      cm_agree:"我明白并同意", cm_later:"以后再说", cm_close:"关闭",
+      leave_modal_title:"离开 {shop}？", leave_modal_desc:"输入密码以确认。您将不再出现在他们的小费页面上。您过往的小费仍会保留，他们可以再次添加您。",
+      password_confirm_ph:"您的密码", confirm_leave:"离开工作单位", cancel:"取消",
+      connected_to:"已连接至 {shop}",
+      m_enter_code:"请输入您的工作单位代码。", m_enter_email_pass:"请输入您的邮箱和密码。",
+      m_enter_names:"请输入您的名字和姓氏。", m_pass_min:"密码至少需要6个字符。", m_pass_match:"两次密码不一致。",
+      m_wp_not_found:"未找到工作单位。请检查代码。", m_not_registered:"此邮箱未在 {shop} 注册。请让他们用此邮箱添加您。",
+      m_removed:"您已不在 {shop} 生效。如有错误请联系他们。", m_left:"您已离开 {shop}。请让他们再次添加您。",
+      m_left_ok:"您已离开 {shop}。", m_load_fail:"无法加载您的资料。",
+      m_verify_sent:"验证邮件已发送。请查看收件箱（和垃圾邮件）。", m_verify_wait:"当前请求过多。请等待几分钟后再点击重新发送。", m_verify_fail:"现在无法发送。请稍后再试。",
+      m_not_verified_yet:"尚未验证 — 请先打开邮件中的链接。", m_leave_wrong_pass:"密码错误。请重试。", m_save_fail:"无法保存。",
+      e_email_in_use:"此邮箱已有账户。请尝试登录。", e_invalid_email:"请输入有效的邮箱。", e_weak_pass:"密码至少需要6个字符。",
+      e_wrong_pass:"邮箱或密码错误。", e_no_user:"此邮箱没有账户。请创建一个。", e_too_many:"尝试次数过多。请等待一分钟后再试。",
+      e_network:"网络问题。请检查连接后重试。", e_missing_pass:"请输入密码。", e_generic:"出了点问题。请重试。"
+    };
+    DICT.ru={
+      signin_title:"Вход для команды", signin_sub:"Войдите, чтобы видеть чаевые и доход.",
+      register_title:"Создайте аккаунт", register_sub:"Используйте тот же email, который добавило ваше место работы.",
+      wcode:"Код места работы", wcode_ph:"Запросите код у вашего места работы",
+      first:"Имя", first_ph:"Имя", last:"Фамилия", last_ph:"Фамилия",
+      email:"Email", password:"Пароль", pass_ph:"Не менее 6 символов",
+      confirm:"Подтвердите пароль", confirm_ph:"Повторите пароль", phone:"Телефон", optional:"(необязательно)",
+      signin_btn:"Войти", create_btn:"Создать аккаунт",
+      new_here:"Впервые здесь?", create_team:"Создайте командный аккаунт",
+      have_account:"Уже есть аккаунт?", switch_signin:"Войти",
+      powered:"При поддержке Amidify Solutions Inc.",
+      verify_title:"Подтвердите email", verify_sub1:"Мы отправили ссылку для подтверждения на", verify_sub2:"Откройте её, затем вернитесь и нажмите продолжить.",
+      verified_continue:"Я подтвердил — продолжить", resend:"Отправить письмо снова", use_diff:"Использовать другой email",
+      verify_banner:"Подтвердите email для защиты аккаунта.", resend_short:"Отправить снова",
+      your_tips:"Ваши чаевые", tips:"Чаевые", avg_tip:"Ср. чаевые", avg_rating:"Ср. оценка",
+      recent_tips:"Недавние чаевые", no_tips:"Пока нет чаевых.", from:"от",
+      insights_title:"Аналитика", this_week:"Эта неделя", this_month:"Этот месяц", all_time:"Всё время",
+      earned:"Заработано", average:"Среднее", daily_earnings:"Доход по дням (последние 14 дней)",
+      top_day:"Лучший день", named_tips:"С именем", anon_tips:"Аноним", rating_avg:"Средняя оценка", no_data:"Пока нет данных за этот период.",
+      settings_title:"Настройки", language:"Язык", profile:"Профиль",
+      name_label:"Имя", email_label:"Email", phone_label:"Телефон", email_status:"Подтверждение email",
+      verified:"Подтверждён ✓", not_verified:"Не подтверждён",
+      get_paid:"Получать выплаты", coming_soon:"Скоро",
+      payout_note:"Банковские выплаты активируются. Скоро вы сможете подключить банковский счёт здесь, чтобы получать чаевые напрямую. Пока ваше место работы может видеть и рассчитывать ваши чаевые.",
+      connect_bank:"Подключить банковский счёт", tip_terms:"Условия распределения чаевых", log_out:"Выйти",
+      leave_wp:"Покинуть место работы", leave_desc:"Перестать отображаться на странице чаевых вашего места работы. Прошлые чаевые остаются в записи.",
+      nav_home:"Главная", nav_insights:"Аналитика", nav_settings:"Настройки",
+      cm_title:"Распределение чаевых", cm_body1:"использует общий фонд чаевых. Они могут удерживать", cm_body2:"максимум до 15%", cm_body3:"от каждых чаевых в общий фонд — остальное ваше.",
+      cm_now1:"Сейчас они удерживают", cm_now2:"так что вы получаете", cm_now3:"от каждых чаевых.",
+      cm_fine:"Также применяются стандартные комиссии Stripe за обработку платежей. Соглашаясь, вы принимаете это распределение. Вы можете просмотреть условия в любое время.",
+      cm_agree:"Понимаю и согласен", cm_later:"Может позже", cm_close:"Закрыть",
+      leave_modal_title:"Покинуть {shop}?", leave_modal_desc:"Введите пароль для подтверждения. Вы перестанете отображаться на их странице чаевых. Прошлые чаевые сохраняются, и они могут снова вас добавить.",
+      password_confirm_ph:"Ваш пароль", confirm_leave:"Покинуть место работы", cancel:"Отмена",
+      connected_to:"Подключено к {shop}",
+      m_enter_code:"Введите код места работы.", m_enter_email_pass:"Введите email и пароль.",
+      m_enter_names:"Введите имя и фамилию.", m_pass_min:"Пароль должен содержать не менее 6 символов.", m_pass_match:"Пароли не совпадают.",
+      m_wp_not_found:"Место работы не найдено. Проверьте код.", m_not_registered:"Этот email не зарегистрирован в {shop}. Попросите добавить вас с этим email.",
+      m_removed:"Вы больше не активны в {shop}. Свяжитесь с ними, если это ошибка.", m_left:"Вы покинули {shop}. Попросите добавить вас снова.",
+      m_left_ok:"Вы покинули {shop}.", m_load_fail:"Не удалось загрузить профиль.",
+      m_verify_sent:"Письмо для подтверждения отправлено. Проверьте почту (и спам).", m_verify_wait:"Слишком много запросов. Подождите несколько минут и повторите.", m_verify_fail:"Сейчас не удалось отправить. Повторите позже.",
+      m_not_verified_yet:"Ещё не подтверждено — сначала откройте ссылку в письме.", m_leave_wrong_pass:"Неверный пароль. Повторите попытку.", m_save_fail:"Не удалось сохранить.",
+      e_email_in_use:"У этого email уже есть аккаунт. Попробуйте войти.", e_invalid_email:"Введите корректный email.", e_weak_pass:"Пароль должен содержать не менее 6 символов.",
+      e_wrong_pass:"Неверный email или пароль.", e_no_user:"Нет аккаунта с этим email. Создайте его.", e_too_many:"Слишком много попыток. Подождите минуту и повторите.",
+      e_network:"Проблема с сетью. Проверьте подключение и повторите.", e_missing_pass:"Введите пароль.", e_generic:"Что-то пошло не так. Повторите попытку."
+    };
+
     const firebaseConfig = {apiKey:"AIzaSyBsY_pCxvbbJUtvRb7ClwgWQ25hGzNTgBM",authDomain:"easy-tip-me.firebaseapp.com",projectId:"easy-tip-me",storageBucket:"easy-tip-me.firebasestorage.app",messagingSenderId:"189382420404",appId:"1:189382420404:web:2f6075c986c81484eab4e1"};
     firebase.initializeApp(firebaseConfig);
     const auth=firebase.auth(), db=firebase.firestore();
@@ -201,8 +591,30 @@
     const params=new URLSearchParams(location.search);
     let BID=params.get('s')||localStorage.getItem('etm_staff_bid')||'';
     let staffDoc=null, staffId=null, shop=null, registerMode=false;
+    let allRows=[], curRange='week', curSym='$';
     const BACKEND="https://easytipme-backend.onrender.com";
-    // Send verification via our branded Brevo email (reliable); fall back to Firebase's default sender.
+
+    // ---------- language engine ----------
+    let LANG=localStorage.getItem('etm_lang')||(navigator.language||'en').slice(0,2).toLowerCase();
+    if(!DICT[LANG]) LANG='en';
+    function t(key,vars){ let s=(DICT[LANG]&&DICT[LANG][key])!=null?DICT[LANG][key]:(DICT.en[key]!=null?DICT.en[key]:key); if(vars){for(const k in vars){s=s.replace('{'+k+'}',vars[k]);}} return s; }
+    function applyLang(){
+      document.documentElement.lang=LANG;
+      document.documentElement.dir=(LANG==='ar')?'rtl':'ltr';
+      document.querySelectorAll('[data-i18n]').forEach(el=>{ el.textContent=t(el.getAttribute('data-i18n')); });
+      document.querySelectorAll('[data-i18n-ph]').forEach(el=>{ el.setAttribute('placeholder',t(el.getAttribute('data-i18n-ph'))); });
+      buildSwitchLine();
+      // refresh dynamic bits if signed in
+      if(shop){ $('connShop').textContent=t('connected_to',{shop:shop.businessName||'—'}); }
+      if(staffDoc){ renderSettings(auth.currentUser); if(!$('tab-insights').classList.contains('hide')) renderInsights(); if(!$('tab-home').classList.contains('hide')) renderRecent(); }
+    }
+    function fillLangSelect(sel){ if(!sel)return; sel.innerHTML=''; LANGS.forEach(([code,name])=>{const o=document.createElement('option');o.value=code;o.textContent=name;if(code===LANG)o.selected=true;sel.appendChild(o);}); }
+    function onLangChange(v){ LANG=DICT[v]?v:'en'; try{localStorage.setItem('etm_lang',LANG);}catch(_){}; fillLangSelect($('langAuth')); fillLangSelect($('langSet')); applyLang(); }
+    fillLangSelect($('langAuth')); fillLangSelect($('langSet'));
+    $('langAuth').onchange=e=>onLangChange(e.target.value);
+    $('langSet').onchange=e=>onLangChange(e.target.value);
+
+    // send verification via branded Brevo email (reliable); fall back to Firebase default sender.
     async function sendVerify(user, name){
       try{
         const r=await fetch(BACKEND+'/send-verification',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:(user.email||'').toLowerCase(), name:name||user.displayName||''})});
@@ -216,74 +628,74 @@
 
     // logo mark
     const LOGO='<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00c2ff"/><stop offset="1" stop-color="#0071e3"/></linearGradient></defs><rect width="100" height="100" rx="24" fill="#0a0a0a"/><rect x="30" y="26" width="10" height="48" rx="5" fill="url(#lg)"/><rect x="30" y="26" width="34" height="10" rx="5" fill="url(#lg)"/><rect x="30" y="64" width="34" height="10" rx="5" fill="url(#lg)"/><rect x="30" y="45" width="22" height="10" rx="5" fill="url(#lg)"/><circle cx="63" cy="50" r="9" fill="#fff"/><circle cx="63" cy="50" r="4.5" fill="url(#lg)"/></svg>';
-    // unique gradient id per instance (a shared/hidden id stops the gradient from painting)
     $('mk1').innerHTML=LOGO.replace(/lg/g,'lgA'); $('mk2').innerHTML=LOGO.replace(/lg/g,'lgB'); $('mk3').innerHTML=LOGO.replace(/lg/g,'lgC');
 
-    // eye toggle
+    // eye toggles
     const EYE='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8e8e93" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1.8 12S5.3 5 12 5s10.2 7 10.2 7-3.5 7-10.2 7S1.8 12 1.8 12z"/><circle cx="12" cy="12" r="3.1"/></svg>';
     const EYEOFF='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8e8e93" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 5.2A9.6 9.6 0 0 1 12 5c6.7 0 10.2 7 10.2 7a17 17 0 0 1-3.1 3.8M6.3 6.3A17 17 0 0 0 1.8 12S5.3 19 12 19a9.5 9.5 0 0 0 4.1-.9"/><path d="M9.9 9.9a3.1 3.1 0 0 0 4.4 4.4"/><line x1="3" y1="3" x2="21" y2="21"/></svg>';
-    $('eyeBtn').innerHTML=EYE;
-    $('eyeBtn').onclick=()=>{const p=$('pass');const r=p.type==='password';p.type=r?'text':'password';$('eyeBtn').innerHTML=r?EYEOFF:EYE;};
-    $('eyeBtn2').innerHTML=EYE;
-    $('eyeBtn2').onclick=()=>{const p=$('pass2');const r=p.type==='password';p.type=r?'text':'password';$('eyeBtn2').innerHTML=r?EYEOFF:EYE;};
+    function eyeToggle(btn,inp){ $(btn).innerHTML=EYE; $(btn).onclick=()=>{const p=$(inp);const r=p.type==='password';p.type=r?'text':'password';$(btn).innerHTML=r?EYEOFF:EYE;}; }
+    eyeToggle('eyeBtn','pass'); eyeToggle('eyeBtn2','pass2'); eyeToggle('eyeBtn3','lvPass');
 
     if(!BID){ $('shopCodeWrap').classList.remove('hide'); }
 
     function amsg(t,type){const m=$('authMsg');m.textContent=t;m.className='msg '+(type||'err');}
     function prettyErr(e){const c=(e&&e.code)||'';
-      if(c.includes('email-already-in-use'))return 'This email already has an account. Try signing in.';
-      if(c.includes('invalid-email'))return 'Enter a valid email.';
-      if(c.includes('weak-password'))return 'Password must be at least 6 characters.';
-      if(c.includes('wrong-password')||c.includes('invalid-credential'))return 'Wrong email or password.';
-      if(c.includes('user-not-found'))return 'No account with this email. Create one.';
-      if(c.includes('too-many-requests'))return 'Too many attempts. Please wait a minute, then try again.';
-      if(c.includes('network-request-failed'))return 'Network problem. Check your connection and try again.';
-      if(c.includes('missing-password'))return 'Enter your password.';
-      return 'Something went wrong. Please try again.';
+      if(c.includes('email-already-in-use'))return t('e_email_in_use');
+      if(c.includes('invalid-email'))return t('e_invalid_email');
+      if(c.includes('weak-password'))return t('e_weak_pass');
+      if(c.includes('wrong-password')||c.includes('invalid-credential'))return t('e_wrong_pass');
+      if(c.includes('user-not-found'))return t('e_no_user');
+      if(c.includes('too-many-requests'))return t('e_too_many');
+      if(c.includes('network-request-failed'))return t('e_network');
+      if(c.includes('missing-password'))return t('e_missing_pass');
+      return t('e_generic');
     }
 
+    function buildSwitchLine(){
+      const el=$('switchLine'); if(!el) return;
+      el.innerHTML = registerMode
+        ? t('have_account')+' <a id="altLink">'+t('switch_signin')+'</a>'
+        : t('new_here')+' <a id="altLink">'+t('create_team')+'</a>';
+      const a=el.querySelector('a'); if(a) a.onclick=toggleMode;
+    }
     function applyMode(){
-      $('authTitle').textContent=registerMode?'Create your account':'Team sign in';
-      $('authSub').textContent=registerMode?'Use the same email your workplace added for you.':'Sign in to see your tips and earnings.';
+      $('authTitle').textContent=registerMode?t('register_title'):t('signin_title');
+      $('authSub').textContent=registerMode?t('register_sub'):t('signin_sub');
       $('loginBtn').classList.toggle('hide',registerMode);
       $('registerBtn').classList.toggle('hide',!registerMode);
       $('regNameWrap').classList.toggle('hide',!registerMode);
       $('regConfirmWrap').classList.toggle('hide',!registerMode);
-      $('switchLine').innerHTML=registerMode?'Already have an account? <a id="toSignin">Sign in</a>':'New here? <a id="toReg">Create your team account</a>';
-      const alt=$('switchLine').querySelector('a'); if(alt) alt.onclick=toggleMode;
+      buildSwitchLine();
     }
     function toggleMode(){ registerMode=!registerMode; applyMode(); }
-    $('toRegister').onclick=toggleMode;
-    // invite link (from the welcome email) opens straight into Create account
-    if(params.get('new')==='1' || params.get('r')==='1'){ registerMode=true; applyMode(); }
+    if(params.get('new')==='1' || params.get('r')==='1'){ registerMode=true; }
 
-    $('loginBtn').onclick=async()=>{ await doAuth(false); };
-    $('registerBtn').onclick=async()=>{ await doAuth(true); };
+    $('loginBtn').onclick=()=>doAuth(false);
+    $('registerBtn').onclick=()=>doAuth(true);
 
     async function doAuth(create){
       const email=$('email').value.trim().toLowerCase(), pass=$('pass').value;
       if($('shopCodeWrap').classList.contains('hide')===false){
         const raw=$('shopCode').value.trim();
-        if(!raw){ amsg('Enter your workplace code.'); return; }
+        if(!raw){ amsg(t('m_enter_code')); return; }
         const code=raw.toUpperCase().replace(/[^A-Z0-9]/g,'');
         try{ const cd=await db.collection('shopCodes').doc(code).get(); BID=(cd.exists&&cd.data().bid)?cd.data().bid:raw; }
         catch(_){ BID=raw; }
       }
-      if(!BID){ amsg('Enter your workplace code.'); return; }
-      if(!email||!pass){ amsg('Enter your email and password.'); return; }
+      if(!BID){ amsg(t('m_enter_code')); return; }
+      if(!email||!pass){ amsg(t('m_enter_email_pass')); return; }
       let first='',last='',phone='';
       if(create){
         first=$('f_first').value.trim(); last=$('f_last').value.trim(); phone=$('f_phone').value.trim();
-        if(!first||!last){ amsg('Enter your first and last name.'); return; }
-        if(pass.length<6){ amsg('Password must be at least 6 characters.'); return; }
-        if(pass!==$('pass2').value){ amsg('Passwords don’t match.'); return; }
+        if(!first||!last){ amsg(t('m_enter_names')); return; }
+        if(pass.length<6){ amsg(t('m_pass_min')); return; }
+        if(pass!==$('pass2').value){ amsg(t('m_pass_match')); return; }
       }
       const btn=create?$('registerBtn'):$('loginBtn'); btn.disabled=true;
       try{
         if(create){
           const cred=await auth.createUserWithEmailAndPassword(email,pass);
           try{ await cred.user.updateProfile({displayName:(first+' '+last).trim()}); }catch(_){}
-          // keep the staff's self-entered details (used later to pre-fill Stripe payouts)
           try{ localStorage.setItem('etm_staff_profile', JSON.stringify({firstName:first,lastName:last,phone:phone,email:email})); }catch(_){}
           try{ await sendVerify(cred.user, (first+' '+last).trim()); }catch(_){}
         } else {
@@ -293,117 +705,176 @@
       }catch(e){ btn.disabled=false; amsg(prettyErr(e)); }
     }
 
-    // verify-email screen
-    function vmsg(t,type){const m=$('verMsg');m.textContent=t;m.className='msg '+(type||'err');}
+    // verify-email hard screen (off by default)
+    function vmsg(txt,type){const m=$('verMsg');m.textContent=txt;m.className='msg '+(type||'err');}
     function showVerify(u){ $('verEmail').textContent=u.email||''; vmsg('',''); $('verMsg').className='msg'; show('verify'); }
-    $('verResend').onclick=async()=>{ $('verResend').disabled=true; const res=await sendVerify(auth.currentUser); vmsg(res==='ok'?'Verification email sent. Check your inbox (and spam).':res==='rate'?'Too many requests just now. Please wait a few minutes, then tap Resend again.':'Could not send right now. Try again in a moment.', res==='ok'?'ok':'err'); $('verResend').disabled=false; };
-    $('verCheck').onclick=async()=>{ $('verCheck').disabled=true; try{ await auth.currentUser.reload(); if(auth.currentUser.emailVerified){ loadMembership(auth.currentUser); } else { vmsg('Not verified yet — open the link in the email first.'); } }catch(e){ vmsg(prettyErr(e)); } $('verCheck').disabled=false; };
+    $('verResend').onclick=async()=>{ $('verResend').disabled=true; const res=await sendVerify(auth.currentUser); vmsg(res==='ok'?t('m_verify_sent'):res==='rate'?t('m_verify_wait'):t('m_verify_fail'), res==='ok'?'ok':'err'); $('verResend').disabled=false; };
+    $('verCheck').onclick=async()=>{ $('verCheck').disabled=true; try{ await auth.currentUser.reload(); if(auth.currentUser.emailVerified){ loadMembership(auth.currentUser); } else { vmsg(t('m_not_verified_yet')); } }catch(e){ vmsg(prettyErr(e)); } $('verCheck').disabled=false; };
     $('verLogout').onclick=()=>auth.signOut().then(()=>{ registerMode=false; show('auth'); });
 
-    // Verification is currently a soft reminder (banner on home), not a hard wall,
-    // until the reliable branded verification email (via Brevo) is live. Flip to true to enforce.
     const ENFORCE_VERIFY=false;
     auth.onAuthStateChanged(async u=>{
-      if(!u){ show('auth'); return; }
+      if(!u){ applyMode(); show('auth'); return; }
       if(ENFORCE_VERIFY && !u.emailVerified){ showVerify(u); return; }
       loadMembership(u);
     });
 
     async function loadMembership(u){
       try{
-        if(!BID){ show('auth'); amsg('Enter your workplace code to continue.'); return; }
+        if(!BID){ show('auth'); amsg(t('m_enter_code')); return; }
         const sd=await db.collection('businesses').doc(BID).get();
-        if(!sd.exists){ show('auth'); amsg('Workplace not found. Check the code.'); return; }
+        if(!sd.exists){ show('auth'); amsg(t('m_wp_not_found')); return; }
         shop=sd.data();
         const snap=await db.collection('businesses').doc(BID).collection('staff').where('email','==',(u.email||'').toLowerCase()).limit(1).get();
-        if(snap.empty){ show('auth'); amsg('This email isn’t registered at '+(shop.businessName||'your workplace')+'. Ask them to add you with this email.'); return; }
+        if(snap.empty){ show('auth'); amsg(t('m_not_registered',{shop:shop.businessName||'—'})); return; }
         staffDoc=snap.docs[0].data(); staffId=snap.docs[0].id;
-        if(staffDoc.status==='removed'){ show('auth'); amsg('You’re no longer active at '+(shop.businessName||'this workplace')+'. Contact them if this is a mistake.'); return; }
-        if(staffDoc.leftByStaff===true){ show('auth'); amsg('You left '+(shop.businessName||'this workplace')+'. Ask them to add you again to rejoin.'); return; }
-        // bind this staff record to the signed-in account (stable identity, not the mutable email)
+        if(staffDoc.status==='removed'){ show('auth'); amsg(t('m_removed',{shop:shop.businessName||'—'})); return; }
+        if(staffDoc.leftByStaff===true){ show('auth'); amsg(t('m_left',{shop:shop.businessName||'—'})); return; }
         if(!staffDoc.claimedUid){
           try{ await db.collection('businesses').doc(BID).collection('staff').doc(staffId).update({claimedUid:u.uid, claimedAt:firebase.firestore.FieldValue.serverTimestamp()}); staffDoc.claimedUid=u.uid; }catch(_){}
         }
-        renderHome(u);
-      }catch(e){ show('auth'); amsg('Could not load your profile. '+e.message); }
+        renderApp(u);
+      }catch(e){ show('auth'); amsg(t('m_load_fail')+' '+e.message); }
     }
 
-    async function renderHome(u){
-      const sym=CURSYM[shop.currency||'CAD']||'$';
+    async function renderApp(u){
+      curSym=CURSYM[shop.currency||'CAD']||'$';
       // header
-      $('pPic').innerHTML = staffDoc.photo?`<img src="${staffDoc.photo}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`:(staffDoc.nickname||'?').charAt(0).toUpperCase();
-      $('pName').textContent = staffDoc.nickname||u.email;
+      $('pPic').innerHTML = staffDoc.photo?`<img src="${staffDoc.photo}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`:(staffDoc.nickname||(u.displayName||'?')).charAt(0).toUpperCase();
+      $('pName').textContent = staffDoc.nickname||u.displayName||u.email;
       $('pRole').textContent = (staffDoc.job?staffDoc.job+' · ':'')+(shop.businessName||'');
-      $('connShop').textContent = 'Connected to '+(shop.businessName||'your workplace');
+      $('connShop').textContent = t('connected_to',{shop:shop.businessName||'—'});
       $('connBadge').classList.remove('hide');
-      // soft email-verification reminder (banner)
+      // verify banner
       $('verifyBanner').classList.toggle('hide', !!u.emailVerified);
-      $('vbResend').onclick=async()=>{ $('vbResend').disabled=true; $('vbResend').textContent='Sending…'; const res=await sendVerify(u); $('vbResend').textContent= res==='ok'?'Sent ✓':'Resend'; if(res==='rate') alert('Too many requests just now. Please wait a few minutes, then tap Resend again.'); else if(res!=='ok') alert('Could not send right now. Try again in a moment.'); $('vbResend').disabled=false; };
-      // tip sharing — subtle review link only (details live in the one-time modal)
-      const shareOn=!!shop.tipShareEnabled;
-      $('shareReview').classList.toggle('hide', !shareOn);
-      // earnings
-      let total=0,count=0,rs=0,rc=0; const rows=[];
+      $('vbResend').onclick=async()=>{ $('vbResend').disabled=true; $('vbResend').textContent='…'; const res=await sendVerify(u); $('vbResend').textContent= res==='ok'?'✓':t('resend_short'); if(res==='rate') alert(t('m_verify_wait')); else if(res!=='ok') alert(t('m_verify_fail')); $('vbResend').disabled=false; };
+      // load tips into allRows
+      allRows=[];
       try{
-        const tips=await db.collection('businesses').doc(BID).collection('tips').where('recipientEmails','array-contains',(u.email||'').toLowerCase()).limit(200).get();
-        tips.forEach(d=>{const t=d.data();
-          const n=(t.recipientIds&&t.recipientIds.length)||1;
-          const share=(t.staffShare!=null?t.staffShare:(t.tip||0));
-          const mine= t.multiple? share/n : share;
-          total+=mine; count++;
-          if(t.rating){rs+=t.rating;rc++;}
-          rows.push({amt:mine, date:t.createdAt, rating:t.rating, from:(t.fromName||'')});
+        const tips=await db.collection('businesses').doc(BID).collection('tips').where('recipientEmails','array-contains',(u.email||'').toLowerCase()).limit(300).get();
+        tips.forEach(d=>{const t2=d.data();
+          const n=(t2.recipientIds&&t2.recipientIds.length)||1;
+          const share=(t2.staffShare!=null?t2.staffShare:(t2.tip||0));
+          const mine= t2.multiple? share/n : share;
+          const dt=t2.createdAt&&t2.createdAt.toDate?t2.createdAt.toDate():null;
+          allRows.push({amt:mine, date:dt, ms:dt?dt.getTime():0, rating:t2.rating||0, from:(t2.fromName||'')});
         });
-      }catch(e){ /* permission or data issue — leave earnings at zero */ }
-      rows.sort((a,b)=>{const ta=a.date&&a.date.toMillis?a.date.toMillis():0;const tb=b.date&&b.date.toMillis?b.date.toMillis():0;return tb-ta;});
-      $('eTotal').textContent=sym+total.toFixed(2);
+      }catch(e){ /* leave empty */ }
+      allRows.sort((a,b)=>b.ms-a.ms);
+      renderHomeStats(); renderRecent(); renderInsights(); renderSettings(u); setupConsent(u);
+      show('app'); switchTab('home');
+    }
+
+    function renderHomeStats(){
+      let total=0,count=allRows.length,rs=0,rc=0;
+      allRows.forEach(r=>{ total+=r.amt; if(r.rating){rs+=r.rating;rc++;} });
+      $('eTotal').textContent=curSym+total.toFixed(2);
       $('eCount').textContent=count;
+      $('eAvg').textContent=count?curSym+(total/count).toFixed(2):'—';
       $('eRating').textContent=rc?(rs/rc).toFixed(1)+'★':'—';
-      const el=$('tipsList'); el.innerHTML=''; $('noTips').style.display=rows.length?'none':'block';
-      rows.slice(0,20).forEach(r=>{
-        const dt=r.date&&r.date.toDate?r.date.toDate():null;
-        const ds=dt?dt.toLocaleDateString(undefined,{month:'short',day:'numeric'}):'';
-        const fromTxt=r.from?(' · from '+r.from.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))):'';
-        el.insertAdjacentHTML('beforeend',`<div class="tip-row"><div><div class="tip-amt">+${sym}${r.amt.toFixed(2)}</div><div class="tip-date">${ds}${fromTxt}${r.rating?' · '+'★'.repeat(r.rating):''}</div></div></div>`);
+    }
+    function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+    function renderRecent(){
+      const el=$('tipsList'); el.innerHTML=''; $('noTips').style.display=allRows.length?'none':'block';
+      allRows.slice(0,20).forEach(r=>{
+        const ds=r.date?r.date.toLocaleDateString(LANG,{month:'short',day:'numeric'}):'';
+        const fromTxt=r.from?(' · '+t('from')+' '+esc(r.from)):'';
+        el.insertAdjacentHTML('beforeend',`<div class="tip-row"><div><div class="tip-amt">+${curSym}${r.amt.toFixed(2)}</div><div class="tip-date">${ds}${fromTxt}${r.rating?' · '+'★'.repeat(r.rating):''}</div></div></div>`);
       });
-      // tip-sharing consent — one-time modal, then never in their face again
+    }
+
+    // range segmented control
+    Array.from($('rangeSeg').children).forEach(b=>{ b.onclick=()=>{ curRange=b.getAttribute('data-r'); Array.from($('rangeSeg').children).forEach(x=>x.classList.toggle('on',x===b)); renderInsights(); }; });
+
+    function renderInsights(){
+      const now=Date.now();
+      const days = curRange==='week'?7 : curRange==='month'?30 : 0;
+      const from = days? now - days*86400000 : 0;
+      const rows = allRows.filter(r=> r.ms>=from);
+      let total=0,rs=0,rc=0,named=0,anon=0;
+      rows.forEach(r=>{ total+=r.amt; if(r.rating){rs+=r.rating;rc++;} if(r.from) named++; else anon++; });
+      $('inEarned').textContent=curSym+total.toFixed(2);
+      $('inCount').textContent=rows.length;
+      $('inAvg').textContent=rows.length?curSym+(total/rows.length).toFixed(2):'—';
+      // per-day totals (for best day within range, and 14-day chart)
+      const byDay={};
+      rows.forEach(r=>{ if(!r.date)return; const k=r.date.getFullYear()+'-'+r.date.getMonth()+'-'+r.date.getDate(); byDay[k]=(byDay[k]||0)+r.amt; });
+      let bestK=null,bestV=0; for(const k in byDay){ if(byDay[k]>bestV){bestV=byDay[k];bestK=k;} }
+      if(bestK){ const [y,m,d]=bestK.split('-').map(Number); const bd=new Date(y,m,d); $('inTop').textContent=bd.toLocaleDateString(LANG,{month:'short',day:'numeric'})+' · '+curSym+bestV.toFixed(2); }
+      else $('inTop').textContent='—';
+      $('inNamed').textContent=named; $('inAnon').textContent=anon;
+      $('inRate').textContent=rc?(rs/rc).toFixed(1)+'★':'—';
+      // 14-day chart from all data
+      const chart=$('chart'), xl=$('xlabels'); chart.innerHTML=''; xl.innerHTML='';
+      const buckets=[]; const today=new Date(); today.setHours(0,0,0,0);
+      for(let i=13;i>=0;i--){ const d=new Date(today.getTime()-i*86400000); buckets.push({d, v:0}); }
+      allRows.forEach(r=>{ if(!r.date)return; buckets.forEach(b=>{ if(r.date.getFullYear()===b.d.getFullYear()&&r.date.getMonth()===b.d.getMonth()&&r.date.getDate()===b.d.getDate()) b.v+=r.amt; }); });
+      const max=Math.max(1,...buckets.map(b=>b.v));
+      buckets.forEach((b,i)=>{
+        const h=b.v>0?Math.max(6,Math.round(b.v/max*100)):0;
+        chart.insertAdjacentHTML('beforeend',`<div class="bar ${b.v>0?'':'empty'}" style="height:${b.v>0?h+'%':'6px'}" title="${curSym}${b.v.toFixed(2)}"></div>`);
+        xl.insertAdjacentHTML('beforeend',`<span>${(i%2===0)?b.d.getDate():''}</span>`);
+      });
+    }
+
+    function renderSettings(u){
+      const prof=(()=>{try{return JSON.parse(localStorage.getItem('etm_staff_profile')||'{}');}catch(_){return {};}})();
+      $('setName').textContent = u?(u.displayName|| (prof.firstName?prof.firstName+' '+(prof.lastName||''):'') || (staffDoc&&staffDoc.nickname) || '—'):'—';
+      $('setEmail').textContent = (u&&u.email)||'—';
+      $('setPhone').textContent = (staffDoc&&staffDoc.phone) || prof.phone || '—';
+      const ver=u&&u.emailVerified;
+      $('setVerified').innerHTML = ver?`<span class="pill g">${t('verified')}</span>`:`<span class="pill o">${t('not_verified')}</span>`;
+      $('setResend').classList.toggle('hide', !!ver);
+      $('setResend').onclick=async()=>{ $('setResend').disabled=true; const res=await sendVerify(u); alert(res==='ok'?t('m_verify_sent'):res==='rate'?t('m_verify_wait'):t('m_verify_fail')); $('setResend').disabled=false; };
+    }
+
+    // ---- tip-sharing consent (one-time) ----
+    function setupConsent(u){
+      const shareOn=!!shop.tipShareEnabled;
       const pct=shareOn?Math.min(15,Math.max(0,shop.tipSharePercent||0)):0;
-      $('cmShop').textContent=shop.businessName||'Your workplace';
-      $('cmPct').textContent=pct+'%';
-      $('cmKeep').textContent=(100-pct)+'%';
+      $('cmShop').textContent=shop.businessName||'—';
+      $('cmPct').textContent=pct+'%'; $('cmKeep').textContent=(100-pct)+'%';
       let consented=false;
-      try{
-        const cq=await db.collection('businesses').doc(BID).collection('consents').where('email','==',(u.email||'').toLowerCase()).limit(1).get();
-        consented=!cq.empty;
-      }catch(e){}
-      function openConsent(review){
-        $('cmAgree').classList.toggle('hide', !!review);
-        $('cmLater').textContent = review ? 'Close' : 'Maybe later';
-        $('consentModal').classList.remove('hide');
-      }
-      // show automatically only if sharing is on AND not yet agreed
-      if(shareOn && !consented) openConsent(false);
+      (async()=>{ try{ const cq=await db.collection('businesses').doc(BID).collection('consents').where('email','==',(u.email||'').toLowerCase()).limit(1).get(); consented=!cq.empty; if(shareOn && !consented) openConsent(false); }catch(e){} })();
+      function openConsent(review){ $('cmAgree').classList.toggle('hide', !!review); $('cmLater').textContent = review ? t('cm_close') : t('cm_later'); $('consentModal').classList.remove('hide'); }
       $('reviewShare').onclick=()=>openConsent(true);
       $('cmLater').onclick=()=>$('consentModal').classList.add('hide');
-      $('cmAgree').onclick=async()=>{
-        $('cmAgree').disabled=true;
-        try{ await db.collection('businesses').doc(BID).collection('consents').add({email:(u.email||'').toLowerCase(), staffId, sharePercent:(shop.tipSharePercent||0), agreedAt:firebase.firestore.FieldValue.serverTimestamp()});
-          consented=true; $('consentModal').classList.add('hide');
-        }catch(e){ alert('Could not save. '+e.message); $('cmAgree').disabled=false; }
+      $('cmAgree').onclick=async()=>{ $('cmAgree').disabled=true;
+        try{ await db.collection('businesses').doc(BID).collection('consents').add({email:(u.email||'').toLowerCase(), staffId, sharePercent:(shop.tipSharePercent||0), agreedAt:firebase.firestore.FieldValue.serverTimestamp()}); consented=true; $('consentModal').classList.add('hide'); }
+        catch(e){ alert(t('m_save_fail')+' '+e.message); $('cmAgree').disabled=false; }
       };
-      show('home');
     }
 
-    $('logoutBtn').onclick=()=>auth.signOut().then(()=>{ staffDoc=null; show('auth'); });
-    $('leaveBtn').onclick=async()=>{
-      if(!confirm('Leave '+(shop&&shop.businessName||'this workplace')+'?\n\nYou will stop appearing on their tip page. Your past tips stay recorded. They can add you again to rejoin.')) return;
+    // ---- logout & leave (password protected) ----
+    $('logoutBtn').onclick=()=>auth.signOut().then(()=>{ staffDoc=null; registerMode=false; show('auth'); });
+    function lvmsg(txt){const m=$('lvMsg');m.textContent=txt||'';m.className='msg'+(txt?' err':'');}
+    $('leaveBtn').onclick=()=>{ $('lvTitle').textContent=t('leave_modal_title',{shop:shop&&shop.businessName||'—'}); $('lvDesc').textContent=t('leave_modal_desc'); $('lvPass').value=''; lvmsg(''); $('leaveModal').classList.remove('hide'); };
+    $('lvCancel').onclick=()=>$('leaveModal').classList.add('hide');
+    $('lvConfirm').onclick=async()=>{
+      const pw=$('lvPass').value; if(!pw){ lvmsg(t('e_missing_pass')); return; }
+      $('lvConfirm').disabled=true;
       try{
+        const cred=firebase.auth.EmailAuthProvider.credential(auth.currentUser.email, pw);
+        await auth.currentUser.reauthenticateWithCredential(cred);
         await db.collection('businesses').doc(BID).collection('staff').doc(staffId).update({leftByStaff:true, leftAt:firebase.firestore.FieldValue.serverTimestamp()});
-        await auth.signOut(); staffDoc=null; show('auth'); amsg('You left '+(shop&&shop.businessName||'this workplace')+'.', 'ok');
-      }catch(e){ alert('Could not leave right now. '+prettyErr(e)); }
+        $('leaveModal').classList.add('hide');
+        const nm=shop&&shop.businessName||'—';
+        await auth.signOut(); staffDoc=null; show('auth'); amsg(t('m_left_ok',{shop:nm}), 'ok');
+      }catch(e){ const c=(e&&e.code)||''; lvmsg((c.includes('wrong-password')||c.includes('invalid-credential'))?t('m_leave_wrong_pass'):prettyErr(e)); $('lvConfirm').disabled=false; }
     };
 
-    function show(id){['loading','auth','verify','home'].forEach(x=>$(x).classList.add('hide'));$(id).classList.remove('hide');window.scrollTo(0,0);}
+    // ---- tabs ----
+    function switchTab(name){
+      ['home','insights','settings'].forEach(x=>{ $('tab-'+x).classList.toggle('hide', x!==name); });
+      [['home','navHome'],['insights','navInsights'],['settings','navSettings']].forEach(([x,id])=>$(id).classList.toggle('on', x===name));
+      window.scrollTo(0,0);
+    }
+    document.querySelectorAll('.nav button').forEach(b=>{ b.onclick=()=>switchTab(b.getAttribute('data-tab')); });
+
+    function show(id){['loading','auth','verify','app'].forEach(x=>$(x).classList.add('hide'));$(id).classList.remove('hide');window.scrollTo(0,0);}
+
+    // initial paint
+    applyLang();
   </script>
 </body>
 </html>
