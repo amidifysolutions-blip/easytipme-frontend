@@ -145,6 +145,11 @@
               <button class="btn ghost sm" id="copyStaff">Copy</button>
               <button class="btn sm" id="openStaff">Open</button>
             </div>
+            <p style="color:var(--soft);font-size:13px;margin:14px 0 6px">Or share this short <b>workplace code</b> — a team member can type it in the app instead of the link:</p>
+            <div class="linkrow">
+              <input type="text" id="shopCodeField" readonly style="font-weight:700;letter-spacing:1px">
+              <button class="btn ghost sm" id="copyCode">Copy</button>
+            </div>
           </div>
         </div>
 
@@ -349,8 +354,29 @@
       $('staffLink').value=staffUrl();
       $('shopQr').src='https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=0&data='+encodeURIComponent(url);
       $('loading').style.display='none'; $('app').style.display='flex';
+      ensureShopCode(b.shopCode);
       loadStaff();
     });
+
+    // Short, shareable workplace code (maps to this business). Generated once, then reused.
+    async function ensureShopCode(existing){
+      let code=existing;
+      if(!code){
+        const AB='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no ambiguous chars
+        for(let attempt=0; attempt<5 && !code; attempt++){
+          let c=''; for(let i=0;i<6;i++) c+=AB[Math.floor(Math.random()*AB.length)];
+          try{
+            const ex=await db.collection('shopCodes').doc(c).get();
+            if(ex.exists) continue;
+            await db.collection('shopCodes').doc(c).set({bid:BID, createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+            await db.collection('businesses').doc(BID).set({shopCode:c},{merge:true});
+            code=c;
+          }catch(e){ /* rules or race — try again */ }
+        }
+      }
+      $('shopCodeField').value = code || '—';
+    }
+    $('copyCode').onclick=()=>{navigator.clipboard.writeText($('shopCodeField').value);$('copyCode').textContent='Copied';setTimeout(()=>$('copyCode').textContent='Copy',1200);};
 
     $('logout').onclick=()=>auth.signOut().then(()=>location.href='signup.html');
     $('copyShop').onclick=()=>{navigator.clipboard.writeText($('shopLink').value);$('copyShop').textContent='Copied';setTimeout(()=>$('copyShop').textContent='Copy',1200);};

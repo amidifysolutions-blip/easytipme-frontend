@@ -260,7 +260,13 @@
 
     async function doAuth(create){
       const email=$('email').value.trim().toLowerCase(), pass=$('pass').value;
-      if($('shopCodeWrap').classList.contains('hide')===false){ BID=$('shopCode').value.trim(); }
+      if($('shopCodeWrap').classList.contains('hide')===false){
+        const raw=$('shopCode').value.trim();
+        if(!raw){ amsg('Enter your workplace code.'); return; }
+        const code=raw.toUpperCase().replace(/[^A-Z0-9]/g,'');
+        try{ const cd=await db.collection('shopCodes').doc(code).get(); BID=(cd.exists&&cd.data().bid)?cd.data().bid:raw; }
+        catch(_){ BID=raw; }
+      }
       if(!BID){ amsg('Enter your workplace code.'); return; }
       if(!email||!pass){ amsg('Enter your email and password.'); return; }
       let first='',last='',phone='';

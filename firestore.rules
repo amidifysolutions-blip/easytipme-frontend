@@ -64,6 +64,15 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Short workplace codes → business id. A staff app reads one by code (public lookup);
+    // an owner can only create/edit a code that points to their own business.
+    match /shopCodes/{code} {
+      allow get: if true;
+      allow list: if false;
+      allow create: if request.auth != null && request.resource.data.bid == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.bid == request.auth.uid;
+    }
+
     // Deny everything else by default.
     match /{document=**} {
       allow read, write: if false;
