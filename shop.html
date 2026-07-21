@@ -274,14 +274,16 @@
         stripe=Stripe(STRIPE_PK);
         elements=stripe.elements({clientSecret});
         $('payment-element').innerHTML='';
-        elements.create('payment',{fields:{billingDetails:{address:'never'}},wallets:{applePay:'auto',googlePay:'auto'}}).mount('#payment-element');
+        elements.create('payment',{wallets:{applePay:'auto',googlePay:'auto'}}).mount('#payment-element');
         try{
           const ece=elements.create('expressCheckout',{paymentMethods:{link:'never',paypal:'never',amazonPay:'never'}});
           ece.on('ready',e=>{ if(e && e.availablePaymentMethods){ $('express-wrap').classList.remove('hide'); } });
           ece.on('confirm',async()=>{
-            const {error,paymentIntent}=await stripe.confirmPayment({elements,clientSecret,redirect:'if_required'});
-            if(error){ pmsg(error.message); return; }
-            recordTip(paymentIntent);
+            try{
+              const {error,paymentIntent}=await stripe.confirmPayment({elements,clientSecret,redirect:'if_required'});
+              if(error){ pmsg(error.message); return; }
+              recordTip(paymentIntent);
+            }catch(ex){ pmsg((ex&&ex.message)||'Payment could not be completed. Please try again.'); }
           });
           ece.mount('#express-checkout');
         }catch(ex){/* wallets unavailable — card still works */}
@@ -292,9 +294,12 @@
 
     $('payBtn').onclick=async()=>{
       const btn=$('payBtn'); btn.disabled=true; btn.textContent='Processing…';
-      const {error,paymentIntent}=await stripe.confirmPayment({elements,redirect:'if_required'});
-      if(error){ pmsg(error.message); btn.disabled=false; btn.innerHTML='Pay '+sym+r2(tip*(1+FEE)).toFixed(2); return; }
-      recordTip(paymentIntent);
+      const resetBtn=()=>{ btn.disabled=false; btn.innerHTML='Pay '+sym+r2(tip*(1+FEE)).toFixed(2); };
+      try{
+        const {error,paymentIntent}=await stripe.confirmPayment({elements,redirect:'if_required'});
+        if(error){ pmsg(error.message); resetBtn(); return; }
+        recordTip(paymentIntent);
+      }catch(ex){ pmsg((ex&&ex.message)||'Payment could not be completed. Please try again.'); resetBtn(); }
     };
 
     async function recordTip(paymentIntent){
