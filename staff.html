@@ -893,14 +893,17 @@
 
     // send verification via branded Brevo email (reliable); fall back to Firebase default sender.
     // Sends a 6-digit confirmation code via Brevo (bypasses Firebase link throttle).
+    let lastSendErr='';
     async function sendVerify(user, name){
+      lastSendErr='';
       try{
         const idToken=await user.getIdToken();
         const r=await fetch(BACKEND+'/send-code',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken, name:name||user.displayName||''})});
         const j=await r.json().catch(()=>({}));
         if(j && j.sent===1) return 'ok';
         if(j && j.error==='slow-down') return 'rate';
-      }catch(_){}
+        lastSendErr=(j.error||'?')+(j.status?(' '+j.status):'')+(j.detail?(' · '+j.detail):'');
+      }catch(e){ lastSendErr='client:'+((e&&e.message)||'network'); }
       return 'fail';
     }
 
@@ -996,10 +999,10 @@
 
     // verify-email hard screen (off by default)
     function vmsg(txt,type){const m=$('verMsg');m.textContent=txt;m.className='msg '+(type||'err');}
-    function showVerify(u){ $('verEmail').textContent=u.email||''; $('verCode').value=''; $('verMsg').className='msg'; show('verify'); startResendCD(25); sendVerify(u).then(res=>{ if(res==='ok') vmsg(t('m_verify_sent'),'ok'); else if(res!=='rate') vmsg(t('m_verify_fail'),'err'); }); }
+    function showVerify(u){ $('verEmail').textContent=u.email||''; $('verCode').value=''; $('verMsg').className='msg'; show('verify'); startResendCD(25); sendVerify(u).then(res=>{ if(res==='ok') vmsg(t('m_verify_sent'),'ok'); else if(res!=='rate') vmsg(t('m_verify_fail')+(lastSendErr?(' ['+lastSendErr+']'):''),'err'); }); }
     let resendTimer=null;
     function startResendCD(secs){ const btn=$('verResend'); if(!btn) return; clearInterval(resendTimer); const base=t('resend_code'); btn.disabled=true; const tick=()=>{ if(secs<=0){ clearInterval(resendTimer); btn.disabled=false; btn.textContent=base; return; } btn.textContent=base+' ('+secs+'s)'; secs--; }; tick(); resendTimer=setInterval(tick,1000); }
-    $('verResend').onclick=async()=>{ startResendCD(25); const res=await sendVerify(auth.currentUser); vmsg(res==='ok'?t('m_verify_sent'):res==='rate'?t('m_verify_wait'):t('m_verify_fail'), res==='ok'?'ok':'err'); };
+    $('verResend').onclick=async()=>{ startResendCD(25); const res=await sendVerify(auth.currentUser); vmsg(res==='ok'?t('m_verify_sent'):res==='rate'?t('m_verify_wait'):(t('m_verify_fail')+(lastSendErr?(' ['+lastSendErr+']'):'')), res==='ok'?'ok':'err'); };
     $('verCheck').onclick=async()=>{
       const code=($('verCode').value||'').trim();
       if(code.length<6){ vmsg(t('m_enter_code6')); return; }
@@ -1156,7 +1159,7 @@
       $('verifyBanner').style.display = ver ? 'none' : 'flex';  // keep banner in sync with the real state
       $('setVerified').innerHTML = ver?`<span class="pill g">${t('verified')}</span>`:`<span class="pill o">${t('not_verified')}</span>`;
       $('setResend').classList.toggle('hide', !!ver);
-      $('setResend').onclick=async()=>{ $('setResend').disabled=true; const res=await sendVerify(u); alert(res==='ok'?t('m_verify_sent'):res==='rate'?t('m_verify_wait'):t('m_verify_fail')); $('setResend').disabled=false; };
+      $('setResend').onclick=()=>showVerify(u);   // open the code screen instead of an alert
     }
 
     // ---- Stripe Connect (staff payouts) ----
