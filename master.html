@@ -178,7 +178,9 @@
       <label>Business name</label><input id="bm_name" type="text">
       <label>Owner email</label><input id="bm_email" type="email">
       <label>Admin fee % (0–15)</label><input id="bm_fee" type="number" min="0" max="15" step="0.5">
-      <div id="bmMsg" class="msg"></div>
+      <label style="display:flex;align-items:center;gap:9px;margin-top:14px;font-size:14px;color:var(--ink);cursor:pointer"><input type="checkbox" id="bm_analytics" style="width:auto;margin:0"> Owner can see analytics</label>
+      <label style="display:flex;align-items:center;gap:9px;margin-top:10px;font-size:14px;color:var(--ink);cursor:pointer"><input type="checkbox" id="bm_collect" style="width:auto;margin:0"> Approve “business collects tips” mode</label>
+      <div id="bmMsg" class="msg" style="margin-top:12px"></div>
       <div class="row2"><button class="btn" id="bmSave" style="flex:1">Save fix</button><button class="btn ghost" id="bmCancel" style="flex:1">Cancel</button></div>
     </div>
   </div>
@@ -254,7 +256,8 @@
         const bemail=(d.email||d.businessEmail||'');
         bizRows.push({ id:b.id, name:d.businessName||'—', email:bemail, staff:activeStaff,
           tipsN:tipsSnap.size, vol, rev, feePct, joined:ms(d.createdAt), last, code:d.shopCode||'',
-          blocked:!!d.blocked, nkey:(d.businessName||'').toLowerCase().replace(/\s+/g,' ').trim(), ekey:bemail.toLowerCase().trim() });
+          blocked:!!d.blocked, analyticsEnabled:d.ownerAnalyticsEnabled!==false, collectApproved:!!d.collectModeApproved,
+          nkey:(d.businessName||'').toLowerCase().replace(/\s+/g,' ').trim(), ekey:bemail.toLowerCase().trim() });
       }
       // duplicate detection — flag shops that share an owner email or an identical name
       const ec={}, nc={}; bizRows.forEach(r=>{ if(r.ekey) ec[r.ekey]=(ec[r.ekey]||0)+1; if(r.nkey) nc[r.nkey]=(nc[r.nkey]||0)+1; });
@@ -341,7 +344,7 @@
     }
 
     let editId=null;
-    function openEdit(r){ editId=r.id; $('bmTitle').textContent='Edit '+r.name; $('bm_name').value=r.name==='—'?'':r.name; $('bm_email').value=r.email||''; $('bm_fee').value=r.feePct||0; $('bmMsg').className='msg'; $('bizModal').classList.remove('hide'); }
+    function openEdit(r){ editId=r.id; $('bmTitle').textContent='Edit '+r.name; $('bm_name').value=r.name==='—'?'':r.name; $('bm_email').value=r.email||''; $('bm_fee').value=r.feePct||0; $('bm_analytics').checked=r.analyticsEnabled!==false; $('bm_collect').checked=!!r.collectApproved; $('bmMsg').className='msg'; $('bizModal').classList.remove('hide'); }
     $('bmCancel').onclick=()=>$('bizModal').classList.add('hide');
     $('bmSave').onclick=async()=>{
       if(!editId) return;
@@ -350,8 +353,9 @@
       if(isNaN(fee)||fee<0||fee>15){ msg('bmMsg','Admin fee must be 0–15%.','err'); return; }
       $('bmSave').disabled=true;
       try{
-        await db.collection('businesses').doc(editId).update({ businessName:name, email:email, tipSharePercent:fee, tipShareEnabled:fee>0 });
-        const r=bizRows.find(x=>x.id===editId); if(r){ r.name=name; r.email=email; r.feePct=fee; }
+        const analyticsEnabled=$('bm_analytics').checked, collectApproved=$('bm_collect').checked;
+        await db.collection('businesses').doc(editId).update({ businessName:name, email:email, tipSharePercent:fee, tipShareEnabled:fee>0, ownerAnalyticsEnabled:analyticsEnabled, collectModeApproved:collectApproved });
+        const r=bizRows.find(x=>x.id===editId); if(r){ r.name=name; r.email=email; r.feePct=fee; r.analyticsEnabled=analyticsEnabled; r.collectApproved=collectApproved; }
         $('bizModal').classList.add('hide'); renderBiz();
       }catch(e){ msg('bmMsg','Could not save: '+e.message,'err'); }
       $('bmSave').disabled=false;
