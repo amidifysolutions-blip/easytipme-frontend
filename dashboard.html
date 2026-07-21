@@ -432,8 +432,8 @@
           const j=await r.json().catch(()=>({}));
           if(j&&j.sent===1) vgmsg('Code sent — check your inbox and spam folder.', true);
           else if(j&&j.error==='slow-down'){ if(manual) vgmsg('A code was just sent — check your inbox and spam.', true); }
-          else vgmsg('Could not send the code. Try again in a moment.', false);
-        }catch(_){ vgmsg('Could not send. Check your connection.', false); }
+          else vgmsg('Could not send the code. ['+((j&&j.error)||'?')+(j&&j.status?(' '+j.status):'')+(j&&j.detail?(' · '+j.detail):'')+']', false);
+        }catch(e){ vgmsg('Could not send. [client:'+((e&&e.message)||'network')+']', false); }
       };
       $('vgResend').onclick=()=>sendCode(true);
       $('vgCheck').onclick=async()=>{
