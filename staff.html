@@ -158,6 +158,7 @@
       <button class="btn" id="loginBtn" data-i18n="signin_btn">Sign in</button>
       <button class="btn ghost hide" id="registerBtn" style="margin-top:10px" data-i18n="create_btn">Create account</button>
       <div class="switch" id="switchLine"></div>
+      <div class="switch hide" id="forgotWrap" style="margin-top:4px"><a id="forgotLink" data-i18n="forgot_pw">Forgot password?</a></div>
     </div>
     <div class="powered" data-i18n="powered">Powered by Amidify Solutions Inc.</div>
   </div>
@@ -361,7 +362,8 @@
       e_email_in_use:"This email already has an account. Try signing in.", e_invalid_email:"Enter a valid email.", e_weak_pass:"Password must be at least 6 characters.",
       e_wrong_pass:"Wrong email or password.", e_no_user:"No account with this email. Create one.", e_too_many:"Too many attempts. Please wait a minute, then try again.",
       e_network:"Network problem. Check your connection and try again.", e_missing_pass:"Enter your password.", e_generic:"Something went wrong. Please try again.",
-      payout_connected:"✓ Bank connected — you're set to receive payouts.", payout_continue:"Finish connecting your bank", payout_start_fail:"Couldn't start bank setup right now. Please try again."
+      payout_connected:"✓ Bank connected — you're set to receive payouts.", payout_continue:"Finish connecting your bank", payout_start_fail:"Couldn't start bank setup right now. Please try again.",
+      forgot_pw:"Forgot password?", m_forgot_need_email:"Enter your email above first, then tap Forgot password.", m_reset_sent:"If an account exists for that email, a reset link is on its way. Check your inbox (and spam)."
     };
     DICT.ar={
       signin_title:"تسجيل دخول الفريق", signin_sub:"سجّل دخولك لتشوف بقشيشك وأرباحك.",
@@ -628,8 +630,8 @@
         if(j && j.sent===1) return 'ok';
         if(j && j.error && /TOO_MANY_ATTEMPTS|too-many-requests/i.test(j.error)) return 'rate';
       }catch(_){}
-      try{ await user.sendEmailVerification(); return 'ok'; }
-      catch(e){ if(e && /too-many-requests|TOO_MANY_ATTEMPTS/i.test((e.code||'')+(e.message||''))) return 'rate'; return 'fail'; }
+      // Do NOT fall back to Firebase's default sender — it comes from firebaseapp.com and lands in spam.
+      return 'fail';
     }
 
     // logo mark
@@ -671,6 +673,7 @@
       $('registerBtn').classList.toggle('hide',!registerMode);
       $('regNameWrap').classList.toggle('hide',!registerMode);
       $('regConfirmWrap').classList.toggle('hide',!registerMode);
+      $('forgotWrap').classList.toggle('hide',registerMode);
       buildSwitchLine();
     }
     function toggleMode(){ registerMode=!registerMode; applyMode(); }
@@ -678,6 +681,13 @@
 
     $('loginBtn').onclick=()=>doAuth(false);
     $('registerBtn').onclick=()=>doAuth(true);
+    $('forgotLink').onclick=async()=>{
+      const email=$('email').value.trim().toLowerCase();
+      if(!email){ amsg(t('m_forgot_need_email')); return; }
+      const el=$('forgotLink'); el.style.pointerEvents='none';
+      try{ await fetch(BACKEND+'/send-reset',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})}); }catch(_){}
+      amsg(t('m_reset_sent'),'ok'); el.style.pointerEvents='';
+    };
 
     async function doAuth(create){
       const wasSignedIn=!!auth.currentUser;

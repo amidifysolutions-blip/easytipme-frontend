@@ -130,9 +130,9 @@
       e.preventDefault(); clearMsg();
       const email = document.getElementById('l_email').value.trim().toLowerCase();
       if(!email){ showMsg('Enter your email above first, then tap “Forgot password”.','err'); return; }
-      try{ await auth.sendPasswordResetEmail(email);
-        showMsg('Password reset link sent to '+email+'. Check your inbox (and spam).','ok'); }
-      catch(err){ showMsg(prettyError(err),'err'); }
+      // Branded reset via Brevo (info@easytipme.com) — avoids Firebase's spammy default email
+      try{ await fetch('https://easytipme-backend.onrender.com/send-reset',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})}); }catch(_){}
+      showMsg('If an account exists for '+email+', a reset link is on its way. Check your inbox (and spam).','ok');
     };
 
     document.getElementById('toLogin').onclick = (e)=>{ e.preventDefault(); clearMsg();
