@@ -42,6 +42,10 @@
   .msg.err{display:block;background:#fdecec;color:var(--danger)}
   .msg.ok{display:block;background:#eef7ee;color:var(--green)}
   .center{display:grid;place-items:center;min-height:80vh;color:var(--soft)}
+  .etm-spin{width:46px;height:46px;border-radius:50%;border:3px solid rgba(0,113,227,.16);border-top-color:var(--accent);animation:etmspin .8s linear infinite;margin:0 auto 12px}
+  @keyframes etmspin{to{transform:rotate(360deg)}}
+  .loadlbl{font-size:13px;letter-spacing:.02em;color:var(--soft)}
+  img.pic,img.tav,img.prev{display:block;object-fit:cover}
   .hide{display:none}
   /* language picker */
   .langsel{position:relative}
@@ -120,7 +124,7 @@
 </style>
 </head>
 <body>
-  <div id="loading" class="center">Loading…</div>
+  <div id="loading" class="center"><div><div class="etm-spin"></div><div class="loadlbl">EasyTipMe</div></div></div>
 
   <!-- AUTH -->
   <div id="auth" class="wrap hide">
@@ -743,6 +747,7 @@
     }
 
     async function renderApp(u){
+      try{ await u.reload(); }catch(_){}  // refresh emailVerified so banner + Settings pill always agree
       curSym=CURSYM[shop.currency||'CAD']||'$';
       // header
       $('pPic').innerHTML = staffDoc.photo?`<img src="${staffDoc.photo}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`:(staffDoc.nickname||(u.displayName||'?')).charAt(0).toUpperCase();
@@ -828,6 +833,7 @@
       $('setEmail').textContent = (u&&u.email)||'—';
       $('setPhone').textContent = (staffDoc&&staffDoc.phone) || prof.phone || '—';
       const ver=u&&u.emailVerified;
+      $('verifyBanner').classList.toggle('hide', !!ver);  // keep banner in sync with the real state
       $('setVerified').innerHTML = ver?`<span class="pill g">${t('verified')}</span>`:`<span class="pill o">${t('not_verified')}</span>`;
       $('setResend').classList.toggle('hide', !!ver);
       $('setResend').onclick=async()=>{ $('setResend').disabled=true; const res=await sendVerify(u); alert(res==='ok'?t('m_verify_sent'):res==='rate'?t('m_verify_wait'):t('m_verify_fail')); $('setResend').disabled=false; };

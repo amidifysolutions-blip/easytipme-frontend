@@ -63,12 +63,16 @@
   .msg{font-size:14px;border-radius:10px;padding:10px 12px;margin-top:12px;display:none}.msg.err{display:block;background:#fdecec;color:var(--danger)}
   .hide{display:none}
   .center{display:grid;place-items:center;min-height:80vh;color:var(--soft)}
+  .etm-spin{width:46px;height:46px;border-radius:50%;border:3px solid rgba(0,113,227,.16);border-top-color:var(--accent);animation:etmspin .8s linear infinite;margin:0 auto 12px}
+  @keyframes etmspin{to{transform:rotate(360deg)}}
+  .loadlbl{font-size:13px;color:var(--soft);text-align:center}
+  img.pic{object-fit:cover}
   .thanks{text-align:center;padding:40px 10px}.thanks .big{font-size:52px}.thanks h1{font-size:26px;margin:14px 0 6px}.thanks p{color:var(--soft)}
   .powered{text-align:center;color:#c2c2c7;font-size:12px;margin-top:18px}
 </style>
 </head>
 <body>
-  <div id="loading" class="center">Loading…</div>
+  <div id="loading" class="center"><div><div class="etm-spin"></div><div class="loadlbl">EasyTipMe</div></div></div>
   <div class="wrap hide" id="wrap">
 
     <div id="step-pick">

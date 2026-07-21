@@ -117,10 +117,14 @@
   .msg.err{background:#361a1d;color:#ff7d7d}
   .link.b{color:var(--blue)}
   .rolebadge{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#7cc0ff;background:rgba(47,155,255,.16);border:1px solid rgba(47,155,255,.32);padding:2px 8px;border-radius:20px;margin-left:8px;vertical-align:middle}
+  .etm-spin{width:46px;height:46px;border-radius:50%;border:3px solid rgba(47,155,255,.18);border-top-color:var(--blue);animation:etmspin .8s linear infinite;margin:0 auto 12px}
+  @keyframes etmspin{to{transform:rotate(360deg)}}
+  .loadlbl{font-size:13px;color:var(--soft);text-align:center}
+  img.tav,img.prev{object-fit:cover}
 </style>
 </head>
 <body>
-  <div id="loading" class="center">Loading…</div>
+  <div id="loading" class="center"><div><div class="etm-spin"></div><div class="loadlbl">EasyTipMe</div></div></div>
 
   <div id="app" style="display:none;width:100%">
     <div class="sidebar" id="sidebar">
@@ -494,7 +498,7 @@
     function editStaff(id,s){
       editId=id;
       $('f_nick').value=s.nickname||''; $('f_real').value=s.realName||''; $('f_email').value=s.email||'';
-      $('f_email').readOnly=true; $('f_email').title='Email is locked for security. To change it, remove this member and add them again.'; $('f_email').style.background='#f1f1f4';
+      $('f_email').readOnly=true; $('f_email').title='Email is locked for security. To change it, remove this member and add them again.'; $('f_email').style.background='#101015'; $('f_email').style.color='#7f7f88'; $('f_email').style.cursor='not-allowed';
       $('f_phone').value=s.phone||''; $('f_job').value=s.job||'';
       $('f_s1s').value=s.shift1?.s||''; $('f_s1e').value=s.shift1?.e||'';
       $('f_s2s').value=s.shift2?.s||''; $('f_s2e').value=s.shift2?.e||'';
@@ -506,7 +510,7 @@
     }
     function resetForm(){
       editId=null; fPhoto="";
-      $('f_email').readOnly=false; $('f_email').title=''; $('f_email').style.background='';
+      $('f_email').readOnly=false; $('f_email').title=''; $('f_email').style.background=''; $('f_email').style.color=''; $('f_email').style.cursor='';
       ['f_nick','f_real','f_email','f_phone','f_job','f_s1s','f_s1e','f_s2s','f_s2e'].forEach(id=>$(id).value='');
       $('f_prev').src=''; $('f_photo').value='';
       $('days').querySelectorAll('.day').forEach(d=>d.classList.remove('on'));
