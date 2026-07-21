@@ -70,7 +70,8 @@
   .modal .btn.ghost{margin-top:10px}
   /* profile header */
   .phead{display:flex;align-items:center;gap:14px}
-  .pic{width:60px;height:60px;border-radius:50%;object-fit:cover;flex-shrink:0;display:grid;place-items:center;color:#fff;font-weight:700;font-size:24px;background:linear-gradient(135deg,var(--accent),#00c2ff)}
+  .pic{width:60px;height:60px;border-radius:50%;overflow:hidden;flex-shrink:0;display:grid;place-items:center;color:#fff;font-weight:700;font-size:24px;background:linear-gradient(135deg,var(--accent),#00c2ff)}
+  .pic img{width:60px;height:60px;object-fit:cover;border-radius:50%;display:block}
   .phead .nm{font-size:20px;font-weight:700}
   .phead .rl{font-size:14px;color:var(--soft)}
   /* earnings */
@@ -1073,7 +1074,7 @@
       try{ await u.reload(); }catch(_){}  // refresh emailVerified so banner + Settings pill always agree
       curSym=CURSYM[shop.currency||'CAD']||'$';
       // header
-      $('pPic').innerHTML = staffDoc.photo?`<img src="${staffDoc.photo}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`:(staffDoc.nickname||(u.displayName||'?')).charAt(0).toUpperCase();
+      $('pPic').innerHTML = staffDoc.photo?`<img src="${staffDoc.photo}" style="width:60px;height:60px;border-radius:50%;object-fit:cover;display:block">`:(staffDoc.nickname||(u.displayName||'?')).charAt(0).toUpperCase();
       $('pName').textContent = staffDoc.nickname||u.displayName||u.email;
       $('pRole').textContent = (staffDoc.job?staffDoc.job+' · ':'')+(shop.businessName||'');
       $('connShop').textContent = t('connected_to',{shop:shop.businessName||'—'});
