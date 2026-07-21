@@ -212,10 +212,11 @@
     <div class="card" style="text-align:center">
       <div style="font-size:36px;margin-bottom:4px">📧</div>
       <h1 style="font-size:22px" data-i18n="verify_title">Verify your email</h1>
-      <p class="sub"><span data-i18n="verify_sub1">We sent a verification link to</span> <b id="verEmail"></b>. <span data-i18n="verify_sub2">Open it, then come back and tap continue.</span></p>
+      <p class="sub"><span data-i18n="verify_sub_code">We emailed a 6-digit code to</span> <b id="verEmail"></b>. <span data-i18n="verify_sub_code2">Enter it below to confirm.</span></p>
+      <input id="verCode" inputmode="numeric" maxlength="6" data-i18n-ph="code_ph" placeholder="6-digit code" style="text-align:center;font-size:22px;letter-spacing:8px;font-weight:700">
       <div id="verMsg" class="msg"></div>
-      <button class="btn" id="verCheck" data-i18n="verified_continue">I've verified — continue</button>
-      <button class="btn ghost" id="verResend" style="margin-top:10px" data-i18n="resend">Resend email</button>
+      <button class="btn" id="verCheck" data-i18n="confirm_btn">Confirm</button>
+      <button class="btn ghost" id="verResend" style="margin-top:10px" data-i18n="resend_code">Resend code</button>
       <button class="linkbtn" id="verLogout" style="margin-top:16px;color:var(--soft);width:100%" data-i18n="use_diff">Use a different email</button>
     </div>
   </div>
@@ -426,6 +427,8 @@
       connect_bank:"Connect bank account", tip_terms:"Tip-sharing terms", log_out:"Log out",
       your_country:"Your country", select_country:"Select country…", country_hint:"Where your bank account is. This sets up your payouts and can't be changed later.",
       fp_title:"Set your password", fp_sub:"Welcome! Choose your own password to secure your account.", fp_new:"New password", fp_save:"Save & continue", fp_relogin:"For security, please sign in again with your temporary password to set a new one.",
+      verify_sub_code:"We emailed a 6-digit code to", verify_sub_code2:"Enter it below to confirm.", code_ph:"6-digit code", confirm_btn:"Confirm", resend_code:"Resend code",
+      m_enter_code6:"Enter the 6-digit code from your email.", m_wrong_code:"Wrong code — try again.", m_code_expired:"Code expired — tap Resend code.",
       available:"Available", pending:"Pending", withdraw_speed:"Withdrawal speed", withdraw_now:"Withdraw",
       free:"Free", recent_payouts:"Recent payouts", bal_unavailable:"Balance is loading — check back in a moment.",
       tier_instant:"Instant", tier_instant_d:"Arrives in minutes", tier_standard:"Standard", tier_standard_d:"Free · 1–2 business days",
@@ -483,6 +486,8 @@
       connect_bank:"اربط الحساب البنكي", tip_terms:"شروط تقاسم البقشيش", log_out:"تسجيل الخروج",
       your_country:"بلدك", select_country:"اختر البلد…", country_hint:"وين حسابك البنكي. هيدا بيجهّز تحويلاتك وما بيتغيّر بعدين.",
       fp_title:"عيّن كلمة مرورك", fp_sub:"أهلًا! اختر كلمة مرور خاصة فيك لتأمين حسابك.", fp_new:"كلمة مرور جديدة", fp_save:"حفظ ومتابعة", fp_relogin:"لأمانك، سجّل دخول مرة تانية بالباسورد المؤقت عشان تعيّن باسورد جديد.",
+      verify_sub_code:"بعتنالك كود من ٦ أرقام على", verify_sub_code2:"اكتبو تحت للتأكيد.", code_ph:"كود من ٦ أرقام", confirm_btn:"تأكيد", resend_code:"إعادة إرسال الكود",
+      m_enter_code6:"اكتب الكود المكوّن من ٦ أرقام من إيميلك.", m_wrong_code:"كود غلط — جرّب مرة تانية.", m_code_expired:"انتهت صلاحية الكود — اضغط إعادة إرسال.",
       available:"المتاح", pending:"قيد الانتظار", withdraw_speed:"سرعة السحب", withdraw_now:"اسحب",
       free:"مجاني", recent_payouts:"آخر التحويلات", bal_unavailable:"عم يحمّل الرصيد — رجاع بعد شوي.",
       tier_instant:"فوري", tier_instant_d:"بيوصل خلال دقائق", tier_standard:"عادي", tier_standard_d:"مجاني · يوم-يومين عمل",
@@ -886,14 +891,15 @@
     applyTheme(localStorage.getItem('etm_theme')||'light');
 
     // send verification via branded Brevo email (reliable); fall back to Firebase default sender.
+    // Sends a 6-digit confirmation code via Brevo (bypasses Firebase link throttle).
     async function sendVerify(user, name){
       try{
-        const r=await fetch(BACKEND+'/send-verification',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:(user.email||'').toLowerCase(), name:name||user.displayName||''})});
+        const idToken=await user.getIdToken();
+        const r=await fetch(BACKEND+'/send-code',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken, name:name||user.displayName||''})});
         const j=await r.json().catch(()=>({}));
         if(j && j.sent===1) return 'ok';
-        if(j && j.error && /TOO_MANY_ATTEMPTS|too-many-requests/i.test(j.error)) return 'rate';
+        if(j && j.error==='slow-down') return 'rate';
       }catch(_){}
-      // Do NOT fall back to Firebase's default sender — it comes from firebaseapp.com and lands in spam.
       return 'fail';
     }
 
@@ -989,9 +995,21 @@
 
     // verify-email hard screen (off by default)
     function vmsg(txt,type){const m=$('verMsg');m.textContent=txt;m.className='msg '+(type||'err');}
-    function showVerify(u){ $('verEmail').textContent=u.email||''; vmsg('',''); $('verMsg').className='msg'; show('verify'); }
+    function showVerify(u){ $('verEmail').textContent=u.email||''; $('verCode').value=''; $('verMsg').className='msg'; show('verify'); sendVerify(u).then(res=>{ if(res==='ok') vmsg(t('m_verify_sent'),'ok'); else if(res!=='rate') vmsg(t('m_verify_fail'),'err'); }); }
     $('verResend').onclick=async()=>{ $('verResend').disabled=true; const res=await sendVerify(auth.currentUser); vmsg(res==='ok'?t('m_verify_sent'):res==='rate'?t('m_verify_wait'):t('m_verify_fail'), res==='ok'?'ok':'err'); $('verResend').disabled=false; };
-    $('verCheck').onclick=async()=>{ $('verCheck').disabled=true; try{ await auth.currentUser.reload(); if(auth.currentUser.emailVerified){ loadMembership(auth.currentUser); } else { vmsg(t('m_not_verified_yet')); } }catch(e){ vmsg(prettyErr(e)); } $('verCheck').disabled=false; };
+    $('verCheck').onclick=async()=>{
+      const code=($('verCode').value||'').trim();
+      if(code.length<6){ vmsg(t('m_enter_code6')); return; }
+      $('verCheck').disabled=true;
+      try{
+        const u=auth.currentUser; const idToken=await u.getIdToken();
+        const r=await fetch(BACKEND+'/verify-code',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,code})});
+        const j=await r.json().catch(()=>({}));
+        if(j&&j.ok){ try{ await u.getIdToken(true); await u.reload(); }catch(_){} loadMembership(u); }
+        else vmsg(j.error==='wrong-code'?t('m_wrong_code'):j.error==='expired'?t('m_code_expired'):j.error==='too-many'?t('m_code_expired'):t('m_verify_fail'));
+      }catch(e){ vmsg(prettyErr(e)); }
+      $('verCheck').disabled=false;
+    };
     $('verLogout').onclick=()=>auth.signOut().then(()=>{ registerMode=false; show('auth'); });
 
     function fpmsg(txt,type){const m=$('fpMsg');m.textContent=txt;m.className='msg '+(type||'err');}
@@ -1006,9 +1024,8 @@
           await u.updatePassword(p1);
           try{ const idToken=await u.getIdToken(true); await fetch(BACKEND+'/staff/activate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken, bid:BID, staffId})}); }catch(_){}
           staffDoc.mustChangePassword=false;
-          await sendVerify(u, staffDoc.nickname);   // now email verification is required
           $('fpSave').disabled=false;
-          showVerify(u);
+          showVerify(u);   // sends the 6-digit code and shows the code screen (verification now required)
         }catch(e){
           $('fpSave').disabled=false;
           if(((e&&e.code)||'').includes('requires-recent-login')){ fpmsg(t('fp_relogin')); try{ await auth.signOut(); }catch(_){}; registerMode=false; setTimeout(()=>show('auth'),1600); }
@@ -1057,7 +1074,7 @@
       $('connBadge').classList.remove('hide');
       // verify banner
       $('verifyBanner').style.display = u.emailVerified ? 'none' : 'flex';
-      $('vbResend').onclick=async()=>{ $('vbResend').disabled=true; $('vbResend').textContent='…'; const res=await sendVerify(u); $('vbResend').textContent= res==='ok'?'✓':t('resend_short'); if(res==='rate') alert(t('m_verify_wait')); else if(res!=='ok') alert(t('m_verify_fail')); $('vbResend').disabled=false; };
+      $('vbResend').onclick=()=>showVerify(u);   // open the code screen (send + enter code)
       // load tips into allRows
       allRows=[];
       try{
