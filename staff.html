@@ -205,7 +205,7 @@
   <div id="app" class="wrap hide">
     <div class="brandbar"><span class="mk" id="mk2"></span><b>Easy<span style="color:#0071e3">Tip</span>Me</b></div>
     <div id="connBadge" class="hide" style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--green);background:#eef7ee;border-radius:20px;padding:6px 12px;width:fit-content;margin:-4px 2px 14px;font-weight:600">✓ <span id="connShop"></span></div>
-    <div id="verifyBanner" class="hide" style="background:#fff4e5;border:1px solid #ffe0b3;color:#8a5a00;border-radius:12px;padding:10px 12px;font-size:13px;margin:0 2px 14px;display:flex;gap:8px;align-items:center;justify-content:space-between">
+    <div id="verifyBanner" style="background:#fff4e5;border:1px solid #ffe0b3;color:#8a5a00;border-radius:12px;padding:10px 12px;font-size:13px;margin:0 2px 14px;display:none;gap:8px;align-items:center;justify-content:space-between">
       <span data-i18n="verify_banner">Verify your email to secure your account.</span>
       <button id="vbResend" style="background:none;border:none;color:#0071e3;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap" data-i18n="resend_short">Resend</button>
     </div>
@@ -976,7 +976,7 @@
       $('connShop').textContent = t('connected_to',{shop:shop.businessName||'—'});
       $('connBadge').classList.remove('hide');
       // verify banner
-      $('verifyBanner').classList.toggle('hide', !!u.emailVerified);
+      $('verifyBanner').style.display = u.emailVerified ? 'none' : 'flex';
       $('vbResend').onclick=async()=>{ $('vbResend').disabled=true; $('vbResend').textContent='…'; const res=await sendVerify(u); $('vbResend').textContent= res==='ok'?'✓':t('resend_short'); if(res==='rate') alert(t('m_verify_wait')); else if(res!=='ok') alert(t('m_verify_fail')); $('vbResend').disabled=false; };
       // load tips into allRows
       allRows=[];
@@ -1053,7 +1053,7 @@
       $('setEmail').textContent = (u&&u.email)||'—';
       $('setPhone').textContent = (staffDoc&&staffDoc.phone) || prof.phone || '—';
       const ver=u&&u.emailVerified;
-      $('verifyBanner').classList.toggle('hide', !!ver);  // keep banner in sync with the real state
+      $('verifyBanner').style.display = ver ? 'none' : 'flex';  // keep banner in sync with the real state
       $('setVerified').innerHTML = ver?`<span class="pill g">${t('verified')}</span>`:`<span class="pill o">${t('not_verified')}</span>`;
       $('setResend').classList.toggle('hide', !!ver);
       $('setResend').onclick=async()=>{ $('setResend').disabled=true; const res=await sendVerify(u); alert(res==='ok'?t('m_verify_sent'):res==='rate'?t('m_verify_wait'):t('m_verify_fail')); $('setResend').disabled=false; };
