@@ -294,16 +294,16 @@
           </label>
         </div>
         <div class="card">
-          <h3>Tip sharing (optional)</h3>
+          <h3>Administrative fee (optional)</h3>
           <label style="display:flex;align-items:center;gap:10px;text-transform:none;font-size:14px;font-weight:400;color:var(--ink)">
-            <input type="checkbox" id="s_shareOn" style="width:auto;margin:0"> Share a portion of team tips with the business (tip pool)
+            <input type="checkbox" id="s_shareOn" style="width:auto;margin:0"> Apply an administrative fee to each tip
           </label>
           <div id="shareRow" style="display:none;margin-top:14px">
-            <label style="text-transform:none;font-size:13px;color:var(--soft)">Business share of each tip (%)</label>
+            <label style="text-transform:none;font-size:13px;color:var(--soft)">Administrative fee per tip (%)</label>
             <input type="number" id="s_sharePct" min="0" max="15" step="0.5" value="0" style="max-width:140px">
           </div>
           <p style="font-size:12px;color:var(--soft);line-height:1.5;margin:12px 0 0">
-            When enabled, the chosen percentage of each tip goes to the business (shared tip pool) and the rest goes to the team member. Capped at 15% to protect your team. This is optional — leave it off and your team keeps 100% of every tip. You are responsible for ensuring tip-pooling complies with your local labour laws.
+            When enabled, this percentage of each tip is retained by the business to help run the service, and the rest goes to the team member. Capped at 15%. This is optional — leave it off and your team keeps 100% of every tip. <b>You are responsible for ensuring this complies with your local tipping and labour laws</b> — we recommend confirming with a lawyer.
           </p>
         </div>
         <button class="btn" id="saveSettings">Save settings</button>
