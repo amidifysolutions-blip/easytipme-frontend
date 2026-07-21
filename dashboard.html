@@ -398,17 +398,18 @@
 
     // ---- Platform-controlled analytics visibility ----
     function applyAnalyticsGate(){
-      const on = bizData.ownerAnalyticsEnabled !== false; // default visible unless platform turns it off
+      const on = bizData.ownerAnalyticsEnabled === true; // locked by default — unlocked as a Pro feature
       const nav = document.querySelector('.nav[data-tab="analytics"]');
       const sec = $('sec-analytics');
       if(on){ if(nav) nav.style.display=''; return; }
-      // Analytics disabled by the platform
+      // Analytics is a Pro feature — locked by default
       if(nav) nav.style.display='none';
       sec.innerHTML='<h1>Analytics</h1><div class="sub">Insights for your shop.</div>'
         +'<div class="card" style="text-align:center;padding:40px 24px">'
-        +'<div style="font-size:34px;margin-bottom:10px">🔒</div>'
-        +'<h3 style="margin-bottom:8px">Analytics are managed by EasyTipMe</h3>'
-        +'<div style="color:var(--soft);max-width:420px;margin:0 auto;line-height:1.6">Tip analytics for this shop are currently handled at the platform level. Your team keeps getting paid normally — contact EasyTipMe if you need a report.</div>'
+        +'<div style="font-size:34px;margin-bottom:10px">⭐</div>'
+        +'<h3 style="margin-bottom:8px">Analytics is a Pro feature</h3>'
+        +'<div style="color:var(--soft);max-width:440px;margin:0 auto;line-height:1.6">See your team\'s tip trends, top days, and per-member breakdowns with EasyTipMe Pro. Your team keeps getting paid normally on the free plan — upgrade to unlock analytics.</div>'
+        +'<div style="color:var(--soft);font-size:12px;margin-top:14px">Contact EasyTipMe to enable Pro for your shop.</div>'
         +'</div>';
       // if user was on the analytics tab, bounce them to Team
       if(sec.classList.contains('show')){
