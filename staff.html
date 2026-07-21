@@ -201,6 +201,16 @@
     const params=new URLSearchParams(location.search);
     let BID=params.get('s')||localStorage.getItem('etm_staff_bid')||'';
     let staffDoc=null, staffId=null, shop=null, registerMode=false;
+    const BACKEND="https://easytipme-backend.onrender.com";
+    // Send verification via our branded Brevo email (reliable); fall back to Firebase's default sender.
+    async function sendVerify(user, name){
+      try{
+        const r=await fetch(BACKEND+'/send-verification',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:(user.email||'').toLowerCase(), name:name||user.displayName||''})});
+        const j=await r.json().catch(()=>({}));
+        if(j && j.sent===1) return true;
+      }catch(_){}
+      try{ await user.sendEmailVerification(); return true; }catch(_){ return false; }
+    }
 
     // logo mark
     const LOGO='<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00c2ff"/><stop offset="1" stop-color="#0071e3"/></linearGradient></defs><rect width="100" height="100" rx="24" fill="#0a0a0a"/><rect x="30" y="26" width="10" height="48" rx="5" fill="url(#lg)"/><rect x="30" y="26" width="34" height="10" rx="5" fill="url(#lg)"/><rect x="30" y="64" width="34" height="10" rx="5" fill="url(#lg)"/><rect x="30" y="45" width="22" height="10" rx="5" fill="url(#lg)"/><circle cx="63" cy="50" r="9" fill="#fff"/><circle cx="63" cy="50" r="4.5" fill="url(#lg)"/></svg>';
@@ -267,7 +277,7 @@
           try{ await cred.user.updateProfile({displayName:(first+' '+last).trim()}); }catch(_){}
           // keep the staff's self-entered details (used later to pre-fill Stripe payouts)
           try{ localStorage.setItem('etm_staff_profile', JSON.stringify({firstName:first,lastName:last,phone:phone,email:email})); }catch(_){}
-          try{ await cred.user.sendEmailVerification(); }catch(_){}
+          try{ await sendVerify(cred.user, (first+' '+last).trim()); }catch(_){}
         } else {
           await auth.signInWithEmailAndPassword(email,pass);
         }
@@ -278,7 +288,7 @@
     // verify-email screen
     function vmsg(t,type){const m=$('verMsg');m.textContent=t;m.className='msg '+(type||'err');}
     function showVerify(u){ $('verEmail').textContent=u.email||''; vmsg('',''); $('verMsg').className='msg'; show('verify'); }
-    $('verResend').onclick=async()=>{ try{ await auth.currentUser.sendEmailVerification(); vmsg('Verification email sent. Check your inbox (and spam).','ok'); }catch(e){ vmsg(prettyErr(e)); } };
+    $('verResend').onclick=async()=>{ $('verResend').disabled=true; const ok=await sendVerify(auth.currentUser); vmsg(ok?'Verification email sent. Check your inbox (and spam).':'Could not send right now. Try again in a moment.', ok?'ok':'err'); $('verResend').disabled=false; };
     $('verCheck').onclick=async()=>{ $('verCheck').disabled=true; try{ await auth.currentUser.reload(); if(auth.currentUser.emailVerified){ loadMembership(auth.currentUser); } else { vmsg('Not verified yet — open the link in the email first.'); } }catch(e){ vmsg(prettyErr(e)); } $('verCheck').disabled=false; };
     $('verLogout').onclick=()=>auth.signOut().then(()=>{ registerMode=false; show('auth'); });
 
@@ -320,7 +330,7 @@
       $('connBadge').classList.remove('hide');
       // soft email-verification reminder (banner)
       $('verifyBanner').classList.toggle('hide', !!u.emailVerified);
-      $('vbResend').onclick=async()=>{ $('vbResend').disabled=true; $('vbResend').textContent='Sending…'; try{ await u.sendEmailVerification(); $('vbResend').textContent='Sent ✓'; }catch(e){ alert(prettyErr(e)); $('vbResend').textContent='Resend'; } $('vbResend').disabled=false; };
+      $('vbResend').onclick=async()=>{ $('vbResend').disabled=true; $('vbResend').textContent='Sending…'; const ok=await sendVerify(u); $('vbResend').textContent= ok?'Sent ✓':'Resend'; if(!ok) alert('Could not send right now. Try again in a moment.'); $('vbResend').disabled=false; };
       // tip sharing — subtle review link only (details live in the one-time modal)
       const shareOn=!!shop.tipShareEnabled;
       $('shareReview').classList.toggle('hide', !shareOn);
