@@ -400,7 +400,7 @@
       const btn=$('saveStaff'); btn.disabled=true; btn.textContent='Saving…';
       try{
         const col=db.collection('businesses').doc(BID).collection('staff');
-        if(editId){ await col.doc(editId).update(data); }
+        if(editId){ await col.doc(editId).update(Object.assign({}, data, {leftByStaff:firebase.firestore.FieldValue.delete(), leftAt:firebase.firestore.FieldValue.delete()})); }
         else{ data.published=true; data.createdAt=firebase.firestore.FieldValue.serverTimestamp(); await col.add(data);
           if(data.email){ fetch(BACKEND+'/notify-welcome',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:data.email,name:data.nickname,shopName:($('sideBiz').textContent||''),staffLink:staffUrl()+'&new=1'})}).catch(()=>{}); }
         }
@@ -449,13 +449,20 @@
           <td><b>${esc(s.nickname||'')}</b>${removed?' <small style="color:#e5484d">(removed)</small>':''}<br><small style="color:var(--soft)">${esc(s.job||'')}</small></td>
           <td>${sched}</td>
           <td><label class="switch"><input type="checkbox" ${pub?'checked':''} ${removed?'disabled':''}><span class="slider"></span></label></td>
-          <td><button class="link b editBtn">Edit</button> &nbsp; <button class="link delBtn">${removed?'Restore':'Remove'}</button></td>`;
+          <td><button class="link b editBtn">Edit</button> &nbsp; <button class="link delBtn">${removed?'Restore':'Remove'}</button>${removed?' &nbsp; <button class="link purgeBtn" style="color:#e5484d">Delete</button>':''}</td>`;
         tr.querySelector('.switch input').onchange=e=>db.collection('businesses').doc(BID).collection('staff').doc(s._id).update({published:e.target.checked});
         tr.querySelector('.editBtn').onclick=()=>editStaff(s._id,s);
         tr.querySelector('.delBtn').onclick=async()=>{
           const ref=db.collection('businesses').doc(BID).collection('staff').doc(s._id);
-          if(removed){ await ref.update({status:'active',published:true}); loadStaff(); return; }
+          if(removed){ await ref.update({status:'active',published:true,leftByStaff:firebase.firestore.FieldValue.delete(),leftAt:firebase.firestore.FieldValue.delete()}); loadStaff(); return; }
           if(confirm('Remove '+(s.nickname||'this member')+'?\n\nThey stop receiving tips here and are hidden from your QR, but their tip history stays saved and you can restore them anytime.')){ await ref.update({status:'removed',published:false}); loadStaff(); }
+        };
+        const purge=tr.querySelector('.purgeBtn');
+        if(purge) purge.onclick=async()=>{
+          if(confirm('Permanently delete '+(s.nickname||'this member')+'?\n\nThis erases their profile completely so you can add them again fresh. Past tip records stay in your reports. This cannot be undone.')){
+            try{ await db.collection('businesses').doc(BID).collection('staff').doc(s._id).delete(); loadStaff(); }
+            catch(e){ alert('Could not delete: '+e.message); }
+          }
         };
         tb.appendChild(tr);
       });

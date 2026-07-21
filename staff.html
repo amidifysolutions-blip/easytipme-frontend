@@ -723,9 +723,9 @@
 
     async function loadMembership(u){
       try{
-        if(!BID){ show('auth'); amsg(t('m_enter_code')); return; }
+        if(!BID){ $('shopCodeWrap').classList.remove('hide'); show('auth'); amsg(t('m_enter_code')); return; }
         const sd=await db.collection('businesses').doc(BID).get();
-        if(!sd.exists){ show('auth'); amsg(t('m_wp_not_found')); return; }
+        if(!sd.exists){ BID=''; try{localStorage.removeItem('etm_staff_bid');}catch(_){}; $('shopCodeWrap').classList.remove('hide'); show('auth'); amsg(t('m_wp_not_found')); return; }
         shop=sd.data();
         const snap=await db.collection('businesses').doc(BID).collection('staff').where('email','==',(u.email||'').toLowerCase()).limit(1).get();
         if(snap.empty){ show('auth'); amsg(t('m_not_registered',{shop:shop.businessName||'—'})); return; }
