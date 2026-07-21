@@ -1176,9 +1176,12 @@
     async function setupPayout(u){
       const btn=$('connectBtn'), stat=$('payoutStatus'), soon=$('payoutSoon');
       if(!CONNECT_LIVE){ btn.disabled=true; return; }
-      soon.classList.add('hide'); btn.disabled=false;
+      if(soon){ soon.classList.add('hide'); soon.style.display='none'; }  // reliably hide "Coming soon"
+      btn.disabled=false;
+      // Always (re)populate the country list so it's never empty when shown.
+      fillCountriesStaff($('payCountry'), (staffDoc&&staffDoc.payoutCountry)||shop.country||'');
       const accId = staffDoc.connectAccountId || null;
-      if(!accId){ $('payCountryWrap').classList.remove('hide'); fillCountriesStaff($('payCountry'), (staffDoc&&staffDoc.payoutCountry)||shop.country||''); }
+      if(!accId){ $('payCountryWrap').classList.remove('hide'); }
       // returning from Stripe onboarding
       if(params.get('connect')==='done' && accId){
         try{ const r=await fetch(BACKEND+'/connect/status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accountId:accId})}); const j=await r.json(); paintPayout(j); }catch(_){}
