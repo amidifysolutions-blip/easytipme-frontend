@@ -356,7 +356,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script>
     // ---------- i18n ----------
-    const LANGS=[['en','English'],['ar','العربية'],['fr','Français'],['es','Español'],['zh','中文'],['ru','Русский']];
+    const LANGS=[['en','English'],['ar','العربية'],['fr','Français'],['es','Español'],['pt','Português'],['tr','Türkçe'],['ro','Română'],['uk','Українська'],['ru','Русский'],['fa','فارسی'],['hi','हिन्दी'],['pa','ਪੰਜਾਬੀ'],['zh','中文']];
     const DICT={};
     DICT.en={
       signin_title:"Team sign in", signin_sub:"Sign in to see your tips and earnings.",
@@ -638,6 +638,162 @@
       e_network:"Проблема с сетью. Проверьте подключение и повторите.", e_missing_pass:"Введите пароль.", e_generic:"Что-то пошло не так. Повторите попытку."
     };
 
+    DICT.pt={
+      signin_title:"Entrar (equipe)", signin_sub:"Entre para ver suas gorjetas e ganhos.",
+      register_title:"Crie sua conta", register_sub:"Use o mesmo e-mail que seu local de trabalho adicionou.",
+      wcode:"Código do local", wcode_ph:"Peça o código ao seu local de trabalho",
+      first:"Nome", first_ph:"Nome", last:"Sobrenome", last_ph:"Sobrenome",
+      email:"E-mail", password:"Senha", pass_ph:"Pelo menos 6 caracteres",
+      confirm:"Confirmar senha", confirm_ph:"Digite a senha novamente", phone:"Telefone", optional:"(opcional)",
+      signin_btn:"Entrar", create_btn:"Criar conta", new_here:"Novo por aqui?", create_team:"Crie sua conta de equipe",
+      have_account:"Já tem conta?", switch_signin:"Entrar", powered:"Desenvolvido por Amidify Solutions Inc.", forgot_pw:"Esqueceu a senha?",
+      verify_title:"Verifique seu e-mail", verify_banner:"Verifique seu e-mail para proteger sua conta.", resend:"Reenviar e-mail", resend_short:"Reenviar", verified_continue:"Já verifiquei — continuar", use_diff:"Usar outro e-mail",
+      your_tips:"Suas gorjetas", tips:"Gorjetas", avg_tip:"Gorjeta média", avg_rating:"Avaliação média", recent_tips:"Gorjetas recentes", no_tips:"Ainda não há gorjetas.", from:"de",
+      insights_title:"Análises", this_week:"Esta semana", this_month:"Este mês", all_time:"Tudo", earned:"Ganho", average:"Média", daily_earnings:"Ganhos diários (últimos 14 dias)",
+      top_day:"Melhor dia", named_tips:"Com nome", anon_tips:"Anônimo", rating_avg:"Avaliação média", no_data:"Ainda não há dados para este período.",
+      settings_title:"Configurações", language:"Idioma", theme:"Tema", light:"Claro", dark_mode:"Escuro", profile:"Perfil",
+      name_label:"Nome", email_label:"E-mail", phone_label:"Telefone", change:"Alterar", email_status:"Verificação de e-mail", verified:"Verificado ✓", not_verified:"Não verificado",
+      get_paid:"Receber", coming_soon:"Em breve", connect_bank:"Conectar conta bancária", tip_terms:"Termos de gorjeta", log_out:"Sair",
+      leave_wp:"Sair do local de trabalho", leave_desc:"Deixar de aparecer na página de gorjetas do seu local. Suas gorjetas passadas ficam registradas.",
+      nav_home:"Início", nav_insights:"Análises", nav_settings:"Config.",
+      cm_title:"Gorjetas e taxas", cm_agree:"Entendo e concordo", cm_later:"Talvez depois", cm_close:"Fechar",
+      leave_modal_title:"Sair de {shop}?", confirm_leave:"Sair do local", cancel:"Cancelar", connected_to:"Conectado a {shop}",
+      change_email_title:"Alterar seu e-mail", change_email_desc:"Seu e-mail é seu login e está vinculado aos seus pagamentos. Digite o novo e-mail e sua senha atual.", new_email_ph:"Novo e-mail", change_email_btn:"Atualizar e-mail"
+    };
+    DICT.tr={
+      signin_title:"Ekip girişi", signin_sub:"Bahşiş ve kazançlarını görmek için giriş yap.",
+      register_title:"Hesabını oluştur", register_sub:"İş yerinin eklediği aynı e-postayı kullan.",
+      wcode:"İş yeri kodu", wcode_ph:"Kodu iş yerinden iste",
+      first:"Ad", first_ph:"Ad", last:"Soyad", last_ph:"Soyad",
+      email:"E-posta", password:"Şifre", pass_ph:"En az 6 karakter",
+      confirm:"Şifreyi onayla", confirm_ph:"Şifreyi tekrar gir", phone:"Telefon", optional:"(isteğe bağlı)",
+      signin_btn:"Giriş yap", create_btn:"Hesap oluştur", new_here:"Yeni misin?", create_team:"Ekip hesabını oluştur",
+      have_account:"Hesabın var mı?", switch_signin:"Giriş yap", powered:"Amidify Solutions Inc. tarafından", forgot_pw:"Şifreni mi unuttun?",
+      verify_title:"E-postanı doğrula", verify_banner:"Hesabını güvence altına almak için e-postanı doğrula.", resend:"E-postayı tekrar gönder", resend_short:"Tekrar gönder", verified_continue:"Doğruladım — devam", use_diff:"Başka e-posta kullan",
+      your_tips:"Bahşişlerin", tips:"Bahşiş", avg_tip:"Ort. bahşiş", avg_rating:"Ort. puan", recent_tips:"Son bahşişler", no_tips:"Henüz bahşiş yok.", from:"gönderen",
+      insights_title:"Analizler", this_week:"Bu hafta", this_month:"Bu ay", all_time:"Tümü", earned:"Kazanılan", average:"Ortalama", daily_earnings:"Günlük kazanç (son 14 gün)",
+      top_day:"En iyi gün", named_tips:"İsimli", anon_tips:"Anonim", rating_avg:"Ortalama puan", no_data:"Bu dönem için henüz veri yok.",
+      settings_title:"Ayarlar", language:"Dil", theme:"Tema", light:"Açık", dark_mode:"Koyu", profile:"Profil",
+      name_label:"İsim", email_label:"E-posta", phone_label:"Telefon", change:"Değiştir", email_status:"E-posta doğrulama", verified:"Doğrulandı ✓", not_verified:"Doğrulanmadı",
+      get_paid:"Ödeme al", coming_soon:"Yakında", connect_bank:"Banka hesabı bağla", tip_terms:"Bahşiş koşulları", log_out:"Çıkış yap",
+      leave_wp:"İş yerinden ayrıl", leave_desc:"İş yerinin bahşiş sayfasında görünmeyi bırak. Geçmiş bahşişlerin kayıtlı kalır.",
+      nav_home:"Ana sayfa", nav_insights:"Analizler", nav_settings:"Ayarlar",
+      cm_title:"Bahşiş ve ücretler", cm_agree:"Anlıyorum ve kabul ediyorum", cm_later:"Belki sonra", cm_close:"Kapat",
+      leave_modal_title:"{shop} işinden ayrıl?", confirm_leave:"İş yerinden ayrıl", cancel:"İptal", connected_to:"{shop} ile bağlı",
+      change_email_title:"E-postanı değiştir", change_email_desc:"E-postan girişindir ve ödemelerine bağlıdır. Yeni e-postanı ve mevcut şifreni gir.", new_email_ph:"Yeni e-posta", change_email_btn:"E-postayı güncelle"
+    };
+    DICT.ro={
+      signin_title:"Autentificare echipă", signin_sub:"Conectează-te ca să-ți vezi bacșișurile și câștigurile.",
+      register_title:"Creează-ți contul", register_sub:"Folosește același e-mail adăugat de locul tău de muncă.",
+      wcode:"Cod loc de muncă", wcode_ph:"Cere codul de la locul tău de muncă",
+      first:"Prenume", first_ph:"Prenume", last:"Nume", last_ph:"Nume",
+      email:"E-mail", password:"Parolă", pass_ph:"Minim 6 caractere",
+      confirm:"Confirmă parola", confirm_ph:"Reintrodu parola", phone:"Telefon", optional:"(opțional)",
+      signin_btn:"Autentificare", create_btn:"Creează cont", new_here:"Ești nou aici?", create_team:"Creează-ți contul de echipă",
+      have_account:"Ai deja cont?", switch_signin:"Autentificare", powered:"Susținut de Amidify Solutions Inc.", forgot_pw:"Ai uitat parola?",
+      verify_title:"Verifică-ți e-mailul", verify_banner:"Verifică-ți e-mailul ca să-ți protejezi contul.", resend:"Retrimite e-mailul", resend_short:"Retrimite", verified_continue:"Am verificat — continuă", use_diff:"Folosește alt e-mail",
+      your_tips:"Bacșișurile tale", tips:"Bacșișuri", avg_tip:"Bacșiș mediu", avg_rating:"Evaluare medie", recent_tips:"Bacșișuri recente", no_tips:"Încă niciun bacșiș.", from:"de la",
+      insights_title:"Statistici", this_week:"Săptămâna aceasta", this_month:"Luna aceasta", all_time:"Tot", earned:"Câștigat", average:"Media", daily_earnings:"Câștiguri zilnice (ultimele 14 zile)",
+      top_day:"Cea mai bună zi", named_tips:"Cu nume", anon_tips:"Anonim", rating_avg:"Evaluare medie", no_data:"Încă nu există date pentru această perioadă.",
+      settings_title:"Setări", language:"Limbă", theme:"Temă", light:"Deschis", dark_mode:"Închis", profile:"Profil",
+      name_label:"Nume", email_label:"E-mail", phone_label:"Telefon", change:"Schimbă", email_status:"Verificare e-mail", verified:"Verificat ✓", not_verified:"Neverificat",
+      get_paid:"Încasează", coming_soon:"În curând", connect_bank:"Conectează contul bancar", tip_terms:"Termeni bacșiș", log_out:"Deconectare",
+      leave_wp:"Părăsește locul de muncă", leave_desc:"Nu mai apărea pe pagina de bacșișuri a locului tău. Bacșișurile trecute rămân înregistrate.",
+      nav_home:"Acasă", nav_insights:"Statistici", nav_settings:"Setări",
+      cm_title:"Bacșiș și taxe", cm_agree:"Înțeleg și accept", cm_later:"Poate mai târziu", cm_close:"Închide",
+      leave_modal_title:"Părăsești {shop}?", confirm_leave:"Părăsește locul", cancel:"Anulează", connected_to:"Conectat la {shop}",
+      change_email_title:"Schimbă-ți e-mailul", change_email_desc:"E-mailul e autentificarea ta și e legat de plăți. Introdu noul e-mail și parola actuală.", new_email_ph:"E-mail nou", change_email_btn:"Actualizează e-mailul"
+    };
+
+    DICT.uk={
+      signin_title:"Вхід для команди", signin_sub:"Увійдіть, щоб бачити чайові та заробіток.",
+      register_title:"Створіть акаунт", register_sub:"Використайте той самий email, який додало ваше місце роботи.",
+      wcode:"Код місця роботи", wcode_ph:"Запитайте код у вашому місці роботи",
+      first:"Ім'я", first_ph:"Ім'я", last:"Прізвище", last_ph:"Прізвище",
+      email:"Email", password:"Пароль", pass_ph:"Мінімум 6 символів",
+      confirm:"Підтвердьте пароль", confirm_ph:"Введіть пароль ще раз", phone:"Телефон", optional:"(необов'язково)",
+      signin_btn:"Увійти", create_btn:"Створити акаунт", new_here:"Вперше тут?", create_team:"Створіть командний акаунт",
+      have_account:"Вже є акаунт?", switch_signin:"Увійти", powered:"За підтримки Amidify Solutions Inc.", forgot_pw:"Забули пароль?",
+      verify_title:"Підтвердьте email", verify_banner:"Підтвердьте email, щоб захистити акаунт.", resend:"Надіслати лист ще раз", resend_short:"Ще раз", verified_continue:"Я підтвердив — далі", use_diff:"Інший email",
+      your_tips:"Ваші чайові", tips:"Чайові", avg_tip:"Сер. чайові", avg_rating:"Сер. оцінка", recent_tips:"Останні чайові", no_tips:"Поки немає чайових.", from:"від",
+      insights_title:"Аналітика", this_week:"Цей тиждень", this_month:"Цей місяць", all_time:"Увесь час", earned:"Зароблено", average:"Середнє", daily_earnings:"Щоденний дохід (останні 14 днів)",
+      top_day:"Найкращий день", named_tips:"З іменем", anon_tips:"Анонім", rating_avg:"Середня оцінка", no_data:"Поки немає даних за цей період.",
+      settings_title:"Налаштування", language:"Мова", theme:"Тема", light:"Світла", dark_mode:"Темна", profile:"Профіль",
+      name_label:"Ім'я", email_label:"Email", phone_label:"Телефон", change:"Змінити", email_status:"Підтвердження email", verified:"Підтверджено ✓", not_verified:"Не підтверджено",
+      get_paid:"Отримувати виплати", coming_soon:"Незабаром", connect_bank:"Підключити банківський рахунок", tip_terms:"Умови чайових", log_out:"Вийти",
+      leave_wp:"Покинути місце роботи", leave_desc:"Перестати з'являтися на сторінці чайових вашого місця роботи. Минулі чайові зберігаються.",
+      nav_home:"Головна", nav_insights:"Аналітика", nav_settings:"Налашт.",
+      cm_title:"Чайові та збори", cm_agree:"Розумію і погоджуюся", cm_later:"Можливо пізніше", cm_close:"Закрити",
+      leave_modal_title:"Покинути {shop}?", confirm_leave:"Покинути місце роботи", cancel:"Скасувати", connected_to:"Підключено до {shop}",
+      change_email_title:"Змінити email", change_email_desc:"Ваш email — це ваш вхід і він пов'язаний з виплатами. Введіть новий email і поточний пароль.", new_email_ph:"Новий email", change_email_btn:"Оновити email"
+    };
+    DICT.fa={
+      signin_title:"ورود تیم", signin_sub:"برای دیدن انعام‌ها و درآمدتان وارد شوید.",
+      register_title:"حساب خود را بسازید", register_sub:"همان ایمیلی را که محل کارتان اضافه کرده استفاده کنید.",
+      wcode:"کد محل کار", wcode_ph:"کد را از محل کارتان بگیرید",
+      first:"نام", first_ph:"نام", last:"نام خانوادگی", last_ph:"نام خانوادگی",
+      email:"ایمیل", password:"رمز عبور", pass_ph:"حداقل ۶ کاراکتر",
+      confirm:"تأیید رمز عبور", confirm_ph:"رمز عبور را دوباره وارد کنید", phone:"تلفن", optional:"(اختیاری)",
+      signin_btn:"ورود", create_btn:"ساخت حساب", new_here:"تازه‌وارد هستید؟", create_team:"حساب تیمی خود را بسازید",
+      have_account:"حساب دارید؟", switch_signin:"ورود", powered:"قدرت‌گرفته از Amidify Solutions Inc.", forgot_pw:"رمز عبور را فراموش کرده‌اید؟",
+      verify_title:"ایمیل خود را تأیید کنید", verify_banner:"برای امنیت حساب، ایمیل خود را تأیید کنید.", resend:"ارسال دوباره ایمیل", resend_short:"ارسال دوباره", verified_continue:"تأیید کردم — ادامه", use_diff:"استفاده از ایمیل دیگر",
+      your_tips:"انعام‌های شما", tips:"انعام", avg_tip:"میانگین انعام", avg_rating:"میانگین امتیاز", recent_tips:"انعام‌های اخیر", no_tips:"هنوز انعامی نیست.", from:"از",
+      insights_title:"تحلیل‌ها", this_week:"این هفته", this_month:"این ماه", all_time:"همه", earned:"کسب‌شده", average:"میانگین", daily_earnings:"درآمد روزانه (۱۴ روز اخیر)",
+      top_day:"بهترین روز", named_tips:"با نام", anon_tips:"ناشناس", rating_avg:"میانگین امتیاز", no_data:"هنوز داده‌ای برای این دوره نیست.",
+      settings_title:"تنظیمات", language:"زبان", theme:"پوسته", light:"روشن", dark_mode:"تیره", profile:"پروفایل",
+      name_label:"نام", email_label:"ایمیل", phone_label:"تلفن", change:"تغییر", email_status:"تأیید ایمیل", verified:"تأیید شد ✓", not_verified:"تأیید نشده",
+      get_paid:"دریافت پول", coming_soon:"به‌زودی", connect_bank:"اتصال حساب بانکی", tip_terms:"شرایط انعام", log_out:"خروج",
+      leave_wp:"ترک محل کار", leave_desc:"دیگر در صفحه انعام محل کارتان نمایش داده نمی‌شوید. انعام‌های گذشته ثبت می‌مانند.",
+      nav_home:"خانه", nav_insights:"تحلیل‌ها", nav_settings:"تنظیمات",
+      cm_title:"انعام و کارمزد", cm_agree:"می‌فهمم و موافقم", cm_later:"شاید بعداً", cm_close:"بستن",
+      leave_modal_title:"ترک {shop}؟", confirm_leave:"ترک محل کار", cancel:"لغو", connected_to:"متصل به {shop}",
+      change_email_title:"تغییر ایمیل", change_email_desc:"ایمیل شما ورود شماست و به پرداخت‌هایتان مرتبط است. ایمیل جدید و رمز فعلی را وارد کنید.", new_email_ph:"ایمیل جدید", change_email_btn:"به‌روزرسانی ایمیل"
+    };
+    DICT.hi={
+      signin_title:"टीम साइन इन", signin_sub:"अपनी टिप और कमाई देखने के लिए साइन इन करें।",
+      register_title:"अपना खाता बनाएं", register_sub:"वही ईमेल इस्तेमाल करें जो आपके कार्यस्थल ने जोड़ा है।",
+      wcode:"कार्यस्थल कोड", wcode_ph:"अपने कार्यस्थल से कोड मांगें",
+      first:"पहला नाम", first_ph:"नाम", last:"उपनाम", last_ph:"उपनाम",
+      email:"ईमेल", password:"पासवर्ड", pass_ph:"कम से कम 6 अक्षर",
+      confirm:"पासवर्ड की पुष्टि करें", confirm_ph:"पासवर्ड फिर से डालें", phone:"फ़ोन", optional:"(वैकल्पिक)",
+      signin_btn:"साइन इन", create_btn:"खाता बनाएं", new_here:"नए हैं?", create_team:"अपनी टीम का खाता बनाएं",
+      have_account:"पहले से खाता है?", switch_signin:"साइन इन", powered:"Amidify Solutions Inc. द्वारा संचालित", forgot_pw:"पासवर्ड भूल गए?",
+      verify_title:"अपना ईमेल सत्यापित करें", verify_banner:"अपने खाते को सुरक्षित करने के लिए ईमेल सत्यापित करें।", resend:"ईमेल फिर भेजें", resend_short:"फिर भेजें", verified_continue:"मैंने सत्यापित किया — आगे", use_diff:"दूसरा ईमेल इस्तेमाल करें",
+      your_tips:"आपकी टिप", tips:"टिप", avg_tip:"औसत टिप", avg_rating:"औसत रेटिंग", recent_tips:"हाल की टिप", no_tips:"अभी कोई टिप नहीं।", from:"की ओर से",
+      insights_title:"विश्लेषण", this_week:"इस सप्ताह", this_month:"इस महीने", all_time:"सभी", earned:"कमाया", average:"औसत", daily_earnings:"दैनिक कमाई (पिछले 14 दिन)",
+      top_day:"सबसे अच्छा दिन", named_tips:"नाम के साथ", anon_tips:"गुमनाम", rating_avg:"औसत रेटिंग", no_data:"इस अवधि के लिए अभी कोई डेटा नहीं।",
+      settings_title:"सेटिंग्स", language:"भाषा", theme:"थीम", light:"हल्का", dark_mode:"गहरा", profile:"प्रोफ़ाइल",
+      name_label:"नाम", email_label:"ईमेल", phone_label:"फ़ोन", change:"बदलें", email_status:"ईमेल सत्यापन", verified:"सत्यापित ✓", not_verified:"असत्यापित",
+      get_paid:"भुगतान पाएं", coming_soon:"जल्द आ रहा है", connect_bank:"बैंक खाता जोड़ें", tip_terms:"टिप शर्तें", log_out:"साइन आउट",
+      leave_wp:"कार्यस्थल छोड़ें", leave_desc:"अपने कार्यस्थल के टिप पेज पर दिखना बंद करें। आपकी पिछली टिप दर्ज रहती हैं।",
+      nav_home:"होम", nav_insights:"विश्लेषण", nav_settings:"सेटिंग्स",
+      cm_title:"टिप और शुल्क", cm_agree:"मैं समझता हूँ और सहमत हूँ", cm_later:"शायद बाद में", cm_close:"बंद करें",
+      leave_modal_title:"{shop} छोड़ें?", confirm_leave:"कार्यस्थल छोड़ें", cancel:"रद्द करें", connected_to:"{shop} से जुड़ा",
+      change_email_title:"अपना ईमेल बदलें", change_email_desc:"आपका ईमेल आपका लॉगिन है और आपके भुगतान से जुड़ा है। नया ईमेल और मौजूदा पासवर्ड डालें।", new_email_ph:"नया ईमेल", change_email_btn:"ईमेल अपडेट करें"
+    };
+    DICT.pa={
+      signin_title:"ਟੀਮ ਸਾਈਨ ਇਨ", signin_sub:"ਆਪਣੀ ਟਿੱਪ ਅਤੇ ਕਮਾਈ ਵੇਖਣ ਲਈ ਸਾਈਨ ਇਨ ਕਰੋ।",
+      register_title:"ਆਪਣਾ ਖਾਤਾ ਬਣਾਓ", register_sub:"ਉਹੀ ਈਮੇਲ ਵਰਤੋ ਜੋ ਤੁਹਾਡੇ ਕੰਮ ਵਾਲੀ ਥਾਂ ਨੇ ਜੋੜੀ ਹੈ।",
+      wcode:"ਕੰਮ ਵਾਲੀ ਥਾਂ ਦਾ ਕੋਡ", wcode_ph:"ਆਪਣੀ ਕੰਮ ਵਾਲੀ ਥਾਂ ਤੋਂ ਕੋਡ ਮੰਗੋ",
+      first:"ਪਹਿਲਾ ਨਾਂ", first_ph:"ਨਾਂ", last:"ਗੋਤ", last_ph:"ਗੋਤ",
+      email:"ਈਮੇਲ", password:"ਪਾਸਵਰਡ", pass_ph:"ਘੱਟੋ-ਘੱਟ 6 ਅੱਖਰ",
+      confirm:"ਪਾਸਵਰਡ ਪੱਕਾ ਕਰੋ", confirm_ph:"ਪਾਸਵਰਡ ਦੁਬਾਰਾ ਭਰੋ", phone:"ਫ਼ੋਨ", optional:"(ਚੋਣਵਾਂ)",
+      signin_btn:"ਸਾਈਨ ਇਨ", create_btn:"ਖਾਤਾ ਬਣਾਓ", new_here:"ਨਵੇਂ ਹੋ?", create_team:"ਆਪਣੀ ਟੀਮ ਦਾ ਖਾਤਾ ਬਣਾਓ",
+      have_account:"ਪਹਿਲਾਂ ਹੀ ਖਾਤਾ ਹੈ?", switch_signin:"ਸਾਈਨ ਇਨ", powered:"Amidify Solutions Inc. ਦੁਆਰਾ", forgot_pw:"ਪਾਸਵਰਡ ਭੁੱਲ ਗਏ?",
+      verify_title:"ਆਪਣੀ ਈਮੇਲ ਪੁਸ਼ਟੀ ਕਰੋ", verify_banner:"ਆਪਣੇ ਖਾਤੇ ਨੂੰ ਸੁਰੱਖਿਅਤ ਕਰਨ ਲਈ ਈਮੇਲ ਪੁਸ਼ਟੀ ਕਰੋ।", resend:"ਈਮੇਲ ਦੁਬਾਰਾ ਭੇਜੋ", resend_short:"ਦੁਬਾਰਾ ਭੇਜੋ", verified_continue:"ਮੈਂ ਪੁਸ਼ਟੀ ਕੀਤੀ — ਅੱਗੇ", use_diff:"ਹੋਰ ਈਮੇਲ ਵਰਤੋ",
+      your_tips:"ਤੁਹਾਡੀਆਂ ਟਿੱਪਾਂ", tips:"ਟਿੱਪਾਂ", avg_tip:"ਔਸਤ ਟਿੱਪ", avg_rating:"ਔਸਤ ਰੇਟਿੰਗ", recent_tips:"ਹਾਲੀਆ ਟਿੱਪਾਂ", no_tips:"ਹਾਲੇ ਕੋਈ ਟਿੱਪ ਨਹੀਂ।", from:"ਵੱਲੋਂ",
+      insights_title:"ਵਿਸ਼ਲੇਸ਼ਣ", this_week:"ਇਸ ਹਫ਼ਤੇ", this_month:"ਇਸ ਮਹੀਨੇ", all_time:"ਸਾਰਾ", earned:"ਕਮਾਇਆ", average:"ਔਸਤ", daily_earnings:"ਰੋਜ਼ਾਨਾ ਕਮਾਈ (ਪਿਛਲੇ 14 ਦਿਨ)",
+      top_day:"ਸਭ ਤੋਂ ਵਧੀਆ ਦਿਨ", named_tips:"ਨਾਂ ਨਾਲ", anon_tips:"ਗੁਮਨਾਮ", rating_avg:"ਔਸਤ ਰੇਟਿੰਗ", no_data:"ਇਸ ਸਮੇਂ ਲਈ ਹਾਲੇ ਕੋਈ ਡਾਟਾ ਨਹੀਂ।",
+      settings_title:"ਸੈਟਿੰਗਾਂ", language:"ਭਾਸ਼ਾ", theme:"ਥੀਮ", light:"ਹਲਕਾ", dark_mode:"ਗੂੜ੍ਹਾ", profile:"ਪ੍ਰੋਫਾਈਲ",
+      name_label:"ਨਾਂ", email_label:"ਈਮੇਲ", phone_label:"ਫ਼ੋਨ", change:"ਬਦਲੋ", email_status:"ਈਮੇਲ ਪੁਸ਼ਟੀ", verified:"ਪੁਸ਼ਟੀ ਹੋਈ ✓", not_verified:"ਪੁਸ਼ਟੀ ਨਹੀਂ",
+      get_paid:"ਭੁਗਤਾਨ ਲਵੋ", coming_soon:"ਜਲਦੀ ਆ ਰਿਹਾ", connect_bank:"ਬੈਂਕ ਖਾਤਾ ਜੋੜੋ", tip_terms:"ਟਿੱਪ ਸ਼ਰਤਾਂ", log_out:"ਸਾਈਨ ਆਊਟ",
+      leave_wp:"ਕੰਮ ਵਾਲੀ ਥਾਂ ਛੱਡੋ", leave_desc:"ਆਪਣੀ ਕੰਮ ਵਾਲੀ ਥਾਂ ਦੇ ਟਿੱਪ ਪੰਨੇ 'ਤੇ ਦਿਖਣਾ ਬੰਦ ਕਰੋ। ਤੁਹਾਡੀਆਂ ਪਿਛਲੀਆਂ ਟਿੱਪਾਂ ਦਰਜ ਰਹਿੰਦੀਆਂ ਹਨ।",
+      nav_home:"ਹੋਮ", nav_insights:"ਵਿਸ਼ਲੇਸ਼ਣ", nav_settings:"ਸੈਟਿੰਗਾਂ",
+      cm_title:"ਟਿੱਪ ਅਤੇ ਫ਼ੀਸ", cm_agree:"ਮੈਂ ਸਮਝਦਾ ਹਾਂ ਅਤੇ ਸਹਿਮਤ ਹਾਂ", cm_later:"ਸ਼ਾਇਦ ਬਾਅਦ ਵਿੱਚ", cm_close:"ਬੰਦ ਕਰੋ",
+      leave_modal_title:"{shop} ਛੱਡਣਾ ਹੈ?", confirm_leave:"ਕੰਮ ਵਾਲੀ ਥਾਂ ਛੱਡੋ", cancel:"ਰੱਦ ਕਰੋ", connected_to:"{shop} ਨਾਲ ਜੁੜਿਆ",
+      change_email_title:"ਆਪਣੀ ਈਮੇਲ ਬਦਲੋ", change_email_desc:"ਤੁਹਾਡੀ ਈਮੇਲ ਤੁਹਾਡਾ ਲੌਗਇਨ ਹੈ ਅਤੇ ਭੁਗਤਾਨ ਨਾਲ ਜੁੜੀ ਹੈ। ਨਵੀਂ ਈਮੇਲ ਅਤੇ ਮੌਜੂਦਾ ਪਾਸਵਰਡ ਭਰੋ।", new_email_ph:"ਨਵੀਂ ਈਮੇਲ", change_email_btn:"ਈਮੇਲ ਅੱਪਡੇਟ ਕਰੋ"
+    };
+
     const firebaseConfig = {apiKey:"AIzaSyBsY_pCxvbbJUtvRb7ClwgWQ25hGzNTgBM",authDomain:"easy-tip-me.firebaseapp.com",projectId:"easy-tip-me",storageBucket:"easy-tip-me.firebasestorage.app",messagingSenderId:"189382420404",appId:"1:189382420404:web:2f6075c986c81484eab4e1"};
     firebase.initializeApp(firebaseConfig);
     const auth=firebase.auth(), db=firebase.firestore();
@@ -655,7 +811,7 @@
     function t(key,vars){ let s=(DICT[LANG]&&DICT[LANG][key])!=null?DICT[LANG][key]:(DICT.en[key]!=null?DICT.en[key]:key); if(vars){for(const k in vars){s=s.replace('{'+k+'}',vars[k]);}} return s; }
     function applyLang(){
       document.documentElement.lang=LANG;
-      document.documentElement.dir=(LANG==='ar')?'rtl':'ltr';
+      document.documentElement.dir=(LANG==='ar'||LANG==='fa')?'rtl':'ltr';
       document.querySelectorAll('[data-i18n]').forEach(el=>{ el.textContent=t(el.getAttribute('data-i18n')); });
       document.querySelectorAll('[data-i18n-ph]').forEach(el=>{ el.setAttribute('placeholder',t(el.getAttribute('data-i18n-ph'))); });
       buildSwitchLine();
