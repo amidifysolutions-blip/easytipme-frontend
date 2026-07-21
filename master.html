@@ -182,7 +182,8 @@
       <h3 id="bmTitle">Edit business</h3>
       <label>Business name</label><input id="bm_name" type="text">
       <label>Owner email</label><input id="bm_email" type="email">
-      <label>Admin fee % (0–15)</label><input id="bm_fee" type="number" min="0" max="15" step="0.5">
+      <label>Admin fee % (0–15) — owner's share of the tip</label><input id="bm_fee" type="number" min="0" max="15" step="0.5">
+      <label>Platform commission % for this shop <span style="color:var(--soft);font-weight:400">(leave blank = default)</span></label><input id="bm_comm" type="number" min="0" max="50" step="0.1" placeholder="Default">
       <label style="display:flex;align-items:center;gap:9px;margin-top:14px;font-size:14px;color:var(--ink);cursor:pointer"><input type="checkbox" id="bm_analytics" style="width:auto;margin:0"> Owner can see analytics <span style="color:#e0a52b;font-weight:700;font-size:12px">PRO</span></label>
       <label style="display:flex;align-items:center;gap:9px;margin-top:10px;font-size:14px;color:var(--ink);cursor:pointer"><input type="checkbox" id="bm_collect" style="width:auto;margin:0"> Approve “business collects tips” mode <span style="color:#e0a52b;font-weight:700;font-size:12px">PRO</span></label>
       <div id="bmMsg" class="msg" style="margin-top:12px"></div>
@@ -229,7 +230,7 @@
 
     async function initPanel(){
       const cfg=await db.collection('config').doc('platform').get();
-      commRate=cfg.exists&&cfg.data().commissionPercent!=null?cfg.data().commissionPercent:5;
+      commRate=cfg.exists&&cfg.data().commissionPercent!=null?cfg.data().commissionPercent:7;
       $('commInput').value=commRate;
       $('stComm').textContent=commRate+'%';
       loadBusinesses();
@@ -271,7 +272,7 @@
         tRev+=rev; tVol+=vol; tN+=tipsSnap.size; tStaff+=activeStaff; if(tipsSnap.size>0) activeBiz++;
         const bemail=(d.email||d.businessEmail||'');
         bizRows.push({ id:b.id, name:d.businessName||'—', email:bemail, staff:activeStaff,
-          tipsN:tipsSnap.size, vol, rev, feePct, joined:ms(d.createdAt), last, code:d.shopCode||'',
+          tipsN:tipsSnap.size, vol, rev, feePct, commPct:(d.commissionPercent!=null?d.commissionPercent:null), joined:ms(d.createdAt), last, code:d.shopCode||'',
           blocked:!!d.blocked, analyticsEnabled:d.ownerAnalyticsEnabled===true, collectApproved:!!d.collectModeApproved,
           nkey:(d.businessName||'').toLowerCase().replace(/\s+/g,' ').trim(), ekey:bemail.toLowerCase().trim() });
       }
@@ -360,18 +361,24 @@
     }
 
     let editId=null;
-    function openEdit(r){ editId=r.id; $('bmTitle').textContent='Edit '+r.name; $('bm_name').value=r.name==='—'?'':r.name; $('bm_email').value=r.email||''; $('bm_fee').value=r.feePct||0; $('bm_analytics').checked=r.analyticsEnabled===true; $('bm_collect').checked=!!r.collectApproved; $('bmMsg').className='msg'; $('bizModal').classList.remove('hide'); }
+    function openEdit(r){ editId=r.id; $('bmTitle').textContent='Edit '+r.name; $('bm_name').value=r.name==='—'?'':r.name; $('bm_email').value=r.email||''; $('bm_fee').value=r.feePct||0; $('bm_comm').value=(r.commPct!=null?r.commPct:''); $('bm_analytics').checked=r.analyticsEnabled===true; $('bm_collect').checked=!!r.collectApproved; $('bmMsg').className='msg'; $('bizModal').classList.remove('hide'); }
     $('bmCancel').onclick=()=>$('bizModal').classList.add('hide');
     $('bmSave').onclick=async()=>{
       if(!editId) return;
       const name=$('bm_name').value.trim(), email=$('bm_email').value.trim().toLowerCase(), fee=parseFloat($('bm_fee').value);
       if(!name){ msg('bmMsg','Enter a business name.','err'); return; }
       if(isNaN(fee)||fee<0||fee>15){ msg('bmMsg','Admin fee must be 0–15%.','err'); return; }
+      // Per-shop commission: blank = clear override (use global default). Number = override.
+      const commRaw=$('bm_comm').value.trim();
+      let commVal=null;
+      if(commRaw!==''){ commVal=parseFloat(commRaw); if(isNaN(commVal)||commVal<0||commVal>50){ msg('bmMsg','Commission must be 0–50% (or blank for default).','err'); return; } }
       $('bmSave').disabled=true;
       try{
         const analyticsEnabled=$('bm_analytics').checked, collectApproved=$('bm_collect').checked;
-        await db.collection('businesses').doc(editId).update({ businessName:name, email:email, tipSharePercent:fee, tipShareEnabled:fee>0, ownerAnalyticsEnabled:analyticsEnabled, collectModeApproved:collectApproved });
-        const r=bizRows.find(x=>x.id===editId); if(r){ r.name=name; r.email=email; r.feePct=fee; r.analyticsEnabled=analyticsEnabled; r.collectApproved=collectApproved; }
+        const upd={ businessName:name, email:email, tipSharePercent:fee, tipShareEnabled:fee>0, ownerAnalyticsEnabled:analyticsEnabled, collectModeApproved:collectApproved };
+        upd.commissionPercent = (commVal==null ? firebase.firestore.FieldValue.delete() : commVal);
+        await db.collection('businesses').doc(editId).update(upd);
+        const r=bizRows.find(x=>x.id===editId); if(r){ r.name=name; r.email=email; r.feePct=fee; r.commPct=commVal; r.analyticsEnabled=analyticsEnabled; r.collectApproved=collectApproved; }
         $('bizModal').classList.add('hide'); renderBiz();
       }catch(e){ msg('bmMsg','Could not save: '+e.message,'err'); }
       $('bmSave').disabled=false;

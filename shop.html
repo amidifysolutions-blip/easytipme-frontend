@@ -155,7 +155,7 @@
     const CURSYM={CAD:'$',USD:'$',AUD:'$',EUR:'€',GBP:'£',AED:'AED',SAR:'SAR',QAR:'QAR',KWD:'KWD',BHD:'BHD',OMR:'OMR',LBP:'LBP'};
 
     let shop={}, curr='CAD', sym='$', presets=[15,30,50,100], allStaff=[], recipient=null, tip=0, rating=0;
-    let multiMode=false, selected=new Set(), stripe=null, elements=null;
+    let multiMode=false, selected=new Set(), stripe=null, elements=null, heldTip=false;
 
     if(!BID){ $('loading').textContent='Invalid link.'; } else init();
 
@@ -165,7 +165,10 @@
         if(!bd.exists){ $('loading').textContent='Shop not found.'; return; }
         shop=bd.data(); curr=shop.currency||'CAD'; sym=CURSYM[curr]||'$';
         if(shop.blocked){ $('loading').innerHTML='<div style="text-align:center;color:var(--soft);max-width:320px;margin:0 auto"><div style="font-size:34px;margin-bottom:10px">🚫</div>This tip page is currently unavailable.</div>'; return; }
-        try{const cfg=await db.collection('config').doc('platform').get(); if(cfg.exists && cfg.data().commissionPercent!=null) FEE=cfg.data().commissionPercent/100;}catch(e){}
+        // Commission %: per-shop rate wins, else the global default, else 7%.
+        FEE=0.07;
+        if(shop.commissionPercent!=null){ FEE=shop.commissionPercent/100; }
+        else { try{const cfg=await db.collection('config').doc('platform').get(); if(cfg.exists && cfg.data().commissionPercent!=null) FEE=cfg.data().commissionPercent/100;}catch(e){} }
         if(shop.tipPresets&&shop.tipPresets.length) presets=shop.tipPresets.slice(0,4);
         $('shopName').textContent=shop.businessName||'Leave a tip';
         if(shop.slogan) $('shopSlogan').textContent=shop.slogan;
@@ -282,8 +285,8 @@
           ? { amount:Math.round(total*100), currency:curr.toLowerCase() }
           : { businessId:BID, staffId:recipient.id, tipCents:Math.round(tip*100), currency:curr.toLowerCase() };
         const res=await fetch(BACKEND+'/create-payment-intent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-        const data=await res.json(); const {clientSecret,publishableKey,breakdown,error}=data;
-        if(error==='recipient-not-ready'){ $('payment-element').innerHTML=''; pmsg("This person hasn't finished setting up payouts yet, so they can't receive tips right now. Please pick someone else."); return; }
+        const data=await res.json(); const {clientSecret,publishableKey,breakdown}=data;
+        heldTip=!!data.held; // worker not connected yet → we hold their share until they are
         if(!clientSecret){ $('payment-element').innerHTML=''; pmsg('Could not start payment. Please try again.'); btn.disabled=false; return; }
         // Show the server's authoritative breakdown so the total always matches the charge.
         if(breakdown){ const f=breakdown.commission/100, t=breakdown.total/100; $('bkFee').textContent=sym+f.toFixed(2); $('bkTot').textContent=sym+t.toFixed(2); $('payAmt').textContent=sym+t.toFixed(2); }
@@ -326,7 +329,9 @@
       const fromName=(($('fromName')&&$('fromName').value)||'').trim().slice(0,40);
       try{ await db.collection('businesses').doc(BID).collection('tips').add({
         recipientIds:recipient.members.map(m=>m.id), recipientEmails:recipient.members.map(m=>(m.email||'').toLowerCase()).filter(Boolean), recipientName:recipient.nickname||'team', multiple:!!recipient.multiple,
-        fromName:fromName, tip, fee, total:tip+fee, currency:curr, rating, ownerShare, staffShare, paymentId:paymentIntent?.id||'', createdAt:firebase.firestore.FieldValue.serverTimestamp() }); }catch(e){}
+        fromName:fromName, tip, fee, total:tip+fee, currency:curr, rating, ownerShare, staffShare, paymentId:paymentIntent?.id||'',
+        held:heldTip, released:false, staffId:(recipient.multiple?null:recipient.id),
+        createdAt:firebase.firestore.FieldValue.serverTimestamp() }); }catch(e){}
       if(shop.notifyEmail!==false){ try{
         const perAmt=recipient.multiple?tip/recipient.members.length:tip;
         fetch(BACKEND+'/notify-tip',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
