@@ -246,7 +246,7 @@
       <div class="card">
         <div class="h3" data-i18n="profile">Profile</div>
         <div class="srow"><span class="lab" data-i18n="name_label">Name</span><span class="val" id="setName">—</span></div>
-        <div class="srow"><span class="lab" data-i18n="email_label">Email</span><span class="val" id="setEmail">—</span></div>
+        <div class="srow"><span class="lab" data-i18n="email_label">Email</span><span class="val"><span id="setEmail">—</span> <button id="changeEmailBtn" class="linkbtn" data-i18n="change">Change</button></span></div>
         <div class="srow"><span class="lab" data-i18n="phone_label">Phone</span><span class="val" id="setPhone">—</span></div>
         <div class="srow"><span class="lab" data-i18n="email_status">Email verification</span>
           <span class="val"><span id="setVerified"></span> <button id="setResend" class="linkbtn hide" data-i18n="resend_short">Resend</button></span></div>
@@ -311,6 +311,20 @@
     </div>
   </div>
 
+  <!-- Change-email modal (self-service, password protected) -->
+  <div id="emailModal" class="modal-wrap hide">
+    <div class="modal">
+      <div class="modal-ic">✉️</div>
+      <h2 data-i18n="change_email_title">Change your email</h2>
+      <p data-i18n="change_email_desc">Your email is your login and is linked to your payouts. Enter your new email and your current password to update it.</p>
+      <div id="emMsg" class="msg"></div>
+      <input id="emNew" type="email" data-i18n-ph="new_email_ph" placeholder="New email" autocomplete="email">
+      <div class="pwrap"><input id="emPass" type="password" data-i18n-ph="password_confirm_ph" placeholder="Your password" autocomplete="current-password"><button type="button" class="eye" id="eyeBtn4" aria-label="Show password"></button></div>
+      <button class="btn" id="emConfirm" data-i18n="change_email_btn">Update email</button>
+      <button class="btn ghost" id="emCancel" data-i18n="cancel">Cancel</button>
+    </div>
+  </div>
+
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -345,9 +359,9 @@
       connect_bank:"Connect bank account", tip_terms:"Tip-sharing terms", log_out:"Log out",
       leave_wp:"Leave workplace", leave_desc:"Stop appearing on your workplace's tip page. Your past tips stay recorded.",
       nav_home:"Home", nav_insights:"Insights", nav_settings:"Settings",
-      cm_title:"Tip pooling & fees", cm_body1:"applies an administrative fee to each tip to help run its tipping service. The fee is", cm_body2:"capped at 15% maximum", cm_body3:"— the rest is always yours.",
+      cm_title:"Tip pooling & fees", cm_body1:"applies its own administrative fee to each tip — this fee goes to your workplace, not to EasyTipMe. The fee is", cm_body2:"capped at 15% maximum", cm_body3:"— the rest is always yours.",
       cm_now1:"Right now the fee is", cm_now2:"so you keep", cm_now3:"of every tip.",
-      cm_fine:"Standard payment-processing fees also apply. This arrangement is set by your workplace; by continuing you acknowledge it. You can review these terms anytime.",
+      cm_fine:"This fee is set and kept by your workplace, not by EasyTipMe. Standard payment-processing fees also apply; by continuing you acknowledge it. You can review these terms anytime.",
       cm_agree:"I understand & agree", cm_later:"Maybe later", cm_close:"Close",
       leave_modal_title:"Leave {shop}?", leave_modal_desc:"Enter your password to confirm. You'll stop appearing on their tip page. Your past tips stay recorded, and they can add you again to rejoin.",
       password_confirm_ph:"Your password", confirm_leave:"Leave workplace", cancel:"Cancel",
@@ -363,7 +377,9 @@
       e_wrong_pass:"Wrong email or password.", e_no_user:"No account with this email. Create one.", e_too_many:"Too many attempts. Please wait a minute, then try again.",
       e_network:"Network problem. Check your connection and try again.", e_missing_pass:"Enter your password.", e_generic:"Something went wrong. Please try again.",
       payout_connected:"✓ Bank connected — you're set to receive payouts.", payout_continue:"Finish connecting your bank", payout_start_fail:"Couldn't start bank setup right now. Please try again.",
-      forgot_pw:"Forgot password?", m_forgot_need_email:"Enter your email above first, then tap Forgot password.", m_reset_sent:"If an account exists for that email, a reset link is on its way. Check your inbox (and spam)."
+      forgot_pw:"Forgot password?", m_forgot_need_email:"Enter your email above first, then tap Forgot password.", m_reset_sent:"If an account exists for that email, a reset link is on its way. Check your inbox (and spam).",
+      change:"Change", change_email_title:"Change your email", change_email_desc:"Your email is your login and is linked to your payouts. Enter your new email and your current password to update it.", new_email_ph:"New email", change_email_btn:"Update email",
+      m_email_same:"That's already your email.", m_email_changed:"Email updated. Please sign in again with your new email.", m_email_change_fail:"Couldn't change your email right now. Please try again.", m_reauth_needed:"For security, please sign out and back in, then try again."
     };
     DICT.ar={
       signin_title:"تسجيل دخول الفريق", signin_sub:"سجّل دخولك لتشوف بقشيشك وأرباحك.",
@@ -392,9 +408,9 @@
       connect_bank:"اربط الحساب البنكي", tip_terms:"شروط تقاسم البقشيش", log_out:"تسجيل الخروج",
       leave_wp:"مغادرة مكان العمل", leave_desc:"بتوقف تظهر بصفحة بقشيش مكان عملك. بقشيشك السابق بيضل مسجّل.",
       nav_home:"الرئيسية", nav_insights:"التحليلات", nav_settings:"الإعدادات",
-      cm_title:"رسوم وتجميع البقشيش", cm_body1:"بيطبّق رسوم إدارية على كل بقشيش لتشغيل خدمة البقشيش. الرسوم", cm_body2:"بحد أقصى ١٥٪", cm_body3:"— والباقي دايمًا إلك.",
+      cm_title:"رسوم وتجميع البقشيش", cm_body1:"بيطبّق رسوم إدارية خاصة فيه على كل بقشيش — هالرسوم بتروح لمكان عملك، مش لـ EasyTipMe. الرسوم", cm_body2:"بحد أقصى ١٥٪", cm_body3:"— والباقي دايمًا إلك.",
       cm_now1:"حاليًا الرسوم", cm_now2:"فبيبقالك", cm_now3:"من كل بقشيش.",
-      cm_fine:"بتنطبق كمان رسوم معالجة الدفع القياسية. هالترتيب بيحدّده مكان عملك؛ بالمتابعة إنت مقرّ فيه. فيك تراجع الشروط بأي وقت.",
+      cm_fine:"هالرسوم بيحدّدها وبياخدها مكان عملك، مش EasyTipMe. بتنطبق كمان رسوم معالجة الدفع القياسية؛ بالمتابعة إنت مقرّ فيه. فيك تراجع الشروط بأي وقت.",
       cm_agree:"فهمت وأوافق", cm_later:"ربما لاحقًا", cm_close:"إغلاق",
       leave_modal_title:"مغادرة {shop}؟", leave_modal_desc:"أدخل كلمة المرور للتأكيد. بتوقف تظهر بصفحة بقشيشهم. بقشيشك السابق بيضل مسجّل، وبيقدروا يضيفوك مرة تانية.",
       password_confirm_ph:"كلمة مرورك", confirm_leave:"غادر مكان العمل", cancel:"إلغاء",
@@ -642,7 +658,7 @@
     const EYE='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8e8e93" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1.8 12S5.3 5 12 5s10.2 7 10.2 7-3.5 7-10.2 7S1.8 12 1.8 12z"/><circle cx="12" cy="12" r="3.1"/></svg>';
     const EYEOFF='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8e8e93" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 5.2A9.6 9.6 0 0 1 12 5c6.7 0 10.2 7 10.2 7a17 17 0 0 1-3.1 3.8M6.3 6.3A17 17 0 0 0 1.8 12S5.3 19 12 19a9.5 9.5 0 0 0 4.1-.9"/><path d="M9.9 9.9a3.1 3.1 0 0 0 4.4 4.4"/><line x1="3" y1="3" x2="21" y2="21"/></svg>';
     function eyeToggle(btn,inp){ $(btn).innerHTML=EYE; $(btn).onclick=()=>{const p=$(inp);const r=p.type==='password';p.type=r?'text':'password';$(btn).innerHTML=r?EYEOFF:EYE;}; }
-    eyeToggle('eyeBtn','pass'); eyeToggle('eyeBtn2','pass2'); eyeToggle('eyeBtn3','lvPass');
+    eyeToggle('eyeBtn','pass'); eyeToggle('eyeBtn2','pass2'); eyeToggle('eyeBtn3','lvPass'); eyeToggle('eyeBtn4','emPass');
 
     if(!BID){ $('shopCodeWrap').classList.remove('hide'); }
 
@@ -744,7 +760,9 @@
         const sd=await db.collection('businesses').doc(BID).get();
         if(!sd.exists){ BID=''; try{localStorage.removeItem('etm_staff_bid');}catch(_){}; $('shopCodeWrap').classList.remove('hide'); show('auth'); amsg(t('m_wp_not_found')); return; }
         shop=sd.data();
-        const snap=await db.collection('businesses').doc(BID).collection('staff').where('email','==',(u.email||'').toLowerCase()).limit(1).get();
+        // Prefer stable UID match (survives email changes); fall back to email for first-time claim.
+        let snap=await db.collection('businesses').doc(BID).collection('staff').where('claimedUid','==',u.uid).limit(1).get();
+        if(snap.empty){ snap=await db.collection('businesses').doc(BID).collection('staff').where('email','==',(u.email||'').toLowerCase()).limit(1).get(); }
         if(snap.empty){ show('auth'); amsg(t('m_not_registered',{shop:shop.businessName||'—'})); return; }
         staffDoc=snap.docs[0].data(); staffId=snap.docs[0].id;
         if(staffDoc.status==='removed'){ show('auth'); amsg(t('m_removed',{shop:shop.businessName||'—'})); return; }
@@ -913,6 +931,30 @@
         const nm=shop&&shop.businessName||'—';
         await auth.signOut(); staffDoc=null; show('auth'); amsg(t('m_left_ok',{shop:nm}), 'ok');
       }catch(e){ const c=(e&&e.code)||''; lvmsg((c.includes('wrong-password')||c.includes('invalid-credential'))?t('m_leave_wrong_pass'):prettyErr(e)); $('lvConfirm').disabled=false; }
+    };
+
+    // ---- change email (self-service) ----
+    function emmsg(txt){const m=$('emMsg');m.textContent=txt||'';m.className='msg'+(txt?' err':'');}
+    $('changeEmailBtn').onclick=()=>{ $('emNew').value=''; $('emPass').value=''; emmsg(''); $('emailModal').classList.remove('hide'); };
+    $('emCancel').onclick=()=>$('emailModal').classList.add('hide');
+    $('emConfirm').onclick=async()=>{
+      const u=auth.currentUser; if(!u) return;
+      const newEmail=$('emNew').value.trim().toLowerCase(), pw=$('emPass').value;
+      if(!/.+@.+\..+/.test(newEmail)){ emmsg(t('e_invalid_email')); return; }
+      if(newEmail===(u.email||'').toLowerCase()){ emmsg(t('m_email_same')); return; }
+      if(!pw){ emmsg(t('e_missing_pass')); return; }
+      $('emConfirm').disabled=true;
+      try{
+        const cred=firebase.auth.EmailAuthProvider.credential(u.email, pw);
+        await u.reauthenticateWithCredential(cred);
+        const idToken=await u.getIdToken(true);
+        const r=await fetch(BACKEND+'/staff/change-email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken, bid:BID, staffId, newEmail})});
+        const j=await r.json().catch(()=>({}));
+        if(!r.ok || !j.ok){ emmsg(j.error==='email-in-use'?t('e_email_in_use'):t('m_email_change_fail')); $('emConfirm').disabled=false; return; }
+        try{ localStorage.setItem('etm_pending_verify_email', newEmail); }catch(_){}
+        $('emailModal').classList.add('hide');
+        await auth.signOut(); staffDoc=null; registerMode=false; show('auth'); amsg(t('m_email_changed'),'ok');
+      }catch(e){ const c=(e&&e.code)||''; emmsg((c.includes('wrong-password')||c.includes('invalid-credential'))?t('m_leave_wrong_pass'):(c.includes('requires-recent-login')?t('m_reauth_needed'):prettyErr(e))); $('emConfirm').disabled=false; }
     };
 
     // ---- tabs ----
