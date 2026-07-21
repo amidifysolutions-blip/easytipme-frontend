@@ -183,12 +183,9 @@
         await db.collection('businesses').doc(cred.user.uid).set({
           ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
-        // Send a branded "confirm your email" — like a respectable company.
-        try{
-          await fetch('https://easytipme-backend.onrender.com/send-verification',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:data.email, name:data.ownerName, continueUrl:location.origin+'/dashboard.html'})});
-        }catch(_){}
-        showMsg('Account created! Check your email to confirm it. Redirecting…','ok');
-        setTimeout(()=>{ window.location.href='dashboard.html'; }, 1400);
+        // The dashboard's confirmation gate emails a 6-digit code on open.
+        showMsg('Account created! We\'ll email you a confirmation code next…','ok');
+        setTimeout(()=>{ window.location.href='dashboard.html'; }, 1200);
       }catch(err){
         btn.disabled=false; btn.textContent='Create account';
         showMsg(prettyError(err),'err');

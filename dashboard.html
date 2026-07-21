@@ -131,11 +131,12 @@
     <div style="max-width:420px;width:100%;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:34px 26px;text-align:center">
       <div style="font-size:42px;margin-bottom:6px">📧</div>
       <h2 style="font-size:22px;margin-bottom:8px">Confirm your email</h2>
-      <p style="color:var(--soft);font-size:14px;line-height:1.6;margin-bottom:6px">We sent a confirmation link to <b id="vgEmail"></b>.</p>
-      <p style="color:var(--soft);font-size:13px;line-height:1.6;margin-bottom:18px">Open it (check your spam folder too), then tap continue. This secures your business and your payouts.</p>
+      <p style="color:var(--soft);font-size:14px;line-height:1.6;margin-bottom:6px">We emailed a 6-digit code to <b id="vgEmail"></b>.</p>
+      <p style="color:var(--soft);font-size:13px;line-height:1.6;margin-bottom:16px">Enter it below to confirm (check your spam folder too). This secures your business and your payouts.</p>
+      <input id="vgCode" inputmode="numeric" maxlength="6" placeholder="6-digit code" style="width:100%;text-align:center;font-size:24px;letter-spacing:8px;font-weight:700;padding:12px;margin-bottom:12px">
       <div id="vgMsg" style="font-size:13px;margin-bottom:12px;min-height:16px"></div>
-      <button class="btn" id="vgCheck" style="width:100%">I've confirmed — continue</button>
-      <button class="btn" id="vgResend" style="width:100%;margin-top:10px;background:transparent;border:1px solid var(--line);color:#fff">Resend email</button>
+      <button class="btn" id="vgCheck" style="width:100%">Confirm</button>
+      <button class="btn" id="vgResend" style="width:100%;margin-top:10px;background:transparent;border:1px solid var(--line);color:#fff">Resend code</button>
       <button id="vgLogout" style="background:none;border:none;color:var(--soft);margin-top:16px;cursor:pointer;font-family:inherit;font-size:13px">Use a different account</button>
     </div>
   </div>
@@ -413,27 +414,39 @@
     $('days').querySelectorAll('.day').forEach(d=>d.onclick=()=>d.classList.toggle('on'));
 
     function vgmsg(txt,ok){ const m=$('vgMsg'); if(!m) return; m.textContent=txt||''; m.style.color= ok ? 'var(--green)' : '#ff8a8a'; }
-    function showVerifyGate(u, name){
+    async function showVerifyGate(u, name){
       $('app').style.display='none';
       $('vgEmail').textContent=u.email||'';
       $('verifyGate').style.display='flex';
-      $('vgResend').onclick=async()=>{
-        $('vgResend').disabled=true; $('vgResend').textContent='Sending…'; vgmsg('');
+      const sendCode=async(manual)=>{
+        if(manual){ $('vgResend').disabled=true; $('vgResend').textContent='Sending…'; }
+        vgmsg('');
         try{
-          const r=await fetch(BACKEND+'/send-verification',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:u.email,name:name||'',continueUrl:location.origin+'/dashboard.html'})});
+          const idToken=await u.getIdToken();
+          const r=await fetch(BACKEND+'/send-code',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,name:name||''})});
           const j=await r.json().catch(()=>({}));
-          if(j&&j.sent===1) vgmsg('Sent — check your inbox and spam folder.', true);
-          else vgmsg('Could not send right now. Try again in a moment.', false);
+          if(j&&j.sent===1) vgmsg('Code sent — check your inbox and spam folder.', true);
+          else if(j&&j.error==='slow-down'){ if(manual) vgmsg('A code was just sent — check your email.', true); }
+          else vgmsg('Could not send the code. Try again in a moment.', false);
         }catch(_){ vgmsg('Could not send. Check your connection.', false); }
-        $('vgResend').disabled=false; $('vgResend').textContent='Resend email';
+        if(manual){ $('vgResend').disabled=false; $('vgResend').textContent='Resend code'; }
       };
+      $('vgResend').onclick=()=>sendCode(true);
       $('vgCheck').onclick=async()=>{
+        const code=($('vgCode').value||'').trim();
+        if(code.length<6){ vgmsg('Enter the 6-digit code from your email.', false); return; }
         $('vgCheck').disabled=true; vgmsg('');
-        try{ await u.reload(); if(u.emailVerified){ location.reload(); } else { vgmsg('Not confirmed yet — open the link in your email first.', false); } }
-        catch(_){ vgmsg('Try again.', false); }
+        try{
+          const idToken=await u.getIdToken();
+          const r=await fetch(BACKEND+'/verify-code',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,code})});
+          const j=await r.json().catch(()=>({}));
+          if(j&&j.ok){ try{ await u.getIdToken(true); await u.reload(); }catch(_){} location.reload(); return; }
+          vgmsg(j.error==='wrong-code'?'Wrong code — try again.':j.error==='expired'?'Code expired — tap Resend code.':j.error==='too-many'?'Too many tries — tap Resend code for a new one.':'Could not verify. Try again.', false);
+        }catch(_){ vgmsg('Could not verify. Try again.', false); }
         $('vgCheck').disabled=false;
       };
       $('vgLogout').onclick=()=>auth.signOut().then(()=>location.href='signup.html');
+      sendCode(false); // auto-send a code when the gate opens
     }
 
     // ---- Owner change login email ----
