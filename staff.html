@@ -220,6 +220,22 @@
     </div>
   </div>
 
+  <!-- FIRST LOGIN: choose your own password (forced) -->
+  <div id="firstpw" class="wrap hide">
+    <div class="brandbar"><span class="mk" id="mk4"></span><b>Easy<span style="color:#0071e3">Tip</span>Me</b></div>
+    <div class="card">
+      <div style="font-size:34px;text-align:center;margin-bottom:2px">🔐</div>
+      <h1 style="font-size:22px;text-align:center" data-i18n="fp_title">Set your password</h1>
+      <p class="sub" style="text-align:center" data-i18n="fp_sub">Welcome! Choose your own password to secure your account.</p>
+      <div id="fpMsg" class="msg"></div>
+      <label data-i18n="fp_new">New password</label>
+      <div class="pwrap"><input id="fpNew" type="password" autocomplete="new-password" data-i18n-ph="pass_ph" placeholder="At least 6 characters"><button type="button" class="eye" id="eyeFp" aria-label="Show password"></button></div>
+      <label data-i18n="confirm">Confirm password</label>
+      <div class="pwrap"><input id="fpNew2" type="password" autocomplete="new-password" data-i18n-ph="confirm_ph" placeholder="Re-enter password"></div>
+      <button class="btn" id="fpSave" data-i18n="fp_save">Save &amp; continue</button>
+    </div>
+  </div>
+
   <!-- APP (tabbed dashboard) -->
   <div id="app" class="wrap hide">
     <div class="brandbar"><span class="mk" id="mk2"></span><b>Easy<span style="color:#0071e3">Tip</span>Me</b></div>
@@ -409,6 +425,7 @@
       payout_note:"Bank payouts are being activated. Soon you'll connect your bank account here to receive your tips directly. For now, your workplace can see and settle your tips.",
       connect_bank:"Connect bank account", tip_terms:"Tip-sharing terms", log_out:"Log out",
       your_country:"Your country", select_country:"Select country…", country_hint:"Where your bank account is. This sets up your payouts and can't be changed later.",
+      fp_title:"Set your password", fp_sub:"Welcome! Choose your own password to secure your account.", fp_new:"New password", fp_save:"Save & continue", fp_relogin:"For security, please sign in again with your temporary password to set a new one.",
       available:"Available", pending:"Pending", withdraw_speed:"Withdrawal speed", withdraw_now:"Withdraw",
       free:"Free", recent_payouts:"Recent payouts", bal_unavailable:"Balance is loading — check back in a moment.",
       tier_instant:"Instant", tier_instant_d:"Arrives in minutes", tier_standard:"Standard", tier_standard_d:"Free · 1–2 business days",
@@ -465,6 +482,7 @@
       payout_note:"يتم تفعيل التحويلات البنكية. قريبًا رح تربط حسابك البنكي هون لتستلم بقشيشك مباشرة. حاليًا، مكان عملك بيشوف بقشيشك ويسوّيه.",
       connect_bank:"اربط الحساب البنكي", tip_terms:"شروط تقاسم البقشيش", log_out:"تسجيل الخروج",
       your_country:"بلدك", select_country:"اختر البلد…", country_hint:"وين حسابك البنكي. هيدا بيجهّز تحويلاتك وما بيتغيّر بعدين.",
+      fp_title:"عيّن كلمة مرورك", fp_sub:"أهلًا! اختر كلمة مرور خاصة فيك لتأمين حسابك.", fp_new:"كلمة مرور جديدة", fp_save:"حفظ ومتابعة", fp_relogin:"لأمانك، سجّل دخول مرة تانية بالباسورد المؤقت عشان تعيّن باسورد جديد.",
       available:"المتاح", pending:"قيد الانتظار", withdraw_speed:"سرعة السحب", withdraw_now:"اسحب",
       free:"مجاني", recent_payouts:"آخر التحويلات", bal_unavailable:"عم يحمّل الرصيد — رجاع بعد شوي.",
       tier_instant:"فوري", tier_instant_d:"بيوصل خلال دقائق", tier_standard:"عادي", tier_standard_d:"مجاني · يوم-يومين عمل",
@@ -881,13 +899,13 @@
 
     // logo mark
     const LOGO='<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00c2ff"/><stop offset="1" stop-color="#0071e3"/></linearGradient></defs><rect width="100" height="100" rx="24" fill="#0a0a0a"/><rect x="30" y="26" width="10" height="48" rx="5" fill="url(#lg)"/><rect x="30" y="26" width="34" height="10" rx="5" fill="url(#lg)"/><rect x="30" y="64" width="34" height="10" rx="5" fill="url(#lg)"/><rect x="30" y="45" width="22" height="10" rx="5" fill="url(#lg)"/><circle cx="63" cy="50" r="9" fill="#fff"/><circle cx="63" cy="50" r="4.5" fill="url(#lg)"/></svg>';
-    $('mk1').innerHTML=LOGO.replace(/lg/g,'lgA'); $('mk2').innerHTML=LOGO.replace(/lg/g,'lgB'); $('mk3').innerHTML=LOGO.replace(/lg/g,'lgC');
+    $('mk1').innerHTML=LOGO.replace(/lg/g,'lgA'); $('mk2').innerHTML=LOGO.replace(/lg/g,'lgB'); $('mk3').innerHTML=LOGO.replace(/lg/g,'lgC'); if($('mk4')) $('mk4').innerHTML=LOGO.replace(/lg/g,'lgD');
 
     // eye toggles
     const EYE='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8e8e93" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1.8 12S5.3 5 12 5s10.2 7 10.2 7-3.5 7-10.2 7S1.8 12 1.8 12z"/><circle cx="12" cy="12" r="3.1"/></svg>';
     const EYEOFF='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8e8e93" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 5.2A9.6 9.6 0 0 1 12 5c6.7 0 10.2 7 10.2 7a17 17 0 0 1-3.1 3.8M6.3 6.3A17 17 0 0 0 1.8 12S5.3 19 12 19a9.5 9.5 0 0 0 4.1-.9"/><path d="M9.9 9.9a3.1 3.1 0 0 0 4.4 4.4"/><line x1="3" y1="3" x2="21" y2="21"/></svg>';
     function eyeToggle(btn,inp){ $(btn).innerHTML=EYE; $(btn).onclick=()=>{const p=$(inp);const r=p.type==='password';p.type=r?'text':'password';$(btn).innerHTML=r?EYEOFF:EYE;}; }
-    eyeToggle('eyeBtn','pass'); eyeToggle('eyeBtn2','pass2'); eyeToggle('eyeBtn3','lvPass'); eyeToggle('eyeBtn4','emPass');
+    eyeToggle('eyeBtn','pass'); eyeToggle('eyeBtn2','pass2'); eyeToggle('eyeBtn3','lvPass'); eyeToggle('eyeBtn4','emPass'); if($('eyeFp')) eyeToggle('eyeFp','fpNew');
 
     if(!BID){ $('shopCodeWrap').classList.remove('hide'); }
 
@@ -976,6 +994,29 @@
     $('verCheck').onclick=async()=>{ $('verCheck').disabled=true; try{ await auth.currentUser.reload(); if(auth.currentUser.emailVerified){ loadMembership(auth.currentUser); } else { vmsg(t('m_not_verified_yet')); } }catch(e){ vmsg(prettyErr(e)); } $('verCheck').disabled=false; };
     $('verLogout').onclick=()=>auth.signOut().then(()=>{ registerMode=false; show('auth'); });
 
+    function fpmsg(txt,type){const m=$('fpMsg');m.textContent=txt;m.className='msg '+(type||'err');}
+    function showFirstPw(u){
+      $('fpMsg').className='msg'; $('fpNew').value=''; $('fpNew2').value=''; show('firstpw');
+      $('fpSave').onclick=async()=>{
+        const p1=$('fpNew').value, p2=$('fpNew2').value;
+        if(p1.length<6){ fpmsg(t('m_pass_min')); return; }
+        if(p1!==p2){ fpmsg(t('m_pass_match')); return; }
+        $('fpSave').disabled=true;
+        try{
+          await u.updatePassword(p1);
+          try{ const idToken=await u.getIdToken(true); await fetch(BACKEND+'/staff/activate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken, bid:BID, staffId})}); }catch(_){}
+          staffDoc.mustChangePassword=false;
+          await sendVerify(u, staffDoc.nickname);   // now email verification is required
+          $('fpSave').disabled=false;
+          showVerify(u);
+        }catch(e){
+          $('fpSave').disabled=false;
+          if(((e&&e.code)||'').includes('requires-recent-login')){ fpmsg(t('fp_relogin')); try{ await auth.signOut(); }catch(_){}; registerMode=false; setTimeout(()=>show('auth'),1600); }
+          else fpmsg(prettyErr(e));
+        }
+      };
+    }
+
     const ENFORCE_VERIFY=false;
     auth.onAuthStateChanged(async u=>{
       if(!u){ applyMode(); show('auth'); return; }
@@ -999,6 +1040,8 @@
         if(!staffDoc.claimedUid){
           try{ await db.collection('businesses').doc(BID).collection('staff').doc(staffId).update({claimedUid:u.uid, claimedAt:firebase.firestore.FieldValue.serverTimestamp()}); staffDoc.claimedUid=u.uid; }catch(_){}
         }
+        // First login with the temporary password → force choosing their own password.
+        if(staffDoc.mustChangePassword===true){ showFirstPw(u); return; }
         renderApp(u);
       }catch(e){ show('auth'); amsg(t('m_load_fail')+' '+e.message); }
     }
@@ -1261,7 +1304,7 @@
     }
     document.querySelectorAll('.nav button').forEach(b=>{ b.onclick=()=>switchTab(b.getAttribute('data-tab')); });
 
-    function show(id){['loading','auth','verify','app'].forEach(x=>$(x).classList.add('hide'));$(id).classList.remove('hide');window.scrollTo(0,0);}
+    function show(id){['loading','auth','verify','firstpw','app'].forEach(x=>$(x).classList.add('hide'));$(id).classList.remove('hide');window.scrollTo(0,0);}
 
     // initial paint
     applyLang();

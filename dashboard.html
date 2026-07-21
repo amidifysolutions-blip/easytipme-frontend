@@ -142,6 +142,9 @@
     </div>
 
     <div class="main">
+      <div id="verifyBanner" style="display:none;background:#2a2210;border:1px solid #6b551e;color:#f0c674;padding:11px 15px;border-radius:12px;margin-bottom:18px;font-size:13px;line-height:1.5">
+        ⚠️ Please confirm your email to fully secure your account. <button id="verifyResend" style="background:none;border:none;color:#ffd479;font-weight:700;cursor:pointer;text-decoration:underline;font-family:inherit;font-size:13px">Resend email</button>
+      </div>
       <!-- TEAM -->
       <div class="section show" id="sec-team">
         <h1 id="teamTitle">Your team</h1>
@@ -375,6 +378,14 @@
       BID=u.uid;
       const doc = await db.collection('businesses').doc(BID).get();
       const b = doc.exists?doc.data():{}; bizData=b;
+      // Email verification banner (respectable-company nudge)
+      try{ await u.reload(); }catch(_){}
+      $('verifyBanner').style.display = u.emailVerified ? 'none' : 'block';
+      $('verifyResend').onclick=async()=>{
+        $('verifyResend').disabled=true; $('verifyResend').textContent='Sending…';
+        try{ await fetch(BACKEND+'/send-verification',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:u.email, name:(b.ownerName||''), continueUrl:location.origin+'/dashboard.html'})}); $('verifyResend').textContent='Sent ✓'; }
+        catch(_){ $('verifyResend').textContent='Try again'; $('verifyResend').disabled=false; }
+      };
       $('sideBiz').textContent=b.businessName||u.email;
       $('teamTitle').textContent=(b.businessName||'Your')+' — team';
       // fill profile + settings
@@ -526,8 +537,13 @@
       try{
         const col=db.collection('businesses').doc(BID).collection('staff');
         if(editId){ await col.doc(editId).update(Object.assign({}, data, {leftByStaff:firebase.firestore.FieldValue.delete(), leftAt:firebase.firestore.FieldValue.delete()})); }
-        else{ data.published=true; data.createdAt=firebase.firestore.FieldValue.serverTimestamp(); await col.add(data);
-          if(data.email){ fetch(BACKEND+'/notify-welcome',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:data.email,name:data.nickname,shopName:($('sideBiz').textContent||''),staffLink:staffUrl()+'&new=1'})}).catch(()=>{}); }
+        else{ data.published=true; data.createdAt=firebase.firestore.FieldValue.serverTimestamp(); const docRef=await col.add(data);
+          if(data.email){
+            try{
+              const idToken=await auth.currentUser.getIdToken();
+              fetch(BACKEND+'/staff/invite',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken, bid:BID, staffId:docRef.id, email:data.email, name:data.nickname, shopName:(bizData.businessName||$('sideBiz').textContent||''), shopCode:(bizData.shopCode||''), staffLink:staffUrl()})}).catch(()=>{});
+            }catch(_){}
+          }
         }
         resetForm(); msg('staffMsg', (editId?'Saved ✓':'Saved ✓ — invite email sent'),'ok'); setTimeout(()=>$('staffMsg').className='msg',2200); loadStaff();
       }catch(err){ msg('staffMsg',err.message,'err'); }
