@@ -1179,10 +1179,11 @@
       if(!CONNECT_LIVE){ btn.disabled=true; return; }
       if(soon){ soon.classList.add('hide'); soon.style.display='none'; }  // reliably hide "Coming soon"
       btn.disabled=false;
-      // Always (re)populate the country list so it's never empty when shown.
+      // Always (re)populate the country list (pre-selected to the shop's country) and show it
+      // until the bank is fully connected — so the selector is never empty or hidden mid-setup.
       fillCountriesStaff($('payCountry'), (staffDoc&&staffDoc.payoutCountry)||shop.country||'');
+      $('payCountryWrap').classList.remove('hide');
       const accId = staffDoc.connectAccountId || null;
-      if(!accId){ $('payCountryWrap').classList.remove('hide'); }
       // returning from Stripe onboarding
       if(params.get('connect')==='done' && accId){
         try{ const r=await fetch(BACKEND+'/connect/status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accountId:accId})}); const j=await r.json(); paintPayout(j); }catch(_){}
@@ -1251,11 +1252,12 @@
     }
     async function startConnect(u){
       const btn=$('connectBtn');
+      const hasAcct=!!(staffDoc&&staffDoc.connectAccountId);   // existing account already has its (permanent) country
       const country=($('payCountry')||{}).value||'';
-      if(!country){ alert(t('select_country')); return; }
+      if(!hasAcct && !country){ alert(t('select_country')); return; }
       btn.disabled=true;
       try{
-        try{ await db.collection('businesses').doc(BID).collection('staff').doc(staffId).update({payoutCountry:country}); }catch(_){}
+        try{ if(country) await db.collection('businesses').doc(BID).collection('staff').doc(staffId).update({payoutCountry:country}); }catch(_){}
         const prof=(()=>{try{return JSON.parse(localStorage.getItem('etm_staff_profile')||'{}');}catch(_){return{};}})();
         const cr=await fetch(BACKEND+'/connect/create-account',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({bid:BID, staffId, email:u.email, country:country, firstName:prof.firstName||'', lastName:prof.lastName||'', phone:(staffDoc&&staffDoc.phone)||prof.phone||''})});
         const cj=await cr.json(); if(!cj.accountId) throw new Error('no account');
