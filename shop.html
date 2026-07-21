@@ -276,10 +276,17 @@
       $('express-wrap').classList.add('hide'); $('express-checkout').innerHTML='';
       $('payment-element').innerHTML='<div style="text-align:center;color:var(--soft);padding:26px 0">Preparing secure checkout…</div>';
       try{
-        const res=await fetch(BACKEND+'/create-payment-intent',{method:'POST',headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({amount:Math.round(total*100),currency:curr.toLowerCase(),metadata:{recipient:recipient.nickname||'team',shop:BID}})});
-        const {clientSecret,publishableKey}=await res.json();
+        // Single recipient → server splits the money (tip to the worker, commission
+        // to the platform). Team tips fall back to a plain charge for now.
+        const body = recipient.multiple
+          ? { amount:Math.round(total*100), currency:curr.toLowerCase() }
+          : { businessId:BID, staffId:recipient.id, tipCents:Math.round(tip*100), currency:curr.toLowerCase() };
+        const res=await fetch(BACKEND+'/create-payment-intent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+        const data=await res.json(); const {clientSecret,publishableKey,breakdown,error}=data;
+        if(error==='recipient-not-ready'){ $('payment-element').innerHTML=''; pmsg("This person hasn't finished setting up payouts yet, so they can't receive tips right now. Please pick someone else."); return; }
         if(!clientSecret){ $('payment-element').innerHTML=''; pmsg('Could not start payment. Please try again.'); btn.disabled=false; return; }
+        // Show the server's authoritative breakdown so the total always matches the charge.
+        if(breakdown){ const f=breakdown.commission/100, t=breakdown.total/100; $('bkFee').textContent=sym+f.toFixed(2); $('bkTot').textContent=sym+t.toFixed(2); $('payAmt').textContent=sym+t.toFixed(2); }
         stripe=Stripe(publishableKey||STRIPE_PK);
         elements=stripe.elements({clientSecret});
         $('payment-element').innerHTML='';
