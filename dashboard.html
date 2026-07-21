@@ -55,8 +55,9 @@
     .linkrow input{flex:1 1 100%}
   }
   label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;color:var(--soft);margin-bottom:6px}
-  input[type=text],input[type=email],input[type=tel],input[type=time],select,textarea{width:100%;border:1.5px solid var(--line);
-    border-radius:11px;padding:11px 13px;font-size:14px;font-family:inherit;background:#fbfbfd;margin-bottom:16px;outline:none;transition:.15s}
+  input[type=text],input[type=email],input[type=tel],input[type=time],input[type=password],input[type=number],input:not([type]),select,textarea{width:100%;border:1.5px solid var(--line);
+    border-radius:11px;padding:11px 13px;font-size:14px;font-family:inherit;background:#fbfbfd;color:#111;margin-bottom:16px;outline:none;transition:.15s}
+  input::placeholder{color:#9a9aa0}
   input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,113,227,.12);background:#fff}
   textarea{resize:vertical;min-height:60px}
   .days{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
@@ -147,7 +148,10 @@
       <h3 style="margin-bottom:6px">Change login email</h3>
       <p style="font-size:12px;color:var(--soft);line-height:1.5;margin-bottom:14px">For security, enter your current password, then your new email. You'll confirm the new email and sign in with it.</p>
       <label style="font-size:12px;color:var(--soft)">Current password</label>
-      <input id="oemPass" type="password" style="width:100%;margin:4px 0 10px" autocomplete="current-password">
+      <div style="position:relative">
+        <input id="oemPass" type="password" style="width:100%;margin:4px 0 10px;padding-right:52px" autocomplete="current-password">
+        <button type="button" id="oemEye" style="position:absolute;right:12px;top:9px;background:none;border:none;cursor:pointer;color:#8e8e93;font-size:12px;font-weight:700;font-family:inherit">Show</button>
+      </div>
       <label style="font-size:12px;color:var(--soft)">New email</label>
       <input id="oemNew" type="email" style="width:100%;margin:4px 0 10px" autocomplete="email">
       <div id="oemMsg" class="msg"></div>
@@ -450,6 +454,7 @@
     }
 
     // ---- Owner change login email ----
+    $('oemEye').onclick=()=>{ const p=$('oemPass'); const s=p.type==='password'; p.type=s?'text':'password'; $('oemEye').textContent=s?'Hide':'Show'; };
     $('changeOwnerEmail').onclick=()=>{ $('oemPass').value=''; $('oemNew').value=''; $('oemMsg').className='msg'; $('ownerEmailModal').style.display='flex'; };
     $('oemCancel').onclick=()=>$('ownerEmailModal').style.display='none';
     $('oemConfirm').onclick=async()=>{
