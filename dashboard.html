@@ -618,16 +618,20 @@
       const btn=$('saveStaff'); btn.disabled=true; btn.textContent='Saving…';
       try{
         const col=db.collection('businesses').doc(BID).collection('staff');
+        let savedMsg='Saved ✓', savedType='ok';
         if(editId){ await col.doc(editId).update(Object.assign({}, data, {leftByStaff:firebase.firestore.FieldValue.delete(), leftAt:firebase.firestore.FieldValue.delete()})); }
         else{ data.published=true; data.createdAt=firebase.firestore.FieldValue.serverTimestamp(); const docRef=await col.add(data);
           if(data.email){
             try{
               const idToken=await auth.currentUser.getIdToken();
-              fetch(BACKEND+'/staff/invite',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken, bid:BID, staffId:docRef.id, email:data.email, name:data.nickname, shopName:(bizData.businessName||$('sideBiz').textContent||''), shopCode:(bizData.shopCode||''), staffLink:staffUrl()})}).catch(()=>{});
-            }catch(_){}
+              const ir=await fetch(BACKEND+'/staff/invite',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken, bid:BID, staffId:docRef.id, email:data.email, name:data.nickname, shopName:(bizData.businessName||$('sideBiz').textContent||''), shopCode:(bizData.shopCode||''), staffLink:staffUrl()})});
+              const ij=await ir.json().catch(()=>({}));
+              if(ij && ij.sent===1) savedMsg='Saved ✓ — login details emailed to '+data.email;
+              else { savedMsg='Saved ✓ — but the invite email didn’t send. Double-check the address.'; savedType='err'; }
+            }catch(_){ savedMsg='Saved ✓ — invite email couldn’t be sent right now.'; savedType='err'; }
           }
         }
-        resetForm(); msg('staffMsg', (editId?'Saved ✓':'Saved ✓ — invite email sent'),'ok'); setTimeout(()=>$('staffMsg').className='msg',2200); loadStaff();
+        resetForm(); msg('staffMsg', (editId?'Saved ✓':savedMsg), (editId?'ok':savedType)); setTimeout(()=>$('staffMsg').className='msg',4000); loadStaff();
       }catch(err){ msg('staffMsg',err.message,'err'); }
       btn.disabled=false; btn.textContent=editId?'Update specialist':'Register specialist';
     };
