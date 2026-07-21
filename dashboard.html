@@ -95,6 +95,28 @@
   .presetrow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
   .presetrow input{width:90px;margin-bottom:0;text-align:center}
   .sig{color:#c7c7cc;font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin-top:36px}
+  /* ===== Dark admin-console theme (Business dashboard) — distinct from the light staff app ===== */
+  :root{--bg:#0f0f14;--card:#1a1a21;--ink:#f2f2f5;--soft:#9a9aa4;--line:#2b2b34;--blue:#2f9bff;--blue-d:#0a84ff;}
+  body{background:var(--bg);color:var(--ink)}
+  .sidebar{background:#08080b;border-right:1px solid #1e1e25}
+  .card{background:var(--card);border-color:var(--line)}
+  .card h3{color:var(--ink)}
+  input[type=text],input[type=email],input[type=tel],input[type=time],select,textarea{background:#131318;color:var(--ink);border-color:var(--line)}
+  input:focus,select:focus,textarea:focus{background:#1c1c23;border-color:var(--blue)}
+  input::placeholder,textarea::placeholder{color:#5f5f6a}
+  select option{background:#1a1a21;color:var(--ink)}
+  .day{background:#1c1c23;color:var(--ink);border-color:var(--line)}
+  .day.on{background:var(--blue);color:#04121f;border-color:var(--blue);font-weight:600}
+  .btn.ghost{background:#26262e;color:var(--ink)}
+  td{border-bottom-color:#24242b}
+  .slider{background:#3a3a44}
+  .prev{background:#33333b}
+  .logoprev{background:#fff}
+  .qrbox img{background:#fff}
+  .msg.ok{background:#12301e;color:#48d17e}
+  .msg.err{background:#361a1d;color:#ff7d7d}
+  .link.b{color:var(--blue)}
+  .rolebadge{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#7cc0ff;background:rgba(47,155,255,.16);border:1px solid rgba(47,155,255,.32);padding:2px 8px;border-radius:20px;margin-left:8px;vertical-align:middle}
 </style>
 </head>
 <body>
@@ -102,7 +124,7 @@
 
   <div id="app" style="display:none;width:100%">
     <div class="sidebar" id="sidebar">
-      <div class="brand"><div class="mark"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00c2ff"/><stop offset="1" stop-color="#0071e3"/></linearGradient></defs><rect width="100" height="100" rx="24" fill="#0a0a0a" stroke="rgba(255,255,255,.2)" stroke-width="3"/><rect x="30" y="26" width="10" height="48" rx="5" fill="url(#lg)"/><rect x="30" y="26" width="34" height="10" rx="5" fill="url(#lg)"/><rect x="30" y="64" width="34" height="10" rx="5" fill="url(#lg)"/><rect x="30" y="45" width="22" height="10" rx="5" fill="url(#lg)"/><circle cx="63" cy="50" r="9" fill="#fff"/><circle cx="63" cy="50" r="4.5" fill="url(#lg)"/></svg></div><b>EasyTipMe</b><button class="menuBtn" id="menuBtn" aria-label="Menu">☰</button></div>
+      <div class="brand"><div class="mark"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00c2ff"/><stop offset="1" stop-color="#0071e3"/></linearGradient></defs><rect width="100" height="100" rx="24" fill="#0a0a0a" stroke="rgba(255,255,255,.2)" stroke-width="3"/><rect x="30" y="26" width="10" height="48" rx="5" fill="url(#lg)"/><rect x="30" y="26" width="34" height="10" rx="5" fill="url(#lg)"/><rect x="30" y="64" width="34" height="10" rx="5" fill="url(#lg)"/><rect x="30" y="45" width="22" height="10" rx="5" fill="url(#lg)"/><circle cx="63" cy="50" r="9" fill="#fff"/><circle cx="63" cy="50" r="4.5" fill="url(#lg)"/></svg></div><b>EasyTipMe</b><span class="rolebadge">Business</span><button class="menuBtn" id="menuBtn" aria-label="Menu">☰</button></div>
       <div class="bizname" id="sideBiz"></div>
       <div class="navwrap">
         <div class="nav active" data-tab="team"><span>Team management</span></div>
@@ -436,7 +458,7 @@
         if(jobLabel!==lastJob){
           lastJob=jobLabel;
           const hr=document.createElement('tr');
-          hr.innerHTML=`<td colspan="5" style="background:#fafafb;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--soft);padding:9px 12px">${esc(jobLabel)}</td>`;
+          hr.innerHTML=`<td colspan="5" style="background:#15151b;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--soft);padding:9px 12px">${esc(jobLabel)}</td>`;
           tb.appendChild(hr);
         }
         const removed=s.status==='removed';
