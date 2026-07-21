@@ -7,16 +7,16 @@
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="favicon.svg">
 <style>
-  :root{--bg:#0b0c0f;--card:#16181d;--line:#262a31;--ink:#f2f3f5;--soft:#9aa0aa;--accent:#0a84ff;--accent-d:#0060df;--danger:#ff453a;--green:#30d158;}
+  :root{--bg:#0b0c0f;--card:#16181d;--line:#262a31;--ink:#f2f3f5;--soft:#9aa0aa;--accent:#0a84ff;--accent-d:#0060df;--danger:#ff453a;--green:#30d158;--amber:#ffb020;}
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",Arial,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;min-height:100vh}
   a{color:var(--accent);text-decoration:none}
-  .top{max-width:1000px;margin:0 auto;padding:20px 22px;display:flex;align-items:center;justify-content:space-between}
+  .top{max-width:1080px;margin:0 auto;padding:20px 22px;display:flex;align-items:center;justify-content:space-between}
   .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:18px}
   .brand .mark{width:28px;height:28px;display:inline-flex;vertical-align:middle}
   .brand .mark svg{width:100%;height:100%;display:block}
   .tag{font-size:11px;color:var(--soft);text-transform:uppercase;letter-spacing:.08em;border:1px solid var(--line);padding:3px 8px;border-radius:20px}
-  .wrap{max-width:1000px;margin:0 auto;padding:8px 22px 80px}
+  .wrap{max-width:1080px;margin:0 auto;padding:8px 22px 80px}
   .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;margin-bottom:18px}
   h1{font-size:24px;letter-spacing:-.02em;margin-bottom:2px}
   .sub{color:var(--soft);font-size:14px;margin-bottom:20px}
@@ -27,26 +27,51 @@
   .btn{background:var(--accent);color:#fff;border:none;border-radius:11px;padding:12px 20px;font-weight:600;font-size:15px;cursor:pointer;font-family:inherit}
   .btn:hover{background:var(--accent-d)}
   .btn.ghost{background:#22252b;color:var(--ink)}
+  .btn.sm{padding:8px 14px;font-size:13px}
   .comm-row{display:flex;gap:12px;align-items:flex-end;max-width:360px}
   .comm-row .pct{position:relative;flex:1}
   .comm-row .pct span{position:absolute;right:14px;top:12px;color:var(--soft)}
-  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-  .stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
-  .stat .n{font-size:26px;font-weight:700}
+  /* KPI grid */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px}
+  .stat .n{font-size:23px;font-weight:700;letter-spacing:-.01em}
   .stat .l{font-size:11px;color:var(--soft);text-transform:uppercase;letter-spacing:.04em;margin-top:4px}
+  .stat .d{font-size:11px;margin-top:5px;color:var(--soft)}
+  .stat .d.up{color:var(--green)}
+  .stat.hi{background:linear-gradient(135deg,#0a2a52,#0a84ff22);border-color:#0a84ff55}
+  /* chart */
+  .chart{display:flex;align-items:flex-end;gap:4px;height:140px;margin:8px 0 4px}
+  .bar{flex:1;background:linear-gradient(180deg,#33a3ff,var(--accent));border-radius:5px 5px 2px 2px;min-height:2px;position:relative}
+  .bar.empty{background:#20242b}
+  .xlabels{display:flex;gap:4px;margin-top:6px}
+  .xlabels span{flex:1;text-align:center;font-size:9px;color:var(--soft)}
+  /* table */
+  .toolbar{display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+  .toolbar input{max-width:260px}
   table{width:100%;border-collapse:collapse}
-  th{text-align:left;color:var(--soft);font-size:10px;text-transform:uppercase;letter-spacing:.04em;padding:11px;border-bottom:1px solid var(--line)}
-  td{padding:11px;border-bottom:1px solid #1e2127;font-size:13px}
+  th{text-align:left;color:var(--soft);font-size:10px;text-transform:uppercase;letter-spacing:.04em;padding:11px;border-bottom:1px solid var(--line);cursor:pointer;white-space:nowrap;user-select:none}
+  th:hover{color:var(--ink)}
+  th .ar{opacity:.5;font-size:9px}
+  td{padding:11px;border-bottom:1px solid #1e2127;font-size:13px;white-space:nowrap}
+  tr.biz:hover{background:#1b1e24}
+  .badge{display:inline-block;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px}
+  .badge.g{background:#12331f;color:var(--green)}.badge.m{background:#2a2d34;color:var(--soft)}
+  .num{font-variant-numeric:tabular-nums}
   .msg{font-size:13px;border-radius:9px;padding:9px 12px;margin-top:12px;display:none}
   .msg.ok{display:block;background:#12331f;color:var(--green)}
   .msg.err{display:block;background:#3a1512;color:var(--danger)}
   .hide{display:none!important}
   .center{display:grid;place-items:center;min-height:100vh}
   .login{width:100%;max-width:380px}
-  @media(max-width:720px){.stats{grid-template-columns:1fr 1fr}}
+  .etm-spin{width:44px;height:44px;border-radius:50%;border:3px solid rgba(10,132,255,.2);border-top-color:var(--accent);animation:etmspin .8s linear infinite;margin:0 auto 12px}
+  @keyframes etmspin{to{transform:rotate(360deg)}}
+  .loadlbl{font-size:13px;color:var(--soft);text-align:center}
+  @media(max-width:820px){.stats{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
+  <div id="loading" class="center"><div><div class="etm-spin"></div><div class="loadlbl">EasyTipMe</div></div></div>
+
   <!-- LOGIN -->
   <div id="login" class="center hide">
     <div class="card login">
@@ -69,15 +94,32 @@
   <div id="panel" class="hide">
     <div class="top">
       <div class="brand"><span class="mark"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="lg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00c2ff"/><stop offset="1" stop-color="#0071e3"/></linearGradient></defs><rect width="100" height="100" rx="24" fill="#0a0a0a" stroke="rgba(255,255,255,.2)" stroke-width="3"/><rect x="30" y="26" width="10" height="48" rx="5" fill="url(#lg2)"/><rect x="30" y="26" width="34" height="10" rx="5" fill="url(#lg2)"/><rect x="30" y="64" width="34" height="10" rx="5" fill="url(#lg2)"/><rect x="30" y="45" width="22" height="10" rx="5" fill="url(#lg2)"/><circle cx="63" cy="50" r="9" fill="#fff"/><circle cx="63" cy="50" r="4.5" fill="url(#lg2)"/></svg></span> EasyTipMe <span class="tag">Platform Admin</span></div>
-      <button class="btn ghost" id="logout">Log out</button>
+      <button class="btn ghost sm" id="logout">Log out</button>
     </div>
     <div class="wrap">
-      <h1>Platform control</h1>
-      <div class="sub">Change your commission and settings — applies instantly, no code.</div>
+      <h1>Platform overview</h1>
+      <div class="sub" id="ovSub">Live snapshot across all businesses.</div>
+
+      <div class="stats">
+        <div class="stat hi"><div class="n" id="stRev">—</div><div class="l">Platform revenue (your cut)</div><div class="d" id="stRevM"></div></div>
+        <div class="stat"><div class="n" id="stVol">—</div><div class="l">Tips volume</div><div class="d" id="stVolM"></div></div>
+        <div class="stat"><div class="n" id="stTipsN">—</div><div class="l">Tips count</div></div>
+        <div class="stat"><div class="n" id="stAvg">—</div><div class="l">Avg tip</div></div>
+        <div class="stat"><div class="n" id="stBiz">—</div><div class="l">Businesses</div><div class="d" id="stBizA"></div></div>
+        <div class="stat"><div class="n" id="stStaff">—</div><div class="l">Team members</div></div>
+        <div class="stat"><div class="n" id="stComm">—</div><div class="l">Commission rate</div></div>
+        <div class="stat"><div class="n" id="stRevMonth">—</div><div class="l">Revenue this month</div></div>
+      </div>
+
+      <div class="card">
+        <h3>📈 Platform revenue — last 30 days</h3>
+        <div class="chart" id="chart"></div>
+        <div class="xlabels" id="xlabels"></div>
+      </div>
 
       <div class="card">
         <h3>💰 Platform commission</h3>
-        <div class="sub" style="margin-bottom:14px">The % added on top of every tip. Change it anytime to match the market — it takes effect immediately for all shops.</div>
+        <div class="sub" style="margin-bottom:14px">The % added on top of every tip. Applies instantly to all shops.</div>
         <div class="comm-row">
           <div class="pct"><label>Commission</label><input id="commInput" type="number" step="0.1" min="0" max="50"><span>%</span></div>
           <button class="btn" id="saveComm">Save</button>
@@ -85,17 +127,20 @@
         <div id="commMsg" class="msg"></div>
       </div>
 
-      <div class="stats" style="margin-bottom:18px">
-        <div class="stat"><div class="n" id="stBiz">—</div><div class="l">Businesses</div></div>
-        <div class="stat"><div class="n" id="stStaff">—</div><div class="l">Team members</div></div>
-        <div class="stat"><div class="n" id="stTips">—</div><div class="l">Total tips</div></div>
-        <div class="stat"><div class="n" id="stRev">—</div><div class="l">Platform revenue</div></div>
-      </div>
-
       <div class="card">
-        <h3>Businesses</h3>
+        <h3>Businesses <span class="sub" style="margin:0" id="bizCount"></span></h3>
+        <div class="toolbar"><input id="bizSearch" placeholder="Search business or email…"><button class="btn ghost sm" id="exportCsv">Export CSV</button></div>
         <div style="overflow-x:auto"><table>
-          <thead><tr><th>Business</th><th>Email</th><th>Team</th><th>Tips</th><th>Your cut</th></tr></thead>
+          <thead><tr>
+            <th data-sort="name">Business</th>
+            <th data-sort="staff">Team</th>
+            <th data-sort="tipsN">Tips</th>
+            <th data-sort="vol">Volume</th>
+            <th data-sort="rev">Your cut</th>
+            <th data-sort="feePct">Admin fee</th>
+            <th data-sort="joined">Joined</th>
+            <th data-sort="last">Last tip</th>
+          </tr></thead>
           <tbody id="bizTable"></tbody>
         </table></div>
         <div id="bizEmpty" class="sub" style="text-align:center;padding:18px 0;display:none">No businesses yet.</div>
@@ -114,10 +159,11 @@
     const auth=firebase.auth(), db=firebase.firestore();
     const $=id=>document.getElementById(id);
     const ADMINS=['amidifysolutions@gmail.com'];
-    const CURSYM={CAD:'$',USD:'$',AUD:'$',EUR:'€',GBP:'£',AED:'AED',SAR:'SAR',QAR:'QAR',KWD:'KWD',BHD:'BHD',OMR:'OMR',LBP:'LBP'};
+    let commRate=5, bizRows=[], sortKey='rev', sortDir=-1;
+    const money=n=>'$'+(Number(n)||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
 
     auth.onAuthStateChanged(u=>{
-      hide('login'); hide('denied'); hide('panel');
+      hide('loading'); hide('login'); hide('denied'); hide('panel');
       if(!u){ show('login'); return; }
       if(!ADMINS.includes((u.email||'').toLowerCase())){ $('deniedMsg').textContent=(u.email||'')+' is not an administrator.'; show('denied'); return; }
       show('panel'); initPanel();
@@ -132,7 +178,9 @@
 
     async function initPanel(){
       const cfg=await db.collection('config').doc('platform').get();
-      $('commInput').value=cfg.exists&&cfg.data().commissionPercent!=null?cfg.data().commissionPercent:5;
+      commRate=cfg.exists&&cfg.data().commissionPercent!=null?cfg.data().commissionPercent:5;
+      $('commInput').value=commRate;
+      $('stComm').textContent=commRate+'%';
       loadBusinesses();
     }
 
@@ -140,27 +188,101 @@
       const p=parseFloat($('commInput').value);
       if(isNaN(p)||p<0||p>50){ msg('commMsg','Enter a valid percentage (0–50).','err'); return; }
       try{ await db.collection('config').doc('platform').set({commissionPercent:p},{merge:true});
+        commRate=p; $('stComm').textContent=p+'%';
         msg('commMsg','Saved ✓ — new '+p+'% rate is live for all shops now.','ok'); }
       catch(e){ msg('commMsg',e.message,'err'); }
     };
 
+    function ms(ts){ return ts&&ts.toMillis?ts.toMillis():(ts&&ts.seconds?ts.seconds*1000:0); }
+    function dstr(m){ if(!m) return '—'; const d=new Date(m); return d.toLocaleDateString(undefined,{year:'2-digit',month:'short',day:'numeric'}); }
+
     async function loadBusinesses(){
       const biz=await db.collection('businesses').get();
-      let totalTips=0,totalRev=0,totalStaff=0; const tb=$('bizTable'); tb.innerHTML='';
-      $('bizEmpty').style.display=biz.size?'none':'block';
+      let tRev=0,tVol=0,tN=0,tStaff=0,activeBiz=0,revMonth=0,volMonth=0;
+      const now=new Date(); const monthStart=new Date(now.getFullYear(),now.getMonth(),1).getTime();
+      const days=[]; const today=new Date(); today.setHours(0,0,0,0);
+      for(let i=29;i>=0;i--){ days.push({d:new Date(today.getTime()-i*86400000), v:0}); }
+      bizRows=[];
       for(const b of biz.docs){
-        const d=b.data(); const sym=CURSYM[d.currency||'CAD']||'$';
-        const staff=await db.collection('businesses').doc(b.id).collection('staff').get();
-        const tips=await db.collection('businesses').doc(b.id).collection('tips').get();
-        let bt=0,br=0; tips.forEach(t=>{bt+=t.data().tip||0; br+=t.data().fee||0;});
-        totalTips+=bt; totalRev+=br; totalStaff+=staff.size;
-        tb.insertAdjacentHTML('beforeend',`<tr><td><b>${esc(d.businessName||'—')}</b></td><td style="color:var(--soft)">${esc(d.email||'')}</td><td>${staff.size}</td><td>${sym}${bt.toFixed(2)}</td><td style="color:var(--green)">${sym}${br.toFixed(2)}</td></tr>`);
+        const d=b.data();
+        const [staffSnap, tipsSnap]=await Promise.all([
+          db.collection('businesses').doc(b.id).collection('staff').get(),
+          db.collection('businesses').doc(b.id).collection('tips').get()
+        ]);
+        let vol=0,rev=0,last=0;
+        tipsSnap.forEach(t=>{ const x=t.data(); const tip=x.tip||0, fee=x.fee||0, m=ms(x.createdAt);
+          vol+=tip; rev+=fee; if(m>last) last=m;
+          if(m>=monthStart){ revMonth+=fee; volMonth+=tip; }
+          days.forEach(day=>{ if(m>=day.d.getTime() && m<day.d.getTime()+86400000) day.v+=fee; });
+        });
+        let activeStaff=0; staffSnap.forEach(s=>{ const sd=s.data(); if(sd.status!=='removed' && sd.leftByStaff!==true) activeStaff++; });
+        const feePct=(d.tipShareEnabled? (d.tipSharePercent||0):0);
+        tRev+=rev; tVol+=vol; tN+=tipsSnap.size; tStaff+=activeStaff; if(tipsSnap.size>0) activeBiz++;
+        bizRows.push({ id:b.id, name:d.businessName||'—', email:d.email||d.businessEmail||'', staff:activeStaff,
+          tipsN:tipsSnap.size, vol, rev, feePct, joined:ms(d.createdAt), last, code:d.shopCode||'' });
       }
+      // KPIs
+      $('stRev').textContent=money(tRev);
+      $('stRevM').textContent='take rate '+(tVol>0?(tRev/tVol*100).toFixed(1):'0')+'%'; $('stRevM').className='d up';
+      $('stVol').textContent=money(tVol);
+      $('stVolM').textContent=money(volMonth)+' this month';
+      $('stTipsN').textContent=tN.toLocaleString();
+      $('stAvg').textContent=money(tN>0?tVol/tN:0);
       $('stBiz').textContent=biz.size;
-      $('stStaff').textContent=totalStaff;
-      $('stTips').textContent='$'+totalTips.toFixed(2);
-      $('stRev').textContent='$'+totalRev.toFixed(2);
+      $('stBizA').textContent=activeBiz+' with tips';
+      $('stStaff').textContent=tStaff.toLocaleString();
+      $('stRevMonth').textContent=money(revMonth);
+      $('ovSub').textContent='Live snapshot across '+biz.size+' business'+(biz.size===1?'':'es')+'.';
+      // chart
+      const chart=$('chart'), xl=$('xlabels'); chart.innerHTML=''; xl.innerHTML='';
+      const max=Math.max(0.01,...days.map(d=>d.v));
+      days.forEach((day,i)=>{ const h=day.v>0?Math.max(4,Math.round(day.v/max*100)):0;
+        chart.insertAdjacentHTML('beforeend',`<div class="bar ${day.v>0?'':'empty'}" style="height:${day.v>0?h+'%':'4px'}" title="${dstr(day.d.getTime())}: ${money(day.v)}"></div>`);
+        xl.insertAdjacentHTML('beforeend',`<span>${(i%5===0)?day.d.getDate():''}</span>`);
+      });
+      renderBiz();
     }
+
+    function renderBiz(){
+      const q=($('bizSearch').value||'').toLowerCase().trim();
+      let rows=bizRows.filter(r=> !q || (r.name+' '+r.email).toLowerCase().includes(q));
+      rows.sort((a,b)=>{ let x=a[sortKey], y=b[sortKey];
+        if(typeof x==='string'){ x=(x||'').toLowerCase(); y=(y||'').toLowerCase(); return x<y?-sortDir:x>y?sortDir:0; }
+        return ((x||0)-(y||0))*sortDir; });
+      const tb=$('bizTable'); tb.innerHTML='';
+      $('bizEmpty').style.display=rows.length?'none':'block';
+      $('bizCount').textContent='· '+rows.length+' shown';
+      rows.forEach(r=>{
+        const active=r.last && (Date.now()-r.last)<45*86400000;
+        tb.insertAdjacentHTML('beforeend',`<tr class="biz">
+          <td><b>${esc(r.name)}</b>${r.code?` <span class="badge m">${esc(r.code)}</span>`:''}<br><span style="color:var(--soft);font-size:11px">${esc(r.email)}</span></td>
+          <td class="num">${r.staff}</td>
+          <td class="num">${r.tipsN}</td>
+          <td class="num">${money(r.vol)}</td>
+          <td class="num" style="color:var(--green)">${money(r.rev)}</td>
+          <td class="num">${r.feePct?r.feePct+'%':'—'}</td>
+          <td style="color:var(--soft)">${dstr(r.joined)}</td>
+          <td>${r.last?`<span class="badge ${active?'g':'m'}">${dstr(r.last)}</span>`:'<span style="color:var(--soft)">—</span>'}</td>
+        </tr>`);
+      });
+    }
+
+    $('bizSearch').oninput=renderBiz;
+    document.querySelectorAll('th[data-sort]').forEach(th=>{ th.onclick=()=>{
+      const k=th.getAttribute('data-sort');
+      if(sortKey===k) sortDir*=-1; else { sortKey=k; sortDir=(k==='name'||k==='email')?1:-1; }
+      renderBiz();
+    };});
+
+    $('exportCsv').onclick=()=>{
+      const head=['Business','Email','Code','Team','Tips','Volume','Your cut','Admin fee %','Joined','Last tip'];
+      const lines=[head.join(',')];
+      bizRows.forEach(r=>{ lines.push([q(r.name),q(r.email),q(r.code),r.staff,r.tipsN,r.vol.toFixed(2),r.rev.toFixed(2),r.feePct,dstr(r.joined),dstr(r.last)].join(',')); });
+      const blob=new Blob([lines.join('\n')],{type:'text/csv'}); const a=document.createElement('a');
+      a.href=URL.createObjectURL(blob); a.download='easytipme-businesses.csv'; a.click();
+      function q(s){ s=String(s==null?'':s); return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s; }
+    };
+    function q(s){ s=String(s==null?'':s); return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s; }
 
     function show(id){$(id).classList.remove('hide');} function hide(id){$(id).classList.add('hide');}
     function msg(id,t,type){const m=$(id);m.textContent=t;m.className='msg '+type;}
