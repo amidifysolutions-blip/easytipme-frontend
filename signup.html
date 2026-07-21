@@ -66,6 +66,7 @@
       <div class="field"><label>Business name</label><input id="r_business" type="text" autocomplete="organization" required></div>
       <div class="field"><label>Owner name</label><input id="r_owner" type="text" autocomplete="name" required></div>
       <div class="field"><label>Phone number</label><input id="r_phone" type="tel" autocomplete="tel" required></div>
+      <div class="field"><label>Country</label><select id="r_country" required></select><div class="hint" style="font-size:12px;color:#8a8a90;margin-top:4px">Where your business receives payouts. This sets up bank payouts and can't be changed later.</div></div>
       <div class="field"><label>Email address</label><input id="r_email" type="email" autocomplete="email" required></div>
       <div class="field"><label>Password</label><div class="pwrap"><input id="r_pass" type="password" autocomplete="new-password" minlength="6" required><button type="button" class="eye" data-for="r_pass" aria-label="Show password"></button></div></div>
       <button class="btn" type="submit" id="r_btn">Create account</button>
@@ -101,6 +102,26 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
+
+    // Countries where Stripe can pay out to a connected account (Express). The
+    // account's country is permanent, so we capture it correctly at signup.
+    const STRIPE_COUNTRIES = [
+      ['AU','Australia'],['AT','Austria'],['BE','Belgium'],['BG','Bulgaria'],['CA','Canada'],
+      ['HR','Croatia'],['CY','Cyprus'],['CZ','Czechia'],['DK','Denmark'],['EE','Estonia'],
+      ['FI','Finland'],['FR','France'],['DE','Germany'],['GI','Gibraltar'],['GR','Greece'],
+      ['HK','Hong Kong'],['HU','Hungary'],['IE','Ireland'],['IT','Italy'],['JP','Japan'],
+      ['LV','Latvia'],['LI','Liechtenstein'],['LT','Lithuania'],['LU','Luxembourg'],['MT','Malta'],
+      ['MX','Mexico'],['NL','Netherlands'],['NZ','New Zealand'],['NO','Norway'],['PL','Poland'],
+      ['PT','Portugal'],['RO','Romania'],['SG','Singapore'],['SK','Slovakia'],['SI','Slovenia'],
+      ['ES','Spain'],['SE','Sweden'],['CH','Switzerland'],['TH','Thailand'],['AE','United Arab Emirates'],
+      ['GB','United Kingdom'],['US','United States'],['BR','Brazil'],['MY','Malaysia'],['ZA','South Africa']
+    ];
+    function fillCountries(sel, def){
+      if(!sel) return;
+      sel.innerHTML = '<option value="" disabled'+(def?'':' selected')+'>Select country…</option>' +
+        STRIPE_COUNTRIES.map(c=>`<option value="${c[0]}"${def===c[0]?' selected':''}>${c[1]}</option>`).join('');
+    }
+    fillCountries(document.getElementById('r_country'));
 
     const registerForm = document.getElementById('registerForm');
     const loginForm = document.getElementById('loginForm');
@@ -148,10 +169,13 @@
     registerForm.addEventListener('submit', async (e)=>{
       e.preventDefault(); clearMsg();
       const btn = document.getElementById('r_btn'); btn.disabled=true; btn.textContent='Creating...';
+      const country = document.getElementById('r_country').value;
+      if(!country){ btn.disabled=false; btn.textContent='Create account'; showMsg('Please select your country.','err'); return; }
       const data = {
         businessName: document.getElementById('r_business').value.trim(),
         ownerName: document.getElementById('r_owner').value.trim(),
         phone: document.getElementById('r_phone').value.trim(),
+        country: country,
         email: document.getElementById('r_email').value.trim().toLowerCase()
       };
       try{

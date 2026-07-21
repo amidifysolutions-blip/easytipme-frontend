@@ -313,6 +313,11 @@
           <h3>💳 Get paid</h3>
           <p style="font-size:12px;color:var(--soft);line-height:1.5;margin-bottom:12px">Connect your bank once. Stripe then pays your admin fee (and any tips you collect) straight to your account — automatically, on a schedule. Verifying your identity + bank is required by law.</p>
           <div id="ownerPayoutStatus" style="margin:0 0 12px;font-size:14px;font-weight:600"></div>
+          <div id="ownerCountryWrap" style="display:none;margin-bottom:12px">
+            <label style="font-size:12px;color:var(--soft);display:block;margin-bottom:6px">Payout country</label>
+            <select id="ownerCountry" style="width:100%;max-width:340px;padding:11px;border:1px solid var(--line);border-radius:12px;background:#14141b;color:#fff;font-family:inherit;font-size:14px"></select>
+            <div style="font-size:11px;color:var(--soft);margin-top:5px">Where your bank is. Can't be changed after setup.</div>
+          </div>
           <button class="btn" id="ownerConnectBtn" disabled>Connect bank account</button>
           <div id="ownerBalanceBox" style="display:none;margin-top:16px"></div>
         </div>
@@ -421,14 +426,20 @@
     }
 
     // ---- Owner bank connect (Stripe Connect) ----
+    const STRIPE_COUNTRIES=[['AU','Australia'],['AT','Austria'],['BE','Belgium'],['BG','Bulgaria'],['CA','Canada'],['HR','Croatia'],['CY','Cyprus'],['CZ','Czechia'],['DK','Denmark'],['EE','Estonia'],['FI','Finland'],['FR','France'],['DE','Germany'],['GI','Gibraltar'],['GR','Greece'],['HK','Hong Kong'],['HU','Hungary'],['IE','Ireland'],['IT','Italy'],['JP','Japan'],['LV','Latvia'],['LI','Liechtenstein'],['LT','Lithuania'],['LU','Luxembourg'],['MT','Malta'],['MX','Mexico'],['NL','Netherlands'],['NZ','New Zealand'],['NO','Norway'],['PL','Poland'],['PT','Portugal'],['RO','Romania'],['SG','Singapore'],['SK','Slovakia'],['SI','Slovenia'],['ES','Spain'],['SE','Sweden'],['CH','Switzerland'],['TH','Thailand'],['AE','United Arab Emirates'],['GB','United Kingdom'],['US','United States'],['BR','Brazil'],['MY','Malaysia'],['ZA','South Africa']];
+    function fillCountriesOwner(def){
+      const sel=$('ownerCountry'); if(!sel) return;
+      sel.innerHTML='<option value="" disabled'+(def?'':' selected')+'>Select country…</option>'+STRIPE_COUNTRIES.map(c=>`<option value="${c[0]}"${def===c[0]?' selected':''}>${c[1]}</option>`).join('');
+    }
     async function setupOwnerPayout(){
       const btn=$('ownerConnectBtn'), stat=$('ownerPayoutStatus');
       if(!OWNER_CONNECT_LIVE){ btn.disabled=true; stat.textContent=''; return; }
       btn.disabled=false; btn.onclick=startOwnerConnect;
       const accId=bizData.ownerConnectAccountId;
+      if(!accId){ $('ownerCountryWrap').style.display='block'; fillCountriesOwner(bizData.country||''); }
       if(accId){
         try{ const r=await fetch(BACKEND+'/connect/status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accountId:accId})}); const j=await r.json();
-          if(j.payouts_enabled){ stat.style.color='var(--green)'; stat.textContent='✓ Bank connected — payouts are set up.'; btn.style.display='none'; loadOwnerBalance(accId); }
+          if(j.payouts_enabled){ stat.style.color='var(--green)'; stat.textContent='✓ Bank connected — payouts are set up.'; btn.style.display='none'; $('ownerCountryWrap').style.display='none'; loadOwnerBalance(accId); }
           else if(j.details_submitted){ stat.style.color='var(--amber)'; stat.textContent='Almost there — finish verification.'; btn.textContent='Continue setup'; }
         }catch(_){}
       }
@@ -458,10 +469,14 @@
       }catch(e){ box.innerHTML='<div style="color:var(--amber);font-size:13px">Balance is loading — check back in a moment.</div>'; }
     }
     async function startOwnerConnect(){
-      const btn=$('ownerConnectBtn'); btn.disabled=true;
+      const btn=$('ownerConnectBtn');
+      const country=($('ownerCountry')||{}).value||bizData.country||'';
+      if(!country){ alert('Please select your payout country first.'); return; }
+      btn.disabled=true;
       try{
+        if(!bizData.country){ try{ await db.collection('businesses').doc(BID).update({country:country}); bizData.country=country; }catch(_){} }
         const idToken=await auth.currentUser.getIdToken();
-        const cr=await fetch(BACKEND+'/connect/create-owner-account',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken, bid:BID, email:auth.currentUser.email, country:(bizData.country||'CA')})});
+        const cr=await fetch(BACKEND+'/connect/create-owner-account',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken, bid:BID, email:auth.currentUser.email, country:country})});
         const cj=await cr.json(); if(!cj.accountId) throw new Error(cj.error||'no account');
         const lr=await fetch(BACKEND+'/connect/onboarding-link',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accountId:cj.accountId, returnUrl:location.origin+'/dashboard.html'})});
         const lj=await lr.json(); if(lj.url){ location.href=lj.url; } else { throw new Error('no link'); }

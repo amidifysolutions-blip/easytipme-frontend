@@ -300,6 +300,11 @@
         <div class="h3"><span data-i18n="get_paid">Get paid</span> <span class="soon" id="payoutSoon" data-i18n="coming_soon">Coming soon</span></div>
         <div class="note" data-i18n="payout_note">Bank payouts are being activated. Soon you'll connect your bank account here to receive your tips directly. For now, your workplace can see and settle your tips.</div>
         <div id="payoutStatus" class="hide" style="margin-top:12px;font-size:14px;font-weight:600"></div>
+        <div id="payCountryWrap" class="hide" style="margin-top:14px">
+          <label style="font-size:13px;font-weight:700;display:block;margin-bottom:6px" data-i18n="your_country">Your country</label>
+          <select id="payCountry" style="width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;font-family:inherit;font-size:15px;background:var(--card);color:inherit"></select>
+          <div class="note" style="font-size:11.5px;margin-top:5px" data-i18n="country_hint">Where your bank account is. This sets up your payouts and can't be changed later.</div>
+        </div>
         <button class="btn dark" id="connectBtn" disabled style="margin-top:14px" data-i18n="connect_bank">Connect bank account</button>
         <div id="balanceBox" class="hide" style="margin-top:16px"></div>
       </div>
@@ -403,6 +408,7 @@
       get_paid:"Get paid", coming_soon:"Coming soon",
       payout_note:"Bank payouts are being activated. Soon you'll connect your bank account here to receive your tips directly. For now, your workplace can see and settle your tips.",
       connect_bank:"Connect bank account", tip_terms:"Tip-sharing terms", log_out:"Log out",
+      your_country:"Your country", select_country:"Select country…", country_hint:"Where your bank account is. This sets up your payouts and can't be changed later.",
       available:"Available", pending:"Pending", withdraw_speed:"Withdrawal speed", withdraw_now:"Withdraw",
       free:"Free", recent_payouts:"Recent payouts", bal_unavailable:"Balance is loading — check back in a moment.",
       tier_instant:"Instant", tier_instant_d:"Arrives in minutes", tier_weekly:"Weekly", tier_weekly_d:"Every week",
@@ -459,6 +465,7 @@
       get_paid:"استلام الأموال", coming_soon:"قريبًا",
       payout_note:"يتم تفعيل التحويلات البنكية. قريبًا رح تربط حسابك البنكي هون لتستلم بقشيشك مباشرة. حاليًا، مكان عملك بيشوف بقشيشك ويسوّيه.",
       connect_bank:"اربط الحساب البنكي", tip_terms:"شروط تقاسم البقشيش", log_out:"تسجيل الخروج",
+      your_country:"بلدك", select_country:"اختر البلد…", country_hint:"وين حسابك البنكي. هيدا بيجهّز تحويلاتك وما بيتغيّر بعدين.",
       available:"المتاح", pending:"قيد الانتظار", withdraw_speed:"سرعة السحب", withdraw_now:"اسحب",
       free:"مجاني", recent_payouts:"آخر التحويلات", bal_unavailable:"عم يحمّل الرصيد — رجاع بعد شوي.",
       tier_instant:"فوري", tier_instant_d:"بيوصل خلال دقائق", tier_weekly:"أسبوعي", tier_weekly_d:"كل أسبوع",
@@ -1095,11 +1102,19 @@
     // Flip CONNECT_LIVE to true ONLY after Connect is enabled in the Stripe
     // dashboard and tested. While false, the button stays disabled ("Coming soon").
     const CONNECT_LIVE=true;
+    // Countries Stripe can pay out to (Express). Account country is permanent, so
+    // the worker confirms their own country before the account is created.
+    const STRIPE_COUNTRIES=[['AU','Australia'],['AT','Austria'],['BE','Belgium'],['BG','Bulgaria'],['CA','Canada'],['HR','Croatia'],['CY','Cyprus'],['CZ','Czechia'],['DK','Denmark'],['EE','Estonia'],['FI','Finland'],['FR','France'],['DE','Germany'],['GI','Gibraltar'],['GR','Greece'],['HK','Hong Kong'],['HU','Hungary'],['IE','Ireland'],['IT','Italy'],['JP','Japan'],['LV','Latvia'],['LI','Liechtenstein'],['LT','Lithuania'],['LU','Luxembourg'],['MT','Malta'],['MX','Mexico'],['NL','Netherlands'],['NZ','New Zealand'],['NO','Norway'],['PL','Poland'],['PT','Portugal'],['RO','Romania'],['SG','Singapore'],['SK','Slovakia'],['SI','Slovenia'],['ES','Spain'],['SE','Sweden'],['CH','Switzerland'],['TH','Thailand'],['AE','United Arab Emirates'],['GB','United Kingdom'],['US','United States'],['BR','Brazil'],['MY','Malaysia'],['ZA','South Africa']];
+    function fillCountriesStaff(sel, def){
+      if(!sel) return;
+      sel.innerHTML='<option value="" disabled'+(def?'':' selected')+'>'+t('select_country')+'</option>'+STRIPE_COUNTRIES.map(c=>`<option value="${c[0]}"${def===c[0]?' selected':''}>${c[1]}</option>`).join('');
+    }
     async function setupPayout(u){
       const btn=$('connectBtn'), stat=$('payoutStatus'), soon=$('payoutSoon');
       if(!CONNECT_LIVE){ btn.disabled=true; return; }
       soon.classList.add('hide'); btn.disabled=false;
       const accId = staffDoc.connectAccountId || null;
+      if(!accId){ $('payCountryWrap').classList.remove('hide'); fillCountriesStaff($('payCountry'), (staffDoc&&staffDoc.payoutCountry)||shop.country||''); }
       // returning from Stripe onboarding
       if(params.get('connect')==='done' && accId){
         try{ const r=await fetch(BACKEND+'/connect/status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accountId:accId})}); const j=await r.json(); paintPayout(j); }catch(_){}
@@ -1108,7 +1123,7 @@
       }
       btn.onclick=()=>startConnect(u);
       function paintPayout(j){
-        if(j && j.payouts_enabled){ stat.classList.remove('hide'); stat.style.color='var(--green)'; stat.textContent=t('payout_connected'); btn.classList.add('hide'); loadBalance(accId); }
+        if(j && j.payouts_enabled){ stat.classList.remove('hide'); stat.style.color='var(--green)'; stat.textContent=t('payout_connected'); btn.classList.add('hide'); $('payCountryWrap').classList.add('hide'); loadBalance(accId); }
         else if(j && j.details_submitted){ stat.classList.remove('hide'); stat.style.color='var(--orange)'; stat.textContent=t('payout_continue'); btn.textContent=t('payout_continue'); }
       }
     }
@@ -1169,10 +1184,14 @@
       };
     }
     async function startConnect(u){
-      const btn=$('connectBtn'); btn.disabled=true;
+      const btn=$('connectBtn');
+      const country=($('payCountry')||{}).value||'';
+      if(!country){ alert(t('select_country')); return; }
+      btn.disabled=true;
       try{
+        try{ await db.collection('businesses').doc(BID).collection('staff').doc(staffId).update({payoutCountry:country}); }catch(_){}
         const prof=(()=>{try{return JSON.parse(localStorage.getItem('etm_staff_profile')||'{}');}catch(_){return{};}})();
-        const cr=await fetch(BACKEND+'/connect/create-account',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({bid:BID, staffId, email:u.email, country:(shop.country||'CA'), firstName:prof.firstName||'', lastName:prof.lastName||'', phone:(staffDoc&&staffDoc.phone)||prof.phone||''})});
+        const cr=await fetch(BACKEND+'/connect/create-account',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({bid:BID, staffId, email:u.email, country:country, firstName:prof.firstName||'', lastName:prof.lastName||'', phone:(staffDoc&&staffDoc.phone)||prof.phone||''})});
         const cj=await cr.json(); if(!cj.accountId) throw new Error('no account');
         const lr=await fetch(BACKEND+'/connect/onboarding-link',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accountId:cj.accountId, returnUrl:location.origin+'/staff.html?s='+encodeURIComponent(BID)})});
         const lj=await lr.json(); if(lj.url){ location.href=lj.url; } else { throw new Error('no link'); }
