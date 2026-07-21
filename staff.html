@@ -1083,7 +1083,8 @@
     async function startConnect(u){
       const btn=$('connectBtn'); btn.disabled=true;
       try{
-        const cr=await fetch(BACKEND+'/connect/create-account',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({bid:BID, staffId, email:u.email, country:(shop.country||'CA')})});
+        const prof=(()=>{try{return JSON.parse(localStorage.getItem('etm_staff_profile')||'{}');}catch(_){return{};}})();
+        const cr=await fetch(BACKEND+'/connect/create-account',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({bid:BID, staffId, email:u.email, country:(shop.country||'CA'), firstName:prof.firstName||'', lastName:prof.lastName||'', phone:(staffDoc&&staffDoc.phone)||prof.phone||''})});
         const cj=await cr.json(); if(!cj.accountId) throw new Error('no account');
         const lr=await fetch(BACKEND+'/connect/onboarding-link',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accountId:cj.accountId, returnUrl:location.origin+'/staff.html?s='+encodeURIComponent(BID)})});
         const lj=await lr.json(); if(lj.url){ location.href=lj.url; } else { throw new Error('no link'); }
