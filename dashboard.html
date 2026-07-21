@@ -102,8 +102,8 @@
   .sidebar{background:#08080b;border-right:1px solid #1e1e25}
   .card{background:var(--card);border-color:var(--line)}
   .card h3{color:var(--ink)}
-  input[type=text],input[type=email],input[type=tel],input[type=time],select,textarea{background:#131318;color:var(--ink);border-color:var(--line)}
-  input:focus,select:focus,textarea:focus{background:#1c1c23;border-color:var(--blue)}
+  input[type=text],input[type=email],input[type=tel],input[type=time],input[type=password],input[type=number],input:not([type]),select,textarea{background:#131318;color:var(--ink);border-color:var(--line)}
+  input[type=text]:focus,input[type=email]:focus,input[type=tel]:focus,input[type=time]:focus,input[type=password]:focus,input[type=number]:focus,input:not([type]):focus,select:focus,textarea:focus{background:#1c1c23;border-color:var(--blue)}
   input::placeholder,textarea::placeholder{color:#5f5f6a}
   select option{background:#1a1a21;color:var(--ink)}
   .day{background:#1c1c23;color:var(--ink);border-color:var(--line)}
