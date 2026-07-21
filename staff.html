@@ -676,6 +676,7 @@
     $('registerBtn').onclick=()=>doAuth(true);
 
     async function doAuth(create){
+      const wasSignedIn=!!auth.currentUser;
       const email=$('email').value.trim().toLowerCase(), pass=$('pass').value;
       if($('shopCodeWrap').classList.contains('hide')===false){
         const raw=$('shopCode').value.trim();
@@ -704,6 +705,8 @@
           await auth.signInWithEmailAndPassword(email,pass);
         }
         localStorage.setItem('etm_staff_bid',BID);
+        // already signed in and just re-entered a corrected workplace code → reload membership directly
+        if(wasSignedIn && auth.currentUser){ btn.disabled=false; loadMembership(auth.currentUser); }
       }catch(e){ btn.disabled=false; amsg(prettyErr(e)); }
     }
 
