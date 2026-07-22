@@ -149,7 +149,7 @@
     // returns publishableKey) so it ALWAYS matches the backend's test/live mode
     // and can never drift out of sync. Do not rely on this constant.
     const STRIPE_PK="pk_live_51Tv0VwP5hdbiGSZmrDrfJOML8K1dssKuI3tmWdw3pKn6pQJnMCWYKP5Mf0VslQcBftlKy2QsPueNeXQjZ1o6inaF00cns9RH1p";
-    let FEE=0.05;
+    let FEE=0.07, FIXED=0.30;
     const $=id=>document.getElementById(id);
     const BID=new URLSearchParams(location.search).get('s');
     const CURSYM={CAD:'$',USD:'$',AUD:'$',EUR:'€',GBP:'£',AED:'AED',SAR:'SAR',QAR:'QAR',KWD:'KWD',BHD:'BHD',OMR:'OMR',LBP:'LBP'};
@@ -165,10 +165,12 @@
         if(!bd.exists){ $('loading').textContent='Shop not found.'; return; }
         shop=bd.data(); curr=shop.currency||'CAD'; sym=CURSYM[curr]||'$';
         if(shop.blocked){ $('loading').innerHTML='<div style="text-align:center;color:var(--soft);max-width:320px;margin:0 auto"><div style="font-size:34px;margin-bottom:10px">🚫</div>This tip page is currently unavailable.</div>'; return; }
-        // Commission %: per-shop rate wins, else the global default, else 7%.
-        FEE=0.07;
-        if(shop.commissionPercent!=null){ FEE=shop.commissionPercent/100; }
-        else { try{const cfg=await db.collection('config').doc('platform').get(); if(cfg.exists && cfg.data().commissionPercent!=null) FEE=cfg.data().commissionPercent/100;}catch(e){} }
+        // Commission = % of tip + a small fixed fee. Per-shop value wins, else
+        // the global default (config/platform), else 7% + $0.30.
+        FEE=0.07; FIXED=0.30;
+        let _cfg=null; try{const c=await db.collection('config').doc('platform').get(); if(c.exists) _cfg=c.data();}catch(e){}
+        if(shop.commissionPercent!=null) FEE=shop.commissionPercent/100; else if(_cfg&&_cfg.commissionPercent!=null) FEE=_cfg.commissionPercent/100;
+        if(shop.commissionFixed!=null) FIXED=Number(shop.commissionFixed); else if(_cfg&&_cfg.commissionFixed!=null) FIXED=Number(_cfg.commissionFixed);
         if(shop.tipPresets&&shop.tipPresets.length) presets=shop.tipPresets.slice(0,4);
         $('shopName').textContent=shop.businessName||'Leave a tip';
         if(shop.slogan) $('shopSlogan').textContent=shop.slogan;
@@ -271,7 +273,7 @@
 
     $('toPay').onclick=async()=>{
       if(!tip||tip<=0){ alert('Please choose or enter a tip amount.'); return; }
-      const fee=r2(tip*FEE), total=r2(tip+fee);
+      const fee=r2(tip*FEE+FIXED), total=r2(tip+fee);
       $('bkFeeLabel').textContent='Service fee';
       $('bkTip').textContent=sym+tip.toFixed(2); $('bkFee').textContent=sym+fee.toFixed(2); $('bkTot').textContent=sym+total.toFixed(2); $('payAmt').textContent=sym+total.toFixed(2);
       show('step-pay');
@@ -313,7 +315,7 @@
 
     $('payBtn').onclick=async()=>{
       const btn=$('payBtn'); btn.disabled=true; btn.textContent='Processing…';
-      const resetBtn=()=>{ btn.disabled=false; btn.innerHTML='Pay '+sym+r2(tip*(1+FEE)).toFixed(2); };
+      const resetBtn=()=>{ btn.disabled=false; btn.innerHTML='Pay '+sym+r2(tip*(1+FEE)+FIXED).toFixed(2); };
       try{
         const {error,paymentIntent}=await stripe.confirmPayment({elements,redirect:'if_required'});
         if(error){ pmsg(error.message); resetBtn(); return; }
@@ -322,7 +324,7 @@
     };
 
     async function recordTip(paymentIntent){
-      const fee=r2(tip*FEE);
+      const fee=r2(tip*FEE+FIXED);
       const sharePct=shop.tipShareEnabled?Math.min(15,Math.max(0,shop.tipSharePercent||0)):0;
       const ownerShare=r2(tip*sharePct/100);
       const staffShare=r2(tip-ownerShare);

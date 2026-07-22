@@ -138,9 +138,10 @@
 
       <div class="card">
         <h3>💰 Platform commission</h3>
-        <div class="sub" style="margin-bottom:14px">The % added on top of every tip. Applies instantly to all shops.</div>
+        <div class="sub" style="margin-bottom:14px">Added on top of every tip: a % of the tip <b>plus</b> a small fixed fee. The fixed fee covers Stripe's fixed cost (~$0.30) so small tips stay profitable. Applies to all shops (unless a shop has its own rate).</div>
         <div class="comm-row">
           <div class="pct"><label>Commission</label><input id="commInput" type="number" step="0.1" min="0" max="50"><span>%</span></div>
+          <div class="pct"><label>Fixed fee</label><input id="commFixed" type="number" step="0.05" min="0" max="5"><span>$</span></div>
           <button class="btn" id="saveComm">Save</button>
         </div>
         <div id="commMsg" class="msg"></div>
@@ -184,6 +185,7 @@
       <label>Owner email</label><input id="bm_email" type="email">
       <label>Admin fee % (0–15) — owner's share of the tip</label><input id="bm_fee" type="number" min="0" max="15" step="0.5">
       <label>Platform commission % for this shop <span style="color:var(--soft);font-weight:400">(leave blank = default)</span></label><input id="bm_comm" type="number" min="0" max="50" step="0.1" placeholder="Default">
+      <label>Fixed fee $ for this shop <span style="color:var(--soft);font-weight:400">(leave blank = default)</span></label><input id="bm_commFixed" type="number" min="0" max="5" step="0.05" placeholder="Default">
       <label style="display:flex;align-items:center;gap:9px;margin-top:14px;font-size:14px;color:var(--ink);cursor:pointer"><input type="checkbox" id="bm_analytics" style="width:auto;margin:0"> Owner can see analytics <span style="color:#e0a52b;font-weight:700;font-size:12px">PRO</span></label>
       <label style="display:flex;align-items:center;gap:9px;margin-top:10px;font-size:14px;color:var(--ink);cursor:pointer"><input type="checkbox" id="bm_collect" style="width:auto;margin:0"> Approve “business collects tips” mode <span style="color:#e0a52b;font-weight:700;font-size:12px">PRO</span></label>
       <div id="bmMsg" class="msg" style="margin-top:12px"></div>
@@ -231,17 +233,21 @@
     async function initPanel(){
       const cfg=await db.collection('config').doc('platform').get();
       commRate=cfg.exists&&cfg.data().commissionPercent!=null?cfg.data().commissionPercent:7;
+      const commFix=cfg.exists&&cfg.data().commissionFixed!=null?cfg.data().commissionFixed:0.30;
       $('commInput').value=commRate;
-      $('stComm').textContent=commRate+'%';
+      $('commFixed').value=commFix;
+      $('stComm').textContent=commRate+'% + $'+Number(commFix).toFixed(2);
       loadBusinesses();
     }
 
     $('saveComm').onclick=async()=>{
       const p=parseFloat($('commInput').value);
+      const f=parseFloat($('commFixed').value);
       if(isNaN(p)||p<0||p>50){ msg('commMsg','Enter a valid percentage (0–50).','err'); return; }
-      try{ await db.collection('config').doc('platform').set({commissionPercent:p},{merge:true});
-        commRate=p; $('stComm').textContent=p+'%';
-        msg('commMsg','Saved ✓ — new '+p+'% rate is live for all shops now.','ok'); }
+      if(isNaN(f)||f<0||f>5){ msg('commMsg','Enter a valid fixed fee (0–5).','err'); return; }
+      try{ await db.collection('config').doc('platform').set({commissionPercent:p,commissionFixed:f},{merge:true});
+        commRate=p; $('stComm').textContent=p+'% + $'+f.toFixed(2);
+        msg('commMsg','Saved ✓ — new '+p+'% + $'+f.toFixed(2)+' rate is live for all shops now.','ok'); }
       catch(e){ msg('commMsg',e.message,'err'); }
     };
 
@@ -272,7 +278,7 @@
         tRev+=rev; tVol+=vol; tN+=tipsSnap.size; tStaff+=activeStaff; if(tipsSnap.size>0) activeBiz++;
         const bemail=(d.email||d.businessEmail||'');
         bizRows.push({ id:b.id, name:d.businessName||'—', email:bemail, staff:activeStaff,
-          tipsN:tipsSnap.size, vol, rev, feePct, commPct:(d.commissionPercent!=null?d.commissionPercent:null), joined:ms(d.createdAt), last, code:d.shopCode||'',
+          tipsN:tipsSnap.size, vol, rev, feePct, commPct:(d.commissionPercent!=null?d.commissionPercent:null), commFixed:(d.commissionFixed!=null?d.commissionFixed:null), joined:ms(d.createdAt), last, code:d.shopCode||'',
           blocked:!!d.blocked, analyticsEnabled:d.ownerAnalyticsEnabled===true, collectApproved:!!d.collectModeApproved,
           nkey:(d.businessName||'').toLowerCase().replace(/\s+/g,' ').trim(), ekey:bemail.toLowerCase().trim() });
       }
@@ -361,7 +367,7 @@
     }
 
     let editId=null;
-    function openEdit(r){ editId=r.id; $('bmTitle').textContent='Edit '+r.name; $('bm_name').value=r.name==='—'?'':r.name; $('bm_email').value=r.email||''; $('bm_fee').value=r.feePct||0; $('bm_comm').value=(r.commPct!=null?r.commPct:''); $('bm_analytics').checked=r.analyticsEnabled===true; $('bm_collect').checked=!!r.collectApproved; $('bmMsg').className='msg'; $('bizModal').classList.remove('hide'); }
+    function openEdit(r){ editId=r.id; $('bmTitle').textContent='Edit '+r.name; $('bm_name').value=r.name==='—'?'':r.name; $('bm_email').value=r.email||''; $('bm_fee').value=r.feePct||0; $('bm_comm').value=(r.commPct!=null?r.commPct:''); $('bm_commFixed').value=(r.commFixed!=null?r.commFixed:''); $('bm_analytics').checked=r.analyticsEnabled===true; $('bm_collect').checked=!!r.collectApproved; $('bmMsg').className='msg'; $('bizModal').classList.remove('hide'); }
     $('bmCancel').onclick=()=>$('bizModal').classList.add('hide');
     $('bmSave').onclick=async()=>{
       if(!editId) return;
@@ -372,13 +378,17 @@
       const commRaw=$('bm_comm').value.trim();
       let commVal=null;
       if(commRaw!==''){ commVal=parseFloat(commRaw); if(isNaN(commVal)||commVal<0||commVal>50){ msg('bmMsg','Commission must be 0–50% (or blank for default).','err'); return; } }
+      const commFixRaw=$('bm_commFixed').value.trim();
+      let commFixVal=null;
+      if(commFixRaw!==''){ commFixVal=parseFloat(commFixRaw); if(isNaN(commFixVal)||commFixVal<0||commFixVal>5){ msg('bmMsg','Fixed fee must be 0–5 (or blank for default).','err'); return; } }
       $('bmSave').disabled=true;
       try{
         const analyticsEnabled=$('bm_analytics').checked, collectApproved=$('bm_collect').checked;
         const upd={ businessName:name, email:email, tipSharePercent:fee, tipShareEnabled:fee>0, ownerAnalyticsEnabled:analyticsEnabled, collectModeApproved:collectApproved };
         upd.commissionPercent = (commVal==null ? firebase.firestore.FieldValue.delete() : commVal);
+        upd.commissionFixed = (commFixVal==null ? firebase.firestore.FieldValue.delete() : commFixVal);
         await db.collection('businesses').doc(editId).update(upd);
-        const r=bizRows.find(x=>x.id===editId); if(r){ r.name=name; r.email=email; r.feePct=fee; r.commPct=commVal; r.analyticsEnabled=analyticsEnabled; r.collectApproved=collectApproved; }
+        const r=bizRows.find(x=>x.id===editId); if(r){ r.name=name; r.email=email; r.feePct=fee; r.commPct=commVal; r.commFixed=commFixVal; r.analyticsEnabled=analyticsEnabled; r.collectApproved=collectApproved; }
         $('bizModal').classList.add('hide'); renderBiz();
       }catch(e){ msg('bmMsg','Could not save: '+e.message,'err'); }
       $('bmSave').disabled=false;
