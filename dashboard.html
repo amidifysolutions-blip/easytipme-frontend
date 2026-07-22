@@ -305,6 +305,13 @@
       <div class="section" id="sec-settings">
         <h1>Settings</h1>
         <div class="sub">Tip amounts, currency, and notifications.</div>
+
+        <div class="card" id="proCard" style="border:1px solid rgba(240,180,41,.35)">
+          <h3>⭐ EasyTipMe Pro</h3>
+          <div id="proBody" style="font-size:14px;color:var(--soft)">Loading…</div>
+          <div id="proMsg" class="msg"></div>
+        </div>
+
         <div class="card">
           <h3>Account login</h3>
           <p style="font-size:12px;color:var(--soft);line-height:1.5;margin-bottom:10px">This is the email you sign in with. Changing it keeps your connected bank/Stripe payouts intact.</p>
@@ -342,45 +349,55 @@
           </label>
         </div>
         <div class="card">
-          <h3>Administrative fee (optional)</h3>
-          <label style="display:flex;align-items:center;gap:10px;text-transform:none;font-size:14px;font-weight:400;color:var(--ink)">
-            <input type="checkbox" id="s_shareOn" style="width:auto;margin:0"> Apply an administrative fee to each tip
-          </label>
-          <div id="shareRow" style="display:none;margin-top:14px">
-            <label style="text-transform:none;font-size:13px;color:var(--soft)">Administrative fee per tip (%)</label>
-            <input type="number" id="s_sharePct" min="0" max="15" step="0.5" value="0" style="max-width:140px">
+          <h3>Administrative fee (optional) <span style="font-size:10px;font-weight:800;color:#0a0a0a;background:linear-gradient(135deg,#ffd479,#f0b429);padding:2px 7px;border-radius:20px;margin-left:6px;vertical-align:middle;letter-spacing:.05em">PRO</span></h3>
+          <div id="adminFeeLock" style="display:none">
+            <p style="font-size:13px;color:var(--soft);line-height:1.5;margin:6px 0 12px">🔒 Charging your own administrative fee on tips is a <b>Pro</b> feature. Upgrade to enable it.</p>
+            <button class="btn" onclick="startProCheckout(auth.currentUser)" style="max-width:220px">Upgrade to Pro</button>
           </div>
-          <p style="font-size:12px;color:var(--soft);line-height:1.5;margin:12px 0 0">
-            When enabled, this percentage of each tip is retained by <b>your business</b> — this fee is yours, not EasyTipMe's (the platform charges its own separate commission). The rest goes to the team member. Capped at 15%. This is optional — leave it off and your team keeps 100% of every tip. <b>You are responsible for ensuring this complies with your local tipping and labour laws</b> — we recommend confirming with a lawyer.
-          </p>
+          <div id="adminFeeBody">
+            <label style="display:flex;align-items:center;gap:10px;text-transform:none;font-size:14px;font-weight:400;color:var(--ink)">
+              <input type="checkbox" id="s_shareOn" style="width:auto;margin:0"> Apply an administrative fee to each tip
+            </label>
+            <div id="shareRow" style="display:none;margin-top:14px">
+              <label style="text-transform:none;font-size:13px;color:var(--soft)">Administrative fee per tip (%)</label>
+              <input type="number" id="s_sharePct" min="0" max="15" step="0.5" value="0" style="max-width:140px">
+            </div>
+            <p style="font-size:12px;color:var(--soft);line-height:1.5;margin:12px 0 0">
+              When enabled, this percentage of each tip is retained by <b>your business</b> — this fee is yours, not EasyTipMe's (the platform charges its own separate commission). The rest goes to the team member. Capped at 15%. This is optional — leave it off and your team keeps 100% of every tip. <b>You are responsible for ensuring this complies with your local tipping and labour laws</b> — we recommend confirming with a lawyer.
+            </p>
+          </div>
         </div>
         <button class="btn" id="saveSettings">Save settings</button>
         <div id="settingsMsg" class="msg"></div>
 
-        <div class="card" style="margin-top:20px" id="proCard">
-          <h3>⭐ EasyTipMe Pro</h3>
-          <div id="proBody" style="font-size:14px;color:var(--soft)">Loading…</div>
-          <div id="proMsg" class="msg"></div>
-        </div>
-
         <div class="card" style="margin-top:20px">
-          <h3>💳 Get paid</h3>
-          <p style="font-size:12px;color:var(--soft);line-height:1.5;margin-bottom:12px">Connect your bank once. Stripe then pays your admin fee (and any tips you collect) straight to your account — automatically, on a schedule. Verifying your identity + bank is required by law.</p>
-          <div id="ownerPayoutStatus" style="margin:0 0 12px;font-size:14px;font-weight:600"></div>
-          <div id="ownerCountryWrap" style="display:none;margin-bottom:12px">
-            <label style="font-size:12px;color:var(--soft);display:block;margin-bottom:6px">Payout country</label>
-            <select id="ownerCountry" style="width:100%;max-width:340px;padding:11px;border:1px solid var(--line);border-radius:12px;background:#14141b;color:#fff;font-family:inherit;font-size:14px"></select>
-            <div style="font-size:11px;color:var(--soft);margin-top:5px">Where your bank is. Can't be changed after setup.</div>
+          <h3>💳 Get paid <span style="font-size:10px;font-weight:800;color:#0a0a0a;background:linear-gradient(135deg,#ffd479,#f0b429);padding:2px 7px;border-radius:20px;margin-left:6px;vertical-align:middle;letter-spacing:.05em">PRO</span></h3>
+          <div id="getPaidLock" style="display:none">
+            <p style="font-size:13px;color:var(--soft);line-height:1.5;margin:6px 0 12px">🔒 Receiving your own payouts (your admin fee) is a <b>Pro</b> feature. Upgrade to connect your bank and get paid.</p>
+            <button class="btn" onclick="startProCheckout(auth.currentUser)" style="max-width:220px">Upgrade to Pro</button>
           </div>
-          <button class="btn" id="ownerConnectBtn" disabled>Connect bank account</button>
-          <div id="ownerBalanceBox" style="display:none;margin-top:16px"></div>
+          <div id="getPaidBody">
+            <p style="font-size:12px;color:var(--soft);line-height:1.5;margin-bottom:12px">Connect your bank once. Stripe then pays your admin fee (and any tips you collect) straight to your account — automatically, on a schedule. Verifying your identity + bank is required by law.</p>
+            <div id="ownerPayoutStatus" style="margin:0 0 12px;font-size:14px;font-weight:600"></div>
+            <div id="ownerCountryWrap" style="display:none;margin-bottom:12px">
+              <label style="font-size:12px;color:var(--soft);display:block;margin-bottom:6px">Payout country</label>
+              <select id="ownerCountry" style="width:100%;max-width:340px;padding:11px;border:1px solid var(--line);border-radius:12px;background:#14141b;color:#fff;font-family:inherit;font-size:14px"></select>
+              <div style="font-size:11px;color:var(--soft);margin-top:5px">Where your bank is. Can't be changed after setup.</div>
+            </div>
+            <button class="btn" id="ownerConnectBtn" disabled>Connect bank account</button>
+            <div id="ownerBalanceBox" style="display:none;margin-top:16px"></div>
+          </div>
         </div>
 
-        <div class="card" style="margin-top:20px;border:1px solid rgba(229,72,77,.35)">
-          <h3 style="color:#ff6b6b">⚠️ Danger zone</h3>
-          <p style="font-size:13px;color:var(--soft);line-height:1.5;margin:0 0 12px">Permanently delete your business account. This removes your shop, your team list, your tip records, and your login. Your workers’ own accounts and their bank connections are <b>not</b> affected. This cannot be undone.</p>
-          <button class="btn" id="deleteAcctBtn" style="background:#e5484d">Delete my account</button>
-          <div id="deleteMsg" class="msg"></div>
+        <div style="margin-top:30px;text-align:center">
+          <button id="deleteAcctBtn" style="background:none;border:none;color:#7a7a80;font:inherit;font-size:12px;cursor:pointer;text-decoration:underline">Delete my account</button>
+          <div id="deleteFlow" style="display:none;max-width:330px;margin:14px auto 0;text-align:left;background:#141419;border:1px solid rgba(229,72,77,.3);border-radius:12px;padding:16px">
+            <div style="font-size:12px;color:var(--soft);line-height:1.55;margin-bottom:10px">We emailed a 6-digit code to <b id="delEmail" style="color:#fff"></b>. Enter it to permanently delete your account — this can’t be undone.</div>
+            <input id="delCode" inputmode="numeric" maxlength="6" placeholder="6-digit code" style="width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;background:#0e0e13;color:#fff;font-size:17px;letter-spacing:5px;text-align:center;margin-bottom:9px;font-family:inherit">
+            <button class="btn" id="delConfirmBtn" style="background:#e5484d;width:100%">Confirm deletion</button>
+            <button id="delResend" style="background:none;border:none;color:var(--soft);font:inherit;font-size:12px;cursor:pointer;text-decoration:underline;margin-top:10px;display:block">Resend code</button>
+            <div id="deleteMsg" class="msg"></div>
+          </div>
         </div>
 
         <div class="sig">Powered by Amidify Solutions Inc.</div>
@@ -560,11 +577,30 @@
       loadStaff();
       setupOwnerPayout();
       applyAnalyticsGate();
+      applyOwnerProGate();
       const bu=$('bizUpgradeBtn'); if(bu) bu.onclick=startBizCheckout;
       const ba=$('brAddBtn'); if(ba) ba.onclick=addBranch;
       const bc=$('bizCancelBtn'); if(bc) bc.onclick=cancelBiz;
       applyBranchGate();
     });
+
+    // ---- Owner Pro gate: admin fee + Get paid are Pro features ----
+    function ownerProOn(){ return bizData.proActive===true || bizData.ownerAnalyticsEnabled===true; }
+    function applyOwnerProGate(){
+      const on=ownerProOn();
+      const afB=$('adminFeeBody'), afL=$('adminFeeLock');
+      if(afB) afB.style.display=on?'':'none';
+      if(afL) afL.style.display=on?'none':'block';
+      const gpB=$('getPaidBody'), gpL=$('getPaidLock');
+      if(gpB) gpB.style.display=on?'':'none';
+      if(gpL) gpL.style.display=on?'none':'block';
+      if(!on){
+        const cb=$('s_shareOn'); if(cb) cb.checked=false;
+        const sr=$('shareRow'); if(sr) sr.style.display='none';
+        // Cancelling Pro also switches OFF any live admin fee so it stops applying.
+        if(bizData.tipShareEnabled===true){ bizData.tipShareEnabled=false; try{ db.collection('businesses').doc(BID).set({tipShareEnabled:false},{merge:true}); }catch(_){} }
+      }
+    }
 
     // ---- Platform-controlled analytics visibility ----
     function applyAnalyticsGate(){
@@ -828,18 +864,41 @@
     const delBtn=$('deleteAcctBtn');
     if(delBtn) delBtn.onclick=async ()=>{
       const u=auth.currentUser; if(!u) return;
-      if(!confirm('Delete your business account permanently?\n\nThis removes your shop, team list, and tip records, and signs you out. This CANNOT be undone.')) return;
-      const typed=prompt('To confirm, type DELETE below:');
-      if(typed===null) return;
-      if(typed.trim().toUpperCase()!=='DELETE'){ $('deleteMsg').textContent='Not deleted — you didn’t type DELETE.'; $('deleteMsg').className='msg err'; return; }
-      delBtn.disabled=true; delBtn.textContent='Deleting…'; $('deleteMsg').textContent=''; $('deleteMsg').className='msg';
+      if(!confirm('Delete your business account?\n\nWe’ll email a 6-digit code to confirm it’s really you.')) return;
+      delBtn.disabled=true;
       try{
         const idToken=await u.getIdToken();
-        const r=await fetch(BACKEND+'/business/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken})});
+        await fetch(BACKEND+'/business/delete-request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken})});
+        $('delEmail').textContent=u.email||'your email';
+        $('deleteFlow').style.display='block';
+        $('delCode').focus();
+      }catch(_){ alert('Could not start deletion. Try again.'); }
+      delBtn.disabled=false;
+    };
+    const delConfirm=$('delConfirmBtn');
+    if(delConfirm) delConfirm.onclick=async ()=>{
+      const u=auth.currentUser; if(!u) return;
+      const code=($('delCode').value||'').trim();
+      if(code.length!==6){ $('deleteMsg').textContent='Enter the 6-digit code from your email.'; $('deleteMsg').className='msg err'; return; }
+      delConfirm.disabled=true; delConfirm.textContent='Deleting…'; $('deleteMsg').textContent=''; $('deleteMsg').className='msg';
+      try{
+        const idToken=await u.getIdToken();
+        const r=await fetch(BACKEND+'/business/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,code})});
         const j=await r.json();
         if(j&&j.ok){ alert('Your account has been deleted. Goodbye 👋'); try{await auth.signOut();}catch(_){} location.href='signup.html'; }
-        else { $('deleteMsg').textContent='Could not delete: '+((j&&j.error)||'please try again'); $('deleteMsg').className='msg err'; delBtn.disabled=false; delBtn.textContent='Delete my account'; }
-      }catch(e){ $('deleteMsg').textContent='Could not delete: '+e.message; $('deleteMsg').className='msg err'; delBtn.disabled=false; delBtn.textContent='Delete my account'; }
+        else {
+          const map={'wrong-code':'That code isn’t right.','expired':'Code expired — send a new one.','no-code':'Request a code first.','too-many':'Too many tries — send a new code.'};
+          $('deleteMsg').textContent=map[j&&j.error]||'Could not delete. Try again.'; $('deleteMsg').className='msg err';
+          delConfirm.disabled=false; delConfirm.textContent='Confirm deletion';
+        }
+      }catch(e){ $('deleteMsg').textContent='Could not delete: '+e.message; $('deleteMsg').className='msg err'; delConfirm.disabled=false; delConfirm.textContent='Confirm deletion'; }
+    };
+    const delResend=$('delResend');
+    if(delResend) delResend.onclick=async ()=>{
+      const u=auth.currentUser; if(!u) return;
+      delResend.disabled=true; delResend.textContent='Sending…';
+      try{ const idToken=await u.getIdToken(); await fetch(BACKEND+'/business/delete-request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken})}); $('deleteMsg').textContent='New code sent.'; $('deleteMsg').className='msg ok'; }catch(_){}
+      setTimeout(()=>{ delResend.disabled=false; delResend.textContent='Resend code'; },1500);
     };
     $('copyShop').onclick=()=>{navigator.clipboard.writeText($('shopLink').value);$('copyShop').textContent='Copied';setTimeout(()=>$('copyShop').textContent='Copy',1200);};
     $('openShop').onclick=()=>window.open($('shopLink').value,'_blank');
