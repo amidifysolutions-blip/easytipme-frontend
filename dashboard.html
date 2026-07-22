@@ -614,6 +614,7 @@
       $('verifyBanner').style.display='none';
       $('acctEmail').textContent=u.email||'—';
       renderPro(u); renderBizPlan(u); renderBizProPlan(u); handleProReturn(u); handleBizReturn(u);
+      const rb=document.querySelector('.rolebadge'); if(rb) rb.textContent=(b.businessProActive?'Business Pro':b.businessTierActive?'Business':b.proActive?'Pro':'Free plan');
       $('sideBiz').textContent=b.businessName||u.email;
       $('teamTitle').textContent=(b.businessName||'Your')+' — team';
       // fill profile + settings
