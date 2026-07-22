@@ -607,7 +607,11 @@
       if(!u){ location.href='signup.html'; return; }
       BID=u.uid;
       const doc = await db.collection('businesses').doc(BID).get();
-      const b = doc.exists?doc.data():{}; bizData=b;
+      // This login owns no business (e.g. a leftover worker/staff session on this
+      // browser, or the wrong account). Don't render a broken empty dashboard —
+      // sign out cleanly and send them to the sign-in screen for the owner account.
+      if(!doc.exists){ try{ await auth.signOut(); }catch(_){}; location.href='signup.html'; return; }
+      const b = doc.data(); bizData=b;
       // HARD GATE: confirm email before the dashboard loads at all.
       try{ await u.reload(); }catch(_){}
       if(!u.emailVerified){ $('loading').style.display='none'; showVerifyGate(u, b.ownerName||''); return; }
