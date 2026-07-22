@@ -375,6 +375,13 @@
           <div id="ownerBalanceBox" style="display:none;margin-top:16px"></div>
         </div>
 
+        <div class="card" style="margin-top:20px;border:1px solid rgba(229,72,77,.35)">
+          <h3 style="color:#ff6b6b">⚠️ Danger zone</h3>
+          <p style="font-size:13px;color:var(--soft);line-height:1.5;margin:0 0 12px">Permanently delete your business account. This removes your shop, your team list, your tip records, and your login. Your workers’ own accounts and their bank connections are <b>not</b> affected. This cannot be undone.</p>
+          <button class="btn" id="deleteAcctBtn" style="background:#e5484d">Delete my account</button>
+          <div id="deleteMsg" class="msg"></div>
+        </div>
+
         <div class="sig">Powered by Amidify Solutions Inc.</div>
       </div>
 
@@ -566,7 +573,9 @@
       const body=$('proBody'); if(!body) return;
       if(bizData.proActive){
         body.innerHTML='<div style="color:var(--green);font-weight:700;font-size:15px">✓ Pro is active</div>'
-          +'<p style="margin:8px 0 0;color:var(--soft);font-size:13px">You receive your admin fee, plus analytics, reports, and tip distribution for your team. Thank you! 🎉</p>';
+          +'<p style="margin:8px 0 0;color:var(--soft);font-size:13px">You receive your admin fee, plus analytics, reports, and tip distribution for your team. Thank you! 🎉</p>'
+          +'<button class="link" id="proCancelBtn" style="background:none;border:none;color:#ff6b6b;cursor:pointer;font:inherit;font-size:13px;padding:12px 0 0;text-decoration:underline">Cancel subscription</button>';
+        const cb=$('proCancelBtn'); if(cb) cb.onclick=()=>cancelPro(u);
       } else {
         body.innerHTML='<p style="margin:0 0 10px">Unlock <b>your payouts</b> (receive your admin fee from tips), <b>analytics &amp; reports</b>, and <b>tip distribution</b> for your team.</p>'
           +'<div style="font-weight:800;font-size:22px;color:#fff;margin:6px 0 12px">$19.99<span style="font-size:13px;color:var(--soft);font-weight:500">/month</span></div>'
@@ -584,6 +593,18 @@
         if(j&&j.url){ location.href=j.url; }
         else { proMsg('Could not start checkout. Try again.'); if(btn){btn.disabled=false;btn.textContent='Upgrade to Pro';} }
       }catch(_){ proMsg('Could not start checkout. Try again.'); if(btn){btn.disabled=false;btn.textContent='Upgrade to Pro';} }
+    }
+    async function cancelPro(u){
+      if(!confirm('Cancel your EasyTipMe Pro subscription?\n\nYou’ll keep your data, but Pro features (your payouts, analytics, and tip distribution) will turn off.')) return;
+      const cb=$('proCancelBtn'); if(cb){ cb.disabled=true; cb.textContent='Cancelling…'; }
+      proMsg('');
+      try{
+        const idToken=await u.getIdToken();
+        const r=await fetch(BACKEND+'/billing/cancel',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,plan:'owner'})});
+        const j=await r.json();
+        if(j&&j.ok){ proMsg('Subscription cancelled. Refreshing…','ok'); setTimeout(()=>location.reload(),1400); }
+        else { proMsg('Could not cancel. Please try again.'); if(cb){cb.disabled=false;cb.textContent='Cancel subscription';} }
+      }catch(_){ proMsg('Could not cancel. Please try again.'); if(cb){cb.disabled=false;cb.textContent='Cancel subscription';} }
     }
     async function handleProReturn(u){
       const p=new URLSearchParams(location.search);
@@ -658,6 +679,23 @@
     $('copyCode').onclick=()=>{navigator.clipboard.writeText($('shopCodeField').value);$('copyCode').textContent='Copied';setTimeout(()=>$('copyCode').textContent='Copy',1200);};
 
     $('logout').onclick=()=>auth.signOut().then(()=>location.href='signup.html');
+
+    const delBtn=$('deleteAcctBtn');
+    if(delBtn) delBtn.onclick=async ()=>{
+      const u=auth.currentUser; if(!u) return;
+      if(!confirm('Delete your business account permanently?\n\nThis removes your shop, team list, and tip records, and signs you out. This CANNOT be undone.')) return;
+      const typed=prompt('To confirm, type DELETE below:');
+      if(typed===null) return;
+      if(typed.trim().toUpperCase()!=='DELETE'){ $('deleteMsg').textContent='Not deleted — you didn’t type DELETE.'; $('deleteMsg').className='msg err'; return; }
+      delBtn.disabled=true; delBtn.textContent='Deleting…'; $('deleteMsg').textContent=''; $('deleteMsg').className='msg';
+      try{
+        const idToken=await u.getIdToken();
+        const r=await fetch(BACKEND+'/business/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken})});
+        const j=await r.json();
+        if(j&&j.ok){ alert('Your account has been deleted. Goodbye 👋'); try{await auth.signOut();}catch(_){} location.href='signup.html'; }
+        else { $('deleteMsg').textContent='Could not delete: '+((j&&j.error)||'please try again'); $('deleteMsg').className='msg err'; delBtn.disabled=false; delBtn.textContent='Delete my account'; }
+      }catch(e){ $('deleteMsg').textContent='Could not delete: '+e.message; $('deleteMsg').className='msg err'; delBtn.disabled=false; delBtn.textContent='Delete my account'; }
+    };
     $('copyShop').onclick=()=>{navigator.clipboard.writeText($('shopLink').value);$('copyShop').textContent='Copied';setTimeout(()=>$('copyShop').textContent='Copy',1200);};
     $('openShop').onclick=()=>window.open($('shopLink').value,'_blank');
     $('copyStaff').onclick=()=>{navigator.clipboard.writeText($('staffLink').value);$('copyStaff').textContent='Copied';setTimeout(()=>$('copyStaff').textContent='Copy',1200);};
