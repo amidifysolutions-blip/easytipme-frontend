@@ -1192,9 +1192,22 @@
       }
       btn.onclick=()=>startConnect(u);
       function paintPayout(j){
-        if(j && j.payouts_enabled){ stat.classList.remove('hide'); stat.style.color='var(--green)'; stat.textContent=t('payout_connected'); btn.classList.add('hide'); $('payCountryWrap').classList.add('hide'); loadBalance(accId); }
+        if(j && j.payouts_enabled){ stat.classList.remove('hide'); stat.style.color='var(--green)'; stat.textContent=t('payout_connected'); btn.classList.add('hide'); $('payCountryWrap').classList.add('hide'); releaseHeld(u,accId); loadBalance(accId); }
         else if(j && j.details_submitted){ stat.classList.remove('hide'); stat.style.color='var(--orange)'; stat.textContent=t('payout_continue'); btn.textContent=t('payout_continue'); }
       }
+    }
+
+    // Once the worker's payout account is ready, release any tips that were held
+    // for them while they were still connecting. Safe to call repeatedly.
+    let _releasedOnce=false;
+    async function releaseHeld(u,accId){
+      if(_releasedOnce) return; _releasedOnce=true;
+      try{
+        const idToken=await u.getIdToken();
+        const r=await fetch(BACKEND+'/staff/release-held',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken})});
+        const j=await r.json().catch(()=>({}));
+        if(j && j.released>0){ setTimeout(()=>{ try{ loadBalance(accId); }catch(_){}}, 1500); }
+      }catch(_){}
     }
 
     // Withdrawal fee tiers (base rule for everyone at launch). Platform % is on

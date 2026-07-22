@@ -335,7 +335,7 @@
       if(shop.notifyEmail!==false){ try{
         const perAmt=recipient.multiple?tip/recipient.members.length:tip;
         fetch(BACKEND+'/notify-tip',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-          recipients:recipient.members.map(m=>({name:m.nickname,email:m.email})), amount:perAmt, currency:curr, shopName:shop.businessName||'', fromName:fromName })});
+          recipients:recipient.members.map(m=>({name:m.nickname,email:m.email})), amount:perAmt, tipTotal:tip, currency:curr, shopName:shop.businessName||'', fromName:fromName })});
       }catch(e){} }
       $('doneMsg').textContent=`Your ${sym}${tip.toFixed(2)} tip to ${recipient.nickname||'the team'} is on its way.`;
       show('step-done');
