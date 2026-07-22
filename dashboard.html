@@ -673,16 +673,22 @@
     const STRIPE_COUNTRIES=[['AU','Australia'],['AT','Austria'],['BE','Belgium'],['BG','Bulgaria'],['CA','Canada'],['HR','Croatia'],['CY','Cyprus'],['CZ','Czechia'],['DK','Denmark'],['EE','Estonia'],['FI','Finland'],['FR','France'],['DE','Germany'],['GI','Gibraltar'],['GR','Greece'],['HK','Hong Kong'],['HU','Hungary'],['IE','Ireland'],['IT','Italy'],['JP','Japan'],['LV','Latvia'],['LI','Liechtenstein'],['LT','Lithuania'],['LU','Luxembourg'],['MT','Malta'],['MX','Mexico'],['NL','Netherlands'],['NZ','New Zealand'],['NO','Norway'],['PL','Poland'],['PT','Portugal'],['RO','Romania'],['SG','Singapore'],['SK','Slovakia'],['SI','Slovenia'],['ES','Spain'],['SE','Sweden'],['CH','Switzerland'],['TH','Thailand'],['AE','United Arab Emirates'],['GB','United Kingdom'],['US','United States'],['BR','Brazil'],['MY','Malaysia'],['ZA','South Africa']];
     function fillCountriesOwner(def){
       const sel=$('ownerCountry'); if(!sel) return;
-      // Always pre-select a real country (never a blank placeholder) so the
-      // "select a country" prompt can't block the owner. They can still change it.
+      // Pre-select from saved country / currency when we can tell; otherwise show
+      // a "Select country…" prompt and let the owner pick — never force Canada.
       const chosen = (STRIPE_COUNTRIES.some(c=>c[0]===def) ? def : '') || defaultOwnerCountry();
-      sel.innerHTML=STRIPE_COUNTRIES.map(c=>`<option value="${c[0]}"${chosen===c[0]?' selected':''}>${c[1]}</option>`).join('');
+      const placeholder = chosen ? '' : '<option value="" disabled selected>Select country…</option>';
+      sel.innerHTML=placeholder+STRIPE_COUNTRIES.map(c=>`<option value="${c[0]}"${chosen===c[0]?' selected':''}>${c[1]}</option>`).join('');
     }
+    // Best-guess payout country: saved business country → a currency that maps to
+    // ONE country → the browser's region. Ambiguous currencies (e.g. EUR) return
+    // '' so the owner chooses. No blanket Canada default.
     function defaultOwnerCountry(){
       if(bizData.country && STRIPE_COUNTRIES.some(c=>c[0]===bizData.country)) return bizData.country;
-      const cur=(bizData.currency||'CAD').toUpperCase();
-      const map={CAD:'CA',USD:'US',GBP:'GB',EUR:'IE',AUD:'AU',AED:'AE'};
-      return map[cur]||'CA';
+      const cur=(bizData.currency||'').toUpperCase();
+      const map={CAD:'CA',USD:'US',GBP:'GB',AUD:'AU',AED:'AE',JPY:'JP',CHF:'CH',SGD:'SG',NZD:'NZ',SEK:'SE',NOK:'NO',DKK:'DK',PLN:'PL',BRL:'BR',MYR:'MY',ZAR:'ZA',THB:'TH',HKD:'HK',MXN:'MX'};
+      if(map[cur] && STRIPE_COUNTRIES.some(c=>c[0]===map[cur])) return map[cur];
+      try{ const loc=(navigator.language||'').split('-')[1]; if(loc && STRIPE_COUNTRIES.some(c=>c[0]===loc.toUpperCase())) return loc.toUpperCase(); }catch(_){}
+      return '';
     }
     async function setupOwnerPayout(){
       const btn=$('ownerConnectBtn'), stat=$('ownerPayoutStatus');
