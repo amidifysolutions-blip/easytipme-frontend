@@ -673,7 +673,16 @@
     const STRIPE_COUNTRIES=[['AU','Australia'],['AT','Austria'],['BE','Belgium'],['BG','Bulgaria'],['CA','Canada'],['HR','Croatia'],['CY','Cyprus'],['CZ','Czechia'],['DK','Denmark'],['EE','Estonia'],['FI','Finland'],['FR','France'],['DE','Germany'],['GI','Gibraltar'],['GR','Greece'],['HK','Hong Kong'],['HU','Hungary'],['IE','Ireland'],['IT','Italy'],['JP','Japan'],['LV','Latvia'],['LI','Liechtenstein'],['LT','Lithuania'],['LU','Luxembourg'],['MT','Malta'],['MX','Mexico'],['NL','Netherlands'],['NZ','New Zealand'],['NO','Norway'],['PL','Poland'],['PT','Portugal'],['RO','Romania'],['SG','Singapore'],['SK','Slovakia'],['SI','Slovenia'],['ES','Spain'],['SE','Sweden'],['CH','Switzerland'],['TH','Thailand'],['AE','United Arab Emirates'],['GB','United Kingdom'],['US','United States'],['BR','Brazil'],['MY','Malaysia'],['ZA','South Africa']];
     function fillCountriesOwner(def){
       const sel=$('ownerCountry'); if(!sel) return;
-      sel.innerHTML='<option value="" disabled'+(def?'':' selected')+'>Select country…</option>'+STRIPE_COUNTRIES.map(c=>`<option value="${c[0]}"${def===c[0]?' selected':''}>${c[1]}</option>`).join('');
+      // Always pre-select a real country (never a blank placeholder) so the
+      // "select a country" prompt can't block the owner. They can still change it.
+      const chosen = (STRIPE_COUNTRIES.some(c=>c[0]===def) ? def : '') || defaultOwnerCountry();
+      sel.innerHTML=STRIPE_COUNTRIES.map(c=>`<option value="${c[0]}"${chosen===c[0]?' selected':''}>${c[1]}</option>`).join('');
+    }
+    function defaultOwnerCountry(){
+      if(bizData.country && STRIPE_COUNTRIES.some(c=>c[0]===bizData.country)) return bizData.country;
+      const cur=(bizData.currency||'CAD').toUpperCase();
+      const map={CAD:'CA',USD:'US',GBP:'GB',EUR:'IE',AUD:'AU',AED:'AE'};
+      return map[cur]||'CA';
     }
     async function setupOwnerPayout(){
       const btn=$('ownerConnectBtn'), stat=$('ownerPayoutStatus');
@@ -1044,8 +1053,8 @@
     }
     async function startOwnerConnect(){
       const btn=$('ownerConnectBtn');
-      const country=($('ownerCountry')||{}).value||bizData.country||'';
-      if(!country){ alert('Please select your payout country first.'); return; }
+      const country=($('ownerCountry')||{}).value||bizData.country||defaultOwnerCountry();
+      if(!country){ alert('Please pick your payout country from the list, then try again.'); return; }
       btn.disabled=true;
       try{
         if(!bizData.country){ try{ await db.collection('businesses').doc(BID).update({country:country}); bizData.country=country; }catch(_){} }
