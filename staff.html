@@ -444,7 +444,7 @@
       verify_sub_code:"We emailed a 6-digit code to", verify_sub_code2:"Enter it below to confirm.", code_ph:"6-digit code", confirm_btn:"Confirm", resend_code:"Resend code",
       m_enter_code6:"Enter the 6-digit code from your email.", m_wrong_code:"Wrong code — try again.", m_code_expired:"Code expired — tap Resend code.",
       available:"Available", pending:"Pending", withdraw_speed:"Withdrawal speed", withdraw_now:"Withdraw",
-      free:"Free", recent_payouts:"Recent payouts", bal_unavailable:"Balance is loading — check back in a moment.",
+      free:"Free", recent_payouts:"Recent payouts", bal_unavailable:"Balance is loading — check back in a moment.", nothing_to_withdraw:"Nothing to withdraw yet",
       tier_instant:"Instant", tier_instant_d:"Arrives in minutes", tier_standard:"Standard", tier_standard_d:"Free · 1–2 business days",
       withdraw_disclaimer:"Instant carries a 5% fee for arriving in minutes (Stripe's own fee is included). Standard payouts are free. You always see the exact amount before you confirm.",
       withdraw_soon:"Withdrawals are being switched on. Here's what you'd receive:",
@@ -503,7 +503,7 @@
       verify_sub_code:"بعتنالك كود من ٦ أرقام على", verify_sub_code2:"اكتبو تحت للتأكيد.", code_ph:"كود من ٦ أرقام", confirm_btn:"تأكيد", resend_code:"إعادة إرسال الكود",
       m_enter_code6:"اكتب الكود المكوّن من ٦ أرقام من إيميلك.", m_wrong_code:"كود غلط — جرّب مرة تانية.", m_code_expired:"انتهت صلاحية الكود — اضغط إعادة إرسال.",
       available:"المتاح", pending:"قيد الانتظار", withdraw_speed:"سرعة السحب", withdraw_now:"اسحب",
-      free:"مجاني", recent_payouts:"آخر التحويلات", bal_unavailable:"عم يحمّل الرصيد — رجاع بعد شوي.",
+      free:"مجاني", recent_payouts:"آخر التحويلات", bal_unavailable:"عم يحمّل الرصيد — رجاع بعد شوي.", nothing_to_withdraw:"ما في رصيد للسحب بعد",
       tier_instant:"فوري", tier_instant_d:"بيوصل خلال دقائق", tier_standard:"عادي", tier_standard_d:"مجاني · يوم-يومين عمل",
       withdraw_disclaimer:"الفوري عليه رسم ٥٪ لأنه بيوصل خلال دقائق (رسم Stripe مشمول). السحب العادي مجاني. دايمًا بتشوف المبلغ بالضبط قبل ما تأكّد.",
       withdraw_soon:"عم نفعّل السحب. هيدا يلي رح تستلمه:",
@@ -875,7 +875,7 @@
     const CURSYM={CAD:'$',USD:'$',AUD:'$',EUR:'€',GBP:'£',AED:'AED',SAR:'SAR',QAR:'QAR',KWD:'KWD',BHD:'BHD',OMR:'OMR',LBP:'LBP'};
     const params=new URLSearchParams(location.search);
     let BID=params.get('s')||localStorage.getItem('etm_staff_bid')||'';
-    let staffDoc=null, staffId=null, shop=null, registerMode=false;
+    let staffDoc=null, staffId=null, shop=null, registerMode=false, signInAttempt=false;
     let allRows=[], curRange='week', curSym='$';
     const BACKEND="https://easytipme-backend.onrender.com";
 
@@ -1016,6 +1016,7 @@
         if(pass!==$('pass2').value){ amsg(t('m_pass_match')); return; }
       }
       const btn=create?$('registerBtn'):$('loginBtn'); btn.disabled=true;
+      signInAttempt=true;   // an explicit attempt — OK to show a "not registered" error
       try{
         if(create){
           const cred=await auth.createUserWithEmailAndPassword(email,pass);
@@ -1090,7 +1091,15 @@
         // Prefer stable UID match (survives email changes); fall back to email for first-time claim.
         let snap=await db.collection('businesses').doc(BID).collection('staff').where('claimedUid','==',u.uid).limit(1).get();
         if(snap.empty){ snap=await db.collection('businesses').doc(BID).collection('staff').where('email','==',(u.email||'').toLowerCase()).limit(1).get(); }
-        if(snap.empty){ show('auth'); amsg(t('m_not_registered',{shop:shop.businessName||'—'})); return; }
+        if(snap.empty){
+          // Only alarm the user if THEY just tried to sign in. On a silent
+          // auto-login with an email that isn't on this team, sign out quietly
+          // and show a clean sign-in screen — no scary red banner for no reason.
+          if(signInAttempt){ signInAttempt=false; show('auth'); amsg(t('m_not_registered',{shop:shop.businessName||'—'})); }
+          else { try{ await auth.signOut(); }catch(_){}; show('auth'); }
+          return;
+        }
+        signInAttempt=false;
         staffDoc=snap.docs[0].data(); staffId=snap.docs[0].id;
         if(staffDoc.status==='removed'){ show('auth'); amsg(t('m_removed',{shop:shop.businessName||'—'})); return; }
         if(staffDoc.leftByStaff===true){ show('auth'); amsg(t('m_left',{shop:shop.businessName||'—'})); return; }
@@ -1346,7 +1355,7 @@
         </div>
         <div class="withdrawlab">${t('withdraw_speed')}</div>
         <div class="tiers">${opts}</div>
-        <button class="btn dark" id="withdrawBtn" ${avail<=0?'disabled':''} style="margin-top:12px">${t('withdraw_now')}</button>
+        <button class="btn dark" id="withdrawBtn" ${avail<=0?'disabled':''} style="margin-top:12px">${avail<=0?t('nothing_to_withdraw'):t('withdraw_now')}</button>
         <div class="note" style="margin-top:8px;font-size:11.5px">${t('withdraw_disclaimer')}</div>
         ${rows?`<div class="payhist"><div class="ballab" style="margin:14px 0 6px">${t('recent_payouts')}</div>${rows}</div>`:''}`;
       const wb=$('withdrawBtn'); if(wb) wb.onclick=()=>{

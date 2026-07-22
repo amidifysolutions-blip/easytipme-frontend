@@ -105,11 +105,9 @@
           <span class="qtitle" style="margin:0">Rate your visit</span>
           <div class="stars" id="stars"><span class="star" data-v="1">★</span><span class="star" data-v="2">★</span><span class="star" data-v="3">★</span><span class="star" data-v="4">★</span><span class="star" data-v="5">★</span></div>
         </div>
-      </div>
-      <div class="card">
-        <div class="qtitle" style="margin-bottom:8px">Add your name <span style="color:var(--soft);font-weight:400;font-size:13px">(optional)</span></div>
+        <label style="display:block;font-weight:600;font-size:14px;margin:18px 0 6px">Your name <span style="color:var(--soft);font-weight:400;font-size:12px">— optional</span></label>
         <div class="custom"><span>🙂</span><input id="fromName" maxlength="40" placeholder="So they know it's from you"></div>
-        <div class="qtitle" style="margin:14px 0 8px">Leave a short message <span style="color:var(--soft);font-weight:400;font-size:13px">(optional)</span></div>
+        <label style="display:block;font-weight:600;font-size:14px;margin:12px 0 6px">Short message <span style="color:var(--soft);font-weight:400;font-size:12px">— optional</span></label>
         <div class="custom"><span>💬</span><input id="fromMessage" maxlength="140" placeholder="e.g. Thanks for the great service!"></div>
       </div>
       <button class="btn" id="toPay">Continue</button>
@@ -342,7 +340,7 @@
       if(shop.notifyEmail!==false){ try{
         const perAmt=recipient.multiple?tip/recipient.members.length:tip;
         fetch(BACKEND+'/notify-tip',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-          recipients:recipient.members.map(m=>({name:m.nickname,email:m.email})), amount:perAmt, tipTotal:tip, currency:curr, shopName:shop.businessName||'', fromName:fromName })});
+          recipients:recipient.members.map(m=>({name:m.nickname,email:m.email,pro:!!m.workerProActive})), amount:perAmt, tipTotal:tip, currency:curr, shopName:shop.businessName||'', fromName:fromName })});
       }catch(e){} }
       // Station 2: if the shop takes an admin fee, route it to the owner's account.
       if(ownerShare>0 && paymentIntent && paymentIntent.id && !recipient.multiple){
