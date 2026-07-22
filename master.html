@@ -99,6 +99,19 @@
       <div style="text-align:right;margin-bottom:14px"><a id="l_forgot" style="color:var(--blue,#2f9bff);font-size:13px;cursor:pointer;text-decoration:none">Forgot password?</a></div>
       <button class="btn" id="loginBtn" style="width:100%">Log in</button>
       <div id="loginMsg" class="msg"></div>
+
+      <div id="resetBox" class="hide" style="margin-top:16px;border-top:1px solid rgba(255,255,255,.12);padding-top:16px">
+        <div class="sub" style="margin-bottom:12px">Enter the 6-digit code we emailed you, then choose a new password.</div>
+        <label>Code</label><input id="r_code" inputmode="numeric" maxlength="6" placeholder="6-digit code" style="margin-bottom:12px;letter-spacing:4px;text-align:center;font-weight:700">
+        <label>New password</label>
+        <div style="position:relative;margin-bottom:10px">
+          <input id="r_pass" type="password" placeholder="At least 8 characters" style="margin-bottom:0;padding-right:56px;width:100%">
+          <button type="button" id="r_eye" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#8e8e93;font-size:12px;font-weight:700;font-family:inherit">Show</button>
+        </div>
+        <button class="btn" id="r_confirm" style="width:100%">Set new password</button>
+        <div style="text-align:right;margin-top:8px"><a id="r_resend" style="color:var(--blue,#2f9bff);font-size:13px;cursor:pointer;text-decoration:none">Resend code</a></div>
+        <div id="resetMsg" class="msg"></div>
+      </div>
     </div>
   </div>
 
@@ -218,14 +231,38 @@
     };
     $('l_pass').addEventListener('keydown',e=>{ if(e.key==='Enter') $('loginBtn').click(); });
     $('l_eye').onclick=()=>{ const p=$('l_pass'); const s=p.type==='password'; p.type=s?'text':'password'; $('l_eye').textContent=s?'Hide':'Show'; };
-    $('l_forgot').onclick=async()=>{
+    const BK='https://easytipme-backend.onrender.com';
+    async function sendResetCode(){
       const email=$('l_email').value.trim().toLowerCase();
-      if(!email){ msg('loginMsg','Enter your admin email first, then tap Forgot password.','err'); return; }
+      if(!email){ msg('loginMsg','Enter your admin email first, then tap Forgot password.','err'); return false; }
       try{
-        const r=await fetch('https://easytipme-backend.onrender.com/send-reset',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
+        await fetch(BK+'/reset-request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
+        msg('loginMsg','A 6-digit code was emailed to '+email+' — check inbox & spam.','ok');
+        return true;
+      }catch(_){ msg('loginMsg','Could not send right now. Try again in a moment.','err'); return false; }
+    }
+    $('l_forgot').onclick=async()=>{ if(await sendResetCode()){ $('resetBox').classList.remove('hide'); $('r_code').focus(); } };
+    $('r_resend').onclick=sendResetCode;
+    $('r_eye').onclick=()=>{ const p=$('r_pass'); const s=p.type==='password'; p.type=s?'text':'password'; $('r_eye').textContent=s?'Hide':'Show'; };
+    $('r_confirm').onclick=async()=>{
+      const email=$('l_email').value.trim().toLowerCase(), code=$('r_code').value.trim(), newPassword=$('r_pass').value;
+      if(!/^\d{6}$/.test(code)){ msg('resetMsg','Enter the 6-digit code.','err'); return; }
+      if((newPassword||'').length<8){ msg('resetMsg','Password must be at least 8 characters.','err'); return; }
+      $('r_confirm').disabled=true;
+      try{
+        const r=await fetch(BK+'/reset-confirm',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,code,newPassword})});
         const j=await r.json().catch(()=>({}));
-        msg('loginMsg', (j&&j.sent===1)?'Reset link sent — check your inbox (and spam).':'If an account exists for that email, a reset link is on its way.', (j&&j.sent===1)?'ok':'err');
-      }catch(_){ msg('loginMsg','Could not send right now. Try again in a moment.','err'); }
+        if(j&&j.ok){
+          $('resetBox').classList.add('hide'); $('r_code').value=''; $('r_pass').value='';
+          $('l_pass').value=newPassword;
+          msg('loginMsg','Password changed ✓ — logging you in…','ok');
+          try{ await auth.signInWithEmailAndPassword(email,newPassword); }catch(_){ msg('loginMsg','Password changed ✓ — now tap Log in.','ok'); }
+        } else {
+          const em={'wrong-code':'Wrong code — check and try again.','expired':'Code expired — tap Resend code.','too-many':'Too many attempts — request a new code.','weak-password':'Password must be at least 8 characters.','no-code':'Request a code first.','invalid':'No account found for that email.'};
+          msg('resetMsg', em[j&&j.error]||'Could not reset. Try again.','err');
+        }
+      }catch(_){ msg('resetMsg','Could not reset right now. Try again.','err'); }
+      $('r_confirm').disabled=false;
     };
     $('logout').onclick=()=>auth.signOut();
     $('denLogout').onclick=()=>auth.signOut();
