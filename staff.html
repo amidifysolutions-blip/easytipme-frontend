@@ -1235,19 +1235,19 @@
     function wpmsg(txt){ const m=$('wproMsg'); if(m) m.textContent=txt||''; }
     function renderWorkerPro(u){
       const body=$('wproBody'); if(!body) return;
-      const head='<div style="font-weight:800;font-size:16px;margin-bottom:6px">⭐ Worker Pro</div>';
+      const head='<div style="font-weight:800;font-size:16px;margin-bottom:6px">⭐ Pro</div>';
       if(isWorkerPro()){
         let since=''; try{ if(staffDoc&&staffDoc.workerProSince) since=new Date(staffDoc.workerProSince).toLocaleDateString(LANG||'en',{year:'numeric',month:'short',day:'numeric'}); }catch(_){}
         body.innerHTML=head+'<div style="color:var(--green);font-weight:700">✓ Active'+(since?(' · since '+since):'')+'</div>'
           +'<div style="color:var(--soft);font-size:13px;margin-top:6px;line-height:1.5">You can see who tipped you and their messages, your $2 monthly fee is waived, and instant payout is on when withdrawals go live. Thank you! 🎉</div>'
-          +'<button class="linkbtn" id="wproCancel" style="margin-top:10px;color:var(--danger)">Cancel Worker Pro</button>';
+          +'<button class="linkbtn" id="wproCancel" style="margin-top:10px;color:var(--danger)">Cancel Pro</button>';
         const c=$('wproCancel'); if(c) c.onclick=()=>cancelWorkerPro(u);
       } else {
         body.innerHTML=head
           +'<div style="color:var(--soft);font-size:13px;line-height:1.6">Unlock <b>“Who Tipped Me?”</b> — see the name &amp; message behind each tip. Plus <b>no $2 monthly fee</b> and <b>instant payout</b> (when live).</div>'
           +'<div style="font-weight:800;font-size:20px;margin:10px 0">$4.99<span style="font-size:13px;color:var(--soft);font-weight:500">/month</span></div>'
           +'<div style="font-size:11.5px;color:var(--soft);margin-bottom:10px">🔒 “Who Tipped Me?” is private to you — your workplace can’t see it.</div>'
-          +'<button class="btn dark" id="wproBtn">Upgrade to Worker Pro</button>';
+          +'<button class="btn dark" id="wproBtn">Upgrade to Pro</button>';
         const b=$('wproBtn'); if(b) b.onclick=()=>startWorkerProCheckout(u);
       }
     }
@@ -1258,11 +1258,11 @@
         const idToken=await u.getIdToken();
         const r=await fetch(BACKEND+'/billing/create-checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,plan:'worker',bid:BID,staffId:(staffId||'')})});
         const j=await r.json();
-        if(j&&j.url){ location.href=j.url; } else { wpmsg('Could not start checkout. Try again.'); if(b){b.disabled=false;b.textContent='Upgrade to Worker Pro';} }
-      }catch(_){ wpmsg('Could not start checkout. Try again.'); if(b){b.disabled=false;b.textContent='Upgrade to Worker Pro';} }
+        if(j&&j.url){ location.href=j.url; } else { wpmsg('Could not start checkout. Try again.'); if(b){b.disabled=false;b.textContent='Upgrade to Pro';} }
+      }catch(_){ wpmsg('Could not start checkout. Try again.'); if(b){b.disabled=false;b.textContent='Upgrade to Pro';} }
     }
     async function cancelWorkerPro(u){
-      if(!confirm('Cancel Worker Pro? You’ll lose “Who Tipped Me?” and your $2 fee waiver.')) return;
+      if(!confirm('Cancel Pro? You’ll lose “Who Tipped Me?” and your $2 fee waiver.')) return;
       try{
         const idToken=await u.getIdToken();
         const r=await fetch(BACKEND+'/billing/cancel',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,plan:'worker'})});
