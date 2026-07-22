@@ -42,7 +42,8 @@ service cloud.firestore {
       match /tips/{tipId} {
         // A customer can leave a tip only if the shop is not blocked by the platform admin.
         allow create: if get(/databases/$(database)/documents/businesses/$(uid)).data.blocked != true;
-        allow get, list: if (request.auth != null && request.auth.uid == uid)
+        allow get, list: if isAdmin()
+          || (request.auth != null && request.auth.uid == uid)
           || (request.auth != null
               && request.auth.token.email in resource.data.recipientEmails);
         allow update, delete: if false;
@@ -53,7 +54,8 @@ service cloud.firestore {
       match /consents/{consentId} {
         allow create: if request.auth != null
                       && request.resource.data.email == request.auth.token.email;
-        allow get, list: if (request.auth != null && request.auth.uid == uid)
+        allow get, list: if isAdmin()
+          || (request.auth != null && request.auth.uid == uid)
           || (request.auth != null && resource.data.email == request.auth.token.email);
         allow update, delete: if false;
       }

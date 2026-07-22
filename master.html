@@ -300,22 +300,25 @@
       bizRows=[];
       for(const b of biz.docs){
         const d=b.data();
-        const [staffSnap, tipsSnap]=await Promise.all([
-          db.collection('businesses').doc(b.id).collection('staff').get(),
-          db.collection('businesses').doc(b.id).collection('tips').get()
-        ]);
+        // Resilient reads: a business still shows even if one sub-read is denied
+        // (e.g. tips before the updated rules are published). Read separately so a
+        // tips failure doesn't also drop the (public) staff read.
+        let staffSnap=null, tipsSnap=null;
+        try{ staffSnap=await db.collection('businesses').doc(b.id).collection('staff').get(); }catch(_){ }
+        try{ tipsSnap=await db.collection('businesses').doc(b.id).collection('tips').get(); }catch(_){ }
+        const tipList=(tipsSnap&&tipsSnap.docs)||[], tipCount=(tipsSnap&&tipsSnap.size)||0, staffList=(staffSnap&&staffSnap.docs)||[];
         let vol=0,rev=0,last=0;
-        tipsSnap.forEach(t=>{ const x=t.data(); const tip=x.tip||0, fee=x.fee||0, m=ms(x.createdAt);
+        tipList.forEach(t=>{ const x=t.data(); const tip=x.tip||0, fee=x.fee||0, m=ms(x.createdAt);
           vol+=tip; rev+=fee; if(m>last) last=m;
           if(m>=monthStart){ revMonth+=fee; volMonth+=tip; }
           days.forEach(day=>{ if(m>=day.d.getTime() && m<day.d.getTime()+86400000) day.v+=fee; });
         });
-        let activeStaff=0; staffSnap.forEach(s=>{ const sd=s.data(); if(sd.status!=='removed' && sd.leftByStaff!==true) activeStaff++; });
+        let activeStaff=0; staffList.forEach(s=>{ const sd=s.data(); if(sd.status!=='removed' && sd.leftByStaff!==true) activeStaff++; });
         const feePct=(d.tipShareEnabled? (d.tipSharePercent||0):0);
-        tRev+=rev; tVol+=vol; tN+=tipsSnap.size; tStaff+=activeStaff; if(tipsSnap.size>0) activeBiz++;
+        tRev+=rev; tVol+=vol; tN+=tipCount; tStaff+=activeStaff; if(tipCount>0) activeBiz++;
         const bemail=(d.email||d.businessEmail||'');
         bizRows.push({ id:b.id, name:d.businessName||'—', email:bemail, staff:activeStaff,
-          tipsN:tipsSnap.size, vol, rev, feePct, commPct:(d.commissionPercent!=null?d.commissionPercent:null), commFixed:(d.commissionFixed!=null?d.commissionFixed:null), joined:ms(d.createdAt), last, code:d.shopCode||'',
+          tipsN:tipCount, vol, rev, feePct, commPct:(d.commissionPercent!=null?d.commissionPercent:null), commFixed:(d.commissionFixed!=null?d.commissionFixed:null), joined:ms(d.createdAt), last, code:d.shopCode||'',
           blocked:!!d.blocked, analyticsEnabled:d.ownerAnalyticsEnabled===true, collectApproved:!!d.collectModeApproved,
           nkey:(d.businessName||'').toLowerCase().replace(/\s+/g,' ').trim(), ekey:bemail.toLowerCase().trim() });
       }
