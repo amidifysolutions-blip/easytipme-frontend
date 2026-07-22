@@ -1111,7 +1111,7 @@
         try{
           if((staffDoc.email||'').toLowerCase() !== (u.email||'').toLowerCase()){
             const idToken=await u.getIdToken();
-            await fetch(BACKEND+'/staff/sync-email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken})});
+            await fetch(BACKEND+'/staff/sync-email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,bid:BID,staffId:(staffId||'')})});
             staffDoc.email=(u.email||'').toLowerCase();
           }
         }catch(_){}
@@ -1302,7 +1302,7 @@
       if(!confirm('Cancel Pro? You’ll lose “Who Tipped Me?” and your $2 fee waiver.')) return;
       try{
         const idToken=await u.getIdToken();
-        const r=await fetch(BACKEND+'/billing/cancel',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,plan:'worker'})});
+        const r=await fetch(BACKEND+'/billing/cancel',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,plan:'worker',bid:BID,staffId:(staffId||'')})});
         const j=await r.json();
         if(j&&j.ok){ if(staffDoc) staffDoc.workerProActive=false; wpmsg(''); renderWorkerPro(u); renderRecent(); renderProfileBadges(); }
         else wpmsg('Could not cancel. Try again.');
