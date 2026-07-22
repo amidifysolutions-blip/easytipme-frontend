@@ -163,6 +163,12 @@
       loginForm.classList.add('hide'); registerForm.classList.remove('hide');
       title.textContent='Register your business'; subtitle.textContent='Create your business account — it takes a minute.'; };
 
+    // Open straight to the LOGIN view when arrived via a "Log in" link (signup.html?login)
+    if(/login/i.test(location.search + location.hash)){
+      registerForm.classList.add('hide'); loginForm.classList.remove('hide');
+      title.textContent='Welcome back'; subtitle.textContent='Log in to your dashboard.';
+    }
+
     // If already logged in, go to dashboard
     auth.onAuthStateChanged(u=>{ if(u && !sessionStorage.getItem('justRegistered')) { /* stay unless navigating */ } });
 
