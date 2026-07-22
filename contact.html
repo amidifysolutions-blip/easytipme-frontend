@@ -75,7 +75,7 @@
       <button class="btn" id="c_btn" type="submit">Send message</button>
       <div id="c_msg" class="msg"></div>
     </form>
-    <div class="alt">Prefer email? Write us at <a href="mailto:info@easytipme.com">info@easytipme.com</a></div>
+    <div class="alt">Prefer email? Write us at <a href="mailto:support@easytipme.com">support@easytipme.com</a></div>
   </div>
 
   <div class="card done hide" id="doneCard" style="display:none">
@@ -102,8 +102,8 @@
         body:JSON.stringify({name,email,role,subject,message})});
       const j=await r.json().catch(()=>({}));
       if(j&&j.sent===1){ $('formCard').style.display='none'; $('doneCard').style.display='block'; window.scrollTo(0,0); }
-      else { show("Couldn't send right now. Please email info@easytipme.com directly.",'err'); btn.disabled=false; btn.textContent='Send message'; }
-    }catch(_){ show("Couldn't send right now. Please email info@easytipme.com directly.",'err'); btn.disabled=false; btn.textContent='Send message'; }
+      else { show("Couldn't send right now. Please email support@easytipme.com directly.",'err'); btn.disabled=false; btn.textContent='Send message'; }
+    }catch(_){ show("Couldn't send right now. Please email support@easytipme.com directly.",'err'); btn.disabled=false; btn.textContent='Send message'; }
   });
   function show(t,cls){ const m=$('c_msg'); m.textContent=t; m.className='msg '+(cls||''); }
 </script>
