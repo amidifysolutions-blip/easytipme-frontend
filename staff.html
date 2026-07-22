@@ -309,6 +309,10 @@
     <!-- SETTINGS TAB -->
     <div id="tab-settings" class="tabpanel hide">
       <h1 style="margin:2px 2px 14px" data-i18n="settings_title">Settings</h1>
+      <div class="card" id="wproCard" style="border:1px solid rgba(240,180,41,.55)">
+        <div id="wproBody" style="font-size:14px">Loading…</div>
+        <div id="wproMsg" style="font-size:13px;margin-top:8px;color:var(--danger)"></div>
+      </div>
       <div class="card">
         <div class="srow"><span class="lab" data-i18n="language">Language</span>
           <span class="langsel"><select id="langSet"></select></span></div>
@@ -1120,12 +1124,13 @@
           const share=(t2.staffShare!=null?t2.staffShare:(t2.tip||0));
           const mine= t2.multiple? share/n : share;
           const dt=t2.createdAt&&t2.createdAt.toDate?t2.createdAt.toDate():null;
-          allRows.push({amt:mine, date:dt, ms:dt?dt.getTime():0, rating:t2.rating||0, from:(t2.fromName||'')});
+          allRows.push({amt:mine, date:dt, ms:dt?dt.getTime():0, rating:t2.rating||0, from:(t2.fromName||''), msg:(t2.message||'')});
         });
       }catch(e){ /* leave empty */ }
       allRows.sort((a,b)=>b.ms-a.ms);
       renderHomeStats(); renderRecent(); renderInsights(); renderSettings(u); setupPayout(u); setupConsent(u);
       show('app'); switchTab('home');
+      handleWorkerProReturn(u);
     }
 
     function renderHomeStats(){
@@ -1137,12 +1142,17 @@
       $('eRating').textContent=rc?(rs/rc).toFixed(1)+'★':'—';
     }
     function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+    function isWorkerPro(){ return !!(staffDoc && staffDoc.workerProActive); }
     function renderRecent(){
       const el=$('tipsList'); el.innerHTML=''; $('noTips').style.display=allRows.length?'none':'block';
+      const pro=isWorkerPro();
       allRows.slice(0,20).forEach(r=>{
         const ds=r.date?r.date.toLocaleDateString(LANG,{month:'short',day:'numeric'}):'';
-        const fromTxt=r.from?(' · '+t('from')+' '+esc(r.from)):'';
-        el.insertAdjacentHTML('beforeend',`<div class="tip-row"><div><div class="tip-amt">+${curSym}${r.amt.toFixed(2)}</div><div class="tip-date">${ds}${fromTxt}${r.rating?' · '+'★'.repeat(r.rating):''}</div></div></div>`);
+        let fromTxt='';
+        if(pro){ fromTxt=r.from?(' · '+t('from')+' '+esc(r.from)):''; }
+        else if(r.from||r.msg){ fromTxt=' · 🔒'; }
+        const msgLine=(pro&&r.msg)?`<div class="tip-date" style="font-style:italic;opacity:.85">“${esc(r.msg)}”</div>`:'';
+        el.insertAdjacentHTML('beforeend',`<div class="tip-row"><div><div class="tip-amt">+${curSym}${r.amt.toFixed(2)}</div><div class="tip-date">${ds}${fromTxt}${r.rating?' · '+'★'.repeat(r.rating):''}</div>${msgLine}</div></div>`);
       });
     }
 
@@ -1190,6 +1200,59 @@
       $('setVerified').innerHTML = ver?`<span class="pill g">${t('verified')}</span>`:`<span class="pill o">${t('not_verified')}</span>`;
       $('setResend').classList.toggle('hide', !!ver);
       $('setResend').onclick=()=>showVerify(u);   // open the code screen instead of an alert
+      renderWorkerPro(u);
+    }
+
+    // ---- Worker Pro ($4.99/mo): Who Tipped Me? + no $2 fee + instant payout ----
+    function wpmsg(txt){ const m=$('wproMsg'); if(m) m.textContent=txt||''; }
+    function renderWorkerPro(u){
+      const body=$('wproBody'); if(!body) return;
+      const head='<div style="font-weight:800;font-size:16px;margin-bottom:6px">⭐ Worker Pro</div>';
+      if(isWorkerPro()){
+        body.innerHTML=head+'<div style="color:var(--green);font-weight:700">✓ Active</div>'
+          +'<div style="color:var(--soft);font-size:13px;margin-top:6px;line-height:1.5">You can see who tipped you and their messages, your $2 monthly fee is waived, and instant payout is on when withdrawals go live. Thank you! 🎉</div>'
+          +'<button class="linkbtn" id="wproCancel" style="margin-top:10px;color:var(--danger)">Cancel Worker Pro</button>';
+        const c=$('wproCancel'); if(c) c.onclick=()=>cancelWorkerPro(u);
+      } else {
+        body.innerHTML=head
+          +'<div style="color:var(--soft);font-size:13px;line-height:1.6">Unlock <b>“Who Tipped Me?”</b> — see the name &amp; message behind each tip. Plus <b>no $2 monthly fee</b> and <b>instant payout</b> (when live).</div>'
+          +'<div style="font-weight:800;font-size:20px;margin:10px 0">$4.99<span style="font-size:13px;color:var(--soft);font-weight:500">/month</span></div>'
+          +'<div style="font-size:11.5px;color:var(--soft);margin-bottom:10px">🔒 “Who Tipped Me?” is private to you — your workplace can’t see it.</div>'
+          +'<button class="btn dark" id="wproBtn">Upgrade to Worker Pro</button>';
+        const b=$('wproBtn'); if(b) b.onclick=()=>startWorkerProCheckout(u);
+      }
+    }
+    async function startWorkerProCheckout(u){
+      const b=$('wproBtn'); if(b){b.disabled=true;b.textContent='Opening…';}
+      wpmsg('');
+      try{
+        const idToken=await u.getIdToken();
+        const r=await fetch(BACKEND+'/billing/create-checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,plan:'worker',bid:BID,staffId:(staffId||'')})});
+        const j=await r.json();
+        if(j&&j.url){ location.href=j.url; } else { wpmsg('Could not start checkout. Try again.'); if(b){b.disabled=false;b.textContent='Upgrade to Worker Pro';} }
+      }catch(_){ wpmsg('Could not start checkout. Try again.'); if(b){b.disabled=false;b.textContent='Upgrade to Worker Pro';} }
+    }
+    async function cancelWorkerPro(u){
+      if(!confirm('Cancel Worker Pro? You’ll lose “Who Tipped Me?” and your $2 fee waiver.')) return;
+      try{
+        const idToken=await u.getIdToken();
+        const r=await fetch(BACKEND+'/billing/cancel',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,plan:'worker'})});
+        const j=await r.json();
+        if(j&&j.ok){ if(staffDoc) staffDoc.workerProActive=false; wpmsg(''); renderWorkerPro(u); renderRecent(); }
+        else wpmsg('Could not cancel. Try again.');
+      }catch(_){ wpmsg('Could not cancel. Try again.'); }
+    }
+    async function handleWorkerProReturn(u){
+      const p=new URLSearchParams(location.search);
+      if(p.get('pro')==='success' && p.get('session_id')){
+        try{
+          const idToken=await u.getIdToken();
+          const r=await fetch(BACKEND+'/billing/confirm',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,sessionId:p.get('session_id')})});
+          const j=await r.json();
+          history.replaceState({},'',location.pathname);
+          if(j&&j.active && staffDoc){ staffDoc.workerProActive=true; renderWorkerPro(u); renderRecent(); switchTab('settings'); }
+        }catch(_){ history.replaceState({},'',location.pathname); }
+      } else if(p.get('pro')==='cancel'){ history.replaceState({},'',location.pathname); }
     }
 
     // ---- Stripe Connect (staff payouts) ----
