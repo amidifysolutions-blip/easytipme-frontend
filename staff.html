@@ -260,7 +260,7 @@
     <div id="tab-home" class="tabpanel">
       <div class="card phead">
         <div id="pPic" class="pic"></div>
-        <div><div class="nm" id="pName"></div><div class="rl" id="pRole"></div></div>
+        <div><div class="nm" id="pName"></div><div id="pBadges" style="margin:3px 0 1px"></div><div class="rl" id="pRole"></div></div>
       </div>
       <div class="card earn">
         <div class="lbl" data-i18n="your_tips">Your tips</div>
@@ -1119,6 +1119,7 @@
       $('pPic').innerHTML = staffDoc.photo?`<img src="${staffDoc.photo}" style="width:60px;height:60px;border-radius:50%;object-fit:cover;display:block">`:(staffDoc.nickname||(u.displayName||'?')).charAt(0).toUpperCase();
       $('pName').textContent = staffDoc.nickname||u.displayName||u.email;
       $('pRole').textContent = (staffDoc.job?staffDoc.job+' · ':'')+(shop.businessName||'');
+      renderProfileBadges();
       $('connShop').textContent = t('connected_to',{shop:shop.businessName||'—'});
       $('connBadge').classList.remove('hide');
       // verify banner
@@ -1152,6 +1153,17 @@
     }
     function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
     function isWorkerPro(){ return !!(staffDoc && staffDoc.workerProActive); }
+    let PAYOUT_READY=false;
+    // Personal status badges — shown ONLY in the worker's own app (never to
+    // customers, so no worker looks "better" than another on the tip page).
+    function renderProfileBadges(){
+      const el=$('pBadges'); if(!el) return;
+      const pill='display:inline-block;font-size:11px;font-weight:700;border-radius:20px;padding:2px 9px;margin-right:6px;vertical-align:middle';
+      let h='';
+      if(isWorkerPro()) h+='<span style="'+pill+';background:rgba(240,180,41,.16);border:1px solid rgba(240,180,41,.55)">⭐ Pro</span>';
+      if(PAYOUT_READY) h+='<span style="'+pill+';background:rgba(34,197,94,.14);border:1px solid rgba(34,197,94,.5)">✓ Verified</span>';
+      el.innerHTML=h;
+    }
     function renderRecent(){
       const el=$('tipsList'); el.innerHTML=''; $('noTips').style.display=allRows.length?'none':'block';
       const pro=isWorkerPro();
@@ -1267,7 +1279,7 @@
         const idToken=await u.getIdToken();
         const r=await fetch(BACKEND+'/billing/cancel',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,plan:'worker'})});
         const j=await r.json();
-        if(j&&j.ok){ if(staffDoc) staffDoc.workerProActive=false; wpmsg(''); renderWorkerPro(u); renderRecent(); }
+        if(j&&j.ok){ if(staffDoc) staffDoc.workerProActive=false; wpmsg(''); renderWorkerPro(u); renderRecent(); renderProfileBadges(); }
         else wpmsg('Could not cancel. Try again.');
       }catch(_){ wpmsg('Could not cancel. Try again.'); }
     }
@@ -1279,7 +1291,7 @@
           const r=await fetch(BACKEND+'/billing/confirm',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,sessionId:p.get('session_id')})});
           const j=await r.json();
           history.replaceState({},'',location.pathname);
-          if(j&&j.active && staffDoc){ staffDoc.workerProActive=true; renderWorkerPro(u); renderRecent(); switchTab('settings'); }
+          if(j&&j.active && staffDoc){ staffDoc.workerProActive=true; renderWorkerPro(u); renderRecent(); renderProfileBadges(); switchTab('settings'); }
         }catch(_){ history.replaceState({},'',location.pathname); }
       } else if(p.get('pro')==='cancel'){ history.replaceState({},'',location.pathname); }
     }
@@ -1313,7 +1325,7 @@
       }
       btn.onclick=()=>startConnect(u);
       function paintPayout(j){
-        if(j && j.payouts_enabled){ stat.classList.remove('hide'); stat.style.color='var(--green)'; stat.textContent=t('payout_connected'); btn.classList.add('hide'); $('payCountryWrap').classList.add('hide'); releaseHeld(u,accId); loadBalance(accId); }
+        if(j && j.payouts_enabled){ stat.classList.remove('hide'); stat.style.color='var(--green)'; stat.textContent=t('payout_connected'); btn.classList.add('hide'); $('payCountryWrap').classList.add('hide'); PAYOUT_READY=true; renderProfileBadges(); releaseHeld(u,accId); loadBalance(accId); }
         else if(j && j.details_submitted){ stat.classList.remove('hide'); stat.style.color='var(--orange)'; stat.textContent=t('payout_continue'); btn.textContent=t('payout_continue'); }
       }
     }
