@@ -204,6 +204,14 @@
       <button class="btn ghost hide" id="registerBtn" style="margin-top:10px" data-i18n="create_btn">Create account</button>
       <div class="switch" id="switchLine"></div>
       <div class="switch hide" id="forgotWrap" style="margin-top:4px"><a id="forgotLink" data-i18n="forgot_pw">Forgot password?</a></div>
+      <div id="sr_box" class="hide" style="margin-top:12px;border-top:1px solid var(--line,#e7e7ec);padding-top:12px;text-align:left">
+        <label data-i18n="code_ph">Code</label>
+        <input id="sr_code" inputmode="numeric" maxlength="6" placeholder="6-digit code" style="letter-spacing:3px">
+        <label data-i18n="fp_new">New password</label>
+        <input id="sr_pass" type="password" placeholder="At least 8 characters">
+        <button class="btn" id="sr_confirm" style="margin-top:10px" data-i18n="fp_save">Set new password</button>
+        <div class="switch" style="margin-top:4px"><a id="sr_resend" data-i18n="resend_code">Resend code</a></div>
+      </div>
     </div>
     <div class="powered" data-i18n="powered">Powered by Amidify Solutions Inc.</div>
   </div>
@@ -955,12 +963,33 @@
 
     $('loginBtn').onclick=()=>doAuth(false);
     $('registerBtn').onclick=()=>doAuth(true);
-    $('forgotLink').onclick=async()=>{
+    async function srSend(){
       const email=$('email').value.trim().toLowerCase();
-      if(!email){ amsg(t('m_forgot_need_email')); return; }
-      const el=$('forgotLink'); el.style.pointerEvents='none';
-      try{ await fetch(BACKEND+'/send-reset',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})}); }catch(_){}
-      amsg(t('m_reset_sent'),'ok'); el.style.pointerEvents='';
+      if(!email){ amsg(t('m_forgot_need_email')); return false; }
+      try{ await fetch(BACKEND+'/reset-request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})}); }catch(_){}
+      amsg('A 6-digit code was emailed to '+email+' — check inbox & spam.','ok'); return true;
+    }
+    $('forgotLink').onclick=async()=>{ if(await srSend()){ $('sr_box').classList.remove('hide'); $('sr_code').focus(); } };
+    $('sr_resend').onclick=srSend;
+    $('sr_confirm').onclick=async()=>{
+      const email=$('email').value.trim().toLowerCase();
+      const code=$('sr_code').value.trim(), newPassword=$('sr_pass').value;
+      if(!/^\d{6}$/.test(code)){ amsg('Enter the 6-digit code.'); return; }
+      if((newPassword||'').length<8){ amsg('Password must be at least 8 characters.'); return; }
+      const btn=$('sr_confirm'); btn.disabled=true;
+      try{
+        const r=await fetch(BACKEND+'/reset-confirm',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,code,newPassword})});
+        const j=await r.json().catch(()=>({}));
+        if(j&&j.ok){
+          $('sr_box').classList.add('hide'); $('pass').value=newPassword;
+          amsg('Password changed ✓ — signing you in…','ok');
+          try{ await auth.signInWithEmailAndPassword(email,newPassword); }catch(_){ amsg('Password changed ✓ — now tap Sign in.','ok'); }
+        } else {
+          const em={'wrong-code':'Wrong code — check and try again.','expired':'Code expired — tap Resend code.','too-many':'Too many attempts — request a new code.','weak-password':'Password must be at least 8 characters.','no-code':'Request a code first.','invalid':'No account found for that email.'};
+          amsg(em[j&&j.error]||'Could not reset. Try again.');
+        }
+      }catch(_){ amsg('Could not reset right now. Try again.'); }
+      btn.disabled=false;
     };
 
     async function doAuth(create){

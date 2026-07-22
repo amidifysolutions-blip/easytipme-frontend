@@ -79,6 +79,12 @@
       <div class="field"><label>Email address</label><input id="l_email" type="email" autocomplete="email" required></div>
       <div class="field"><label>Password</label><div class="pwrap"><input id="l_pass" type="password" autocomplete="current-password" required><button type="button" class="eye" data-for="l_pass" aria-label="Show password"></button></div></div>
       <div class="forgot"><a href="#" id="forgotPass">Forgot password?</a></div>
+      <div id="rst_box" class="hide" style="border-top:1px solid #e7e7ec;margin:2px 0 8px;padding-top:12px">
+        <div class="field"><label>Code (6 digits)</label><input id="rst_code" inputmode="numeric" maxlength="6" placeholder="6-digit code" style="letter-spacing:3px"></div>
+        <div class="field"><label>New password</label><div class="pwrap"><input id="rst_pass" type="password" placeholder="At least 8 characters"><button type="button" class="eye" data-for="rst_pass" aria-label="Show password"></button></div></div>
+        <button class="btn" type="button" id="rst_confirm">Set new password</button>
+        <div class="forgot"><a href="#" id="rst_resend">Resend code</a></div>
+      </div>
       <button class="btn" type="submit" id="l_btn">Log in</button>
       <div class="switch">New here? <a href="#" id="toRegister">Register your business</a></div>
     </form>
@@ -146,14 +152,38 @@
       };
     });
 
-    // Forgot password
-    document.getElementById('forgotPass').onclick = async (e)=>{
-      e.preventDefault(); clearMsg();
-      const email = document.getElementById('l_email').value.trim().toLowerCase();
-      if(!email){ showMsg('Enter your email above first, then tap “Forgot password”.','err'); return; }
-      // Branded reset via Brevo (info@easytipme.com) — avoids Firebase's spammy default email
-      try{ await fetch('https://easytipme-backend.onrender.com/send-reset',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})}); }catch(_){}
-      showMsg('If an account exists for '+email+', a reset link is on its way. Check your inbox (and spam).','ok');
+    // Forgot password → 6-digit code flow
+    const RESET_BK='https://easytipme-backend.onrender.com';
+    async function sendResetCode(){
+      const email=document.getElementById('l_email').value.trim().toLowerCase();
+      if(!email){ showMsg('Enter your email above first, then tap “Forgot password”.','err'); return false; }
+      try{ await fetch(RESET_BK+'/reset-request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})}); }catch(_){}
+      showMsg('A 6-digit code was emailed to '+email+' — check inbox & spam.','ok'); return true;
+    }
+    document.getElementById('forgotPass').onclick=async(e)=>{ e.preventDefault(); clearMsg(); if(await sendResetCode()){ document.getElementById('rst_box').classList.remove('hide'); document.getElementById('rst_code').focus(); } };
+    document.getElementById('rst_resend').onclick=(e)=>{ e.preventDefault(); sendResetCode(); };
+    document.getElementById('rst_confirm').onclick=async()=>{
+      clearMsg();
+      const email=document.getElementById('l_email').value.trim().toLowerCase();
+      const code=document.getElementById('rst_code').value.trim();
+      const newPassword=document.getElementById('rst_pass').value;
+      if(!/^\d{6}$/.test(code)){ showMsg('Enter the 6-digit code.','err'); return; }
+      if((newPassword||'').length<8){ showMsg('Password must be at least 8 characters.','err'); return; }
+      const btn=document.getElementById('rst_confirm'); btn.disabled=true; btn.textContent='Saving…';
+      try{
+        const r=await fetch(RESET_BK+'/reset-confirm',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,code,newPassword})});
+        const j=await r.json().catch(()=>({}));
+        if(j&&j.ok){
+          document.getElementById('rst_box').classList.add('hide');
+          document.getElementById('l_pass').value=newPassword;
+          showMsg('Password changed ✓ — logging you in…','ok');
+          try{ await auth.signInWithEmailAndPassword(email,newPassword); location.href='dashboard.html'; }catch(_){ showMsg('Password changed ✓ — now tap Log in.','ok'); }
+        } else {
+          const em={'wrong-code':'Wrong code — check and try again.','expired':'Code expired — tap Resend code.','too-many':'Too many attempts — request a new code.','weak-password':'Password must be at least 8 characters.','no-code':'Request a code first.','invalid':'No account found for that email.'};
+          showMsg(em[j&&j.error]||'Could not reset. Try again.','err');
+        }
+      }catch(_){ showMsg('Could not reset right now. Try again.','err'); }
+      btn.disabled=false; btn.textContent='Set new password';
     };
 
     document.getElementById('toLogin').onclick = (e)=>{ e.preventDefault(); clearMsg();
