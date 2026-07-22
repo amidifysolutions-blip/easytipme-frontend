@@ -217,7 +217,7 @@
       try{
         const cred = await auth.createUserWithEmailAndPassword(data.email, document.getElementById('r_pass').value);
         await db.collection('businesses').doc(cred.user.uid).set({
-          ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          ...data, blocked: false, createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         // The dashboard's confirmation gate emails a 6-digit code on open.
         showMsg('Account created! We\'ll email you a confirmation code next…','ok');

@@ -41,10 +41,14 @@ service cloud.firestore {
       // recipientEmails array contains their own account email.
       match /tips/{tipId} {
         // A customer can leave a tip only if the shop is not blocked by the platform admin.
-        allow create: if get(/databases/$(database)/documents/businesses/$(uid)).data.blocked != true;
+        // Use .get('blocked', false) so a business doc WITHOUT a `blocked` field (the
+        // normal case) is treated as not-blocked instead of erroring the rule (which
+        // would silently deny every tip write).
+        allow create: if get(/databases/$(database)/documents/businesses/$(uid)).data.get('blocked', false) != true;
         allow get, list: if isAdmin()
           || (request.auth != null && request.auth.uid == uid)
           || (request.auth != null
+              && ('recipientEmails' in resource.data)
               && request.auth.token.email in resource.data.recipientEmails);
         allow update, delete: if false;
       }
