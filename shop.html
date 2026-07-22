@@ -171,6 +171,8 @@
         let _cfg=null; try{const c=await db.collection('config').doc('platform').get(); if(c.exists) _cfg=c.data();}catch(e){}
         if(shop.commissionPercent!=null) FEE=shop.commissionPercent/100; else if(_cfg&&_cfg.commissionPercent!=null) FEE=_cfg.commissionPercent/100;
         if(shop.commissionFixed!=null) FIXED=Number(shop.commissionFixed); else if(_cfg&&_cfg.commissionFixed!=null) FIXED=Number(_cfg.commissionFixed);
+        // Flat fixed fee only applies in the launch currencies; others = percentage only.
+        if(!['CAD','USD','EUR','GBP'].includes(curr)) FIXED=0;
         if(shop.tipPresets&&shop.tipPresets.length) presets=shop.tipPresets.slice(0,4);
         $('shopName').textContent=shop.businessName||'Leave a tip';
         if(shop.slogan) $('shopSlogan').textContent=shop.slogan;
