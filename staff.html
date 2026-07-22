@@ -869,8 +869,13 @@
     };
 
     const firebaseConfig = {apiKey:"AIzaSyBsY_pCxvbbJUtvRb7ClwgWQ25hGzNTgBM",authDomain:"easy-tip-me.firebaseapp.com",projectId:"easy-tip-me",storageBucket:"easy-tip-me.firebasestorage.app",messagingSenderId:"189382420404",appId:"1:189382420404:web:2f6075c986c81484eab4e1"};
-    firebase.initializeApp(firebaseConfig);
-    const auth=firebase.auth(), db=firebase.firestore();
+    // Use a NAMED Firebase app ('worker') so the worker app keeps its OWN auth
+    // session, independent of the owner dashboard / customer pages that use the
+    // default app on the same domain. Without this, signing into the worker app
+    // (or its auto sign-out of a non-staff user) would clobber the owner's
+    // dashboard login on easytipme.com — making the dashboard "log out by itself".
+    const _wApp = firebase.apps.some(a=>a.name==='worker') ? firebase.app('worker') : firebase.initializeApp(firebaseConfig,'worker');
+    const auth=_wApp.auth(), db=_wApp.firestore();
     const $=id=>document.getElementById(id);
     const CURSYM={CAD:'$',USD:'$',AUD:'$',EUR:'€',GBP:'£',AED:'AED',SAR:'SAR',QAR:'QAR',KWD:'KWD',BHD:'BHD',OMR:'OMR',LBP:'LBP'};
     const params=new URLSearchParams(location.search);
