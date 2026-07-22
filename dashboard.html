@@ -812,6 +812,7 @@
 
     const CURSYM={CAD:'$',USD:'$',AUD:'$',EUR:'€',GBP:'£',AED:'AED',SAR:'SAR',QAR:'QAR',KWD:'KWD',BHD:'BHD',OMR:'OMR',LBP:'LBP'};
     async function loadAnalytics(){
+      if(!$('anTotal')) return;   // locked (Pro screen shown) — nothing to populate
       const sym=CURSYM[$('s_curr').value]||'$';
       const snap=await db.collection('businesses').doc(BID).collection('tips').orderBy('createdAt','desc').get();
       let total=0,rs=0,rc=0,share=0; const per={}; const recent=[];
