@@ -272,7 +272,7 @@
         </div>
       </div>
       <div class="card">
-        <div class="h3" data-i18n="recent_tips">Recent tips</div>
+        <div class="h3" id="recentHdr" data-i18n="recent_tips">Recent tips</div>
         <div id="tipsList"></div>
         <div id="noTips" style="color:var(--soft);text-align:center;padding:16px 0" data-i18n="no_tips">No tips yet.</div>
       </div>
@@ -429,7 +429,7 @@
       verified_continue:"I've verified — continue", resend:"Resend email", use_diff:"Use a different email",
       verify_banner:"Verify your email to secure your account.", resend_short:"Resend",
       your_tips:"Your tips", tips:"Tips", avg_tip:"Avg tip", avg_rating:"Avg rating",
-      recent_tips:"Recent tips", no_tips:"No tips yet.", from:"from",
+      recent_tips:"Recent tips", no_tips:"No tips yet.", from:"from", who_tipped_you:"Who tipped you", tips_have_details:"of your tips have a name or message from the customer.", upgrade_to_see:"Upgrade to see who tipped you & read their message.",
       insights_title:"Insights", this_week:"This week", this_month:"This month", all_time:"All time",
       earned:"Earned", average:"Average", daily_earnings:"Daily earnings (last 14 days)",
       top_day:"Best day", named_tips:"With a name", anon_tips:"Anonymous", rating_avg:"Average rating", no_data:"No data for this period yet.",
@@ -488,7 +488,7 @@
       verified_continue:"فعّلت — متابعة", resend:"إعادة إرسال الإيميل", use_diff:"استخدم إيميل آخر",
       verify_banner:"فعّل إيميلك لتأمين حسابك.", resend_short:"إعادة إرسال",
       your_tips:"بقشيشك", tips:"البقشيش", avg_tip:"متوسط البقشيش", avg_rating:"متوسط التقييم",
-      recent_tips:"آخر البقشيش", no_tips:"ما في بقشيش بعد.", from:"من",
+      recent_tips:"آخر البقشيش", no_tips:"ما في بقشيش بعد.", from:"من", who_tipped_you:"مين تيّبك", tips_have_details:"من تيباتك فيها اسم أو رسالة من الزبون.", upgrade_to_see:"اشترك لتشوف مين تيّبك وتقرا رسالتو.",
       insights_title:"التحليلات", this_week:"هالأسبوع", this_month:"هالشهر", all_time:"الكل",
       earned:"المكتسب", average:"المتوسط", daily_earnings:"الأرباح اليومية (آخر ١٤ يوم)",
       top_day:"أفضل يوم", named_tips:"مع اسم", anon_tips:"بدون اسم", rating_avg:"متوسط التقييم", no_data:"ما في بيانات لهالفترة بعد.",
@@ -1155,13 +1155,27 @@
     function renderRecent(){
       const el=$('tipsList'); el.innerHTML=''; $('noTips').style.display=allRows.length?'none':'block';
       const pro=isWorkerPro();
-      allRows.slice(0,20).forEach(r=>{
+      // The list is the worker's permanent tip history. For Pro workers it shows
+      // WHO tipped and their message (the whole point of the feature); free
+      // workers see a teaser so their curiosity nudges them to upgrade.
+      const hdr=$('recentHdr'); if(hdr) hdr.textContent = pro ? '💬 '+t('who_tipped_you') : t('recent_tips');
+      if(!pro){
+        const hidden=allRows.filter(r=>r.from||r.msg).length;
+        if(hidden>0){
+          el.insertAdjacentHTML('beforeend',`<div style="background:rgba(240,180,41,.12);border:1px solid rgba(240,180,41,.5);border-radius:12px;padding:12px;margin-bottom:12px;font-size:13px;line-height:1.5">🔒 <b>${hidden}</b> ${t('tips_have_details')} <b>${t('upgrade_to_see')}</b></div>`);
+        }
+      }
+      allRows.slice(0,80).forEach(r=>{
         const ds=r.date?r.date.toLocaleDateString(LANG,{month:'short',day:'numeric'}):'';
-        let fromTxt='';
-        if(pro){ fromTxt=r.from?(' · '+t('from')+' '+esc(r.from)):''; }
-        else if(r.from||r.msg){ fromTxt=' · 🔒'; }
-        const msgLine=(pro&&r.msg)?`<div class="tip-date" style="font-style:italic;opacity:.85">“${esc(r.msg)}”</div>`:'';
-        el.insertAdjacentHTML('beforeend',`<div class="tip-row"><div><div class="tip-amt">+${curSym}${r.amt.toFixed(2)}</div><div class="tip-date">${ds}${fromTxt}${r.rating?' · '+'★'.repeat(r.rating):''}</div>${msgLine}</div></div>`);
+        const stars=r.rating?(' · '+'★'.repeat(r.rating)):'';
+        let meta=ds+stars, extra='';
+        if(pro){
+          if(r.from) meta=ds+' · '+t('from')+' <b>'+esc(r.from)+'</b>'+stars;
+          if(r.msg) extra=`<div style="margin-top:7px;border:1px solid var(--line);border-radius:10px;padding:8px 11px;font-size:13.5px;line-height:1.45">💬 “${esc(r.msg)}”</div>`;
+        } else if(r.from||r.msg){
+          meta=ds+' · 🔒'+stars;
+        }
+        el.insertAdjacentHTML('beforeend',`<div class="tip-row"><div style="width:100%"><div class="tip-amt">+${curSym}${r.amt.toFixed(2)}</div><div class="tip-date">${meta}</div>${extra}</div></div>`);
       });
     }
 
