@@ -80,11 +80,13 @@ small tips stay profitable (industry standard, cf. TackPay "5% + £0.25").
 Configurable globally (`config/platform.commissionPercent` / `commissionFixed`)
 and per-shop (`businesses/{id}.commissionPercent` / `commissionFixed`) in master.
 
-**Monthly $2 active-account fee.** Taken from the worker's tip, at most once per
-30 days, only when the worker has **more than 5 tips in the last 30 days** and
-only from a tip **>= $3** (so they still net from it; if the 6th tip is too
-small we wait for the next tip >= $3 in the cycle). Marked via
-`staff.lastFeeTakenAt`. The customer's total is unchanged. (Model: TipDrop.)
+**Monthly $2 active-account fee (volume-based).** Taken from the worker's tip, at
+most once per 30 days, and only once the worker has **earned more than $20 in
+tips in the last 30 days** (fairer than a tip count — someone with six $1 tips
+isn't charged). Only deducted from a tip **>= $3** so they still net from it; if
+the tip that crosses $20 is smaller, we wait for the next tip >= $3 in the cycle.
+Marked via `staff.lastFeeTakenAt`. The customer's total is unchanged. Tunable
+constants: FEE_CENTS (200), FEE_MIN_EARNED (2000), FEE_MIN_TIP (300). (Model: TipDrop.)
 
 **Decided for Pro (not built yet):** tip sharing / pooling is a Pro feature — the
 strongest owner subscription anchor (cf. TiPJAR's tip-distribution tier at the
