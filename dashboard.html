@@ -169,9 +169,10 @@
       <div class="navwrap">
         <div class="nav active" data-tab="team"><span>Team management</span></div>
         <div class="nav" data-tab="profile"><span>Company profile</span></div>
-        <div class="nav" data-tab="analytics"><span>⭐ Pro</span></div>
-        <div class="nav" data-tab="branches" id="navBranches"><span>🏢 Branches</span></div>
+        <div class="nav" data-tab="analytics"><span>Analytics</span></div>
+        <div class="nav" data-tab="branches" id="navBranches"><span>Branches</span></div>
         <div class="nav" data-tab="settings"><span>Settings</span></div>
+        <div class="nav" data-tab="subscribe"><span>⭐ Subscription</span></div>
         <div class="side-bottom">
           <button class="logout" id="logout">Log out</button>
         </div>
@@ -360,9 +361,11 @@
               When enabled, this percentage of each tip is retained by <b>your business</b> — this fee is yours, not EasyTipMe's (the platform charges its own separate commission). The rest goes to the team member. Capped at 15%. This is optional — leave it off and your team keeps 100% of every tip. <b>You are responsible for ensuring this complies with your local tipping and labour laws</b> — we recommend confirming with a lawyer.
             </p>
           </div>
+          <div style="display:flex;justify-content:flex-end;align-items:center;gap:12px;margin-top:16px">
+            <span id="settingsMsg" class="msg" style="margin:0"></span>
+            <button class="btn" id="saveSettings" style="padding:9px 18px;font-size:14px">Save settings</button>
+          </div>
         </div>
-        <button class="btn" id="saveSettings">Save settings</button>
-        <div id="settingsMsg" class="msg"></div>
 
         <div class="card" style="margin-top:20px">
           <h3>💳 Get paid <span style="font-size:10px;font-weight:800;color:#0a0a0a;background:linear-gradient(135deg,#ffd479,#f0b429);padding:2px 7px;border-radius:20px;margin-left:6px;vertical-align:middle;letter-spacing:.05em">PRO</span></h3>
@@ -397,9 +400,34 @@
         <div class="sig">Powered by Amidify Solutions Inc.</div>
       </div>
 
-      <!-- PRO (plans + analytics) -->
+      <!-- ANALYTICS -->
       <div class="section" id="sec-analytics">
-        <h1>⭐ EasyTipMe Pro</h1>
+        <h1>Analytics</h1>
+        <div class="sub">Tips your team has received.</div>
+        <div id="anLocked" class="card" style="display:none;text-align:center">
+          <div style="font-size:34px;margin-bottom:8px">📊</div>
+          <div style="color:#fff;font-weight:700;font-size:16px;margin-bottom:6px">Analytics is a Pro feature</div>
+          <div style="color:var(--soft);font-size:14px;line-height:1.6;max-width:440px;margin:0 auto 14px">See your team’s tip trends, top days, and per-member breakdowns. Your team keeps getting paid normally on the free plan — unlock this with any subscription.</div>
+          <button class="btn" onclick="openProTab()" style="max-width:240px;margin:0 auto">See subscription plans</button>
+        </div>
+        <div id="proAnalytics">
+          <div class="card" style="display:flex;gap:32px;flex-wrap:wrap">
+            <div><div style="font-size:11px;color:var(--soft);text-transform:uppercase;letter-spacing:.04em">Total tips</div><div id="anTotal" style="font-size:30px;font-weight:700">—</div></div>
+            <div><div style="font-size:11px;color:var(--soft);text-transform:uppercase;letter-spacing:.04em">Number of tips</div><div id="anCount" style="font-size:30px;font-weight:700">—</div></div>
+            <div><div style="font-size:11px;color:var(--soft);text-transform:uppercase;letter-spacing:.04em">Avg rating</div><div id="anRating" style="font-size:30px;font-weight:700">—</div></div>
+            <div id="anShareBox" style="display:none"><div style="font-size:11px;color:var(--soft);text-transform:uppercase;letter-spacing:.04em">Your share</div><div id="anShare" style="font-size:30px;font-weight:700">—</div></div>
+          </div>
+          <div class="card"><h3>By team member</h3><div id="anByStaff"></div></div>
+          <div class="card"><h3>Recent tips</h3>
+            <div style="overflow-x:auto"><table><thead><tr><th>To</th><th>Tip</th><th>Rating</th></tr></thead><tbody id="anRecent"></tbody></table></div>
+            <div id="anEmpty" style="color:var(--soft);text-align:center;padding:20px 0">No tips yet.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUBSCRIPTION (plans) -->
+      <div class="section" id="sec-subscribe">
+        <h1>⭐ Subscription</h1>
         <div class="sub">Unlock more for your business — pick the plan that fits.</div>
 
         <div class="card" id="proCard" style="border:1px solid rgba(240,180,41,.4)">
@@ -415,24 +443,6 @@
         <div class="card" id="bizProPlanCard" style="border:1px solid rgba(139,92,246,.4)">
           <div id="bizProPlanBody" style="font-size:14px;color:var(--soft)">Loading…</div>
           <div id="bizProPlanMsg" class="msg"></div>
-        </div>
-
-        <h3 style="margin:28px 0 6px;font-size:16px">📊 Your analytics</h3>
-        <div id="anLocked" class="card" style="display:none">
-          <div style="color:var(--soft);font-size:14px;line-height:1.6">🔒 See your team’s tip trends, top days, and per-member breakdowns. Included with <b>Pro</b> and <b>Business</b> — pick a plan above to unlock.</div>
-        </div>
-        <div id="proAnalytics">
-          <div class="card" style="display:flex;gap:32px;flex-wrap:wrap">
-            <div><div style="font-size:11px;color:var(--soft);text-transform:uppercase;letter-spacing:.04em">Total tips</div><div id="anTotal" style="font-size:30px;font-weight:700">—</div></div>
-            <div><div style="font-size:11px;color:var(--soft);text-transform:uppercase;letter-spacing:.04em">Number of tips</div><div id="anCount" style="font-size:30px;font-weight:700">—</div></div>
-            <div><div style="font-size:11px;color:var(--soft);text-transform:uppercase;letter-spacing:.04em">Avg rating</div><div id="anRating" style="font-size:30px;font-weight:700">—</div></div>
-            <div id="anShareBox" style="display:none"><div style="font-size:11px;color:var(--soft);text-transform:uppercase;letter-spacing:.04em">Your share</div><div id="anShare" style="font-size:30px;font-weight:700">—</div></div>
-          </div>
-          <div class="card"><h3>By team member</h3><div id="anByStaff"></div></div>
-          <div class="card"><h3>Recent tips</h3>
-            <div style="overflow-x:auto"><table><thead><tr><th>To</th><th>Tip</th><th>Rating</th></tr></thead><tbody id="anRecent"></tbody></table></div>
-            <div id="anEmpty" style="color:var(--soft);text-align:center;padding:20px 0">No tips yet.</div>
-          </div>
         </div>
       </div>
 
@@ -484,6 +494,7 @@
       document.querySelectorAll('.section').forEach(s=>s.classList.remove('show'));
       $('sec-'+n.dataset.tab).classList.add('show');
       if(n.dataset.tab==='analytics') loadAnalytics();
+      if(n.dataset.tab==='subscribe') renderPlans();
       if(n.dataset.tab==='branches') loadBranches();
       $('sidebar').classList.remove('open');
       window.scrollTo(0,0);
@@ -734,11 +745,12 @@
     // ---- Branches (Business tier) ----
     function bizPlanMsg(t,cls){ const m=$('bizPlanMsg'); if(m){ m.textContent=t||''; m.className='msg '+(cls||'err'); } }
     function bizProPlanMsg(t,cls){ const m=$('bizProPlanMsg'); if(m){ m.textContent=t||''; m.className='msg '+(cls||'err'); } }
+    function renderPlans(){ const u=auth.currentUser; if(!u) return; renderPro(u); renderBizPlan(u); renderBizProPlan(u); }
     function openProTab(){
       document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));
-      const nav=document.querySelector('.nav[data-tab="analytics"]'); if(nav) nav.classList.add('active');
+      const nav=document.querySelector('.nav[data-tab="subscribe"]'); if(nav) nav.classList.add('active');
       document.querySelectorAll('.section').forEach(s=>s.classList.remove('show'));
-      $('sec-analytics').classList.add('show'); window.scrollTo(0,0); loadAnalytics();
+      $('sec-subscribe').classList.add('show'); window.scrollTo(0,0); renderPlans();
     }
     function bfmt(cur,n){ try{ return new Intl.NumberFormat('en',{style:'currency',currency:cur||'CAD'}).format(n||0); }catch(_){ return (cur||'CAD')+' '+(n||0).toFixed(2); } }
     function hasBranchPlan(){ return bizData.businessTierActive===true || bizData.businessProActive===true; }
