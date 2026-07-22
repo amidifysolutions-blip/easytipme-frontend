@@ -162,6 +162,47 @@
     </div>
   </div>
 
+  <div id="branchMgr" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:250;align-items:flex-start;justify-content:center;padding:24px;overflow:auto">
+    <div style="max-width:640px;width:100%;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;margin:auto">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
+        <h3 id="bmTitle" style="margin:0">Manage location</h3>
+        <button id="bmClose" style="background:none;border:none;color:#8e8e93;font-size:24px;cursor:pointer;line-height:1">×</button>
+      </div>
+      <div style="font-size:12px;color:var(--soft);margin-bottom:16px">Workplace code <b id="bmCode" style="color:#fff">—</b> — staff use this to log in.</div>
+
+      <div class="card" style="background:#15151b">
+        <h3 style="font-size:14px">Location settings</h3>
+        <label>Location name</label><input type="text" id="bmName">
+        <label>Currency</label><select id="bmCurr" style="max-width:260px"></select>
+        <label>Preset tip amounts shown to customers</label>
+        <div class="presetrow"><input type="text" id="bmTp1" inputmode="decimal"><input type="text" id="bmTp2" inputmode="decimal"><input type="text" id="bmTp3" inputmode="decimal"><input type="text" id="bmTp4" inputmode="decimal"></div>
+        <div style="display:flex;justify-content:flex-end;gap:12px;align-items:center;margin-top:10px"><span id="bmSetMsg" class="msg" style="margin:0"></span><button class="btn" id="bmSaveSettings" style="padding:9px 18px;font-size:14px">Save</button></div>
+      </div>
+
+      <div class="card" style="background:#15151b">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <h3 style="font-size:14px;margin:0">Team <span id="bmTeamCount" style="color:var(--soft);font-weight:400"></span></h3>
+          <button class="btn" id="bmAddStaff" style="padding:8px 14px;font-size:13px">+ Add member</button>
+        </div>
+        <div id="bmStaffList"></div>
+
+        <div id="bmStaffForm" style="display:none;border-top:1px solid var(--line);margin-top:12px;padding-top:14px">
+          <div id="bmStaffFormTitle" style="font-weight:700;margin-bottom:10px">Add member</div>
+          <label>Nickname (shown to customers)</label><input type="text" id="bmSNick" placeholder="e.g. Shani">
+          <label>Job title</label><input type="text" id="bmSJob" placeholder="e.g. Barista">
+          <label>Email (for their login + tip alerts)</label><input type="email" id="bmSEmail">
+          <label>Phone (optional)</label><input type="tel" id="bmSPhone">
+          <div class="photo-pick" style="margin-top:10px"><img id="bmSPrev" class="prev" alt=""><input type="file" id="bmSPhoto" accept="image/*" style="margin-bottom:0"></div>
+          <div id="bmStaffMsg" class="msg"></div>
+          <div style="display:flex;gap:10px;margin-top:12px">
+            <button class="btn" id="bmStaffSave" style="flex:1">Save member</button>
+            <button class="btn" id="bmStaffCancel" style="flex:1;background:transparent;border:1px solid var(--line);color:#fff">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="app" style="display:none;width:100%">
     <div class="sidebar" id="sidebar">
       <div class="brand"><div class="mark"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00c2ff"/><stop offset="1" stop-color="#0071e3"/></linearGradient></defs><rect width="100" height="100" rx="24" fill="#0a0a0a" stroke="rgba(255,255,255,.2)" stroke-width="3"/><rect x="30" y="26" width="10" height="48" rx="5" fill="url(#lg)"/><rect x="30" y="26" width="34" height="10" rx="5" fill="url(#lg)"/><rect x="30" y="64" width="34" height="10" rx="5" fill="url(#lg)"/><rect x="30" y="45" width="22" height="10" rx="5" fill="url(#lg)"/><circle cx="63" cy="50" r="9" fill="#fff"/><circle cx="63" cy="50" r="4.5" fill="url(#lg)"/></svg></div><b>EasyTipMe</b><span class="rolebadge">Business</span><button class="menuBtn" id="menuBtn" aria-label="Menu">☰</button></div>
@@ -767,7 +808,8 @@
       document.querySelectorAll('.section').forEach(s=>s.classList.remove('show'));
       $('sec-branches').classList.add('show'); window.scrollTo(0,0);
     }
-    let BR_LIMIT=0, BR_USED=0;
+    let BR_LIMIT=0, BR_USED=0, BR_LOCATIONS=[];
+    let BM={id:null,name:'',currency:'CAD',shopCode:'',staff:[],locations:[],editStaffId:null,sPhoto:''};
     async function loadBranches(){
       applyBranchGate();
       if(!hasBranchPlan()) return;
@@ -778,6 +820,7 @@
         const j=await r.json();
         if(!j||!j.ok){ if(list) list.innerHTML='<div class="card" style="color:#ff8a8a">Could not load locations.</div>'; return; }
         BR_LIMIT=j.limit||0; BR_USED=j.used||0;
+        BR_LOCATIONS=(j.branches||[]).map(b=>({id:b.id,name:b.name,isMain:b.isMain}));
         renderBranches(j.branches||[]);
       }catch(_){ if(list) list.innerHTML='<div class="card" style="color:#ff8a8a">Could not load locations.</div>'; }
     }
@@ -800,14 +843,15 @@
           +'<div><div style="font-weight:700;font-size:16px">'+esc(b.name)+(b.isMain?' <span style="font-size:11px;color:var(--green);border:1px solid var(--green);border-radius:20px;padding:1px 8px;margin-left:4px">Main</span>':'')+'</div>'
           +'<div style="color:var(--soft);font-size:12px;margin-top:4px">Code <b style="color:#fff">'+esc(b.shopCode||'—')+'</b> · '+bfmt(b.currency,b.tipTotal)+' in '+(b.tipCount||0)+' tips · '+(b.staffCount||0)+' team</div></div>'
           +'<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">'
+          +'<button class="link b brManage">Manage</button>'
           +'<button class="link b brOpen">Open QR page</button>'
           +'<button class="link b brCopy">Copy link</button>'
-          +(b.isMain?'':'<button class="link brRen">Rename</button> <button class="link brDel" style="color:#e5484d">Delete</button>')
+          +(b.isMain?'':'<button class="link brDel" style="color:#e5484d">Delete</button>')
           +'</div></div>';
+        card.querySelector('.brManage').onclick=()=>openBranchMgr(b.id, b.name);
         card.querySelector('.brOpen').onclick=()=>window.open(shopLink,'_blank');
         card.querySelector('.brCopy').onclick=(e)=>{navigator.clipboard.writeText(shopLink);e.target.textContent='Copied';setTimeout(()=>e.target.textContent='Copy link',1200);};
         if(!b.isMain){
-          card.querySelector('.brRen').onclick=async()=>{ const nn=prompt('New branch name:',b.name); if(nn===null) return; const idToken=await auth.currentUser.getIdToken(); await fetch(BACKEND+'/branch/rename',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,id:b.id,name:nn})}); loadBranches(); };
           card.querySelector('.brDel').onclick=async()=>{ if(!confirm('Delete branch “'+b.name+'”?\n\nThis removes its QR page, team, and tip records. Cannot be undone.')) return; const idToken=await auth.currentUser.getIdToken(); const rr=await fetch(BACKEND+'/branch/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,id:b.id})}); const jj=await rr.json(); if(jj&&jj.ok) loadBranches(); else alert('Could not delete branch.'); };
         }
         list.appendChild(card);
@@ -872,6 +916,109 @@
         }catch(_){ history.replaceState({},'',location.pathname); }
       } else if(p.get('biz')==='cancel'){ history.replaceState({},'',location.pathname); }
     }
+
+    // ---- Full location management: settings + team + move between locations ----
+    const CUR_OPTS=[['CAD','CAD — Canadian Dollar ($)'],['USD','USD — US Dollar ($)'],['EUR','EUR — Euro (€)'],['GBP','GBP — British Pound (£)'],['AED','AED — UAE Dirham'],['SAR','SAR — Saudi Riyal'],['AUD','AUD — Australian Dollar ($)'],['QAR','QAR — Qatari Riyal'],['KWD','KWD — Kuwaiti Dinar'],['BHD','BHD — Bahraini Dinar'],['OMR','OMR — Omani Rial'],['LBP','LBP — Lebanese Pound']];
+    function bmHideForm(){ $('bmStaffForm').style.display='none'; BM.editStaffId=null; BM.sPhoto=''; ['bmSNick','bmSJob','bmSEmail','bmSPhone'].forEach(id=>$(id).value=''); $('bmSPrev').src=''; $('bmSPhoto').value=''; $('bmSEmail').readOnly=false; $('bmStaffMsg').textContent=''; $('bmStaffMsg').className='msg'; }
+    async function openBranchMgr(id,name){
+      BM={id,name,currency:'CAD',shopCode:'',staff:[],locations:[],editStaffId:null,sPhoto:''};
+      $('bmTitle').textContent='Manage: '+name;
+      if(!$('bmCurr').options.length) $('bmCurr').innerHTML=CUR_OPTS.map(c=>'<option value="'+c[0]+'">'+c[1]+'</option>').join('');
+      bmHideForm(); $('bmSetMsg').textContent=''; $('bmSetMsg').className='msg';
+      $('bmStaffList').innerHTML='<div style="color:var(--soft);text-align:center;padding:12px">Loading…</div>';
+      $('branchMgr').style.display='flex';
+      await loadBranchTeam();
+    }
+    async function loadBranchTeam(){
+      try{
+        const idToken=await auth.currentUser.getIdToken();
+        const r=await fetch(BACKEND+'/branch/team',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,id:BM.id})});
+        const j=await r.json();
+        if(!j||!j.ok){ $('bmStaffList').innerHTML='<div style="color:#ff8a8a">Could not load team.</div>'; return; }
+        BM.name=j.name; BM.currency=j.currency; BM.shopCode=j.shopCode; BM.staff=j.staff||[];
+        BM.locations=(BR_LOCATIONS||[]).filter(l=>l.id!==BM.id);
+        $('bmName').value=j.name||''; $('bmCode').textContent=j.shopCode||'—'; $('bmCurr').value=j.currency||'CAD';
+        const p=j.tipPresets||[]; ['bmTp1','bmTp2','bmTp3','bmTp4'].forEach((id,i)=>$(id).value=(p[i]!=null?p[i]:''));
+        renderBranchTeam();
+      }catch(_){ $('bmStaffList').innerHTML='<div style="color:#ff8a8a">Could not load team.</div>'; }
+    }
+    function renderBranchTeam(){
+      const list=$('bmStaffList'); list.innerHTML='';
+      const active=BM.staff.filter(s=>s.status!=='removed');
+      $('bmTeamCount').textContent=active.length?('('+active.length+')'):'';
+      if(!BM.staff.length){ list.innerHTML='<div style="color:var(--soft);padding:8px 0">No team members yet. Add your first one.</div>'; return; }
+      BM.staff.forEach(s=>{
+        const removed=s.status==='removed';
+        const av=s.photo?'<img src="'+s.photo+'" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex:0 0 auto">':'<div style="width:36px;height:36px;border-radius:50%;background:#2c2c33;display:grid;place-items:center;font-weight:700;flex:0 0 auto">'+esc((s.nickname||'?').charAt(0).toUpperCase())+'</div>';
+        const moveOpts=BM.locations.map(l=>'<option value="'+l.id+'">'+esc(l.name)+(l.isMain?' (Main)':'')+'</option>').join('');
+        const row=document.createElement('div');
+        row.style.cssText='display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);flex-wrap:wrap';
+        if(removed) row.style.opacity='.5';
+        row.innerHTML=av+'<div style="flex:1;min-width:120px"><b>'+esc(s.nickname||'')+'</b>'+(removed?' <small style="color:#e5484d">(removed)</small>':'')+'<br><small style="color:var(--soft)">'+esc(s.job||'')+'</small></div>'
+          +'<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end">'
+          +(removed?'<button class="link bmRestore">Restore</button>':'<button class="link b bmEdit">Edit</button>')
+          +((!removed&&BM.locations.length)?'<select class="bmMove" style="padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:#0e0e13;color:#fff;font-size:12px;font-family:inherit"><option value="">Move to…</option>'+moveOpts+'</select>':'')
+          +'<button class="link bmRemove" style="color:#e5484d">'+(removed?'Delete':'Remove')+'</button></div>';
+        if(!removed) row.querySelector('.bmEdit').onclick=()=>bmEditStaff(s);
+        if(removed) row.querySelector('.bmRestore').onclick=()=>bmStaffAction(s.id,'restore');
+        row.querySelector('.bmRemove').onclick=()=>{
+          if(removed){ if(confirm('Permanently delete '+(s.nickname||'this member')+'? This cannot be undone.')) bmStaffAction(s.id,'delete'); }
+          else { if(confirm('Remove '+(s.nickname||'this member')+'?\n\nThey stop receiving tips here but their history stays saved.')) bmStaffAction(s.id,'remove'); }
+        };
+        const mv=row.querySelector('.bmMove'); if(mv) mv.onchange=()=>{ if(mv.value) bmMoveStaff(s, mv.value); };
+        list.appendChild(row);
+      });
+    }
+    async function bmStaffAction(staffId,action){
+      try{ const idToken=await auth.currentUser.getIdToken(); const r=await fetch(BACKEND+'/branch/staff/remove',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,id:BM.id,staffId,action})}); const j=await r.json(); if(j&&j.ok) loadBranchTeam(); else alert('Could not update.'); }catch(_){ alert('Could not update.'); }
+    }
+    async function bmMoveStaff(s,toId){
+      const dest=BM.locations.find(l=>l.id===toId);
+      if(!confirm('Move '+(s.nickname||'this member')+' to “'+(dest?dest.name:'that location')+'”?\n\nThey’ll receive tips there instead. Their past tips stay with this location.')){ renderBranchTeam(); return; }
+      try{ const idToken=await auth.currentUser.getIdToken(); const r=await fetch(BACKEND+'/branch/staff/move',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,fromId:BM.id,toId,staffId:s.id})}); const j=await r.json(); if(j&&j.ok){ await loadBranches(); loadBranchTeam(); } else { alert('Could not move.'); loadBranchTeam(); } }catch(_){ alert('Could not move.'); loadBranchTeam(); }
+    }
+    function bmEditStaff(s){
+      BM.editStaffId=s.id; BM.sPhoto=s.photo||'';
+      $('bmStaffFormTitle').textContent='Edit member';
+      $('bmSNick').value=s.nickname||''; $('bmSJob').value=s.job||''; $('bmSEmail').value=s.email||''; $('bmSEmail').readOnly=!!s.email; $('bmSPhone').value=s.phone||''; $('bmSPrev').src=s.photo||'';
+      $('bmStaffForm').style.display='block'; $('bmStaffForm').scrollIntoView({behavior:'smooth',block:'nearest'});
+    }
+    $('bmClose').onclick=()=>{ $('branchMgr').style.display='none'; loadBranches(); if(typeof loadStaff==='function') loadStaff(); };
+    $('bmAddStaff').onclick=()=>{ bmHideForm(); $('bmStaffFormTitle').textContent='Add member'; $('bmStaffForm').style.display='block'; $('bmSNick').focus(); };
+    $('bmStaffCancel').onclick=bmHideForm;
+    $('bmSPhoto').onchange=e=>{const f=e.target.files[0];if(!f){BM.sPhoto='';$('bmSPrev').src='';return;}resize(f,256,d=>{BM.sPhoto=d;$('bmSPrev').src=d;});};
+    $('bmStaffSave').onclick=async()=>{
+      const nick=$('bmSNick').value.trim(); if(!nick){ $('bmStaffMsg').textContent='Please enter a nickname.'; $('bmStaffMsg').className='msg err'; return; }
+      const data={ nickname:nick, job:$('bmSJob').value.trim(), email:$('bmSEmail').value.trim().toLowerCase(), phone:$('bmSPhone').value.trim() };
+      if(BM.sPhoto) data.photo=BM.sPhoto;
+      const btn=$('bmStaffSave'); btn.disabled=true; btn.textContent='Saving…';
+      try{
+        const idToken=await auth.currentUser.getIdToken();
+        const r=await fetch(BACKEND+'/branch/staff/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,id:BM.id,staffId:BM.editStaffId||undefined,data})});
+        const j=await r.json();
+        if(j&&j.ok){
+          if(j.created && data.email){
+            const staffLink=location.origin+location.pathname.replace(/[^/]*$/,'')+'staff.html?s='+BM.id;
+            try{ await fetch(BACKEND+'/staff/invite',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken, bid:BM.id, staffId:j.staffId, email:data.email, name:data.nickname, shopName:BM.name, shopCode:BM.shopCode, staffLink})}); }catch(_){}
+          }
+          bmHideForm(); loadBranchTeam();
+        } else { $('bmStaffMsg').textContent='Could not save.'; $('bmStaffMsg').className='msg err'; }
+      }catch(_){ $('bmStaffMsg').textContent='Could not save.'; $('bmStaffMsg').className='msg err'; }
+      btn.disabled=false; btn.textContent='Save member';
+    };
+    $('bmSaveSettings').onclick=async()=>{
+      const presets=['bmTp1','bmTp2','bmTp3','bmTp4'].map(id=>parseFloat($(id).value)).filter(v=>!isNaN(v)&&v>0);
+      const nm=$('bmName').value.trim();
+      const btn=$('bmSaveSettings'); btn.disabled=true; btn.textContent='Saving…';
+      try{
+        const idToken=await auth.currentUser.getIdToken();
+        const r=await fetch(BACKEND+'/branch/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,id:BM.id,name:nm,currency:$('bmCurr').value,tipPresets:presets})});
+        const j=await r.json();
+        if(j&&j.ok){ $('bmSetMsg').textContent='Saved ✓'; $('bmSetMsg').className='msg ok'; if(nm) $('bmTitle').textContent='Manage: '+nm; setTimeout(()=>{$('bmSetMsg').className='msg';$('bmSetMsg').textContent='';},1500); }
+        else { $('bmSetMsg').textContent='Could not save.'; $('bmSetMsg').className='msg err'; }
+      }catch(_){ $('bmSetMsg').textContent='Could not save.'; $('bmSetMsg').className='msg err'; }
+      btn.disabled=false; btn.textContent='Save';
+    };
 
     async function loadOwnerBalance(accId){
       const box=$('ownerBalanceBox'); if(!accId||!box) return;
