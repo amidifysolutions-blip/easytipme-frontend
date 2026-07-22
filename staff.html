@@ -1134,8 +1134,11 @@
       // verify banner
       $('verifyBanner').style.display = u.emailVerified ? 'none' : 'flex';
       $('vbResend').onclick=()=>showVerify(u);   // open the code screen (send + enter code)
-      // LIVE tip feed — new tips (with names/messages) appear instantly, no reload.
+      // Tip feed: reliable one-time load first, then a live listener for instant
+      // updates. A temporary DEBUG line shows the key values while we diagnose.
       const email=(u.email||'').toLowerCase();
+      const tipsQ=db.collection('businesses').doc(BID).collection('tips').where('recipientEmails','array-contains',email).limit(300);
+      function _dbg(txt,err){ try{ let d=$('__dbg'); if(!d){ d=document.createElement('div'); d.id='__dbg'; const hh=$('tab-home'); if(hh) hh.insertBefore(d, hh.firstChild); } d.style.cssText='background:'+(err?'#fdd;border:1px solid #f00':'#fff3cd;border:1px solid #e0b000')+';color:#000;padding:8px 10px;font-size:11px;margin:0 2px 12px;border-radius:8px;word-break:break-all'; d.textContent=txt; }catch(_){} }
       function processTips(snap){
         allRows=[];
         snap.forEach(d=>{const t2=d.data();
@@ -1148,14 +1151,13 @@
         allRows.sort((a,b)=>b.ms-a.ms);
         renderHomeStats(); renderRecent();
         if(!$('tab-insights').classList.contains('hide')) renderInsights();
+        _dbg('DEBUG · login='+email+' · staffEmail='+((staffDoc&&staffDoc.email)||'-')+' · staffId='+staffId+' · matched='+allRows.length);
       }
+      try{ const s0=await tipsQ.get(); processTips(s0); }
+      catch(e){ _dbg('DEBUG get error: '+(e&&e.message),true); }
       try{ if(window._tipsUnsub) window._tipsUnsub(); }catch(_){}
-      try{
-        window._tipsUnsub = db.collection('businesses').doc(BID).collection('tips')
-          .where('recipientEmails','array-contains',email).limit(300)
-          .onSnapshot(processTips, ()=>{ /* ignore stream errors */ });
-      }catch(e){ allRows=[]; renderHomeStats(); renderRecent(); }
-      renderInsights(); renderSettings(u); setupPayout(u); setupConsent(u);
+      try{ window._tipsUnsub = tipsQ.onSnapshot(processTips, err=>{ _dbg('DEBUG listener error: '+(err&&err.message),true); }); }catch(_){}
+      renderSettings(u); setupPayout(u); setupConsent(u);
       show('app'); switchTab('home');
       handleWorkerProReturn(u);
     }
