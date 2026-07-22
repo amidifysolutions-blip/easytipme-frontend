@@ -127,6 +127,10 @@ Customer pays `total = tip + commission`. Split:
 ## 8) Pending / possible next work
 
 - **Instant payout** for workers (Pro) — withdrawal flow is "Coming soon"; when built, Pro gets instant at a reduced fee (~1–2%, not 5%).
+- **Worker→worker "tip-out" (Pro) — SPLIT AT SOURCE, never a balance transfer.** Idea: a Pro worker pre-sets rules to share a % of each tip with same-branch colleagues (e.g. 10% to the busser, 5% to kitchen). The split happens AT PAYMENT TIME via Stripe multi-transfers on the original charge (same `source_transaction` pattern already used for the owner fee / Station 2) — money is divided from the incoming payment and NEVER moves between workers' settled accounts.
+  - **Compliance rationale (important):** letting a worker send already-received money to another worker — even "only inside our platform" — makes us a *money transmitter / MSB* requiring licensing (FINTRAC in Canada, FinCEN in the US). That's exactly what Venmo/PayPal/Cash App are licensed for. So we deliberately do NOT build "balance transfer"; split-at-source gives the same practical result (colleague sharing) with no licensing burden. (Not legal advice — confirm with a compliance advisor / Stripe before shipping.)
+  - **Design:** worker-app Settings → "Share my tips (tip-out)", Pro-gated; pick same-branch colleague + %, cap total ≈50%. Data: `tipOut: [{toStaffId, percent}]` on the worker's staff doc. Computed in `create-payment-intent`. Colleague not payout-ready → their share is *held* like existing held tips. Customer tip page stays clean — no split shown to the tipper.
+  - **STATUS:** designed, but may intentionally SKIP to avoid over-complicating the system. Decide later.
 - **Tip pooling / distribution** UI (Business) — split a tip across a team by rule.
 - Per-currency flat fees (beyond USD/CAD/EUR/GBP).
 - NFC "Tap to Tip", POS integration (later expansion).
