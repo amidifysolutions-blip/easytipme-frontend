@@ -658,8 +658,9 @@
           +'<p style="margin:8px 0 0;color:var(--soft);font-size:13px">You receive your admin fee, plus analytics, reports, and tip distribution for your team. Thank you! 🎉</p>'
           +'<button class="link" id="proCancelBtn" style="background:none;border:none;color:#ff6b6b;cursor:pointer;font:inherit;font-size:13px;padding:12px 0 0;text-decoration:underline">Cancel Pro</button>';
         const cb=$('proCancelBtn'); if(cb) cb.onclick=()=>cancelPro(u);
-      } else if(bizData.businessTierActive){
-        body.innerHTML=head+'<div style="color:var(--green);font-weight:700;font-size:15px">✓ Included with your Business plan</div>'
+      } else if(bizData.businessTierActive || bizData.businessProActive){
+        const planNm = bizData.businessProActive ? 'Business Pro' : 'Business';
+        body.innerHTML=head+'<div style="color:var(--green);font-weight:700;font-size:15px">✓ Included with your '+planNm+' plan</div>'
           +'<p style="margin:8px 0 0;color:var(--soft);font-size:13px">All Pro features — your payouts, analytics &amp; reports, and tip distribution — are already unlocked.</p>';
       } else {
         body.innerHTML=head
