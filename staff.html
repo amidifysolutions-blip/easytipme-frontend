@@ -1106,6 +1106,15 @@
         if(!staffDoc.claimedUid){
           try{ await db.collection('businesses').doc(BID).collection('staff').doc(staffId).update({claimedUid:u.uid, claimedAt:firebase.firestore.FieldValue.serverTimestamp()}); staffDoc.claimedUid=u.uid; }catch(_){}
         }
+        // Keep the staff record's email aligned with the real login email so
+        // tips (addressed by email) actually reach this worker.
+        try{
+          if((staffDoc.email||'').toLowerCase() !== (u.email||'').toLowerCase()){
+            const idToken=await u.getIdToken();
+            await fetch(BACKEND+'/staff/sync-email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken})});
+            staffDoc.email=(u.email||'').toLowerCase();
+          }
+        }catch(_){}
         // First login with the temporary password → force choosing their own password.
         if(staffDoc.mustChangePassword===true){ showFirstPw(u); return; }
         renderApp(u);
