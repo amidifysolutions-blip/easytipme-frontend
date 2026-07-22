@@ -521,26 +521,23 @@
 
     // ---- Platform-controlled analytics visibility ----
     function applyAnalyticsGate(){
-      const on = bizData.ownerAnalyticsEnabled === true; // locked by default — unlocked as a Pro feature
+      // Unlocked by a Pro subscription (proActive) OR an admin override (ownerAnalyticsEnabled).
+      const on = bizData.proActive === true || bizData.ownerAnalyticsEnabled === true;
       const nav = document.querySelector('.nav[data-tab="analytics"]');
       const sec = $('sec-analytics');
-      if(on){ if(nav) nav.style.display=''; return; }
-      // Analytics is a Pro feature — locked by default
-      if(nav) nav.style.display='none';
+      // Keep the tab VISIBLE either way — the feature is discoverable, just locked until Pro.
+      if(nav) nav.style.display='';
+      if(on) return;   // unlocked → the real analytics UI stays / renders
+      // Locked (not Pro): show an upgrade screen with a working Upgrade button.
       sec.innerHTML='<h1>Analytics</h1><div class="sub">Insights for your shop.</div>'
         +'<div class="card" style="text-align:center;padding:40px 24px">'
         +'<div style="font-size:34px;margin-bottom:10px">⭐</div>'
         +'<h3 style="margin-bottom:8px">Analytics is a Pro feature</h3>'
-        +'<div style="color:var(--soft);max-width:440px;margin:0 auto;line-height:1.6">See your team\'s tip trends, top days, and per-member breakdowns with EasyTipMe Pro. Your team keeps getting paid normally on the free plan — upgrade to unlock analytics.</div>'
-        +'<div style="color:var(--soft);font-size:12px;margin-top:14px">Contact EasyTipMe to enable Pro for your shop.</div>'
+        +'<div style="color:var(--soft);max-width:440px;margin:0 auto;line-height:1.6">See your team\'s tip trends, top days, and per-member breakdowns. Your team keeps getting paid normally on the free plan — upgrade to unlock.</div>'
+        +'<div style="font-weight:800;font-size:20px;color:#fff;margin:14px 0 12px">$19.99<span style="font-size:13px;color:var(--soft);font-weight:500">/month</span></div>'
+        +'<button class="btn" id="analyticsUpBtn" style="max-width:240px">Upgrade to Pro</button>'
         +'</div>';
-      // if user was on the analytics tab, bounce them to Team
-      if(sec.classList.contains('show')){
-        document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));
-        const t=document.querySelector('.nav[data-tab="team"]'); if(t) t.classList.add('active');
-        document.querySelectorAll('.section').forEach(s=>s.classList.remove('show'));
-        $('sec-team').classList.add('show');
-      }
+      const ub=$('analyticsUpBtn'); if(ub) ub.onclick=()=>startProCheckout(auth.currentUser);
     }
 
     // ---- Owner bank connect (Stripe Connect) ----
@@ -596,7 +593,7 @@
           const idToken=await u.getIdToken();
           const r=await fetch(BACKEND+'/billing/confirm',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,sessionId:p.get('session_id')})});
           const j=await r.json();
-          if(j&&j.active){ bizData.proActive=true; renderPro(u); proMsg('Pro activated ✓ — welcome! 🎉','ok'); }
+          if(j&&j.active){ proMsg('Pro activated ✓ — unlocking your features…','ok'); history.replaceState({},'',location.pathname); setTimeout(()=>location.reload(),1400); return; }
           else { proMsg('Payment not confirmed yet — refresh in a moment.'); }
         }catch(_){ proMsg('Could not confirm — refresh in a moment.'); }
         history.replaceState({},'',location.pathname);
