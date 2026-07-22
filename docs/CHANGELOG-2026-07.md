@@ -64,3 +64,28 @@ commission. The worker still appears on the tip page.
 - Rotate the Firebase service-account key.
 - Set `STRIPE_PUBLISHABLE_KEY` (+ secret) to live values at launch.
 - Consider 2FA on the admin Gmail.
+
+---
+
+## Update — monetization refinements
+
+**Clean worker transfer.** The direct charge now uses `transfer_data.amount = tip`
+so the worker's Stripe account shows exactly the tip (e.g. $50), not the gross
+"$53.50 minus a fee". Net result unchanged (worker = tip, platform = commission
+minus Stripe fee).
+
+**Commission = percentage + fixed fee.** Now `X% + $Y` (default **7% + $0.30**),
+both added on top of the tip. The fixed part covers Stripe's fixed ~$0.30 cost so
+small tips stay profitable (industry standard, cf. TackPay "5% + £0.25").
+Configurable globally (`config/platform.commissionPercent` / `commissionFixed`)
+and per-shop (`businesses/{id}.commissionPercent` / `commissionFixed`) in master.
+
+**Monthly $2 active-account fee.** Taken from the worker's tip, at most once per
+30 days, only when the worker has **more than 5 tips in the last 30 days** and
+only from a tip **>= $3** (so they still net from it; if the 6th tip is too
+small we wait for the next tip >= $3 in the cycle). Marked via
+`staff.lastFeeTakenAt`. The customer's total is unchanged. (Model: TipDrop.)
+
+**Decided for Pro (not built yet):** tip sharing / pooling is a Pro feature — the
+strongest owner subscription anchor (cf. TiPJAR's tip-distribution tier at the
+top of their pricing).
