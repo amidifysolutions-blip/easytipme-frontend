@@ -170,6 +170,7 @@
         <div class="nav active" data-tab="team"><span>Team management</span></div>
         <div class="nav" data-tab="profile"><span>Company profile</span></div>
         <div class="nav" data-tab="analytics"><span>Analytics</span></div>
+        <div class="nav" data-tab="branches" id="navBranches"><span>🏢 Branches</span></div>
         <div class="nav" data-tab="settings"><span>Settings</span></div>
         <div class="side-bottom">
           <button class="logout" id="logout">Log out</button>
@@ -401,6 +402,40 @@
           <div id="anEmpty" style="color:var(--soft);text-align:center;padding:20px 0">No tips yet.</div>
         </div>
       </div>
+
+      <!-- BRANCHES (Business tier) -->
+      <div class="section" id="sec-branches">
+        <h1>🏢 Branches</h1>
+        <div class="sub">Run all your locations from one place.</div>
+
+        <!-- Locked pitch (not on Business tier) -->
+        <div class="card" id="brLocked" style="display:none;text-align:center">
+          <div style="font-size:44px;margin-bottom:6px">🏢</div>
+          <h3 style="color:#fff;font-size:18px">EasyTipMe Business — Multi-location</h3>
+          <p style="color:var(--soft);font-size:14px;line-height:1.6;max-width:460px;margin:8px auto 0">Got more than one location? Manage every branch from a single login — each branch gets its own QR, code, team, and tips, and you see all your locations together in one place.</p>
+          <div style="font-weight:800;font-size:26px;color:#fff;margin:16px 0 4px">$49.99<span style="font-size:13px;color:var(--soft);font-weight:500">/month</span></div>
+          <div style="color:var(--soft);font-size:12px;margin-bottom:14px">Unlimited branches · one dashboard · combined reports</div>
+          <button class="btn" id="bizUpgradeBtn" style="max-width:280px;margin:0 auto">Upgrade to Business</button>
+          <div id="bizMsg" class="msg"></div>
+        </div>
+
+        <!-- Active manager -->
+        <div id="brActive" style="display:none">
+          <div class="card" style="display:flex;gap:24px;flex-wrap:wrap;align-items:center;justify-content:space-between">
+            <div style="display:flex;gap:32px;flex-wrap:wrap">
+              <div><div style="font-size:11px;color:var(--soft);text-transform:uppercase;letter-spacing:.04em">Locations</div><div id="brCount" style="font-size:30px;font-weight:700">—</div></div>
+              <div><div style="font-size:11px;color:var(--soft);text-transform:uppercase;letter-spacing:.04em">Total tips (all)</div><div id="brTotal" style="font-size:30px;font-weight:700">—</div></div>
+              <div><div style="font-size:11px;color:var(--soft);text-transform:uppercase;letter-spacing:.04em">Team (all)</div><div id="brStaff" style="font-size:30px;font-weight:700">—</div></div>
+            </div>
+            <button class="btn" id="brAddBtn">+ Add branch</button>
+          </div>
+          <div id="brList"></div>
+          <div class="card" style="border:1px solid rgba(229,72,77,.25)">
+            <div style="font-size:13px;color:var(--soft)">On the <b style="color:#fff">Business</b> plan ($49.99/mo). <button class="link" id="bizCancelBtn" style="background:none;border:none;color:#ff6b6b;cursor:pointer;font:inherit;text-decoration:underline;padding:0">Cancel Business plan</button></div>
+            <div id="bizCancelMsg" class="msg"></div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -423,6 +458,7 @@
       document.querySelectorAll('.section').forEach(s=>s.classList.remove('show'));
       $('sec-'+n.dataset.tab).classList.add('show');
       if(n.dataset.tab==='analytics') loadAnalytics();
+      if(n.dataset.tab==='branches') loadBranches();
       $('sidebar').classList.remove('open');
       window.scrollTo(0,0);
     });
@@ -499,7 +535,7 @@
       if(!u.emailVerified){ $('loading').style.display='none'; showVerifyGate(u, b.ownerName||''); return; }
       $('verifyBanner').style.display='none';
       $('acctEmail').textContent=u.email||'—';
-      renderPro(u); handleProReturn(u);
+      renderPro(u); handleProReturn(u); handleBizReturn(u);
       $('sideBiz').textContent=b.businessName||u.email;
       $('teamTitle').textContent=(b.businessName||'Your')+' — team';
       // fill profile + settings
@@ -524,6 +560,10 @@
       loadStaff();
       setupOwnerPayout();
       applyAnalyticsGate();
+      const bu=$('bizUpgradeBtn'); if(bu) bu.onclick=startBizCheckout;
+      const ba=$('brAddBtn'); if(ba) ba.onclick=addBranch;
+      const bc=$('bizCancelBtn'); if(bc) bc.onclick=cancelBiz;
+      applyBranchGate();
     });
 
     // ---- Platform-controlled analytics visibility ----
@@ -619,6 +659,111 @@
         }catch(_){ proMsg('Could not confirm — refresh in a moment.'); }
         history.replaceState({},'',location.pathname);
       } else if(p.get('pro')==='cancel'){ history.replaceState({},'',location.pathname); }
+    }
+
+    // ---- Branches (Business tier) ----
+    function bizMsg(t,cls){ const m=$('bizMsg'); if(m){ m.textContent=t||''; m.className='msg '+(cls||'err'); } }
+    function bfmt(cur,n){ try{ return new Intl.NumberFormat('en',{style:'currency',currency:cur||'CAD'}).format(n||0); }catch(_){ return (cur||'CAD')+' '+(n||0).toFixed(2); } }
+    function applyBranchGate(){
+      const on = bizData.businessTierActive===true;
+      const lk=$('brLocked'), ac=$('brActive');
+      if(lk) lk.style.display = on?'none':'block';
+      if(ac) ac.style.display = on?'block':'none';
+    }
+    function openBranchesTab(){
+      document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));
+      const nav=document.querySelector('.nav[data-tab="branches"]'); if(nav) nav.classList.add('active');
+      document.querySelectorAll('.section').forEach(s=>s.classList.remove('show'));
+      $('sec-branches').classList.add('show'); window.scrollTo(0,0);
+    }
+    async function loadBranches(){
+      applyBranchGate();
+      if(bizData.businessTierActive!==true) return;
+      const list=$('brList'); if(list) list.innerHTML='<div class="card" style="color:var(--soft);text-align:center">Loading locations…</div>';
+      try{
+        const idToken=await auth.currentUser.getIdToken();
+        const r=await fetch(BACKEND+'/branch/list',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken})});
+        const j=await r.json();
+        if(!j||!j.ok){ if(list) list.innerHTML='<div class="card" style="color:#ff8a8a">Could not load locations.</div>'; return; }
+        renderBranches(j.branches||[]);
+      }catch(_){ if(list) list.innerHTML='<div class="card" style="color:#ff8a8a">Could not load locations.</div>'; }
+    }
+    function renderBranches(branches){
+      const totalTips=branches.reduce((s,b)=>s+(b.tipTotal||0),0);
+      const totalStaff=branches.reduce((s,b)=>s+(b.staffCount||0),0);
+      $('brCount').textContent=branches.length;
+      $('brStaff').textContent=totalStaff;
+      const cur0=(branches[0]&&branches[0].currency)||'CAD';
+      $('brTotal').textContent=bfmt(cur0,totalTips);
+      const base=location.origin+location.pathname.replace(/[^/]*$/,'');
+      const list=$('brList'); list.innerHTML='';
+      branches.forEach(b=>{
+        const shopLink=base+'shop.html?s='+b.id;
+        const card=document.createElement('div'); card.className='card';
+        card.innerHTML=
+          '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">'
+          +'<div><div style="font-weight:700;font-size:16px">'+esc(b.name)+(b.isMain?' <span style="font-size:11px;color:var(--green);border:1px solid var(--green);border-radius:20px;padding:1px 8px;margin-left:4px">Main</span>':'')+'</div>'
+          +'<div style="color:var(--soft);font-size:12px;margin-top:4px">Code <b style="color:#fff">'+esc(b.shopCode||'—')+'</b> · '+bfmt(b.currency,b.tipTotal)+' in '+(b.tipCount||0)+' tips · '+(b.staffCount||0)+' team</div></div>'
+          +'<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">'
+          +'<button class="link b brOpen">Open QR page</button>'
+          +'<button class="link b brCopy">Copy link</button>'
+          +(b.isMain?'':'<button class="link brRen">Rename</button> <button class="link brDel" style="color:#e5484d">Delete</button>')
+          +'</div></div>';
+        card.querySelector('.brOpen').onclick=()=>window.open(shopLink,'_blank');
+        card.querySelector('.brCopy').onclick=(e)=>{navigator.clipboard.writeText(shopLink);e.target.textContent='Copied';setTimeout(()=>e.target.textContent='Copy link',1200);};
+        if(!b.isMain){
+          card.querySelector('.brRen').onclick=async()=>{ const nn=prompt('New branch name:',b.name); if(nn===null) return; const idToken=await auth.currentUser.getIdToken(); await fetch(BACKEND+'/branch/rename',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,id:b.id,name:nn})}); loadBranches(); };
+          card.querySelector('.brDel').onclick=async()=>{ if(!confirm('Delete branch “'+b.name+'”?\n\nThis removes its QR page, team, and tip records. Cannot be undone.')) return; const idToken=await auth.currentUser.getIdToken(); const rr=await fetch(BACKEND+'/branch/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,id:b.id})}); const jj=await rr.json(); if(jj&&jj.ok) loadBranches(); else alert('Could not delete branch.'); };
+        }
+        list.appendChild(card);
+      });
+    }
+    async function addBranch(){
+      const name=prompt('Name this branch (e.g. “Downtown”, “Airport”):'); if(name===null) return;
+      const btn=$('brAddBtn'); if(btn){btn.disabled=true;btn.textContent='Adding…';}
+      try{
+        const idToken=await auth.currentUser.getIdToken();
+        const r=await fetch(BACKEND+'/branch/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,name})});
+        const j=await r.json();
+        if(j&&j.ok){ await loadBranches(); }
+        else if(j&&j.error==='business-tier-required'){ alert('Your Business plan isn’t active.'); }
+        else { alert('Could not add branch. Try again.'); }
+      }catch(_){ alert('Could not add branch. Try again.'); }
+      if(btn){btn.disabled=false;btn.textContent='+ Add branch';}
+    }
+    async function startBizCheckout(){
+      const btn=$('bizUpgradeBtn'); if(btn){btn.disabled=true;btn.textContent='Opening checkout…';}
+      bizMsg('');
+      try{
+        const idToken=await auth.currentUser.getIdToken();
+        const r=await fetch(BACKEND+'/billing/create-checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,plan:'business',bid:BID})});
+        const j=await r.json();
+        if(j&&j.url){ location.href=j.url; }
+        else { bizMsg('Could not start checkout. Try again.'); if(btn){btn.disabled=false;btn.textContent='Upgrade to Business';} }
+      }catch(_){ bizMsg('Could not start checkout. Try again.'); if(btn){btn.disabled=false;btn.textContent='Upgrade to Business';} }
+    }
+    async function cancelBiz(){
+      if(!confirm('Cancel your Business (multi-location) plan?\n\nYour branches stay in your data, but you won’t be able to manage them until you re-subscribe.')) return;
+      const cb=$('bizCancelBtn'); if(cb){cb.disabled=true;cb.textContent='Cancelling…';}
+      try{
+        const idToken=await auth.currentUser.getIdToken();
+        const r=await fetch(BACKEND+'/billing/cancel',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,plan:'business'})});
+        const j=await r.json();
+        if(j&&j.ok){ $('bizCancelMsg').textContent='Cancelled. Refreshing…'; $('bizCancelMsg').className='msg ok'; setTimeout(()=>location.reload(),1400); }
+        else { $('bizCancelMsg').textContent='Could not cancel. Try again.'; $('bizCancelMsg').className='msg err'; if(cb){cb.disabled=false;cb.textContent='Cancel Business plan';} }
+      }catch(_){ $('bizCancelMsg').textContent='Could not cancel. Try again.'; $('bizCancelMsg').className='msg err'; if(cb){cb.disabled=false;cb.textContent='Cancel Business plan';} }
+    }
+    async function handleBizReturn(u){
+      const p=new URLSearchParams(location.search);
+      if(p.get('biz')==='success' && p.get('session_id')){
+        try{
+          const idToken=await u.getIdToken();
+          const r=await fetch(BACKEND+'/billing/confirm',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,sessionId:p.get('session_id')})});
+          const j=await r.json();
+          history.replaceState({},'',location.pathname);
+          if(j&&j.active){ bizData.businessTierActive=true; openBranchesTab(); loadBranches(); }
+        }catch(_){ history.replaceState({},'',location.pathname); }
+      } else if(p.get('biz')==='cancel'){ history.replaceState({},'',location.pathname); }
     }
 
     async function loadOwnerBalance(accId){
