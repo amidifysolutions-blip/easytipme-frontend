@@ -1218,7 +1218,8 @@
       const body=$('wproBody'); if(!body) return;
       const head='<div style="font-weight:800;font-size:16px;margin-bottom:6px">⭐ Worker Pro</div>';
       if(isWorkerPro()){
-        body.innerHTML=head+'<div style="color:var(--green);font-weight:700">✓ Active</div>'
+        let since=''; try{ if(staffDoc&&staffDoc.workerProSince) since=new Date(staffDoc.workerProSince).toLocaleDateString(LANG||'en',{year:'numeric',month:'short',day:'numeric'}); }catch(_){}
+        body.innerHTML=head+'<div style="color:var(--green);font-weight:700">✓ Active'+(since?(' · since '+since):'')+'</div>'
           +'<div style="color:var(--soft);font-size:13px;margin-top:6px;line-height:1.5">You can see who tipped you and their messages, your $2 monthly fee is waived, and instant payout is on when withdrawals go live. Thank you! 🎉</div>'
           +'<button class="linkbtn" id="wproCancel" style="margin-top:10px;color:var(--danger)">Cancel Worker Pro</button>';
         const c=$('wproCancel'); if(c) c.onclick=()=>cancelWorkerPro(u);

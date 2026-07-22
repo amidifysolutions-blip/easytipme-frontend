@@ -707,11 +707,12 @@
     let OBAL_CUR='CAD';
     function ofmt(n){ try{ return new Intl.NumberFormat('en',{style:'currency',currency:OBAL_CUR}).format(n||0); }catch(_){ return OBAL_CUR+' '+(n||0).toFixed(2); } }
     function proMsg(t,cls){ const m=$('proMsg'); if(m){ m.textContent=t||''; m.className='msg '+(cls||'err'); } }
+    function planSinceTxt(){ try{ return bizData.planSince?(' · since '+new Date(bizData.planSince).toLocaleDateString('en',{year:'numeric',month:'short',day:'numeric'})):''; }catch(_){ return ''; } }
     function renderPro(u){
       const body=$('proBody'); if(!body) return;
       const head='<h3 style="margin:0 0 8px;font-size:16px">⭐ Pro</h3>';
       if(bizData.proActive){
-        body.innerHTML=head+'<div style="color:var(--green);font-weight:700;font-size:15px">✓ Active</div>'
+        body.innerHTML=head+'<div style="color:var(--green);font-weight:700;font-size:15px">✓ Active'+planSinceTxt()+'</div>'
           +'<p style="margin:8px 0 0;color:var(--soft);font-size:13px">You receive your admin fee, plus analytics, reports, and tip distribution for your team. Thank you! 🎉</p>'
           +'<button class="link" id="proCancelBtn" style="background:none;border:none;color:#ff6b6b;cursor:pointer;font:inherit;font-size:13px;padding:12px 0 0;text-decoration:underline">Cancel Pro</button>';
         const cb=$('proCancelBtn'); if(cb) cb.onclick=()=>cancelPro(u);
@@ -734,7 +735,7 @@
         body.innerHTML=head+'<div style="color:var(--green);font-weight:700;font-size:15px">✓ Included with Business Pro</div>'
           +'<p style="margin:8px 0 0;color:var(--soft);font-size:13px">You’re on the higher plan — up to 25 locations.</p>';
       } else if(bizData.businessTierActive){
-        body.innerHTML=head+'<div style="color:var(--green);font-weight:700;font-size:15px">✓ Active — up to 10 locations</div>'
+        body.innerHTML=head+'<div style="color:var(--green);font-weight:700;font-size:15px">✓ Active — up to 10 locations'+planSinceTxt()+'</div>'
           +'<p style="margin:8px 0 0;color:var(--soft);font-size:13px">Everything in Pro, plus multiple locations. Manage them in the <b>Branches</b> tab.</p>'
           +'<button class="link" id="bizPlanCancelBtn" style="background:none;border:none;color:#ff6b6b;cursor:pointer;font:inherit;font-size:13px;padding:12px 0 0;text-decoration:underline">Cancel Business</button>';
         const cb=$('bizPlanCancelBtn'); if(cb) cb.onclick=()=>cancelBiz('business');
@@ -750,7 +751,7 @@
       const body=$('bizProPlanBody'); if(!body) return;
       const head='<h3 style="margin:0 0 8px;font-size:16px">🏢 Business Pro</h3>';
       if(bizData.businessProActive){
-        body.innerHTML=head+'<div style="color:var(--green);font-weight:700;font-size:15px">✓ Active — up to 25 locations</div>'
+        body.innerHTML=head+'<div style="color:var(--green);font-weight:700;font-size:15px">✓ Active — up to 25 locations'+planSinceTxt()+'</div>'
           +'<p style="margin:8px 0 0;color:var(--soft);font-size:13px">Your top plan. Manage all your locations in the <b>Branches</b> tab.</p>'
           +'<button class="link" id="bizProCancelBtn" style="background:none;border:none;color:#ff6b6b;cursor:pointer;font:inherit;font-size:13px;padding:12px 0 0;text-decoration:underline">Cancel Business Pro</button>';
         const cb=$('bizProCancelBtn'); if(cb) cb.onclick=()=>cancelBiz('businesspro');
