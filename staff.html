@@ -1125,20 +1125,28 @@
       // verify banner
       $('verifyBanner').style.display = u.emailVerified ? 'none' : 'flex';
       $('vbResend').onclick=()=>showVerify(u);   // open the code screen (send + enter code)
-      // load tips into allRows
-      allRows=[];
-      try{
-        const tips=await db.collection('businesses').doc(BID).collection('tips').where('recipientEmails','array-contains',(u.email||'').toLowerCase()).limit(300).get();
-        tips.forEach(d=>{const t2=d.data();
+      // LIVE tip feed — new tips (with names/messages) appear instantly, no reload.
+      const email=(u.email||'').toLowerCase();
+      function processTips(snap){
+        allRows=[];
+        snap.forEach(d=>{const t2=d.data();
           const n=(t2.recipientIds&&t2.recipientIds.length)||1;
           const share=(t2.staffShare!=null?t2.staffShare:(t2.tip||0));
           const mine= t2.multiple? share/n : share;
           const dt=t2.createdAt&&t2.createdAt.toDate?t2.createdAt.toDate():null;
           allRows.push({amt:mine, date:dt, ms:dt?dt.getTime():0, rating:t2.rating||0, from:(t2.fromName||''), msg:(t2.message||'')});
         });
-      }catch(e){ /* leave empty */ }
-      allRows.sort((a,b)=>b.ms-a.ms);
-      renderHomeStats(); renderRecent(); renderInsights(); renderSettings(u); setupPayout(u); setupConsent(u);
+        allRows.sort((a,b)=>b.ms-a.ms);
+        renderHomeStats(); renderRecent();
+        if(!$('tab-insights').classList.contains('hide')) renderInsights();
+      }
+      try{ if(window._tipsUnsub) window._tipsUnsub(); }catch(_){}
+      try{
+        window._tipsUnsub = db.collection('businesses').doc(BID).collection('tips')
+          .where('recipientEmails','array-contains',email).limit(300)
+          .onSnapshot(processTips, ()=>{ /* ignore stream errors */ });
+      }catch(e){ allRows=[]; renderHomeStats(); renderRecent(); }
+      renderInsights(); renderSettings(u); setupPayout(u); setupConsent(u);
       show('app'); switchTab('home');
       handleWorkerProReturn(u);
     }
@@ -1430,7 +1438,7 @@
     }
 
     // ---- logout & leave (password protected) ----
-    $('logoutBtn').onclick=()=>auth.signOut().then(()=>{ staffDoc=null; registerMode=false; show('auth'); });
+    $('logoutBtn').onclick=()=>{ try{ if(window._tipsUnsub) window._tipsUnsub(); }catch(_){} auth.signOut().then(()=>{ staffDoc=null; registerMode=false; show('auth'); }); };
     function lvmsg(txt){const m=$('lvMsg');m.textContent=txt||'';m.className='msg'+(txt?' err':'');}
     $('leaveBtn').onclick=()=>{ $('lvTitle').textContent=t('leave_modal_title',{shop:shop&&shop.businessName||'—'}); $('lvDesc').textContent=t('leave_modal_desc'); $('lvPass').value=''; lvmsg(''); $('leaveModal').classList.remove('hide'); };
     $('lvCancel').onclick=()=>$('leaveModal').classList.add('hide');
