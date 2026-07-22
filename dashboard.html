@@ -356,6 +356,12 @@
         <button class="btn" id="saveSettings">Save settings</button>
         <div id="settingsMsg" class="msg"></div>
 
+        <div class="card" style="margin-top:20px" id="proCard">
+          <h3>⭐ EasyTipMe Pro</h3>
+          <div id="proBody" style="font-size:14px;color:var(--soft)">Loading…</div>
+          <div id="proMsg" class="msg"></div>
+        </div>
+
         <div class="card" style="margin-top:20px">
           <h3>💳 Get paid</h3>
           <p style="font-size:12px;color:var(--soft);line-height:1.5;margin-bottom:12px">Connect your bank once. Stripe then pays your admin fee (and any tips you collect) straight to your account — automatically, on a schedule. Verifying your identity + bank is required by law.</p>
@@ -486,6 +492,7 @@
       if(!u.emailVerified){ $('loading').style.display='none'; showVerifyGate(u, b.ownerName||''); return; }
       $('verifyBanner').style.display='none';
       $('acctEmail').textContent=u.email||'—';
+      renderPro(u); handleProReturn(u);
       $('sideBiz').textContent=b.businessName||u.email;
       $('teamTitle').textContent=(b.businessName||'Your')+' — team';
       // fill profile + settings
@@ -557,6 +564,45 @@
     }
     let OBAL_CUR='CAD';
     function ofmt(n){ try{ return new Intl.NumberFormat('en',{style:'currency',currency:OBAL_CUR}).format(n||0); }catch(_){ return OBAL_CUR+' '+(n||0).toFixed(2); } }
+    function proMsg(t,cls){ const m=$('proMsg'); if(m){ m.textContent=t||''; m.className='msg '+(cls||'err'); } }
+    function renderPro(u){
+      const body=$('proBody'); if(!body) return;
+      if(bizData.proActive){
+        body.innerHTML='<div style="color:var(--green);font-weight:700;font-size:15px">✓ Pro is active</div>'
+          +'<p style="margin:8px 0 0;color:var(--soft);font-size:13px">You receive your admin fee, plus analytics, reports, and tip distribution for your team. Thank you! 🎉</p>';
+      } else {
+        body.innerHTML='<p style="margin:0 0 10px">Unlock <b>your payouts</b> (receive your admin fee from tips), <b>analytics &amp; reports</b>, and <b>tip distribution</b> for your team.</p>'
+          +'<div style="font-weight:800;font-size:22px;color:#fff;margin:6px 0 12px">$19.99<span style="font-size:13px;color:var(--soft);font-weight:500">/month</span></div>'
+          +'<button class="btn" id="proBtn">Upgrade to Pro</button>';
+        const btn=$('proBtn'); if(btn) btn.onclick=()=>startProCheckout(u);
+      }
+    }
+    async function startProCheckout(u){
+      const btn=$('proBtn'); if(btn){ btn.disabled=true; btn.textContent='Opening checkout…'; }
+      proMsg('');
+      try{
+        const idToken=await u.getIdToken();
+        const r=await fetch(BACKEND+'/billing/create-checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,plan:'owner',bid:BID})});
+        const j=await r.json();
+        if(j&&j.url){ location.href=j.url; }
+        else { proMsg('Could not start checkout. Try again.'); if(btn){btn.disabled=false;btn.textContent='Upgrade to Pro';} }
+      }catch(_){ proMsg('Could not start checkout. Try again.'); if(btn){btn.disabled=false;btn.textContent='Upgrade to Pro';} }
+    }
+    async function handleProReturn(u){
+      const p=new URLSearchParams(location.search);
+      if(p.get('pro')==='success' && p.get('session_id')){
+        proMsg('Activating your Pro subscription…','ok');
+        try{
+          const idToken=await u.getIdToken();
+          const r=await fetch(BACKEND+'/billing/confirm',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,sessionId:p.get('session_id')})});
+          const j=await r.json();
+          if(j&&j.active){ bizData.proActive=true; renderPro(u); proMsg('Pro activated ✓ — welcome! 🎉','ok'); }
+          else { proMsg('Payment not confirmed yet — refresh in a moment.'); }
+        }catch(_){ proMsg('Could not confirm — refresh in a moment.'); }
+        history.replaceState({},'',location.pathname);
+      } else if(p.get('pro')==='cancel'){ history.replaceState({},'',location.pathname); }
+    }
+
     async function loadOwnerBalance(accId){
       const box=$('ownerBalanceBox'); if(!accId||!box) return;
       box.style.display='block';
