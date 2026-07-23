@@ -178,13 +178,30 @@
         if(shop.slogan) $('shopSlogan').textContent=shop.slogan;
         if(shop.logo){ $('shopLogo').src=shop.logo; $('shopLogo').style.display='block'; }
         const snap=await db.collection('businesses').doc(BID).collection('staff').get();
-        allStaff=[]; snap.forEach(d=>{const s=d.data(); s.id=d.id; if(s.published!==false && s.status!=='removed' && s.leftByStaff!==true) allStaff.push(s);});
+        // Only show workers who are ON SHIFT right now. The customer is physically
+        // at the shop, so their device's local clock == the shop's local time —
+        // no timezone conversion needed. A worker with no schedule always shows.
+        allStaff=[]; snap.forEach(d=>{const s=d.data(); s.id=d.id; if(s.published!==false && s.status!=='removed' && s.leftByStaff!==true && onShiftNow(s)) allStaff.push(s);});
         allStaff.sort(cmpStaff);
         drawStaff(allStaff);
         $('noStaff').style.display=allStaff.length?'none':'block';
         $('loading').style.display='none'; $('wrap').classList.remove('hide');
         fetch(BACKEND+'/health').catch(()=>{}); // warm the payment backend so checkout is fast
       }catch(e){ $('loading').textContent='Something went wrong. '+e.message; }
+    }
+
+    // Is this worker on shift right now? Uses the customer's local clock (they're
+    // at the shop, so it matches the shop's local time). No schedule → always on.
+    // Supports weekday list (days) + up to two windows (shift1/shift2), incl. overnight.
+    function onShiftNow(s){
+      const days=(s&&s.days)||[]; const s1=(s&&s.shift1&&s.shift1.s)?s.shift1:null; const s2=(s&&s.shift2&&s.shift2.s)?s.shift2:null;
+      if(!days.length && !s1 && !s2) return true;                 // no schedule set → always available
+      const now=new Date();
+      if(days.length){ const dn=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][now.getDay()]; if(!days.includes(dn)) return false; }
+      if(!s1 && !s2) return true;                                 // days set but no times → all day those days
+      const mins=now.getHours()*60+now.getMinutes();
+      const inWin=w=>{ if(!w||!w.s) return false; const a=w.s.split(':'); const st=(+a[0])*60+(+(a[1]||0)); if(!w.e) return mins>=st; const b=w.e.split(':'); let en=(+b[0])*60+(+(b[1]||0)); if(en<=st) return mins>=st||mins<en; return mins>=st&&mins<en; };
+      return inWin(s1)||inWin(s2);
     }
 
     $('multiToggle').onchange=e=>{ multiMode=e.target.checked; selected.clear(); $('selectAll').classList.toggle('hide',!multiMode); updateSelAll(); drawStaff(currentList()); updateMultiBar(); };
@@ -285,9 +302,15 @@
       try{
         // Single recipient → server splits the money (tip to the worker, commission
         // to the platform). Team tips fall back to a plain charge for now.
+        // If the owner turned on tip pooling, the tip is split equally among the
+        // workers currently on shift (allStaff = the on-shift set shown above).
+        const poolOn = shop.tipPoolEnabled===true && !recipient.multiple && allStaff.length>0;
+        recipient._pool = poolOn; recipient._members = poolOn ? allStaff.slice() : null;
         const body = recipient.multiple
           ? { amount:Math.round(total*100), currency:curr.toLowerCase() }
-          : { businessId:BID, staffId:recipient.id, tipCents:Math.round(tip*100), currency:curr.toLowerCase() };
+          : poolOn
+            ? { businessId:BID, staffId:recipient.id, tipCents:Math.round(tip*100), currency:curr.toLowerCase(), pool:true, poolStaffIds:allStaff.map(s=>s.id) }
+            : { businessId:BID, staffId:recipient.id, tipCents:Math.round(tip*100), currency:curr.toLowerCase() };
         const res=await fetch(BACKEND+'/create-payment-intent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
         const data=await res.json(); const {clientSecret,publishableKey,breakdown}=data;
         heldTip=!!data.held; // worker not connected yet → we hold their share until they are
@@ -332,18 +355,25 @@
       const staffShare=r2(tip-ownerShare);
       const fromName=(($('fromName')&&$('fromName').value)||'').trim().slice(0,40);
       const message=(($('fromMessage')&&$('fromMessage').value)||'').trim().slice(0,140);
+      // Pooled tip → record it against the whole on-shift team so it shows for
+      // each of them (each sees their equal share), and settle via /settle-pool.
+      const pooled = recipient._pool===true;
+      const members = pooled ? (recipient._members||[]) : recipient.members;
+      const isMulti = pooled || !!recipient.multiple;
       try{ await db.collection('businesses').doc(BID).collection('tips').add({
-        recipientIds:recipient.members.map(m=>m.id), recipientEmails:recipient.members.map(m=>(m.email||'').toLowerCase()).filter(Boolean), recipientName:recipient.nickname||'team', multiple:!!recipient.multiple,
+        recipientIds:members.map(m=>m.id), recipientEmails:members.map(m=>(m.email||'').toLowerCase()).filter(Boolean), recipientName:recipient.nickname||'team', multiple:isMulti, pooled:pooled,
         fromName:fromName, message:message, tip, fee, total:tip+fee, currency:curr, rating, ownerShare, staffShare, paymentId:paymentIntent?.id||'',
-        held:heldTip, released:false, staffId:(recipient.multiple?null:recipient.id),
+        held:heldTip, released:false, staffId:(isMulti?null:recipient.id),
         createdAt:firebase.firestore.FieldValue.serverTimestamp() }); }catch(e){}
       if(shop.notifyEmail!==false){ try{
-        const perAmt=recipient.multiple?tip/recipient.members.length:tip;
+        const perAmt=isMulti?tip/Math.max(1,members.length):tip;
         fetch(BACKEND+'/notify-tip',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-          recipients:recipient.members.map(m=>({name:m.nickname,email:m.email,pro:!!m.workerProActive})), amount:perAmt, tipTotal:tip, currency:curr, shopName:shop.businessName||'', fromName:fromName })});
+          recipients:members.map(m=>({name:m.nickname,email:m.email,pro:!!m.workerProActive})), amount:perAmt, tipTotal:tip, currency:curr, shopName:shop.businessName||'', fromName:fromName })});
       }catch(e){} }
-      // Station 2: if the shop takes an admin fee, route it to the owner's account.
-      if(ownerShare>0 && paymentIntent && paymentIntent.id && !recipient.multiple){
+      // Settle the money split after the charge succeeds.
+      if(pooled && paymentIntent && paymentIntent.id){
+        try{ fetch(BACKEND+'/settle-pool',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentId:paymentIntent.id})}); }catch(e){}
+      } else if(ownerShare>0 && paymentIntent && paymentIntent.id && !recipient.multiple){
         try{ fetch(BACKEND+'/settle-owner-fee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentId:paymentIntent.id})}); }catch(e){}
       }
       $('doneMsg').textContent=`Your ${sym}${tip.toFixed(2)} tip to ${recipient.nickname||'the team'} is on its way.`;
