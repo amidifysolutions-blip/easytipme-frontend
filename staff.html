@@ -429,7 +429,7 @@
       verified_continue:"I've verified — continue", resend:"Resend email", use_diff:"Use a different email",
       verify_banner:"Verify your email to secure your account.", resend_short:"Resend",
       your_tips:"Your tips", tips:"Tips", avg_tip:"Avg tip", avg_rating:"Avg rating",
-      recent_tips:"Recent tips", no_tips:"No tips yet.", from:"from", who_tipped_you:"Who tipped you", tips_have_details:"of your tips have a name or message from the customer.", upgrade_to_see:"Upgrade to see who tipped you & read their message.",
+      recent_tips:"Recent tips", no_tips:"No tips yet.", from:"from", team_share:"Team share", who_tipped_you:"Who tipped you", tips_have_details:"of your tips have a name or message from the customer.", upgrade_to_see:"Upgrade to see who tipped you & read their message.",
       insights_title:"Insights", this_week:"This week", this_month:"This month", all_time:"All time",
       earned:"Earned", average:"Average", daily_earnings:"Daily earnings (last 14 days)",
       top_day:"Best day", named_tips:"With a name", anon_tips:"Anonymous", rating_avg:"Average rating", no_data:"No data for this period yet.",
@@ -488,7 +488,7 @@
       verified_continue:"فعّلت — متابعة", resend:"إعادة إرسال الإيميل", use_diff:"استخدم إيميل آخر",
       verify_banner:"فعّل إيميلك لتأمين حسابك.", resend_short:"إعادة إرسال",
       your_tips:"بقشيشك", tips:"البقشيش", avg_tip:"متوسط البقشيش", avg_rating:"متوسط التقييم",
-      recent_tips:"آخر البقشيش", no_tips:"ما في بقشيش بعد.", from:"من", who_tipped_you:"مين تيّبك", tips_have_details:"من تيباتك فيها اسم أو رسالة من الزبون.", upgrade_to_see:"اشترك لتشوف مين تيّبك وتقرا رسالتو.",
+      recent_tips:"آخر البقشيش", no_tips:"ما في بقشيش بعد.", from:"من", team_share:"حصّة من الفريق", who_tipped_you:"مين تيّبك", tips_have_details:"من تيباتك فيها اسم أو رسالة من الزبون.", upgrade_to_see:"اشترك لتشوف مين تيّبك وتقرا رسالتو.",
       insights_title:"التحليلات", this_week:"هالأسبوع", this_month:"هالشهر", all_time:"الكل",
       earned:"المكتسب", average:"المتوسط", daily_earnings:"الأرباح اليومية (آخر ١٤ يوم)",
       top_day:"أفضل يوم", named_tips:"مع اسم", anon_tips:"بدون اسم", rating_avg:"متوسط التقييم", no_data:"ما في بيانات لهالفترة بعد.",
@@ -1153,7 +1153,7 @@
           // ONE worker they picked — not the whole team. Everyone else just sees
           // their money share.
           const personal = t2.pooled!==true || t2.pickedId===staffId;
-          allRows.push({amt:mine, date:dt, ms:dt?dt.getTime():0, rating: personal?(t2.rating||0):0, from: personal?(t2.fromName||''):'', msg: personal?(t2.message||''):''});
+          allRows.push({amt:mine, date:dt, ms:dt?dt.getTime():0, rating: personal?(t2.rating||0):0, from: personal?(t2.fromName||''):'', msg: personal?(t2.message||''):'', pooled:(t2.pooled===true)});
         });
         allRows.sort((a,b)=>b.ms-a.ms);
         renderHomeStats(); renderRecent();
@@ -1217,6 +1217,9 @@
         } else if(r.from||r.msg){
           meta=ds+' · 🔒'+stars;
         }
+        // Pooled tips are a SHARE of a team tip — label them so a worker never
+        // mistakes their share for a tip they earned alone.
+        if(r.pooled) meta += ' · 🤝 '+t('team_share');
         el.insertAdjacentHTML('beforeend',`<div class="tip-row"><div style="width:100%"><div class="tip-amt">+${curSym}${r.amt.toFixed(2)}</div><div class="tip-date">${meta}</div>${extra}</div></div>`);
       });
     }
