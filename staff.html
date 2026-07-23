@@ -1149,7 +1149,11 @@
           const share=(t2.staffShare!=null?t2.staffShare:(t2.tip||0));
           const mine= t2.multiple? share/n : share;
           const dt=t2.createdAt&&t2.createdAt.toDate?t2.createdAt.toDate():null;
-          allRows.push({amt:mine, date:dt, ms:dt?dt.getTime():0, rating:t2.rating||0, from:(t2.fromName||''), msg:(t2.message||'')});
+          // For a POOLED tip the customer's name / message / rating belong to the
+          // ONE worker they picked — not the whole team. Everyone else just sees
+          // their money share.
+          const personal = t2.pooled!==true || t2.pickedId===staffId;
+          allRows.push({amt:mine, date:dt, ms:dt?dt.getTime():0, rating: personal?(t2.rating||0):0, from: personal?(t2.fromName||''):'', msg: personal?(t2.message||''):''});
         });
         allRows.sort((a,b)=>b.ms-a.ms);
         renderHomeStats(); renderRecent();

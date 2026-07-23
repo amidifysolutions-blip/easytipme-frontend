@@ -361,7 +361,7 @@
       const members = pooled ? (recipient._members||[]) : recipient.members;
       const isMulti = pooled || !!recipient.multiple;
       try{ await db.collection('businesses').doc(BID).collection('tips').add({
-        recipientIds:members.map(m=>m.id), recipientEmails:members.map(m=>(m.email||'').toLowerCase()).filter(Boolean), recipientName:recipient.nickname||'team', multiple:isMulti, pooled:pooled,
+        recipientIds:members.map(m=>m.id), recipientEmails:members.map(m=>(m.email||'').toLowerCase()).filter(Boolean), recipientName:recipient.nickname||'team', multiple:isMulti, pooled:pooled, pickedId:(pooled?recipient.id:null),
         fromName:fromName, message:message, tip, fee, total:tip+fee, currency:curr, rating, ownerShare, staffShare, paymentId:paymentIntent?.id||'',
         held:heldTip, released:false, staffId:(isMulti?null:recipient.id),
         createdAt:firebase.firestore.FieldValue.serverTimestamp() }); }catch(e){}

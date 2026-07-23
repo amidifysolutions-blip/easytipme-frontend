@@ -1330,10 +1330,10 @@
       const sym=CURSYM[$('s_curr').value]||'$';
       const snap=await db.collection('businesses').doc(BID).collection('tips').orderBy('createdAt','desc').get();
       let total=0,rs=0,rc=0,share=0; const per={}; const recent=[];
-      snap.forEach(d=>{const t=d.data(); total+=(t.tip||0); share+=(t.ownerShare||0); if(t.rating){rs+=t.rating;rc++;} const n=t.recipientName||'—'; per[n]=(per[n]||0)+(t.tip||0); recent.push(t);});
+      snap.forEach(d=>{const t=d.data(); if(t.poolHold===true) return; total+=(t.tip||0); share+=(t.ownerShare||0); if(t.rating){rs+=t.rating;rc++;} const n=t.recipientName||'—'; per[n]=(per[n]||0)+(t.tip||0); recent.push(t);});
       if(share>0){ $('anShareBox').style.display='block'; $('anShare').textContent=sym+share.toFixed(2); } else { $('anShareBox').style.display='none'; }
       $('anTotal').textContent=sym+total.toFixed(2);
-      $('anCount').textContent=snap.size;
+      $('anCount').textContent=recent.length;
       $('anRating').textContent=rc?(rs/rc).toFixed(1)+' ★':'—';
       const by=$('anByStaff'); by.innerHTML=Object.keys(per).length?'':'<div style="color:var(--soft)">No tips yet.</div>';
       Object.entries(per).sort((a,b)=>b[1]-a[1]).forEach(([n,v])=>by.insertAdjacentHTML('beforeend',`<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #f0f0f2"><span>${esc(n)}</span><b>${sym}${v.toFixed(2)}</b></div>`));
