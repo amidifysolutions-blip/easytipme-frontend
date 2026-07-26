@@ -167,7 +167,8 @@
           <button class="chip on" id="fAll" data-f="all">All</button>
           <button class="chip" id="fDup" data-f="dup">Duplicates (0)</button>
           <button class="chip" id="fBlk" data-f="blocked">Blocked (0)</button>
-          <button class="btn ghost sm" id="exportCsv" style="margin-left:auto">Export CSV</button>
+          <button class="btn ghost sm" id="freeEmail" style="margin-left:auto">Free an email</button>
+          <button class="btn ghost sm" id="exportCsv">Export CSV</button>
         </div>
         <div style="overflow-x:auto"><table>
           <thead><tr>
@@ -456,6 +457,19 @@
       function q(s){ s=String(s==null?'':s); return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s; }
     };
     function q(s){ s=String(s==null?'':s); return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s; }
+
+    $('freeEmail').onclick=async()=>{
+      const em=prompt('Email to free (removes any leftover login/business so it can register again):');
+      if(!em||!em.trim()) return;
+      if(!confirm('Free "'+em.trim()+'"?\n\nThis deletes any leftover login (and orphaned business data) for this email so it can sign up fresh.')) return;
+      try{
+        const idToken=await auth.currentUser.getIdToken();
+        const resp=await fetch('https://easytipme-backend.onrender.com/admin/free-email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,email:em.trim()})});
+        const j=await resp.json();
+        if(j&&j.ok){ alert('Done ✓  "'+em.trim()+'" is free now — it can register again.'); loadBusinesses(); }
+        else alert('Could not free it: '+((j&&j.error)||'error'));
+      }catch(e){ alert('Could not free it: '+e.message); }
+    };
 
     function show(id){$(id).classList.remove('hide');} function hide(id){$(id).classList.add('hide');}
     function msg(id,t,type){const m=$(id);m.textContent=t;m.className='msg '+type;}
