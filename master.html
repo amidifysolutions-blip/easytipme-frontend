@@ -398,9 +398,15 @@
         return;
       }
       if(act==='delete'){
-        if(!confirm('PERMANENTLY delete "'+r.name+'"?\n\nThis removes the business record entirely. Use this only for fake/abusive shops. This cannot be undone.')) return;
-        if(!confirm('Are you absolutely sure? Type-check: this deletes "'+r.name+'" for good.')) return;
-        try{ await db.collection('businesses').doc(id).delete(); bizRows=bizRows.filter(x=>x.id!==id); renderBiz(); }
+        if(!confirm('PERMANENTLY delete "'+r.name+'"?\n\nThis removes the business, its team, tips, branches AND frees the owner’s email so it can be reused. Use only for fake/abusive/test shops. Cannot be undone.')) return;
+        if(!confirm('Are you absolutely sure? This deletes "'+r.name+'" for good.')) return;
+        try{
+          const idToken=await auth.currentUser.getIdToken();
+          const resp=await fetch('https://easytipme-backend.onrender.com/admin/delete-business',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,uid:id})});
+          const j=await resp.json();
+          if(j&&j.ok){ bizRows=bizRows.filter(x=>x.id!==id); renderBiz(); }
+          else alert('Could not delete: '+((j&&j.error)||'error'));
+        }
         catch(e){ alert('Could not delete: '+e.message); }
         return;
       }
