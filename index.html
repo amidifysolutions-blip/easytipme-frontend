@@ -3,19 +3,20 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>EasyTipMe — Cashless QR Tipping for Teams</title>
-<meta name="description" content="Scan a QR, tip your team in seconds — no cash, no app. EasyTipMe is cashless digital tipping for restaurants, cafés, salons & service teams, with fair team splits and secure Stripe payouts." />
-<meta name="keywords" content="digital tipping, QR tipping, cashless tips, tip jar, restaurant tips, cafe tips, salon tips, team tipping, EasyTipMe" />
-<meta name="theme-color" content="#0071e3" />
+<title>EasyTipMe: Cashless QR Tipping for Teams</title>
+<meta name="description" content="Scan a QR, tip your team in seconds, no cash, no app. EasyTipMe is cashless digital tipping for restaurants, cafés, salons & service teams, with fair team splits and secure Stripe payouts." />
+<meta name="keywords" content="digital tipping, QR tipping, cashless tips, tip jar, restaurant tips, cafe tips, salon tips, barbershop tips, hotel tips, gym tips, fitness tips, clinic tips, hospital tips, tip pooling, fair tip splitting, team tipping, EasyTipMe" />
+<meta name="theme-color" content="#ffffff" />
 <meta name="robots" content="index, follow" />
+<meta name="author" content="Amidify Solutions Inc." />
 <link rel="canonical" href="https://easytipme.com/" />
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="favicon.svg">
 <!-- Open Graph (link previews on WhatsApp, iMessage, Facebook, LinkedIn…) -->
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="EasyTipMe" />
-<meta property="og:title" content="EasyTipMe — Tips, made effortless" />
-<meta property="og:description" content="Scan a QR, tip your team in seconds — no cash, no app. Cashless tipping for restaurants, cafés & salons, with fair team splits and secure Stripe payouts." />
+<meta property="og:title" content="EasyTipMe: Tips, made effortless" />
+<meta property="og:description" content="Scan a QR, tip your team in seconds, no cash, no app. Cashless tipping for restaurants, cafés & salons, with fair team splits and secure Stripe payouts." />
 <meta property="og:url" content="https://easytipme.com/" />
 <meta property="og:image" content="https://easytipme.com/og.png" />
 <meta property="og:image:width" content="1200" />
@@ -23,11 +24,13 @@
 <meta property="og:locale" content="en_US" />
 <!-- Twitter / X card -->
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="EasyTipMe — Tips, made effortless" />
-<meta name="twitter:description" content="Scan a QR, tip your team in seconds — no cash, no app. Cashless tipping with fair team splits and secure Stripe payouts." />
+<meta name="twitter:title" content="EasyTipMe: Tips, made effortless" />
+<meta name="twitter:description" content="Scan a QR, tip your team in seconds, no cash, no app. Cashless tipping with fair team splits and secure Stripe payouts." />
 <meta name="twitter:image" content="https://easytipme.com/og.png" />
 <!-- Structured data for Google -->
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"EasyTipMe","applicationCategory":"BusinessApplication","operatingSystem":"Web","description":"Cashless QR tipping for teams — customers scan and tip in seconds, with fair team splits and secure Stripe payouts.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"url":"https://easytipme.com/","publisher":{"@type":"Organization","name":"Amidify Solutions Inc.","url":"https://easytipme.com/"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"EasyTipMe","applicationCategory":"BusinessApplication","operatingSystem":"Web","description":"Cashless QR tipping for teams. Customers scan and tip in seconds, with fair team splits and secure Stripe payouts.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"url":"https://easytipme.com/","publisher":{"@type":"Organization","name":"Amidify Solutions Inc.","url":"https://easytipme.com/"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"EasyTipMe","legalName":"Amidify Solutions Inc.","url":"https://easytipme.com/","logo":"https://easytipme.com/og.png","description":"Cashless QR tipping platform for service teams: restaurants, cafés, salons and barbershops."}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Do customers need to download an app to tip?","acceptedAnswer":{"@type":"Answer","text":"No. Customers scan your QR code with their phone camera, pick a team member, choose an amount and pay, all in the browser. No app, no account, no cash."}},{"@type":"Question","name":"How do team members get paid?","acceptedAnswer":{"@type":"Answer","text":"Tips are paid out securely through Stripe. Each team member connects their bank once and receives their tips automatically on a schedule."}},{"@type":"Question","name":"Is EasyTipMe free to start?","acceptedAnswer":{"@type":"Answer","text":"Yes. You can register your business, add your team and start collecting tips for free. Optional Pro features are available for owners who want more."}},{"@type":"Question","name":"Can tips be split fairly across a team?","acceptedAnswer":{"@type":"Answer","text":"Yes. Owners can turn on tip pooling to split tips equally among the team members on shift, fairly and automatically."}},{"@type":"Question","name":"What types of businesses use EasyTipMe?","acceptedAnswer":{"@type":"Answer","text":"Restaurants, cafés, salons, barbershops, hotels, gyms and fitness studios, clinics, hospitals and any service team that gets tipped."}}]}</script>
 <style>
   :root{
     --bg:#ffffff;
@@ -39,7 +42,7 @@
     --accent-ink:#0058b9;
     --green:#34c759;
     --radius:22px;
-    --maxw:1080px;
+    --maxw:1100px;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
@@ -49,17 +52,32 @@
     background:var(--bg);
     -webkit-font-smoothing:antialiased;
     line-height:1.5;
+    overflow-x:hidden;
   }
   a{text-decoration:none;color:inherit}
-  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px;position:relative;z-index:2}
 
-  nav{
-    position:sticky;top:0;z-index:50;
-    backdrop-filter:saturate(180%) blur(20px);
-    background:rgba(255,255,255,.72);
-    border-bottom:1px solid var(--line);
-  }
-  .nav-in{display:flex;align-items:center;justify-content:space-between;height:56px}
+  /* ---------- Soft magic background: pale drifting wash + flowing waves ---------- */
+  .ambient{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+  .ambient .glow{position:absolute;border-radius:50%;filter:blur(90px);will-change:transform}
+  .g1{width:620px;height:620px;left:-120px;top:-160px;background:radial-gradient(circle at 40% 40%,rgba(0,113,227,.10),transparent 66%);animation:float1 22s ease-in-out infinite}
+  .g2{width:560px;height:560px;right:-120px;top:-40px;background:radial-gradient(circle at 50% 50%,rgba(0,198,255,.09),transparent 66%);animation:float2 26s ease-in-out infinite}
+  .g3{width:520px;height:520px;left:30%;top:220px;background:radial-gradient(circle at 50% 50%,rgba(120,110,255,.07),transparent 68%);animation:float3 30s ease-in-out infinite}
+  @keyframes float1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(120px,80px) scale(1.15)}}
+  @keyframes float2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-110px,70px) scale(1.1)}}
+  @keyframes float3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(60px,-80px) scale(1.18)}}
+
+  /* flowing wave lines (slightly darker than white) */
+  .waves{position:absolute;left:0;right:0;top:0;height:760px;z-index:0;pointer-events:none;overflow:hidden}
+  .waves svg{position:absolute;left:0;bottom:0;width:200%;height:100%;display:block}
+  .w1 svg{animation:wave 26s linear infinite}
+  .w2 svg{animation:wave 20s linear infinite reverse;opacity:.7}
+  .w3 svg{animation:wave 34s linear infinite;opacity:.55}
+  @keyframes wave{to{transform:translateX(-50%)}}
+
+  /* ---------- Nav ---------- */
+  nav{position:sticky;top:0;z-index:50;backdrop-filter:saturate(180%) blur(20px);background:rgba(255,255,255,.72);border-bottom:1px solid var(--line)}
+  .nav-in{display:flex;align-items:center;justify-content:space-between;height:58px}
   .logo{display:flex;align-items:center;gap:9px;font-weight:600;font-size:19px;letter-spacing:-.02em}
   .logo .mark{width:28px;height:28px;display:inline-flex}
   .logo .mark svg{width:100%;height:100%;display:block}
@@ -67,114 +85,137 @@
   .nav-links .btn{flex-shrink:0}
   .nav-links a{font-size:14px;color:var(--ink-soft);transition:color .2s}
   .nav-links a:hover{color:var(--ink)}
-  .nav-links a.btn-primary{color:#fff}
-  .nav-links a.btn-primary:hover{color:#fff}
-  .btn{
-    display:inline-flex;align-items:center;justify-content:center;
-    font-size:15px;font-weight:500;border-radius:980px;padding:9px 20px;
-    transition:transform .15s ease,background .2s,opacity .2s;cursor:pointer;border:none;
-  }
-  .btn-primary{background:var(--accent);color:#fff}
+  .nav-links a.btn-primary,.nav-links a.btn-primary:hover{color:#fff}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;font-size:15px;font-weight:500;border-radius:980px;padding:10px 22px;transition:transform .15s ease,background .2s,opacity .2s,box-shadow .2s;cursor:pointer;border:none}
+  .btn-primary{background:var(--accent);color:#fff;box-shadow:0 8px 26px -10px rgba(0,113,227,.6)}
   .btn-primary:hover{background:var(--accent-ink)}
   .btn-primary:active{transform:scale(.97)}
-  .btn-ghost{background:transparent;color:var(--accent);padding:9px 6px}
-  .btn-ghost:hover{opacity:.7}
-  .btn-lg{font-size:17px;padding:13px 28px}
+  .btn-ghost{background:rgba(0,0,0,.045);color:var(--accent);border:1px solid var(--line)}
+  .btn-ghost:hover{background:rgba(0,0,0,.07)}
+  .btn-lg{font-size:17px;padding:14px 30px}
 
-  header.hero{padding:84px 0 20px;text-align:center;background:
-     radial-gradient(1200px 480px at 50% -120px, #eef6ff 0%, rgba(238,246,255,0) 70%);}
-  .eyebrow{font-size:15px;color:var(--accent);font-weight:600;letter-spacing:.01em;margin-bottom:14px}
-  h1{
-    font-size:clamp(40px,7vw,80px);
-    line-height:1.03;letter-spacing:-.03em;font-weight:700;
-    max-width:16ch;margin:0 auto;
-  }
-  h1 .grad{background:linear-gradient(120deg,var(--accent),#00c6ff 60%,var(--green));-webkit-background-clip:text;background-clip:text;color:transparent}
-  .sub{font-size:clamp(18px,2.4vw,23px);color:var(--ink-soft);max-width:34ch;margin:22px auto 0;letter-spacing:-.01em}
-  .cta-row{display:flex;gap:14px;justify-content:center;align-items:center;margin-top:32px;flex-wrap:wrap}
-  .cta-note{font-size:13px;color:var(--ink-soft);margin-top:16px}
+  /* ---------- Hero ---------- */
+  header.hero{padding:92px 0 40px;text-align:center;position:relative}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;color:var(--ink);font-weight:500;margin-bottom:22px;padding:7px 15px;border:1px solid var(--line);border-radius:980px;background:rgba(255,255,255,.6)}
+  .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px rgba(52,199,89,.8)}
+  h1{font-size:clamp(42px,7.4vw,84px);line-height:1.02;letter-spacing:-.035em;font-weight:700;max-width:15ch;margin:0 auto}
+  h1 .grad{background:linear-gradient(115deg,var(--accent),#00c6ff 55%,var(--green));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{font-size:clamp(18px,2.4vw,23px);color:var(--ink-soft);max-width:36ch;margin:24px auto 0;letter-spacing:-.01em}
+  .cta-row{display:flex;gap:14px;justify-content:center;align-items:center;margin-top:34px;flex-wrap:wrap}
+  .cta-note{font-size:13px;color:var(--ink-soft);margin-top:18px}
 
-  .stage{display:flex;justify-content:center;margin-top:56px;perspective:1400px}
-  .phone{
-    width:300px;background:#fff;border-radius:44px;padding:12px;
-    box-shadow:0 40px 90px -30px rgba(0,50,120,.35),0 0 0 1px rgba(0,0,0,.04);
-    position:relative;
-  }
-  .phone .screen{
-    background:linear-gradient(180deg,#f7fbff,#ffffff 40%);
-    border-radius:34px;overflow:hidden;padding:26px 22px 30px;border:1px solid #eef1f6;
-  }
-  .notch{position:absolute;top:20px;left:50%;transform:translateX(-50%);width:110px;height:26px;background:#000;border-radius:0 0 16px 16px;z-index:2}
-  .avatar{width:64px;height:64px;border-radius:50%;margin:8px auto 10px;
-     background:linear-gradient(135deg,#0071e3,#00c6ff);display:grid;place-items:center;color:#fff;font-size:26px;font-weight:600}
+  .stage{display:flex;justify-content:center;margin-top:60px;perspective:1600px}
+  .phone{width:300px;background:#fff;border-radius:46px;padding:12px;position:relative;
+     box-shadow:0 44px 100px -34px rgba(0,60,140,.4),0 0 0 1px rgba(0,0,0,.05);animation:floaty 6s ease-in-out infinite}
+  @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+  .phone .screen{background:linear-gradient(180deg,#f7fbff,#ffffff 42%);border-radius:36px;overflow:hidden;padding:30px 22px 26px;border:1px solid #eef1f6}
+  .notch{position:absolute;top:20px;left:50%;transform:translateX(-50%);width:104px;height:26px;background:#000;border-radius:0 0 16px 16px;z-index:2}
+  .avatar{width:66px;height:66px;border-radius:50%;margin:6px auto 12px;background:linear-gradient(135deg,#0071e3,#00c6ff);display:grid;place-items:center;color:#fff;font-size:27px;font-weight:600;box-shadow:0 12px 30px -10px rgba(0,113,227,.6)}
   .p-name{text-align:center;font-weight:600;font-size:18px}
-  .p-role{text-align:center;color:var(--ink-soft);font-size:13px;margin-bottom:18px}
+  .p-role{text-align:center;color:var(--ink-soft);font-size:13px;margin-bottom:20px}
   .amts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
-  .amt{border:1.5px solid var(--line);border-radius:14px;padding:12px 0;text-align:center;font-weight:600;font-size:16px}
+  .amt{border:1.5px solid var(--line);border-radius:14px;padding:13px 0;text-align:center;font-weight:600;font-size:16px;cursor:pointer;transition:.2s}
   .amt.sel{border-color:var(--accent);background:#f1f8ff;color:var(--accent-ink)}
+  .stars{display:flex;justify-content:center;gap:4px;margin:16px 0 4px;color:#ffb800;font-size:15px}
   .pay{margin-top:14px;background:#000;color:#fff;border-radius:14px;text-align:center;padding:13px;font-weight:600;font-size:15px;display:flex;align-items:center;justify-content:center;gap:7px}
-  .apple-glyph{font-size:17px}
 
-  section{padding:88px 0}
-  .section-head{text-align:center;max-width:640px;margin:0 auto 52px}
-  .section-head h2{font-size:clamp(30px,4.4vw,46px);letter-spacing:-.025em;line-height:1.08;font-weight:700}
+  .trust{margin-top:58px;text-align:center}
+  .trust .lbl{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:16px}
+  .trust .row{display:flex;flex-wrap:wrap;gap:10px 12px;justify-content:center}
+  .chip{font-size:14px;color:var(--ink);padding:8px 16px;border:1px solid var(--line);border-radius:980px;background:rgba(255,255,255,.7)}
+
+  /* ---------- Sections ---------- */
+  section{padding:94px 0;position:relative;z-index:2}
+  .section-head{text-align:center;max-width:660px;margin:0 auto 54px}
+  .section-head h2{font-size:clamp(30px,4.6vw,46px);letter-spacing:-.03em;line-height:1.07;font-weight:700}
   .section-head p{color:var(--ink-soft);font-size:19px;margin-top:14px;letter-spacing:-.01em}
   .soft{background:var(--bg-soft)}
 
-  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
-  .card{
-    background:#fff;border:1px solid var(--line);border-radius:var(--radius);
-    padding:34px;transition:transform .3s ease,box-shadow .3s ease;
-  }
-  .card:hover{transform:translateY(-4px);box-shadow:0 24px 50px -30px rgba(0,40,90,.28)}
-  .ic{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;font-size:22px;margin-bottom:18px;background:#eef6ff}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:34px;transition:transform .3s ease,box-shadow .3s ease}
+  .card:hover{transform:translateY(-4px);box-shadow:0 26px 54px -32px rgba(0,50,110,.3)}
+  .ic{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:22px;margin-bottom:18px;background:#eef6ff}
   .card h3{font-size:21px;letter-spacing:-.02em;font-weight:600;margin-bottom:8px}
   .card p{color:var(--ink-soft);font-size:16px}
 
-  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;counter-reset:s}
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:26px}
   .step{position:relative;padding-top:8px}
-  .step .n{width:40px;height:40px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-weight:600;margin-bottom:18px}
+  .step .n{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#0071e3,#00c6ff);color:#fff;display:grid;place-items:center;font-weight:700;margin-bottom:18px;box-shadow:0 10px 24px -10px rgba(0,113,227,.6)}
   .step h3{font-size:22px;letter-spacing:-.02em;margin-bottom:8px;font-weight:600}
   .step p{color:var(--ink-soft);font-size:16px}
 
-  .banner{background:linear-gradient(135deg,#0b1220,#101a2e);color:#fff;border-radius:32px;padding:64px 44px;text-align:center;margin:0 24px}
-  .banner h2{font-size:clamp(28px,4vw,42px);letter-spacing:-.025em;font-weight:700;max-width:20ch;margin:0 auto}
-  .banner p{color:#aeb6c4;font-size:19px;margin:16px auto 30px;max-width:44ch}
-  .banner .btn-primary{background:#fff;color:#0b1220}
-  .banner .btn-primary:hover{background:#e9eef5}
+  /* Problems to Solutions */
+  .ps{display:grid;gap:16px;max-width:960px;margin:0 auto}
+  .pscard{display:grid;grid-template-columns:1fr 48px 1fr;gap:16px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:26px 30px;transition:transform .3s ease,box-shadow .3s ease}
+  .pscard:hover{transform:translateY(-3px);box-shadow:0 24px 50px -32px rgba(0,50,110,.28)}
+  .pscol .k{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:7px}
+  .pscol.prob .k{color:#c0392b}
+  .pscol.sol .k{color:#1a8a3f}
+  .pscol h3{font-size:18px;font-weight:600;letter-spacing:-.01em;margin-bottom:5px}
+  .pscol p{font-size:15px;color:var(--ink-soft);line-height:1.55}
+  .psarrow{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:#eef6ff;color:var(--accent);font-size:20px;justify-self:center}
+  .ps-note{text-align:center;color:var(--ink-soft);font-size:12.5px;margin-top:18px}
+  @media(max-width:760px){
+    .pscard{grid-template-columns:1fr;gap:12px;padding:22px}
+    .psarrow{transform:rotate(90deg);justify-self:start;margin:2px 0}
+  }
+
+  /* FAQ */
+  .faq{max-width:780px;margin:0 auto}
+  .q{border:1px solid var(--line);border-radius:16px;background:#fff;margin-bottom:12px;overflow:hidden}
+  .q summary{list-style:none;cursor:pointer;padding:20px 22px;font-size:17px;font-weight:600;display:flex;justify-content:space-between;align-items:center;gap:14px}
+  .q summary::-webkit-details-marker{display:none}
+  .q summary .plus{color:var(--accent);font-size:22px;transition:transform .25s;flex-shrink:0}
+  .q[open] summary .plus{transform:rotate(45deg)}
+  .q .a{padding:0 22px 20px;color:var(--ink-soft);font-size:16px;line-height:1.6}
 
   .final{text-align:center}
-  .final h2{font-size:clamp(32px,5vw,54px);letter-spacing:-.03em;font-weight:700;line-height:1.05}
-  .final .cta-row{margin-top:30px}
+  .final h2{font-size:clamp(34px,5.4vw,56px);letter-spacing:-.03em;font-weight:700;line-height:1.04}
 
-  footer{border-top:1px solid var(--line);padding:40px 0;background:var(--bg-soft)}
+  footer{border-top:1px solid var(--line);padding:42px 0;position:relative;z-index:2;background:var(--bg-soft)}
   .foot-in{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;color:var(--ink-soft);font-size:13px}
-  .foot-links{display:flex;gap:22px}
+  .foot-links{display:flex;gap:22px;flex-wrap:wrap}
+  .foot-links a:hover{color:var(--ink)}
 
-  .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease}
+  .reveal{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s ease}
   .reveal.in{opacity:1;transform:none}
 
-  @media(max-width:920px){
-    .nav-links a.hide-m{display:none}
-    .nav-links{gap:16px}
-  }
+  @media(max-width:920px){.nav-links a.hide-m{display:none}.nav-links{gap:16px}}
   @media(max-width:760px){
     .grid{grid-template-columns:1fr}
     .steps{grid-template-columns:1fr}
-    .nav-links a.hide-m{display:none}
-    section{padding:64px 0}
-    .banner{padding:48px 26px}
+    section{padding:66px 0}
+    header.hero{padding:64px 0 20px}
+    .waves{height:620px}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .glow,.phone,.w1 svg,.w2 svg,.w3 svg{animation:none!important}
+    html{scroll-behavior:auto}
   }
 </style>
 </head>
 <body>
 
+<!-- soft magic background -->
+<div class="ambient" aria-hidden="true">
+  <span class="glow g1"></span>
+  <span class="glow g2"></span>
+  <span class="glow g3"></span>
+  <div class="waves">
+    <div class="w1"><svg viewBox="0 0 1440 200" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path d="M0,120 C120,80 240,80 360,120 C480,160 600,160 720,120 C840,80 960,80 1080,120 C1200,160 1320,160 1440,120 V200 H0 Z" fill="#eef2f8"/></svg></div>
+    <div class="w2"><svg viewBox="0 0 1440 200" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path d="M0,140 C120,100 240,180 360,140 C480,100 600,180 720,140 C840,100 960,180 1080,140 C1200,100 1320,180 1440,140 V200 H0 Z" fill="#e6edf7"/></svg></div>
+    <div class="w3"><svg viewBox="0 0 1440 200" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path d="M0,160 C180,120 360,150 540,160 C720,170 900,120 1080,150 C1260,175 1350,150 1440,160 V200 H0 Z" fill="#f0f4fa"/></svg></div>
+  </div>
+</div>
+
 <nav>
   <div class="wrap nav-in">
-    <div class="logo"><span class="mark"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00c2ff"/><stop offset="1" stop-color="#0071e3"/></linearGradient></defs><rect width="100" height="100" rx="24" fill="#0a0a0a" stroke="rgba(255,255,255,.18)" stroke-width="3"/><rect x="30" y="26" width="10" height="48" rx="5" fill="url(#lg)"/><rect x="30" y="26" width="34" height="10" rx="5" fill="url(#lg)"/><rect x="30" y="64" width="34" height="10" rx="5" fill="url(#lg)"/><rect x="30" y="45" width="22" height="10" rx="5" fill="url(#lg)"/><circle cx="63" cy="50" r="9" fill="#fff"/><circle cx="63" cy="50" r="4.5" fill="url(#lg)"/></svg></span> EasyTipMe</div>
+    <a href="/" class="logo" aria-label="EasyTipMe home"><span class="mark"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00c2ff"/><stop offset="1" stop-color="#0071e3"/></linearGradient></defs><rect width="100" height="100" rx="24" fill="#0a0a0a" stroke="rgba(255,255,255,.18)" stroke-width="3"/><rect x="30" y="26" width="10" height="48" rx="5" fill="url(#lg)"/><rect x="30" y="26" width="34" height="10" rx="5" fill="url(#lg)"/><rect x="30" y="64" width="34" height="10" rx="5" fill="url(#lg)"/><rect x="30" y="45" width="22" height="10" rx="5" fill="url(#lg)"/><circle cx="63" cy="50" r="9" fill="#fff"/><circle cx="63" cy="50" r="4.5" fill="url(#lg)"/></svg></span> EasyTipMe</a>
     <div class="nav-links">
       <a href="#features" class="hide-m">Features</a>
       <a href="#how" class="hide-m">How it works</a>
+      <a href="#faq" class="hide-m">FAQ</a>
       <a href="signup.html?login">Log in</a>
       <a href="signup.html" class="btn btn-primary">Get started</a>
     </div>
@@ -183,9 +224,9 @@
 
 <header class="hero">
   <div class="wrap">
-    <div class="eyebrow reveal">Cashless tipping · Built for teams</div>
+    <div class="eyebrow reveal"><span class="dot"></span> Cashless tipping · Built for teams</div>
     <h1 class="reveal">Tips, made <span class="grad">effortless.</span></h1>
-    <p class="sub reveal">Your customers scan, tap, and tip in seconds. Your team gets recognized — no cash, no apps, no friction.</p>
+    <p class="sub reveal">Your customers scan, tap, and tip in seconds. Your team gets recognized. No cash, no apps, no friction.</p>
     <div class="cta-row reveal">
       <a href="signup.html" class="btn btn-primary btn-lg">Get started free</a>
       <a href="#how" class="btn btn-ghost btn-lg">See how it works ›</a>
@@ -196,16 +237,33 @@
       <div class="phone">
         <div class="notch"></div>
         <div class="screen">
-          <div class="avatar">S</div>
-          <div class="p-name">Sami</div>
-          <div class="p-role">Senior Barber · Al Zahia</div>
+          <div class="avatar">Y</div>
+          <div class="p-name">Yana</div>
+          <div class="p-role">Gym Coach · White Rock</div>
           <div class="amts">
-            <div class="amt">$5</div>
-            <div class="amt sel">$10</div>
-            <div class="amt">$20</div>
+            <div class="amt">$10</div>
+            <div class="amt sel">$20</div>
+            <div class="amt">$50</div>
           </div>
-          <div class="pay"><span class="apple-glyph"></span> Pay</div>
+          <div class="stars">★ ★ ★ ★ ★</div>
+          <div class="pay"><span></span> Pay</div>
         </div>
+      </div>
+    </div>
+
+    <div class="trust reveal">
+      <div class="lbl">Made for service teams</div>
+      <div class="row">
+        <span class="chip">Restaurants</span>
+        <span class="chip">Cafés</span>
+        <span class="chip">Salons</span>
+        <span class="chip">Barbershops</span>
+        <span class="chip">Hotels</span>
+        <span class="chip">Gyms</span>
+        <span class="chip">Fitness</span>
+        <span class="chip">Clinics</span>
+        <span class="chip">Hospitals</span>
+        <span class="chip">Secured by Stripe</span>
       </div>
     </div>
   </div>
@@ -215,13 +273,13 @@
   <div class="wrap">
     <div class="section-head reveal">
       <h2>Everything you need to get tipped.</h2>
-      <p>A complete tipping platform — set up in minutes, running on autopilot.</p>
+      <p>A complete tipping platform that sets up in minutes and runs on autopilot.</p>
     </div>
     <div class="grid">
       <div class="card reveal">
         <div class="ic">⚡️</div>
         <h3>Instant team onboarding</h3>
-        <p>Register your business and add your whole team in minutes. You get one permanent QR for the whole business — it always shows who's available to tip.</p>
+        <p>Register your business and add your whole team in minutes. You get one permanent QR for the whole business, and it always shows who's available to tip.</p>
       </div>
       <div class="card reveal">
         <div class="ic">📊</div>
@@ -229,9 +287,9 @@
         <p>See who's earning what, live. Track tips and ratings by team member from one clean dashboard.</p>
       </div>
       <div class="card reveal">
-        <div class="ic">🔔</div>
-        <h3>Automatic email alerts</h3>
-        <p>Your team gets an email the moment a tip lands. Instant recognition keeps everyone motivated.</p>
+        <div class="ic">🤝</div>
+        <h3>Fair team tip pooling</h3>
+        <p>Turn on pooling to split tips equally among the team on shift. Fair, automatic, and fully in your control.</p>
       </div>
       <div class="card reveal">
         <div class="ic">🔒</div>
@@ -246,7 +304,7 @@
   <div class="wrap">
     <div class="section-head reveal">
       <h2>Live in three steps.</h2>
-      <p>From sign-up to your first tip — faster than making a coffee.</p>
+      <p>From sign-up to your first tip, faster than making a coffee.</p>
     </div>
     <div class="steps">
       <div class="step reveal">
@@ -262,18 +320,74 @@
       <div class="step reveal">
         <div class="n">3</div>
         <h3>Share &amp; get tipped</h3>
-        <p>Put your QR wherever your customers are. They scan, pick a team member, choose an amount, and pay — done.</p>
+        <p>Put your QR wherever your customers are. They scan, pick a team member, choose an amount, and pay. Done.</p>
       </div>
     </div>
   </div>
 </section>
 
-<section class="soft">
+<section id="why" class="soft">
   <div class="wrap">
-    <div class="banner reveal">
-      <h2>Not just tips. Give too.</h2>
-      <p>The same effortless flow works for donations — for teams, causes, mosques, churches and organizations. One scan to give.</p>
-      <a href="signup.html" class="btn btn-primary btn-lg">Start collecting</a>
+    <div class="section-head reveal">
+      <h2>Built to fix real tipping headaches.</h2>
+      <p>The everyday problems teams run into with tips, solved by design.</p>
+    </div>
+    <div class="ps">
+      <div class="pscard reveal">
+        <div class="pscol prob">
+          <div class="k">The problem</div>
+          <h3>Splitting tips by hand</h3>
+          <p>Dividing cash at the end of a shift is slow, error-prone, and starts arguments over who got what.</p>
+        </div>
+        <div class="psarrow">→</div>
+        <div class="pscol sol">
+          <div class="k">✓ With EasyTipMe</div>
+          <h3>Fair, automatic splits</h3>
+          <p>Turn on pooling and each person's fair share is calculated and paid straight to them, with no cash to divide and no disputes.</p>
+        </div>
+      </div>
+      <div class="pscard reveal">
+        <div class="pscol prob">
+          <div class="k">The problem</div>
+          <h3>One person holds everyone's tips</h3>
+          <p>When every tip lands in one pocket or one account, the team waits to be paid and has to trust the hand-out.</p>
+        </div>
+        <div class="psarrow">→</div>
+        <div class="pscol sol">
+          <div class="k">✓ With EasyTipMe</div>
+          <h3>Paid directly, split at the source</h3>
+          <p>Every tip and share goes straight to each worker's own account through Stripe, so the money never sits with one person.</p>
+        </div>
+      </div>
+      <div class="pscard reveal">
+        <div class="pscol prob">
+          <div class="k">The problem</div>
+          <h3>No record of who earned what</h3>
+          <p>Cash leaves no trail, so it's hard for the team to trust the split and hard to keep track of.</p>
+        </div>
+        <div class="psarrow">→</div>
+        <div class="pscol sol">
+          <div class="k">✓ With EasyTipMe</div>
+          <h3>A clear trail for everyone</h3>
+          <p>Every tip is logged with amount, date and recipient, so it's clear for the team and easy to keep track of.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <h2>Questions, answered.</h2>
+      <p>Everything owners and teams ask before getting started.</p>
+    </div>
+    <div class="faq reveal">
+      <details class="q"><summary>Do customers need an app to tip? <span class="plus">+</span></summary><div class="a">No. Customers scan your QR with their phone camera, pick a team member, choose an amount and pay, all in the browser. No app, no account, no cash.</div></details>
+      <details class="q"><summary>How does my team get paid? <span class="plus">+</span></summary><div class="a">Tips are paid out securely through Stripe. Each team member connects their bank once and receives their tips automatically on a schedule.</div></details>
+      <details class="q"><summary>Is it free to start? <span class="plus">+</span></summary><div class="a">Yes. You can register your business, add your team and start collecting tips for free. Optional Pro features are available for owners who want more.</div></details>
+      <details class="q"><summary>Can tips be split fairly across the team? <span class="plus">+</span></summary><div class="a">Yes. Owners can turn on tip pooling to split tips equally among the team members on shift, fairly and automatically.</div></details>
+      <details class="q"><summary>Which businesses is it for? <span class="plus">+</span></summary><div class="a">Restaurants, cafés, salons, barbershops, hotels, gyms &amp; fitness studios, clinics, hospitals and any service team that gets tipped.</div></details>
     </div>
   </div>
 </section>
@@ -293,10 +407,11 @@
 
 <footer>
   <div class="wrap foot-in">
-    <div class="logo"><span class="mark"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00c2ff"/><stop offset="1" stop-color="#0071e3"/></linearGradient></defs><rect width="100" height="100" rx="24" fill="#0a0a0a" stroke="rgba(255,255,255,.18)" stroke-width="3"/><rect x="30" y="26" width="10" height="48" rx="5" fill="url(#lg)"/><rect x="30" y="26" width="34" height="10" rx="5" fill="url(#lg)"/><rect x="30" y="64" width="34" height="10" rx="5" fill="url(#lg)"/><rect x="30" y="45" width="22" height="10" rx="5" fill="url(#lg)"/><circle cx="63" cy="50" r="9" fill="#fff"/><circle cx="63" cy="50" r="4.5" fill="url(#lg)"/></svg></span> EasyTipMe</div>
+    <a href="/" class="logo" aria-label="EasyTipMe home"><span class="mark"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="lgf" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00c2ff"/><stop offset="1" stop-color="#0071e3"/></linearGradient></defs><rect width="100" height="100" rx="24" fill="#0a0a0a" stroke="rgba(255,255,255,.18)" stroke-width="3"/><rect x="30" y="26" width="10" height="48" rx="5" fill="url(#lgf)"/><rect x="30" y="26" width="34" height="10" rx="5" fill="url(#lgf)"/><rect x="30" y="64" width="34" height="10" rx="5" fill="url(#lgf)"/><rect x="30" y="45" width="22" height="10" rx="5" fill="url(#lgf)"/><circle cx="63" cy="50" r="9" fill="#fff"/><circle cx="63" cy="50" r="4.5" fill="url(#lgf)"/></svg></span> EasyTipMe</a>
     <div class="foot-links">
       <a href="#features">Features</a>
       <a href="#how">How it works</a>
+      <a href="#faq">FAQ</a>
       <a href="privacy.html">Privacy</a>
       <a href="terms.html">Terms</a>
       <a href="contact.html">Contact</a>
