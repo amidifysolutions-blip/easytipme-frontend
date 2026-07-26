@@ -1092,8 +1092,23 @@
             <div style="text-align:right"><div style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--soft)">Pending</div><div style="font-size:15px;font-weight:600;color:var(--soft)">${ofmt(j.pending)}</div></div>
           </div>
           <p style="font-size:12px;color:var(--soft);margin:10px 0 0;line-height:1.5">Your admin fee lands here and Stripe pays it to your bank automatically on a schedule — no manual withdrawal needed.</p>
-          ${rows?`<div style="margin-top:12px"><div style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--soft);margin-bottom:4px">Recent payouts</div>${rows}</div>`:''}`;
+          ${rows?`<div style="margin-top:12px"><div style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--soft);margin-bottom:4px">Recent payouts</div>${rows}</div>`:''}
+          <button class="btn" id="ownerStripeBtn" style="margin-top:14px;background:#635bff;max-width:280px">Open my Stripe dashboard ↗</button>
+          <p style="font-size:11px;color:var(--soft);margin:6px 0 0;line-height:1.5">See your full balance, payout history, and edit your bank details on Stripe.</p>`;
+        const sbtn=$('ownerStripeBtn'); if(sbtn) sbtn.onclick=openOwnerStripe;
       }catch(e){ box.innerHTML='<div style="color:var(--amber);font-size:13px">Balance is loading — check back in a moment.</div>'; }
+    }
+    async function openOwnerStripe(){
+      const btn=$('ownerStripeBtn');
+      const old=btn?btn.textContent:'';
+      if(btn){ btn.disabled=true; btn.textContent='Opening…'; }
+      try{
+        const idToken=await auth.currentUser.getIdToken();
+        const r=await fetch(BACKEND+'/connect/owner-dashboard-link',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken, bid:BID, returnUrl:location.origin+'/dashboard.html'})});
+        const j=await r.json(); if(!j.url) throw new Error(j.error||'no link');
+        window.open(j.url,'_blank');
+      }catch(e){ alert('Could not open your Stripe dashboard right now. '+(e.message||'')); }
+      finally{ if(btn){ btn.disabled=false; btn.textContent=old; } }
     }
     async function startOwnerConnect(){
       const btn=$('ownerConnectBtn');
