@@ -329,6 +329,16 @@
         <div class="srow"><span class="lab" data-i18n="email_status">Email verification</span>
           <span class="val"><span id="setVerified"></span> <button id="setResend" class="linkbtn hide" data-i18n="resend_short">Resend</button></span></div>
       </div>
+      <div class="card" id="wpCard">
+        <div class="h3" data-i18n="your_workplaces">Your workplaces</div>
+        <div id="wpList" style="margin-top:8px;font-size:14px"></div>
+        <div id="wpAddWrap" class="hide" style="margin-top:12px">
+          <input id="wpCode" type="text" placeholder="Workplace code" autocomplete="off" style="text-transform:uppercase">
+          <button class="btn" id="wpJoin" style="margin-top:10px" data-i18n="join_wp">Join workplace</button>
+          <div id="wpMsg" class="msg"></div>
+        </div>
+        <button class="btn ghost" id="addWpBtn" style="margin-top:12px" data-i18n="add_workplace">+ Add workplace</button>
+      </div>
       <div class="card payoff">
         <div class="h3"><span data-i18n="get_paid">Get paid</span> <span class="soon" id="payoutSoon" data-i18n="coming_soon">Coming soon</span></div>
         <div class="note" data-i18n="payout_note">Bank payouts are being activated. Soon you'll connect your bank account here to receive your tips directly. For now, your workplace can see and settle your tips.</div>
@@ -473,6 +483,7 @@
       password_confirm_ph:"Your password", confirm_leave:"Leave workplace", cancel:"Cancel",
       delete_account:"Delete your account", del_modal_title:"Delete your account?", del_modal_desc:"This removes you from every workplace, deletes your payout (Stripe) account, and permanently deletes your login. This can't be undone. Withdraw any available balance first.", confirm_delete:"Delete my account",
       m_deleted_ok:"Your account has been deleted.", m_deleted_partial:"Account deleted. Note: {amt} in held tips couldn't be paid out because no bank was connected.",
+      your_workplaces:"Your workplaces", add_workplace:"+ Add workplace", join_wp:"Join workplace", no_workplaces:"Just this one for now.", current_wp:"Current", switch_wp:"Switch", left_tag:"left",
       connected_to:"Connected to {shop}",
       m_enter_code:"Enter your workplace code.", m_enter_email_pass:"Enter your email and password.",
       m_enter_names:"Enter your first and last name.", m_pass_min:"Password must be at least 6 characters.", m_pass_match:"Passwords don’t match.",
@@ -534,6 +545,7 @@
       password_confirm_ph:"كلمة مرورك", confirm_leave:"غادر مكان العمل", cancel:"إلغاء",
       delete_account:"احذف حسابك", del_modal_title:"حذف حسابك؟", del_modal_desc:"هيدا بيشيلك من كل أماكن العمل، بيحذف حساب الدفع (Stripe) تبعك، وبيمحي تسجيل دخولك نهائيًا. ما فيك ترجع عنه. اسحب أي رصيد متوفّر قبل.", confirm_delete:"احذف حسابي",
       m_deleted_ok:"انحذف حسابك.", m_deleted_partial:"انحذف الحساب. ملاحظة: {amt} من البقشيش المحجوز ما انبعت لأنّه ما في حساب بنك موصول.",
+      your_workplaces:"أماكن عملك", add_workplace:"+ إضافة مكان عمل", join_wp:"انضمّ للمحل", no_workplaces:"هيدا الوحيد حالياً.", current_wp:"الحالي", switch_wp:"تبديل", left_tag:"غادرت",
       connected_to:"متصل بـ {shop}",
       m_enter_code:"أدخل كود مكان عملك.", m_enter_email_pass:"أدخل الإيميل وكلمة المرور.",
       m_enter_names:"أدخل اسمك الأول واسم العائلة.", m_pass_min:"كلمة المرور لازم ٦ أحرف على الأقل.", m_pass_match:"كلمتا المرور مش متطابقتين.",
@@ -959,7 +971,11 @@
     function eyeToggle(btn,inp){ $(btn).innerHTML=EYE; $(btn).onclick=()=>{const p=$(inp);const r=p.type==='password';p.type=r?'text':'password';$(btn).innerHTML=r?EYEOFF:EYE;}; }
     eyeToggle('eyeBtn','pass'); eyeToggle('eyeBtn2','pass2'); eyeToggle('eyeBtn3','lvPass'); eyeToggle('eyeBtn4','emPass'); eyeToggle('eyeBtn5','delPass'); if($('eyeFp')) eyeToggle('eyeFp','fpNew');
 
-    if(!BID){ $('shopCodeWrap').classList.remove('hide'); }
+    // Always show the workplace-code field on sign-in: an invited worker (new OR
+    // existing account) can always enter email + password + code and land in the
+    // right shop. Left blank, it falls back to their current/last workplace.
+    $('shopCodeWrap').classList.remove('hide');
+    if(BID){ try{ db.collection('businesses').doc(BID).get().then(d=>{ if(d.exists && d.data().shopCode && !$('shopCode').value){ $('shopCode').value=d.data().shopCode; } }); }catch(_){} }
 
     function amsg(t,type){const m=$('authMsg');m.textContent=t;m.className='msg '+(type||'err');}
     function prettyErr(e){const c=(e&&e.code)||'';
@@ -1028,12 +1044,13 @@
     async function doAuth(create){
       const wasSignedIn=!!auth.currentUser;
       const email=$('email').value.trim().toLowerCase(), pass=$('pass').value;
-      if($('shopCodeWrap').classList.contains('hide')===false){
-        const raw=$('shopCode').value.trim();
-        if(!raw){ amsg(t('m_enter_code')); return; }
-        const code=raw.toUpperCase().replace(/[^A-Z0-9]/g,'');
-        try{ const cd=await db.collection('shopCodes').doc(code).get(); BID=(cd.exists&&cd.data().bid)?cd.data().bid:raw; }
-        catch(_){ BID=raw; }
+      // A code typed here always wins (lets an invited worker jump to a new shop);
+      // left blank, we keep their current/last workplace.
+      const rawCode=$('shopCode').value.trim();
+      if(rawCode){
+        const code=rawCode.toUpperCase().replace(/[^A-Z0-9]/g,'');
+        try{ const cd=await db.collection('shopCodes').doc(code).get(); BID=(cd.exists&&cd.data().bid)?cd.data().bid:rawCode; }
+        catch(_){ BID=rawCode; }
       }
       if(!BID){ amsg(t('m_enter_code')); return; }
       if(!email||!pass){ amsg(t('m_enter_email_pass')); return; }
@@ -1143,6 +1160,13 @@
             await fetch(BACKEND+'/staff/sync-email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,bid:BID,staffId:(staffId||'')})});
             staffDoc.email=(u.email||'').toLowerCase();
           }
+        }catch(_){}
+        // Link the worker's shared payout account into this shop (one Stripe for
+        // all their workplaces — connect a bank once, get paid everywhere).
+        try{
+          const it=await u.getIdToken();
+          fetch(BACKEND+'/staff/link-payout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken:it,bid:BID,staffId:(staffId||'')})})
+            .then(r=>r.json()).then(j=>{ if(j&&j.accountId && !staffDoc.connectAccountId){ staffDoc.connectAccountId=j.accountId; try{ if(!$('tab-settings').classList.contains('hide')) setupPayout(u); }catch(_){} } }).catch(()=>{});
         }catch(_){}
         // First login with the temporary password → force choosing their own password.
         if(staffDoc.mustChangePassword===true){ showFirstPw(u); return; }
@@ -1495,6 +1519,15 @@
         await db.collection('businesses').doc(BID).collection('staff').doc(staffId).update({leftByStaff:true, leftAt:firebase.firestore.FieldValue.serverTimestamp()});
         $('leaveModal').classList.add('hide');
         const nm=shop&&shop.businessName||'—';
+        // If she still belongs to another workplace, switch to it (stay signed in);
+        // otherwise sign out to the login screen.
+        try{
+          const it=await auth.currentUser.getIdToken();
+          const r=await fetch(BACKEND+'/staff/workplaces',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken:it})});
+          const j=await r.json().catch(()=>({}));
+          const other=(j.workplaces||[]).find(w=>w.bid!==BID && !w.left && !w.removed);
+          if(other){ try{localStorage.setItem('etm_staff_bid',other.bid);}catch(_){}; location.href='staff.html?s='+other.bid; return; }
+        }catch(_){}
         await auth.signOut(); staffDoc=null; show('auth'); amsg(t('m_left_ok',{shop:nm}), 'ok');
       }catch(e){ const c=(e&&e.code)||''; lvmsg((c.includes('wrong-password')||c.includes('invalid-credential'))?t('m_leave_wrong_pass'):prettyErr(e)); $('lvConfirm').disabled=false; }
     };
@@ -1521,6 +1554,44 @@
         try{ await auth.signOut(); }catch(_){}
         staffDoc=null; registerMode=false; show('auth'); amsg(okMsg,'ok');
       }catch(e){ const c=(e&&e.code)||''; delmsg((c.includes('wrong-password')||c.includes('invalid-credential'))?t('m_leave_wrong_pass'):(c.includes('requires-recent-login')?t('m_reauth_needed'):prettyErr(e))); $('delConfirm').disabled=false; }
+    };
+
+    // ---- workplaces: multi-shop switcher + join by code ----
+    function wpEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+    async function renderWorkplaces(){
+      const list=$('wpList'); if(!list||!auth.currentUser) return;
+      list.innerHTML='<span style="color:var(--soft)">…</span>';
+      try{
+        const idToken=await auth.currentUser.getIdToken();
+        const r=await fetch(BACKEND+'/staff/workplaces',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken})});
+        const j=await r.json().catch(()=>({}));
+        const wps=(j.workplaces||[]).filter(w=>!w.removed);
+        if(!wps.length){ list.innerHTML='<span style="color:var(--soft)">'+wpEsc(t('no_workplaces'))+'</span>'; return; }
+        list.innerHTML='';
+        wps.forEach(w=>{
+          const cur=w.bid===BID;
+          const row=document.createElement('div');
+          row.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)';
+          const leftTxt=w.left?' <span style="color:var(--soft)">· '+wpEsc(t('left_tag'))+'</span>':'';
+          row.innerHTML='<span><b>'+wpEsc(w.name||'—')+'</b>'+(w.role?' <span style="color:var(--soft)">· '+wpEsc(w.role)+'</span>':'')+leftTxt+'</span>'+
+            (cur?'<span style="color:#0071e3;font-weight:600;font-size:13px">'+wpEsc(t('current_wp'))+'</span>':'<button class="linkbtn wpSwitch" data-bid="'+w.bid+'">'+wpEsc(t('switch_wp'))+'</button>');
+          list.appendChild(row);
+        });
+        list.querySelectorAll('.wpSwitch').forEach(b=>{ b.onclick=()=>{ const bid=b.getAttribute('data-bid'); try{localStorage.setItem('etm_staff_bid',bid);}catch(_){}; location.href='staff.html?s='+bid; }; });
+      }catch(_){ list.innerHTML='<span style="color:var(--soft)">'+wpEsc(t('no_workplaces'))+'</span>'; }
+    }
+    function wpmsg(txt){ const m=$('wpMsg'); if(m){ m.textContent=txt||''; m.className='msg'+(txt?' err':''); } }
+    if($('addWpBtn')) $('addWpBtn').onclick=()=>{ $('wpAddWrap').classList.toggle('hide'); wpmsg(''); if(!$('wpAddWrap').classList.contains('hide')) $('wpCode').focus(); };
+    if($('wpJoin')) $('wpJoin').onclick=async()=>{
+      const raw=($('wpCode').value||'').trim(); if(!raw){ wpmsg(t('m_enter_code')); return; }
+      const code=raw.toUpperCase().replace(/[^A-Z0-9]/g,'');
+      $('wpJoin').disabled=true;
+      try{
+        const cd=await db.collection('shopCodes').doc(code).get();
+        const bid=(cd.exists&&cd.data().bid)?cd.data().bid:code;
+        try{localStorage.setItem('etm_staff_bid',bid);}catch(_){}
+        location.href='staff.html?s='+bid;
+      }catch(e){ wpmsg(t('m_wp_not_found')); $('wpJoin').disabled=false; }
     };
 
     // ---- change email (self-service) ----
@@ -1551,6 +1622,7 @@
     function switchTab(name){
       ['home','insights','settings'].forEach(x=>{ $('tab-'+x).classList.toggle('hide', x!==name); });
       [['home','navHome'],['insights','navInsights'],['settings','navSettings']].forEach(([x,id])=>$(id).classList.toggle('on', x===name));
+      if(name==='settings'){ try{ renderWorkplaces(); }catch(_){} }
       window.scrollTo(0,0);
     }
     document.querySelectorAll('.nav button').forEach(b=>{ b.onclick=()=>switchTab(b.getAttribute('data-tab')); });
