@@ -906,7 +906,10 @@
     const BACKEND="https://easytipme-backend.onrender.com";
 
     // ---------- language engine ----------
-    let LANG=localStorage.getItem('etm_lang')||(navigator.language||'en').slice(0,2).toLowerCase();
+    // Default is ALWAYS English for everyone. The worker only sees another
+    // language if they explicitly pick one (saved in etm_lang) — we no longer
+    // auto-switch to the phone's language.
+    let LANG=localStorage.getItem('etm_lang')||'en';
     if(!DICT[LANG]) LANG='en';
     function t(key,vars){ let s=(DICT[LANG]&&DICT[LANG][key])!=null?DICT[LANG][key]:(DICT.en[key]!=null?DICT.en[key]:key); if(vars){for(const k in vars){s=s.replace('{'+k+'}',vars[k]);}} return s; }
     function applyLang(){
