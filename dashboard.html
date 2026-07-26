@@ -563,20 +563,24 @@
         row.className='dayrow'; row.dataset.d=dn;
         row.style.cssText='border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px';
         row.innerHTML=`<div class="dhead" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none">`
-          +`<span style="font-weight:600">${dn}</span><span class="dstate" style="font-size:12px;color:var(--soft)">Day off</span></div>`
+          +`<span style="font-weight:600;font-size:15px">${dn}</span><span class="dstate" style="font-size:12px;font-weight:700;padding:5px 14px;border-radius:20px;border:1.5px solid var(--line);color:var(--soft)">Off</span></div>`
           +`<div class="dtimes" style="display:none;margin-top:10px">`
           +`<div class="times"><input type="time" class="s1s"><span style="margin-bottom:16px">–</span><input type="time" class="s1e"></div>`
           +`<div class="times"><input type="time" class="s2s"><span style="margin-bottom:16px">–</span><input type="time" class="s2e"></div>`
           +`<div style="font-size:11px;color:var(--soft);margin-top:-6px">Shift 1 · Shift 2 (optional). Leave blank = works all day.</div></div>`;
         row.querySelector('.dhead').onclick=()=>setDayRow(row,!row.classList.contains('on'));
         wrap.appendChild(row);
+        setDayRow(row,false);
       });
     }
     function setDayRow(row,on){
       row.classList.toggle('on',on);
       row.style.borderColor = on ? 'var(--blue)' : 'var(--line)';
-      row.querySelector('.dstate').textContent = on ? 'Working' : 'Day off';
-      row.querySelector('.dstate').style.color = on ? 'var(--blue)' : 'var(--soft)';
+      const st=row.querySelector('.dstate');
+      st.textContent = on ? '✓ Working' : 'Off';
+      st.style.color = on ? '#fff' : 'var(--soft)';
+      st.style.background = on ? 'var(--blue)' : 'transparent';
+      st.style.borderColor = on ? 'var(--blue)' : 'var(--line)';
       row.querySelector('.dtimes').style.display = on ? 'block' : 'none';
     }
     function readScheduleUI(){
