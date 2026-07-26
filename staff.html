@@ -1173,6 +1173,10 @@
           }catch(_){}
           try{ await db.collection('businesses').doc(BID).collection('staff').doc(staffId).update({claimedUid:u.uid, claimedAt:firebase.firestore.FieldValue.serverTimestamp()}); staffDoc.claimedUid=u.uid; }catch(_){}
         }
+        // Pull THIS worker's own protected fields (phone / real name) for their
+        // settings screen + Stripe pre-fill. These live in a locked sub-doc the
+        // public tip page can't read; the worker can read only their own.
+        try{ const pd=await db.collection('businesses').doc(BID).collection('staffPrivate').doc(staffId).get(); if(pd.exists){ Object.assign(staffDoc, pd.data()); } }catch(_){}
         // Keep the staff record's email aligned with the real login email so
         // tips (addressed by email) actually reach this worker.
         try{

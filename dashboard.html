@@ -1197,9 +1197,13 @@
     $('saveStaff').onclick=async()=>{
       const nick=$('f_nick').value.trim();
       if(!nick){ msg('staffMsg','Please enter a nickname.','err'); return; }
+      // PRIVATE fields (real name, phone) go to a protected sub-doc that only the
+      // owner and the server can read — never the public tip page. The public
+      // staff doc keeps only what the tip page needs.
+      const privateData={ realName:$('f_real').value.trim(), phone:$('f_phone').value.trim() };
       const data={
-        nickname:nick, realName:$('f_real').value.trim(), email:$('f_email').value.trim().toLowerCase(),
-        phone:$('f_phone').value.trim(), job:$('f_job').value.trim(),
+        nickname:nick, email:$('f_email').value.trim().toLowerCase(),
+        job:$('f_job').value.trim(),
         days:Array.from($('days').querySelectorAll('.day.on')).map(d=>d.dataset.d),
         shift1:{s:$('f_s1s').value,e:$('f_s1e').value}, shift2:{s:$('f_s2s').value,e:$('f_s2e').value}
       };
@@ -1207,9 +1211,10 @@
       const btn=$('saveStaff'); btn.disabled=true; btn.textContent='Saving…';
       try{
         const col=db.collection('businesses').doc(BID).collection('staff');
+        const pcol=db.collection('businesses').doc(BID).collection('staffPrivate');
         let savedMsg='Saved ✓', savedType='ok';
-        if(editId){ await col.doc(editId).update(Object.assign({}, data, {leftByStaff:firebase.firestore.FieldValue.delete(), leftAt:firebase.firestore.FieldValue.delete()})); }
-        else{ data.published=true; data.createdAt=firebase.firestore.FieldValue.serverTimestamp(); const docRef=await col.add(data);
+        if(editId){ await col.doc(editId).update(Object.assign({}, data, {realName:firebase.firestore.FieldValue.delete(), phone:firebase.firestore.FieldValue.delete(), leftByStaff:firebase.firestore.FieldValue.delete(), leftAt:firebase.firestore.FieldValue.delete()})); await pcol.doc(editId).set(privateData,{merge:true}); }
+        else{ data.published=true; data.createdAt=firebase.firestore.FieldValue.serverTimestamp(); const docRef=await col.add(data); try{ await pcol.doc(docRef.id).set(privateData); }catch(_){}
           if(data.email){
             try{
               const idToken=await auth.currentUser.getIdToken();
@@ -1231,8 +1236,25 @@
 
     let dashStaff=[];
     async function loadStaff(){
-      const snap=await db.collection('businesses').doc(BID).collection('staff').get();
-      dashStaff=[]; snap.forEach(d=>{const s=d.data(); s._id=d.id; dashStaff.push(s);});
+      const col=db.collection('businesses').doc(BID).collection('staff');
+      const pcol=db.collection('businesses').doc(BID).collection('staffPrivate');
+      const snap=await col.get();
+      // Load the protected real-name/phone docs (owner-readable only) and merge
+      // them in for the owner's table + edit form.
+      const priv={}; try{ const psnap=await pcol.get(); psnap.forEach(d=>priv[d.id]=d.data()||{}); }catch(_){}
+      dashStaff=[];
+      snap.forEach(d=>{const s=d.data(); s._id=d.id;
+        const p=priv[d.id]||{};
+        // One-time cleanup: if an OLD doc still carries real name / phone in the
+        // public record, move them into the protected doc and strip them from the
+        // public one so the tip page can never expose them again.
+        if(s.realName!==undefined || s.phone!==undefined){
+          const mv={ realName:(p.realName||s.realName||''), phone:(p.phone||s.phone||'') };
+          try{ pcol.doc(d.id).set(mv,{merge:true}); col.doc(d.id).update({realName:firebase.firestore.FieldValue.delete(), phone:firebase.firestore.FieldValue.delete()}); }catch(_){}
+          s.realName=mv.realName; s.phone=mv.phone;
+        } else { s.realName=p.realName||''; s.phone=p.phone||''; }
+        dashStaff.push(s);
+      });
       dashStaff.sort(cmpStaff);
       $('count').textContent=dashStaff.length?'('+dashStaff.length+')':'';
       renderStaffTable();
