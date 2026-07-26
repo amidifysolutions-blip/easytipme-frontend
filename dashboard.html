@@ -1259,21 +1259,23 @@
           tb.appendChild(hr);
         }
         const removed=s.status==='removed';
-        const pub=s.published!==false && !removed;
+        const left=s.leftByStaff===true && !removed;
+        const pub=s.published!==false && !removed && !left;
         const av=s.photo?`<img class="tav" src="${s.photo}">`:`<div class="tav">${(s.nickname||'?').charAt(0).toUpperCase()}</div>`;
         const sched=(s.days&&s.days.length?s.days.join(', '):'—')+'<br><small style="color:var(--soft)">'+(s.shift1&&s.shift1.s?s.shift1.s+'–'+(s.shift1.e||''):'no shift')+(s.shift2&&s.shift2.s?' , '+s.shift2.s+'–'+(s.shift2.e||''):'')+'</small>';
         const tr=document.createElement('tr');
-        if(removed) tr.style.opacity='.5';
+        if(removed||left) tr.style.opacity='.5';
         tr.innerHTML=`<td>${av}</td>
-          <td><b>${esc(s.nickname||'')}</b>${removed?' <small style="color:#e5484d">(removed)</small>':''}<br><small style="color:var(--soft)">${esc(s.job||'')}</small></td>
+          <td><b>${esc(s.nickname||'')}</b>${removed?' <small style="color:#e5484d">(removed)</small>':(left?' <small style="color:#e5a23d">(left)</small>':'')}<br><small style="color:var(--soft)">${esc(s.job||'')}</small></td>
           <td>${sched}</td>
-          <td><label class="switch"><input type="checkbox" ${pub?'checked':''} ${removed?'disabled':''}><span class="slider"></span></label></td>
-          <td><button class="link b editBtn">Edit</button> &nbsp; <button class="link delBtn">${removed?'Restore':'Remove'}</button>${removed?' &nbsp; <button class="link purgeBtn" style="color:#e5484d">Delete</button>':''}</td>`;
+          <td><label class="switch"><input type="checkbox" ${pub?'checked':''} ${(removed||left)?'disabled':''}><span class="slider"></span></label></td>
+          <td><button class="link b editBtn">Edit</button> &nbsp; <button class="link delBtn">${removed?'Restore':(left?'Return':'Remove')}</button>${removed?' &nbsp; <button class="link purgeBtn" style="color:#e5484d">Delete</button>':''}</td>`;
         tr.querySelector('.switch input').onchange=e=>db.collection('businesses').doc(BID).collection('staff').doc(s._id).update({published:e.target.checked});
         tr.querySelector('.editBtn').onclick=()=>editStaff(s._id,s);
         tr.querySelector('.delBtn').onclick=async()=>{
           const ref=db.collection('businesses').doc(BID).collection('staff').doc(s._id);
           if(removed){ await ref.update({status:'active',published:true,leftByStaff:firebase.firestore.FieldValue.delete(),leftAt:firebase.firestore.FieldValue.delete()}); loadStaff(); return; }
+          if(left){ await ref.update({published:true,leftByStaff:firebase.firestore.FieldValue.delete(),leftAt:firebase.firestore.FieldValue.delete()}); loadStaff(); return; }
           if(confirm('Remove '+(s.nickname||'this member')+'?\n\nThey stop receiving tips here and are hidden from your QR, but their tip history stays saved and you can restore them anytime.')){ await ref.update({status:'removed',published:false}); loadStaff(); }
         };
         const purge=tr.querySelector('.purgeBtn');
