@@ -484,6 +484,7 @@
       delete_account:"Delete your account", del_modal_title:"Delete your account?", del_modal_desc:"This removes you from every workplace, deletes your payout (Stripe) account, and permanently deletes your login. This can't be undone. Withdraw any available balance first.", confirm_delete:"Delete my account",
       m_deleted_ok:"Your account has been deleted.", m_deleted_partial:"Account deleted. Note: {amt} in held tips couldn't be paid out because no bank was connected.",
       your_workplaces:"Your workplaces", add_workplace:"+ Add workplace", join_wp:"Join workplace", no_workplaces:"Just this one for now.", current_wp:"Current", switch_wp:"Switch", left_tag:"left",
+      m_max_workplaces:"You can be in up to 5 workplaces at once. Leave one to join another.",
       connected_to:"Connected to {shop}",
       m_enter_code:"Enter your workplace code.", m_enter_email_pass:"Enter your email and password.",
       m_enter_names:"Enter your first and last name.", m_pass_min:"Password must be at least 6 characters.", m_pass_match:"Passwords don’t match.",
@@ -546,6 +547,7 @@
       delete_account:"احذف حسابك", del_modal_title:"حذف حسابك؟", del_modal_desc:"هيدا بيشيلك من كل أماكن العمل، بيحذف حساب الدفع (Stripe) تبعك، وبيمحي تسجيل دخولك نهائيًا. ما فيك ترجع عنه. اسحب أي رصيد متوفّر قبل.", confirm_delete:"احذف حسابي",
       m_deleted_ok:"انحذف حسابك.", m_deleted_partial:"انحذف الحساب. ملاحظة: {amt} من البقشيش المحجوز ما انبعت لأنّه ما في حساب بنك موصول.",
       your_workplaces:"أماكن عملك", add_workplace:"+ إضافة مكان عمل", join_wp:"انضمّ للمحل", no_workplaces:"هيدا الوحيد حالياً.", current_wp:"الحالي", switch_wp:"تبديل", left_tag:"غادرت",
+      m_max_workplaces:"فيك تكون بحد أقصى ٥ أماكن عمل بنفس الوقت. غادر واحد حتى تنضمّ لغيره.",
       connected_to:"متصل بـ {shop}",
       m_enter_code:"أدخل كود مكان عملك.", m_enter_email_pass:"أدخل الإيميل وكلمة المرور.",
       m_enter_names:"أدخل اسمك الأول واسم العائلة.", m_pass_min:"كلمة المرور لازم ٦ أحرف على الأقل.", m_pass_match:"كلمتا المرور مش متطابقتين.",
@@ -1154,6 +1156,14 @@
         if(staffDoc.status==='removed'){ show('auth'); $('shopCodeWrap').classList.remove('hide'); amsg(t('m_removed',{shop:shop.businessName||'—'})); return; }
         if(staffDoc.leftByStaff===true){ show('auth'); $('shopCodeWrap').classList.remove('hide'); amsg(t('m_left',{shop:shop.businessName||'—'})); return; }
         if(!staffDoc.claimedUid){
+          // Guardrail: a worker can be active in at most 5 workplaces at once.
+          try{
+            const it0=await u.getIdToken();
+            const wr=await fetch(BACKEND+'/staff/workplaces',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken:it0})});
+            const wj=await wr.json().catch(()=>({}));
+            const activeCount=(wj.workplaces||[]).filter(w=>w.bid!==BID && !w.left && !w.removed).length;
+            if(activeCount>=5){ signInAttempt=false; show('auth'); $('shopCodeWrap').classList.remove('hide'); amsg(t('m_max_workplaces')); return; }
+          }catch(_){}
           try{ await db.collection('businesses').doc(BID).collection('staff').doc(staffId).update({claimedUid:u.uid, claimedAt:firebase.firestore.FieldValue.serverTimestamp()}); staffDoc.claimedUid=u.uid; }catch(_){}
         }
         // Keep the staff record's email aligned with the real login email so
