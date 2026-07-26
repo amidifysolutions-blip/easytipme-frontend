@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard.html
+Disallow: /master.html
+Disallow: /master-control.html
+Disallow: /app.html
+Disallow: /verify.html
+
+Sitemap: https://easytipme.com/sitemap.xml
