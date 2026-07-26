@@ -65,6 +65,8 @@
   .day.on{background:#000;color:#fff;border-color:#000}
   .times{display:flex;gap:10px;align-items:center}
   .times input{margin-bottom:16px}
+  input[type=time]{color:var(--ink,#e9e9ee)}
+  input[type=time]::-webkit-calendar-picker-indicator{filter:invert(1);opacity:.6;cursor:pointer}
   .btn{background:var(--blue);color:#fff;border:none;padding:13px 22px;border-radius:12px;font-weight:600;font-size:15px;cursor:pointer;font-family:inherit;transition:.2s}
   .btn:hover{background:var(--blue-d)}.btn:active{transform:scale(.98)}
   .btn.full{width:100%}
