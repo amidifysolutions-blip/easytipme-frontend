@@ -218,6 +218,21 @@
     <div class="powered" data-i18n="powered">Powered by Amidify Solutions Inc.</div>
   </div>
 
+  <!-- NO WORKPLACE (signed in, but not part of any shop) -->
+  <div id="nowp" class="wrap hide">
+    <div class="brandbar"><b>Easy<span style="color:#0071e3">Tip</span>Me</b></div>
+    <div class="card">
+      <h1 data-i18n="nowp_title">You're not connected to a workplace</h1>
+      <p class="sub" data-i18n="nowp_sub">Your account is ready. When a workplace adds your email, enter their workplace code here to join.</p>
+      <div id="nowpMsg" class="msg"></div>
+      <label data-i18n="wcode">Workplace code</label>
+      <input id="nowpCode" type="text" data-i18n-ph="wcode_ph" placeholder="Ask your workplace for the code" autocomplete="off" style="text-transform:uppercase">
+      <button class="btn" id="nowpJoin" style="margin-top:12px" data-i18n="join_wp">Join workplace</button>
+      <button class="btn ghost" id="nowpLogout" style="margin-top:10px" data-i18n="log_out">Log out</button>
+    </div>
+    <div class="powered" data-i18n="powered">Powered by Amidify Solutions Inc.</div>
+  </div>
+
   <!-- VERIFY EMAIL (hard gate, off by default) -->
   <div id="verify" class="wrap hide">
     <div class="brandbar"><span class="mk" id="mk3"></span><b>Easy<span style="color:#0071e3">Tip</span>Me</b></div>
@@ -489,6 +504,7 @@
       del_warn:"Attention: Deleting your account removes you from all your workplaces, closes your payout (Stripe) account, and permanently deletes your login. This can't be undone. Withdraw any available balance first. Your past tip history stays with your workplaces for their records.",
       m_deleted_ok:"Your account has been deleted.", m_deleted_partial:"Account deleted. Note: {amt} in held tips couldn't be paid out because no bank was connected.",
       your_workplaces:"Your workplaces", add_workplace:"+ Add workplace", join_wp:"Join workplace", no_workplaces:"Just this one for now.", current_wp:"Current", switch_wp:"Switch", left_tag:"left",
+      nowp_title:"You're not connected to a workplace", nowp_sub:"Your account is ready. When a workplace adds your email, enter their workplace code here to join.",
       m_max_workplaces:"You can be in up to 5 workplaces at once. Leave one to join another.",
       connected_to:"Connected to {shop}",
       m_enter_code:"Enter your workplace code.", m_enter_email_pass:"Enter your email and password.",
@@ -555,6 +571,7 @@
       del_warn:"انتباه: مسح حسابك بيشيلك من كل أماكن شغلك، بيسكّر حساب الدفع تبعك (Stripe)، وبيمسح تسجيل دخولك نهائيًا. ما بيرجع بعد المسح. اسحب أي رصيد متاح عندك قبل. سجلّ بقشيشك السابق بيضل محفوظ عند أماكن عملك لسجلّاتهم.",
       m_deleted_ok:"انحذف حسابك.", m_deleted_partial:"انحذف الحساب. ملاحظة: {amt} من البقشيش المحجوز ما انبعت لأنّه ما في حساب بنك موصول.",
       your_workplaces:"أماكن عملك", add_workplace:"+ إضافة مكان عمل", join_wp:"انضمّ للمحل", no_workplaces:"هيدا الوحيد حالياً.", current_wp:"الحالي", switch_wp:"تبديل", left_tag:"غادرت",
+      nowp_title:"أنت مش متصل بأي محل", nowp_sub:"حسابك جاهز. لما محل يضيف إيميلك، أدخل كود المحل هون لتنضمّ.",
       m_max_workplaces:"فيك تكون بحد أقصى ٥ أماكن عمل بنفس الوقت. غادر واحد حتى تنضمّ لغيره.",
       connected_to:"متصل بـ {shop}",
       m_enter_code:"أدخل كود مكان عملك.", m_enter_email_pass:"أدخل الإيميل وكلمة المرور.",
@@ -609,6 +626,7 @@
       password_confirm_ph:"Votre mot de passe", confirm_leave:"Quitter le lieu de travail", cancel:"Annuler",
       delete_account:"Supprimer votre compte", del_modal_title:"Supprimer votre compte ?", del_modal_desc:"Cela vous retire de tous les lieux de travail, supprime votre compte de paiement (Stripe) et supprime définitivement votre connexion. Irréversible. Retirez d'abord tout solde disponible.", confirm_delete:"Supprimer mon compte",
       del_warn:"Attention : supprimer votre compte vous retire de tous vos lieux de travail, ferme votre compte de versement (Stripe) et supprime définitivement votre connexion. Cette action est irréversible. Retirez d'abord tout solde disponible. Votre historique de pourboires reste enregistré chez vos lieux de travail.",
+      nowp_title:"Vous n'êtes connecté à aucun lieu de travail", nowp_sub:"Votre compte est prêt. Quand un lieu de travail ajoute votre e-mail, entrez son code ici pour le rejoindre.",
       m_deleted_ok:"Votre compte a été supprimé.", m_deleted_partial:"Compte supprimé. Note : {amt} de pourboires retenus n'ont pas pu être versés car aucun compte bancaire n'était connecté.",
       connected_to:"Connecté à {shop}",
       m_enter_code:"Entrez le code de votre lieu de travail.", m_enter_email_pass:"Entrez votre e-mail et mot de passe.",
@@ -1153,19 +1171,20 @@
         let snap=await db.collection('businesses').doc(BID).collection('staff').where('claimedUid','==',u.uid).limit(1).get();
         if(snap.empty){ snap=await db.collection('businesses').doc(BID).collection('staff').where('email','==',(u.email||'').toLowerCase()).limit(1).get(); }
         if(snap.empty){
-          // Only alarm the user if THEY just tried to sign in. On a silent
-          // auto-login with an email that isn't on this team, sign out quietly
-          // and show a clean sign-in screen — no scary red banner for no reason.
-          if(signInAttempt){ signInAttempt=false; show('auth'); $('shopCodeWrap').classList.remove('hide'); amsg(t('m_not_registered',{shop:shop.businessName||'—'})); }
-          else { try{ await auth.signOut(); }catch(_){}; show('auth'); }
-          return;
+          // If THEY just typed a specific code that isn't theirs, tell them
+          // (explicit attempt). Otherwise it's a silent auto-login of a shop that
+          // no longer has them (owner removed them) → keep them signed in and
+          // route to their other workplace or the no-workplace screen. Never sign out.
+          if(signInAttempt){ signInAttempt=false; show('auth'); $('shopCodeWrap').classList.remove('hide'); amsg(t('m_not_registered',{shop:shop.businessName||'—'})); return; }
+          await goNoWorkplace(u); return;
         }
         signInAttempt=false;
         staffDoc=snap.docs[0].data(); staffId=snap.docs[0].id;
-        // No active membership here → surface the code field so they can enter
-        // another workplace's code (e.g. after leaving, or if removed).
-        if(staffDoc.status==='removed'){ show('auth'); $('shopCodeWrap').classList.remove('hide'); amsg(t('m_removed',{shop:shop.businessName||'—'})); return; }
-        if(staffDoc.leftByStaff===true){ show('auth'); $('shopCodeWrap').classList.remove('hide'); amsg(t('m_left',{shop:shop.businessName||'—'})); return; }
+        // No active membership here (owner removed them, or they left) → switch to
+        // another active workplace if they have one, else show the no-workplace
+        // screen. The worker stays signed in either way.
+        if(staffDoc.status==='removed'){ await goNoWorkplace(u); return; }
+        if(staffDoc.leftByStaff===true){ await goNoWorkplace(u); return; }
         if(!staffDoc.claimedUid){
           // Guardrail: a worker can be active in at most 5 workplaces at once.
           try{
@@ -1629,6 +1648,37 @@
       }catch(e){ wpmsg(t('m_wp_not_found')); $('wpJoin').disabled=false; }
     };
 
+    // ---- "not connected to a workplace" screen (signed in, no active shop) ----
+    async function goNoWorkplace(u){
+      // If the worker still belongs to another active workplace, jump to it;
+      // otherwise show the friendly no-workplace screen — they STAY signed in and
+      // can enter a new workplace code to join once an owner adds their email.
+      try{
+        const it=await u.getIdToken();
+        const r=await fetch(BACKEND+'/staff/workplaces',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken:it})});
+        const j=await r.json().catch(()=>({}));
+        const other=(j.workplaces||[]).find(w=>w.bid!==BID && !w.left && !w.removed);
+        if(other){ try{localStorage.setItem('etm_staff_bid',other.bid);}catch(_){}; location.href='staff.html?s='+other.bid; return; }
+      }catch(_){}
+      try{ localStorage.removeItem('etm_staff_bid'); }catch(_){}
+      BID=''; staffDoc=null; staffId=null;
+      const m=$('nowpMsg'); if(m){ m.textContent=''; m.className='msg'; }
+      show('nowp');
+    }
+    function nowpmsg(txt){ const m=$('nowpMsg'); if(m){ m.textContent=txt||''; m.className='msg'+(txt?' err':''); } }
+    if($('nowpJoin')) $('nowpJoin').onclick=async()=>{
+      const raw=($('nowpCode').value||'').trim(); if(!raw){ nowpmsg(t('m_enter_code')); return; }
+      const code=raw.toUpperCase().replace(/[^A-Z0-9]/g,'');
+      $('nowpJoin').disabled=true;
+      try{
+        const cd=await db.collection('shopCodes').doc(code).get();
+        const bid=(cd.exists&&cd.data().bid)?cd.data().bid:code;
+        try{localStorage.setItem('etm_staff_bid',bid);}catch(_){}
+        location.href='staff.html?s='+bid;
+      }catch(e){ nowpmsg(t('m_wp_not_found')); $('nowpJoin').disabled=false; }
+    };
+    if($('nowpLogout')) $('nowpLogout').onclick=()=>{ try{ if(window._tipsUnsub) window._tipsUnsub(); }catch(_){} auth.signOut().then(()=>{ staffDoc=null; show('auth'); }); };
+
     // ---- change email (self-service) ----
     function emmsg(txt){const m=$('emMsg');m.textContent=txt||'';m.className='msg'+(txt?' err':'');}
     $('changeEmailBtn').onclick=()=>{ $('emNew').value=''; $('emPass').value=''; emmsg(''); $('emailModal').classList.remove('hide'); };
@@ -1662,7 +1712,7 @@
     }
     document.querySelectorAll('.nav button').forEach(b=>{ b.onclick=()=>switchTab(b.getAttribute('data-tab')); });
 
-    function show(id){['loading','auth','verify','firstpw','app'].forEach(x=>$(x).classList.add('hide'));$(id).classList.remove('hide');window.scrollTo(0,0);}
+    function show(id){['loading','auth','nowp','verify','firstpw','app'].forEach(x=>$(x).classList.add('hide'));$(id).classList.remove('hide');window.scrollTo(0,0);}
 
     // initial paint
     applyLang();
