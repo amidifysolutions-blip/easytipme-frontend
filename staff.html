@@ -346,11 +346,11 @@
       </div>
       <div class="card">
         <button class="btn ghost" id="logoutBtn" data-i18n="log_out">Log out</button>
-      </div>
-      <div class="card" style="border:1px solid #fadcdc">
-        <div class="h3" style="color:var(--danger)" data-i18n="leave_wp">Leave workplace</div>
-        <div class="note" data-i18n="leave_desc">Stop appearing on your workplace's tip page. Your past tips stay recorded.</div>
-        <button class="btn danger" id="leaveBtn" style="margin-top:14px" data-i18n="leave_wp">Leave workplace</button>
+        <div style="margin-top:18px;text-align:center;line-height:2.4">
+          <button id="leaveBtn" style="background:none;border:none;color:#b06a6a;font:inherit;font-size:12.5px;cursor:pointer;text-decoration:underline" data-i18n="leave_wp">Leave workplace</button>
+          <br>
+          <button id="deleteAcctBtn" style="background:none;border:none;color:var(--danger);font:inherit;font-size:12.5px;cursor:pointer;text-decoration:underline" data-i18n="delete_account">Delete your account</button>
+        </div>
       </div>
       <div class="powered" data-i18n="powered">Powered by Amidify Solutions Inc.</div>
     </div>
@@ -392,6 +392,19 @@
       <div class="pwrap"><input id="lvPass" type="password" data-i18n-ph="password_confirm_ph" placeholder="Your password" autocomplete="current-password"><button type="button" class="eye" id="eyeBtn3" aria-label="Show password"></button></div>
       <button class="btn danger" id="lvConfirm" data-i18n="confirm_leave">Leave workplace</button>
       <button class="btn ghost" id="lvCancel" data-i18n="cancel">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Delete-account confirm modal (password protected) -->
+  <div id="deleteModal" class="modal-wrap hide">
+    <div class="modal">
+      <div class="modal-ic">🗑️</div>
+      <h2 data-i18n="del_modal_title">Delete your account?</h2>
+      <p data-i18n="del_modal_desc">This removes you from every workplace, deletes your payout (Stripe) account, and permanently deletes your login. This can't be undone. Withdraw any available balance first.</p>
+      <div id="delMsg" class="msg"></div>
+      <div class="pwrap"><input id="delPass" type="password" data-i18n-ph="password_confirm_ph" placeholder="Your password" autocomplete="current-password"><button type="button" class="eye" id="eyeBtn5" aria-label="Show password"></button></div>
+      <button class="btn danger" id="delConfirm" data-i18n="confirm_delete">Delete my account</button>
+      <button class="btn ghost" id="delCancel" data-i18n="cancel">Cancel</button>
     </div>
   </div>
 
@@ -458,6 +471,8 @@
       cm_agree:"I understand & agree", cm_later:"Maybe later", cm_close:"Close",
       leave_modal_title:"Leave {shop}?", leave_modal_desc:"Enter your password to confirm. You'll stop appearing on their tip page. Your past tips stay recorded, and they can add you again to rejoin.",
       password_confirm_ph:"Your password", confirm_leave:"Leave workplace", cancel:"Cancel",
+      delete_account:"Delete your account", del_modal_title:"Delete your account?", del_modal_desc:"This removes you from every workplace, deletes your payout (Stripe) account, and permanently deletes your login. This can't be undone. Withdraw any available balance first.", confirm_delete:"Delete my account",
+      m_deleted_ok:"Your account has been deleted.", m_deleted_partial:"Account deleted. Note: {amt} in held tips couldn't be paid out because no bank was connected.",
       connected_to:"Connected to {shop}",
       m_enter_code:"Enter your workplace code.", m_enter_email_pass:"Enter your email and password.",
       m_enter_names:"Enter your first and last name.", m_pass_min:"Password must be at least 6 characters.", m_pass_match:"Passwords don’t match.",
@@ -517,6 +532,8 @@
       cm_agree:"فهمت وأوافق", cm_later:"ربما لاحقًا", cm_close:"إغلاق",
       leave_modal_title:"مغادرة {shop}؟", leave_modal_desc:"أدخل كلمة المرور للتأكيد. بتوقف تظهر بصفحة بقشيشهم. بقشيشك السابق بيضل مسجّل، وبيقدروا يضيفوك مرة تانية.",
       password_confirm_ph:"كلمة مرورك", confirm_leave:"غادر مكان العمل", cancel:"إلغاء",
+      delete_account:"احذف حسابك", del_modal_title:"حذف حسابك؟", del_modal_desc:"هيدا بيشيلك من كل أماكن العمل، بيحذف حساب الدفع (Stripe) تبعك، وبيمحي تسجيل دخولك نهائيًا. ما فيك ترجع عنه. اسحب أي رصيد متوفّر قبل.", confirm_delete:"احذف حسابي",
+      m_deleted_ok:"انحذف حسابك.", m_deleted_partial:"انحذف الحساب. ملاحظة: {amt} من البقشيش المحجوز ما انبعت لأنّه ما في حساب بنك موصول.",
       connected_to:"متصل بـ {shop}",
       m_enter_code:"أدخل كود مكان عملك.", m_enter_email_pass:"أدخل الإيميل وكلمة المرور.",
       m_enter_names:"أدخل اسمك الأول واسم العائلة.", m_pass_min:"كلمة المرور لازم ٦ أحرف على الأقل.", m_pass_match:"كلمتا المرور مش متطابقتين.",
@@ -566,6 +583,8 @@
       cm_agree:"Je comprends et j'accepte", cm_later:"Plus tard", cm_close:"Fermer",
       leave_modal_title:"Quitter {shop} ?", leave_modal_desc:"Entrez votre mot de passe pour confirmer. Vous n'apparaîtrez plus sur leur page de pourboires. Vos pourboires passés restent enregistrés et ils peuvent vous réajouter.",
       password_confirm_ph:"Votre mot de passe", confirm_leave:"Quitter le lieu de travail", cancel:"Annuler",
+      delete_account:"Supprimer votre compte", del_modal_title:"Supprimer votre compte ?", del_modal_desc:"Cela vous retire de tous les lieux de travail, supprime votre compte de paiement (Stripe) et supprime définitivement votre connexion. Irréversible. Retirez d'abord tout solde disponible.", confirm_delete:"Supprimer mon compte",
+      m_deleted_ok:"Votre compte a été supprimé.", m_deleted_partial:"Compte supprimé. Note : {amt} de pourboires retenus n'ont pas pu être versés car aucun compte bancaire n'était connecté.",
       connected_to:"Connecté à {shop}",
       m_enter_code:"Entrez le code de votre lieu de travail.", m_enter_email_pass:"Entrez votre e-mail et mot de passe.",
       m_enter_names:"Entrez votre prénom et nom.", m_pass_min:"Le mot de passe doit contenir au moins 6 caractères.", m_pass_match:"Les mots de passe ne correspondent pas.",
@@ -935,7 +954,7 @@
     const EYE='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8e8e93" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1.8 12S5.3 5 12 5s10.2 7 10.2 7-3.5 7-10.2 7S1.8 12 1.8 12z"/><circle cx="12" cy="12" r="3.1"/></svg>';
     const EYEOFF='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8e8e93" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 5.2A9.6 9.6 0 0 1 12 5c6.7 0 10.2 7 10.2 7a17 17 0 0 1-3.1 3.8M6.3 6.3A17 17 0 0 0 1.8 12S5.3 19 12 19a9.5 9.5 0 0 0 4.1-.9"/><path d="M9.9 9.9a3.1 3.1 0 0 0 4.4 4.4"/><line x1="3" y1="3" x2="21" y2="21"/></svg>';
     function eyeToggle(btn,inp){ $(btn).innerHTML=EYE; $(btn).onclick=()=>{const p=$(inp);const r=p.type==='password';p.type=r?'text':'password';$(btn).innerHTML=r?EYEOFF:EYE;}; }
-    eyeToggle('eyeBtn','pass'); eyeToggle('eyeBtn2','pass2'); eyeToggle('eyeBtn3','lvPass'); eyeToggle('eyeBtn4','emPass'); if($('eyeFp')) eyeToggle('eyeFp','fpNew');
+    eyeToggle('eyeBtn','pass'); eyeToggle('eyeBtn2','pass2'); eyeToggle('eyeBtn3','lvPass'); eyeToggle('eyeBtn4','emPass'); eyeToggle('eyeBtn5','delPass'); if($('eyeFp')) eyeToggle('eyeFp','fpNew');
 
     if(!BID){ $('shopCodeWrap').classList.remove('hide'); }
 
@@ -1475,6 +1494,30 @@
         const nm=shop&&shop.businessName||'—';
         await auth.signOut(); staffDoc=null; show('auth'); amsg(t('m_left_ok',{shop:nm}), 'ok');
       }catch(e){ const c=(e&&e.code)||''; lvmsg((c.includes('wrong-password')||c.includes('invalid-credential'))?t('m_leave_wrong_pass'):prettyErr(e)); $('lvConfirm').disabled=false; }
+    };
+
+    // ---- delete account (password protected) ----
+    function delmsg(txt){const m=$('delMsg');m.textContent=txt||'';m.className='msg'+(txt?' err':'');}
+    $('deleteAcctBtn').onclick=()=>{ $('delPass').value=''; delmsg(''); $('deleteModal').classList.remove('hide'); };
+    $('delCancel').onclick=()=>$('deleteModal').classList.add('hide');
+    $('delConfirm').onclick=async()=>{
+      const pw=$('delPass').value; if(!pw){ delmsg(t('e_missing_pass')); return; }
+      $('delConfirm').disabled=true;
+      try{
+        const u=auth.currentUser;
+        const cred=firebase.auth.EmailAuthProvider.credential(u.email, pw);
+        await u.reauthenticateWithCredential(cred);
+        const idToken=await u.getIdToken(true);
+        const r=await fetch(BACKEND+'/staff/delete-account',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken})});
+        const j=await r.json().catch(()=>({}));
+        if(!r.ok || !j.ok) throw new Error(j.error||'delete-failed');
+        $('deleteModal').classList.add('hide');
+        let okMsg=t('m_deleted_ok');
+        if(j.heldUnpaid>0){ const amt=(j.currency?j.currency.toUpperCase()+' ':'')+Number(j.heldUnpaidAmount||0).toFixed(2); okMsg=t('m_deleted_partial',{amt}); }
+        try{ if(window._tipsUnsub) window._tipsUnsub(); }catch(_){}
+        try{ await auth.signOut(); }catch(_){}
+        staffDoc=null; registerMode=false; show('auth'); amsg(okMsg,'ok');
+      }catch(e){ const c=(e&&e.code)||''; delmsg((c.includes('wrong-password')||c.includes('invalid-credential'))?t('m_leave_wrong_pass'):(c.includes('requires-recent-login')?t('m_reauth_needed'):prettyErr(e))); $('delConfirm').disabled=false; }
     };
 
     // ---- change email (self-service) ----
