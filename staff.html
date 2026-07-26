@@ -1233,6 +1233,10 @@
 
     async function renderApp(u){
       try{ await u.reload(); }catch(_){}  // refresh emailVerified so banner + Settings pill always agree
+      // Read the worker's REAL Pro status (source of truth = workers/{uid}) before
+      // rendering, so Pro shows in every workplace — not just the shop they bought
+      // it from. Done first so no "Upgrade" prompt flashes for a Pro worker.
+      try{ const it=await u.getIdToken(); const wr=await fetch(BACKEND+'/staff/workplaces',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken:it})}); const wj=await wr.json().catch(()=>({})); WORKER_PRO = !!(wj && wj.pro===true); }catch(_){}
       curSym=CURSYM[shop.currency||'CAD']||'$';
       // header
       $('pPic').innerHTML = staffDoc.photo?`<img src="${staffDoc.photo}" style="width:60px;height:60px;border-radius:50%;object-fit:cover;display:block">`:(staffDoc.nickname||(u.displayName||'?')).charAt(0).toUpperCase();
@@ -1282,7 +1286,12 @@
       $('eRating').textContent=rc?(rs/rc).toFixed(1)+'★':'—';
     }
     function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-    function isWorkerPro(){ return !!(staffDoc && staffDoc.workerProActive); }
+    // Worker Pro is the WORKER's OWN subscription (lives on workers/{uid}) and
+    // applies in EVERY workplace. WORKER_PRO holds that durable source of truth
+    // (read from /staff/workplaces), so a Pro worker is never shown "subscribe
+    // again" in a shop whose staff record wasn't tagged yet.
+    let WORKER_PRO=false;
+    function isWorkerPro(){ return WORKER_PRO===true || !!(staffDoc && staffDoc.workerProActive); }
     let PAYOUT_READY=false;
     // Personal status badges — shown ONLY in the worker's own app (never to
     // customers, so no worker looks "better" than another on the tip page).
@@ -1416,7 +1425,7 @@
         const idToken=await u.getIdToken();
         const r=await fetch(BACKEND+'/billing/cancel',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,plan:'worker',bid:BID,staffId:(staffId||'')})});
         const j=await r.json();
-        if(j&&j.ok){ if(staffDoc) staffDoc.workerProActive=false; wpmsg(''); renderWorkerPro(u); renderRecent(); renderProfileBadges(); }
+        if(j&&j.ok){ WORKER_PRO=false; if(staffDoc) staffDoc.workerProActive=false; wpmsg(''); renderWorkerPro(u); renderRecent(); renderProfileBadges(); }
         else wpmsg('Could not cancel. Try again.');
       }catch(_){ wpmsg('Could not cancel. Try again.'); }
     }
@@ -1428,7 +1437,7 @@
           const r=await fetch(BACKEND+'/billing/confirm',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,sessionId:p.get('session_id')})});
           const j=await r.json();
           history.replaceState({},'',location.pathname);
-          if(j&&j.active && staffDoc){ staffDoc.workerProActive=true; renderWorkerPro(u); renderRecent(); renderProfileBadges(); switchTab('settings'); }
+          if(j&&j.active){ WORKER_PRO=true; if(staffDoc) staffDoc.workerProActive=true; renderWorkerPro(u); renderRecent(); renderProfileBadges(); switchTab('settings'); }
         }catch(_){ history.replaceState({},'',location.pathname); }
       } else if(p.get('pro')==='cancel'){ history.replaceState({},'',location.pathname); }
     }
