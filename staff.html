@@ -971,11 +971,10 @@
     function eyeToggle(btn,inp){ $(btn).innerHTML=EYE; $(btn).onclick=()=>{const p=$(inp);const r=p.type==='password';p.type=r?'text':'password';$(btn).innerHTML=r?EYEOFF:EYE;}; }
     eyeToggle('eyeBtn','pass'); eyeToggle('eyeBtn2','pass2'); eyeToggle('eyeBtn3','lvPass'); eyeToggle('eyeBtn4','emPass'); eyeToggle('eyeBtn5','delPass'); if($('eyeFp')) eyeToggle('eyeFp','fpNew');
 
-    // Always show the workplace-code field on sign-in: an invited worker (new OR
-    // existing account) can always enter email + password + code and land in the
-    // right shop. Left blank, it falls back to their current/last workplace.
-    $('shopCodeWrap').classList.remove('hide');
-    if(BID){ try{ db.collection('businesses').doc(BID).get().then(d=>{ if(d.exists && d.data().shopCode && !$('shopCode').value){ $('shopCode').value=d.data().shopCode; } }); }catch(_){} }
+    // The workplace-code field only appears when we don't already know the shop
+    // (new device, first sign-up, or after leaving). A returning active worker
+    // signs in with just email + password — no code asked.
+    if(!BID){ $('shopCodeWrap').classList.remove('hide'); }
 
     function amsg(t,type){const m=$('authMsg');m.textContent=t;m.className='msg '+(type||'err');}
     function prettyErr(e){const c=(e&&e.code)||'';
@@ -1005,6 +1004,9 @@
       $('regNameWrap').classList.toggle('hide',!registerMode);
       $('regConfirmWrap').classList.toggle('hide',!registerMode);
       $('forgotWrap').classList.toggle('hide',registerMode);
+      // Registering always needs a workplace code; signing in only shows it when
+      // we don't already know the shop.
+      $('shopCodeWrap').classList.toggle('hide', !registerMode && !!BID);
       buildSwitchLine();
     }
     function toggleMode(){ registerMode=!registerMode; applyMode(); }
@@ -1141,14 +1143,16 @@
           // Only alarm the user if THEY just tried to sign in. On a silent
           // auto-login with an email that isn't on this team, sign out quietly
           // and show a clean sign-in screen — no scary red banner for no reason.
-          if(signInAttempt){ signInAttempt=false; show('auth'); amsg(t('m_not_registered',{shop:shop.businessName||'—'})); }
+          if(signInAttempt){ signInAttempt=false; show('auth'); $('shopCodeWrap').classList.remove('hide'); amsg(t('m_not_registered',{shop:shop.businessName||'—'})); }
           else { try{ await auth.signOut(); }catch(_){}; show('auth'); }
           return;
         }
         signInAttempt=false;
         staffDoc=snap.docs[0].data(); staffId=snap.docs[0].id;
-        if(staffDoc.status==='removed'){ show('auth'); amsg(t('m_removed',{shop:shop.businessName||'—'})); return; }
-        if(staffDoc.leftByStaff===true){ show('auth'); amsg(t('m_left',{shop:shop.businessName||'—'})); return; }
+        // No active membership here → surface the code field so they can enter
+        // another workplace's code (e.g. after leaving, or if removed).
+        if(staffDoc.status==='removed'){ show('auth'); $('shopCodeWrap').classList.remove('hide'); amsg(t('m_removed',{shop:shop.businessName||'—'})); return; }
+        if(staffDoc.leftByStaff===true){ show('auth'); $('shopCodeWrap').classList.remove('hide'); amsg(t('m_left',{shop:shop.businessName||'—'})); return; }
         if(!staffDoc.claimedUid){
           try{ await db.collection('businesses').doc(BID).collection('staff').doc(staffId).update({claimedUid:u.uid, claimedAt:firebase.firestore.FieldValue.serverTimestamp()}); staffDoc.claimedUid=u.uid; }catch(_){}
         }
