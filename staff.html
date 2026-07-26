@@ -361,6 +361,7 @@
           <button id="leaveBtn" style="background:none;border:none;color:#b06a6a;font:inherit;font-size:14.5px;font-weight:600;cursor:pointer;text-decoration:underline" data-i18n="leave_wp">Leave workplace</button>
           <br>
           <button id="deleteAcctBtn" style="background:none;border:none;color:var(--danger);font:inherit;font-size:11px;cursor:pointer;text-decoration:underline;opacity:.85" data-i18n="delete_account">Delete your account</button>
+          <div style="margin:8px auto 0;max-width:340px;font-size:11.5px;line-height:1.55;color:var(--soft);text-align:center" data-i18n="del_warn">Attention: Deleting your account removes you from all your workplaces, closes your payout (Stripe) account, and permanently deletes your login. This can't be undone. Withdraw any available balance first. Your past tip history stays with your workplaces for their records.</div>
         </div>
       </div>
       <div class="powered" data-i18n="powered">Powered by Amidify Solutions Inc.</div>
@@ -485,6 +486,7 @@
       leave_modal_title:"Leave {shop}?", leave_modal_desc:"Enter your password to confirm. You'll stop appearing on their tip page. Your past tips stay recorded, and they can add you again to rejoin.",
       password_confirm_ph:"Your password", confirm_leave:"Leave workplace", cancel:"Cancel",
       delete_account:"Delete your account", del_modal_title:"Delete your account?", del_modal_desc:"This removes you from every workplace, deletes your payout (Stripe) account, and permanently deletes your login. This can't be undone. Withdraw any available balance first.", confirm_delete:"Delete my account",
+      del_warn:"Attention: Deleting your account removes you from all your workplaces, closes your payout (Stripe) account, and permanently deletes your login. This can't be undone. Withdraw any available balance first. Your past tip history stays with your workplaces for their records.",
       m_deleted_ok:"Your account has been deleted.", m_deleted_partial:"Account deleted. Note: {amt} in held tips couldn't be paid out because no bank was connected.",
       your_workplaces:"Your workplaces", add_workplace:"+ Add workplace", join_wp:"Join workplace", no_workplaces:"Just this one for now.", current_wp:"Current", switch_wp:"Switch", left_tag:"left",
       m_max_workplaces:"You can be in up to 5 workplaces at once. Leave one to join another.",
@@ -550,6 +552,7 @@
       leave_modal_title:"مغادرة {shop}؟", leave_modal_desc:"أدخل كلمة المرور للتأكيد. بتوقف تظهر بصفحة بقشيشهم. بقشيشك السابق بيضل مسجّل، وبيقدروا يضيفوك مرة تانية.",
       password_confirm_ph:"كلمة مرورك", confirm_leave:"غادر مكان العمل", cancel:"إلغاء",
       delete_account:"احذف حسابك", del_modal_title:"حذف حسابك؟", del_modal_desc:"هيدا بيشيلك من كل أماكن العمل، بيحذف حساب الدفع (Stripe) تبعك، وبيمحي تسجيل دخولك نهائيًا. ما فيك ترجع عنه. اسحب أي رصيد متوفّر قبل.", confirm_delete:"احذف حسابي",
+      del_warn:"انتباه: مسح حسابك بيشيلك من كل أماكن شغلك، بيسكّر حساب الدفع تبعك (Stripe)، وبيمسح تسجيل دخولك نهائيًا. ما بيرجع بعد المسح. اسحب أي رصيد متاح عندك قبل. سجلّ بقشيشك السابق بيضل محفوظ عند أماكن عملك لسجلّاتهم.",
       m_deleted_ok:"انحذف حسابك.", m_deleted_partial:"انحذف الحساب. ملاحظة: {amt} من البقشيش المحجوز ما انبعت لأنّه ما في حساب بنك موصول.",
       your_workplaces:"أماكن عملك", add_workplace:"+ إضافة مكان عمل", join_wp:"انضمّ للمحل", no_workplaces:"هيدا الوحيد حالياً.", current_wp:"الحالي", switch_wp:"تبديل", left_tag:"غادرت",
       m_max_workplaces:"فيك تكون بحد أقصى ٥ أماكن عمل بنفس الوقت. غادر واحد حتى تنضمّ لغيره.",
@@ -605,6 +608,7 @@
       leave_modal_title:"Quitter {shop} ?", leave_modal_desc:"Entrez votre mot de passe pour confirmer. Vous n'apparaîtrez plus sur leur page de pourboires. Vos pourboires passés restent enregistrés et ils peuvent vous réajouter.",
       password_confirm_ph:"Votre mot de passe", confirm_leave:"Quitter le lieu de travail", cancel:"Annuler",
       delete_account:"Supprimer votre compte", del_modal_title:"Supprimer votre compte ?", del_modal_desc:"Cela vous retire de tous les lieux de travail, supprime votre compte de paiement (Stripe) et supprime définitivement votre connexion. Irréversible. Retirez d'abord tout solde disponible.", confirm_delete:"Supprimer mon compte",
+      del_warn:"Attention : supprimer votre compte vous retire de tous vos lieux de travail, ferme votre compte de versement (Stripe) et supprime définitivement votre connexion. Cette action est irréversible. Retirez d'abord tout solde disponible. Votre historique de pourboires reste enregistré chez vos lieux de travail.",
       m_deleted_ok:"Votre compte a été supprimé.", m_deleted_partial:"Compte supprimé. Note : {amt} de pourboires retenus n'ont pas pu être versés car aucun compte bancaire n'était connecté.",
       connected_to:"Connecté à {shop}",
       m_enter_code:"Entrez le code de votre lieu de travail.", m_enter_email_pass:"Entrez votre e-mail et mot de passe.",
@@ -1546,6 +1550,8 @@
         const cred=firebase.auth.EmailAuthProvider.credential(auth.currentUser.email, pw);
         await auth.currentUser.reauthenticateWithCredential(cred);
         await db.collection('businesses').doc(BID).collection('staff').doc(staffId).update({leftByStaff:true, leftAt:firebase.firestore.FieldValue.serverTimestamp()});
+        // Let the workplace owner know, by email, that this worker left (fire-and-forget).
+        try{ const itL=await auth.currentUser.getIdToken(); fetch(BACKEND+'/staff/notify-leave',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken:itL, bid:BID, staffId:(staffId||'')})}); }catch(_){}
         $('leaveModal').classList.add('hide');
         const nm=shop&&shop.businessName||'—';
         // If she still belongs to another workplace, switch to it (stay signed in);

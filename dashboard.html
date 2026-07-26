@@ -445,6 +445,7 @@
 
         <div style="margin-top:30px;text-align:center">
           <button id="deleteAcctBtn" style="background:none;border:none;color:#7a7a80;font:inherit;font-size:12px;cursor:pointer;text-decoration:underline">Delete my account</button>
+          <div style="max-width:360px;margin:9px auto 0;font-size:11.5px;line-height:1.55;color:#7a7a80">Attention: Deleting your account erases your business and tip page, removes all team members, and permanently deletes your login. We first pay out any tips still held for your workers. This can't be undone.</div>
           <div id="deleteFlow" style="display:none;max-width:330px;margin:14px auto 0;text-align:left;background:#141419;border:1px solid rgba(229,72,77,.3);border-radius:12px;padding:16px">
             <div style="font-size:12px;color:var(--soft);line-height:1.55;margin-bottom:10px">We emailed a 6-digit code to <b id="delEmail" style="color:#fff"></b>. Enter it to permanently delete your account — this can’t be undone.</div>
             <input id="delCode" inputmode="numeric" maxlength="6" placeholder="6-digit code" style="width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;background:#0e0e13;color:#fff;font-size:17px;letter-spacing:5px;text-align:center;margin-bottom:9px;font-family:inherit">
@@ -1369,7 +1370,16 @@
       const sym=CURSYM[$('s_curr').value]||'$';
       const snap=await db.collection('businesses').doc(BID).collection('tips').orderBy('createdAt','desc').get();
       let total=0,rs=0,rc=0,share=0; const per={}; const recent=[];
-      snap.forEach(d=>{const t=d.data(); if(t.poolHold===true) return; total+=(t.tip||0); share+=(t.ownerShare||0); if(t.rating){rs+=t.rating;rc++;} const n=t.recipientName||'—'; per[n]=(per[n]||0)+(t.tip||0); recent.push(t);});
+      // Map staff id -> nickname so a pooled / team tip is split across the ACTUAL
+      // members instead of dumped in full on the one worker the customer picked.
+      const nmById={}; (dashStaff||[]).forEach(s=>{ if(s&&s._id) nmById[s._id]=s.nickname||'—'; });
+      snap.forEach(d=>{const t=d.data(); if(t.poolHold===true) return;
+        total+=(t.tip||0); share+=(t.ownerShare||0); if(t.rating){rs+=t.rating;rc++;}
+        const ids=(t.recipientIds&&t.recipientIds.length)?t.recipientIds:null;
+        if(ids){ const each=(t.tip||0)/ids.length; ids.forEach(id=>{ const nm=nmById[id]||t.recipientName||'—'; per[nm]=(per[nm]||0)+each; }); }
+        else { const n=t.recipientName||'—'; per[n]=(per[n]||0)+(t.tip||0); }
+        recent.push(t);
+      });
       if(share>0){ $('anShareBox').style.display='block'; $('anShare').textContent=sym+share.toFixed(2); } else { $('anShareBox').style.display='none'; }
       $('anTotal').textContent=sym+total.toFixed(2);
       $('anCount').textContent=recent.length;
@@ -1377,7 +1387,7 @@
       const by=$('anByStaff'); by.innerHTML=Object.keys(per).length?'':'<div style="color:var(--soft)">No tips yet.</div>';
       Object.entries(per).sort((a,b)=>b[1]-a[1]).forEach(([n,v])=>by.insertAdjacentHTML('beforeend',`<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #f0f0f2"><span>${esc(n)}</span><b>${sym}${v.toFixed(2)}</b></div>`));
       const rec=$('anRecent'); rec.innerHTML=''; $('anEmpty').style.display=snap.size?'none':'block';
-      recent.slice(0,25).forEach(t=>rec.insertAdjacentHTML('beforeend',`<tr><td>${esc(t.recipientName||'—')}</td><td>${sym}${(t.tip||0).toFixed(2)}</td><td>${t.rating?'★'.repeat(t.rating):'—'}</td></tr>`));
+      recent.slice(0,25).forEach(t=>{ const team=(t.pooled===true)||(t.multiple===true)||((t.recipientIds&&t.recipientIds.length>1)); const tag=team?' <span style="font-size:11px;color:var(--soft)">🤝 team split</span>':''; rec.insertAdjacentHTML('beforeend',`<tr><td>${esc(t.recipientName||'—')}${tag}</td><td>${sym}${(t.tip||0).toFixed(2)}</td><td>${t.rating?'★'.repeat(t.rating):'—'}</td></tr>`); });
     }
     function shopUrl(){ return location.origin+location.pathname.replace(/[^/]*$/,'')+'shop.html?s='+BID; }
     function staffUrl(){ return location.origin+location.pathname.replace(/[^/]*$/,'')+'staff.html?s='+BID; }
