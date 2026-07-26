@@ -342,6 +342,7 @@
       <div class="card payoff">
         <div class="h3"><span data-i18n="get_paid">Get paid</span> <span class="soon" id="payoutSoon" data-i18n="coming_soon">Coming soon</span></div>
         <div class="note" data-i18n="payout_note">Bank payouts are being activated. Soon you'll connect your bank account here to receive your tips directly. For now, your workplace can see and settle your tips.</div>
+        <div class="note" style="margin-top:12px;background:rgba(240,180,41,.10);border:1px solid rgba(240,180,41,.45);border-radius:12px;padding:11px 13px;line-height:1.6" data-i18n="fee_disclosure">About the $2 monthly account fee: no tips means no fee, so a quiet month costs you nothing. It's taken just once every 30 days, and only after you've earned more than $20 in that time. Going Pro removes it completely.</div>
         <div id="payoutStatus" class="hide" style="margin-top:12px;font-size:14px;font-weight:600"></div>
         <div id="payCountryWrap" class="hide" style="margin-top:14px">
           <label style="font-size:13px;font-weight:700;display:block;margin-bottom:6px" data-i18n="your_country">Your country</label>
@@ -463,6 +464,8 @@
       verified:"Verified ✓", not_verified:"Not verified",
       get_paid:"Get paid", coming_soon:"Coming soon",
       payout_note:"Bank payouts are being activated. Soon you'll connect your bank account here to receive your tips directly. For now, your workplace can see and settle your tips.",
+      fee_disclosure:"About the $2 monthly account fee: no tips means no fee, so a quiet month costs you nothing. It's taken just once every 30 days, and only after you've earned more than $20 in that time. Going Pro removes it completely.",
+      monthly_fee:"EasyTipMe monthly fee", you_received:"you received",
       connect_bank:"Connect bank account", tip_terms:"Tip-sharing terms", log_out:"Log out",
       your_country:"Your country", select_country:"Select country…", country_hint:"Where your bank account is. This sets up your payouts and can't be changed later.",
       fp_title:"Set your password", fp_sub:"Welcome! Choose your own password to secure your account.", fp_new:"New password", fp_save:"Save & continue", fp_relogin:"For security, please sign in again with your temporary password to set a new one.",
@@ -526,6 +529,8 @@
       verified:"مفعّل ✓", not_verified:"غير مفعّل",
       get_paid:"استلام الأموال", coming_soon:"قريبًا",
       payout_note:"يتم تفعيل التحويلات البنكية. قريبًا رح تربط حسابك البنكي هون لتستلم بقشيشك مباشرة. حاليًا، مكان عملك بيشوف بقشيشك ويسوّيه.",
+      fee_disclosure:"بخصوص رسم الحساب الشهري (٢ دولار): ما في بقشيش يعني ما في رسم، فالشهر الهادي ما بيكلّفك شي. بينخصم مرة وحدة كل ٣٠ يوم، وبس بعد ما تكون كسبت أكثر من ٢٠ دولار بهالفترة. اشتراك برو بيشيلو نهائيًا.",
+      monthly_fee:"رسم EasyTipMe الشهري", you_received:"وصلك",
       connect_bank:"اربط الحساب البنكي", tip_terms:"شروط تقاسم البقشيش", log_out:"تسجيل الخروج",
       your_country:"بلدك", select_country:"اختر البلد…", country_hint:"وين حسابك البنكي. هيدا بيجهّز تحويلاتك وما بيتغيّر بعدين.",
       fp_title:"عيّن كلمة مرورك", fp_sub:"أهلًا! اختر كلمة مرور خاصة فيك لتأمين حسابك.", fp_new:"كلمة مرور جديدة", fp_save:"حفظ ومتابعة", fp_relogin:"لأمانك، سجّل دخول مرة تانية بالباسورد المؤقت عشان تعيّن باسورد جديد.",
@@ -588,6 +593,8 @@
       verified:"Vérifié ✓", not_verified:"Non vérifié",
       get_paid:"Être payé", coming_soon:"Bientôt",
       payout_note:"Les virements bancaires sont en cours d'activation. Bientôt, vous connecterez votre compte bancaire ici pour recevoir vos pourboires directement. Pour l'instant, votre lieu de travail peut voir et régler vos pourboires.",
+      fee_disclosure:"À propos des frais de compte mensuels (2 $) : pas de pourboire, pas de frais, donc un mois calme ne vous coûte rien. Ils sont prélevés une seule fois tous les 30 jours, et seulement après avoir gagné plus de 20 $ sur cette période. Passer à Pro les supprime complètement.",
+      monthly_fee:"Frais mensuels EasyTipMe", you_received:"vous avez reçu",
       connect_bank:"Connecter un compte bancaire", tip_terms:"Conditions de partage des pourboires", log_out:"Se déconnecter",
       leave_wp:"Quitter le lieu de travail", leave_desc:"Ne plus apparaître sur la page de pourboires de votre lieu de travail. Vos pourboires passés restent enregistrés.",
       nav_home:"Accueil", nav_insights:"Analyses", nav_settings:"Paramètres",
@@ -1215,7 +1222,7 @@
           // ONE worker they picked — not the whole team. Everyone else just sees
           // their money share.
           const personal = t2.pooled!==true || t2.pickedId===staffId;
-          allRows.push({amt:mine, date:dt, ms:dt?dt.getTime():0, rating: personal?(t2.rating||0):0, from: personal?(t2.fromName||''):'', msg: personal?(t2.message||''):'', pooled:(t2.pooled===true)});
+          allRows.push({amt:mine, date:dt, ms:dt?dt.getTime():0, rating: personal?(t2.rating||0):0, from: personal?(t2.fromName||''):'', msg: personal?(t2.message||''):'', pooled:(t2.pooled===true), fee:(t2.multiple?0:Number(t2.monthlyFee||0))});
         });
         allRows.sort((a,b)=>b.ms-a.ms);
         renderHomeStats(); renderRecent();
@@ -1282,7 +1289,11 @@
         // Pooled tips are a SHARE of a team tip — label them so a worker never
         // mistakes their share for a tip they earned alone.
         if(r.pooled) meta += ' · 🤝 '+t('team_share');
-        el.insertAdjacentHTML('beforeend',`<div class="tip-row"><div style="width:100%"><div class="tip-amt">+${curSym}${r.amt.toFixed(2)}</div><div class="tip-date">${meta}</div>${extra}</div></div>`);
+        // If the $2 monthly account fee was taken from THIS tip, show it plainly
+        // so the worker always knows exactly why they received less than the tip.
+        let feeNote='';
+        if(r.fee>0){ feeNote=`<div class="tip-date" style="margin-top:3px;opacity:.85">${t('monthly_fee')} −${curSym}${r.fee.toFixed(2)} · ${t('you_received')} ${curSym}${(r.amt-r.fee).toFixed(2)}</div>`; }
+        el.insertAdjacentHTML('beforeend',`<div class="tip-row"><div style="width:100%"><div class="tip-amt">+${curSym}${r.amt.toFixed(2)}</div><div class="tip-date">${meta}</div>${feeNote}${extra}</div></div>`);
       });
     }
 
