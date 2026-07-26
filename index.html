@@ -59,13 +59,13 @@
 
   /* ---------- Soft magic background: pale drifting wash + flowing waves ---------- */
   .ambient{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
-  .ambient .glow{position:absolute;border-radius:50%;filter:blur(90px);will-change:transform}
+  .ambient .glow{position:absolute;border-radius:50%;filter:blur(70px);will-change:transform;transform:translateZ(0)}
   .g1{width:620px;height:620px;left:-120px;top:-160px;background:radial-gradient(circle at 40% 40%,rgba(0,113,227,.10),transparent 66%);animation:float1 22s ease-in-out infinite}
   .g2{width:560px;height:560px;right:-120px;top:-40px;background:radial-gradient(circle at 50% 50%,rgba(0,198,255,.09),transparent 66%);animation:float2 26s ease-in-out infinite}
   .g3{width:520px;height:520px;left:30%;top:220px;background:radial-gradient(circle at 50% 50%,rgba(120,110,255,.07),transparent 68%);animation:float3 30s ease-in-out infinite}
-  @keyframes float1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(120px,80px) scale(1.15)}}
-  @keyframes float2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-110px,70px) scale(1.1)}}
-  @keyframes float3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(60px,-80px) scale(1.18)}}
+  @keyframes float1{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(110px,70px,0)}}
+  @keyframes float2{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(-100px,60px,0)}}
+  @keyframes float3{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(60px,-70px,0)}}
 
   /* flowing wave lines (slightly darker than white) */
   .waves{position:absolute;left:0;right:0;top:0;height:760px;z-index:0;pointer-events:none;overflow:hidden}
@@ -178,7 +178,7 @@
   .foot-links{display:flex;gap:22px;flex-wrap:wrap}
   .foot-links a:hover{color:var(--ink)}
 
-  .reveal{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s ease}
+  .reveal{opacity:0;transform:translateY(16px);transition:opacity .5s cubic-bezier(.22,.61,.36,1),transform .5s cubic-bezier(.22,.61,.36,1)}
   .reveal.in{opacity:1;transform:none}
 
   @media(max-width:920px){.nav-links a.hide-m{display:none}.nav-links{gap:16px}}
@@ -188,6 +188,7 @@
     section{padding:66px 0}
     header.hero{padding:64px 0 20px}
     .waves{height:620px}
+    .ambient .glow{filter:blur(55px)}
   }
   @media(prefers-reduced-motion:reduce){
     .glow,.phone,.w1 svg,.w2 svg,.w3 svg{animation:none!important}
@@ -427,7 +428,7 @@
   // on screen immediately, and has a hard fallback so nothing ever stays blank.
   (function(){
     var els=[].slice.call(document.querySelectorAll('.reveal'));
-    els.forEach(function(el,i){ el.style.transitionDelay=((i%4)*60)+'ms'; });
+    els.forEach(function(el,i){ el.style.transitionDelay=((i%3)*40)+'ms'; });
     function show(el){ el.classList.add('in'); }
     if(!('IntersectionObserver' in window)){ els.forEach(show); return; }
     var io=new IntersectionObserver(function(entries){
