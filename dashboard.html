@@ -291,13 +291,9 @@
                 <option value="Cabin Steward"></option><option value="Steward"></option><option value="Deckhand"></option><option value="Cruise Staff"></option>
                 <option value="Security Guard"></option><option value="Parking Attendant"></option><option value="Car Wash Attendant"></option><option value="Personal Trainer"></option><option value="Yoga Instructor"></option><option value="Golf Caddy"></option><option value="Pet Groomer"></option>
               </datalist>
-              <label>Working days</label>
-              <div class="days" id="days">
-                <div class="day" data-d="Mon">Mon</div><div class="day" data-d="Tue">Tue</div><div class="day" data-d="Wed">Wed</div>
-                <div class="day" data-d="Thu">Thu</div><div class="day" data-d="Fri">Fri</div><div class="day" data-d="Sat">Sat</div><div class="day" data-d="Sun">Sun</div>
-              </div>
-              <label>Shift 1</label><div class="times"><input type="time" id="f_s1s"><span style="margin-bottom:16px">–</span><input type="time" id="f_s1e"></div>
-              <label>Shift 2 (optional)</label><div class="times"><input type="time" id="f_s2s"><span style="margin-bottom:16px">–</span><input type="time" id="f_s2e"></div>
+              <label>Weekly schedule</label>
+              <div style="font-size:12px;color:var(--soft);margin:2px 0 12px;line-height:1.5">Tap a day to set it as a working day, then set its hours (each day can differ). A day left off = day off. Leave every day off = the specialist always shows to customers.</div>
+              <div id="schedWrap"></div>
             </div>
           </div>
           <button class="btn full" id="saveStaff">Register specialist</button>
@@ -558,8 +554,88 @@
       window.scrollTo(0,0);
     });
     $('menuBtn').onclick=()=>$('sidebar').classList.toggle('open');
-    // days toggle
-    $('days').querySelectorAll('.day').forEach(d=>d.onclick=()=>d.classList.toggle('on'));
+    // ---- Per-day schedule builder (each day can have its own hours) ----
+    const SCHED_DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    function buildScheduleUI(){
+      const wrap=$('schedWrap'); if(!wrap) return; wrap.innerHTML='';
+      SCHED_DAYS.forEach(dn=>{
+        const row=document.createElement('div');
+        row.className='dayrow'; row.dataset.d=dn;
+        row.style.cssText='border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px';
+        row.innerHTML=`<div class="dhead" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none">`
+          +`<span style="font-weight:600">${dn}</span><span class="dstate" style="font-size:12px;color:var(--soft)">Day off</span></div>`
+          +`<div class="dtimes" style="display:none;margin-top:10px">`
+          +`<div class="times"><input type="time" class="s1s"><span style="margin-bottom:16px">–</span><input type="time" class="s1e"></div>`
+          +`<div class="times"><input type="time" class="s2s"><span style="margin-bottom:16px">–</span><input type="time" class="s2e"></div>`
+          +`<div style="font-size:11px;color:var(--soft);margin-top:-6px">Shift 1 · Shift 2 (optional). Leave blank = works all day.</div></div>`;
+        row.querySelector('.dhead').onclick=()=>setDayRow(row,!row.classList.contains('on'));
+        wrap.appendChild(row);
+      });
+    }
+    function setDayRow(row,on){
+      row.classList.toggle('on',on);
+      row.style.borderColor = on ? 'var(--blue)' : 'var(--line)';
+      row.querySelector('.dstate').textContent = on ? 'Working' : 'Day off';
+      row.querySelector('.dstate').style.color = on ? 'var(--blue)' : 'var(--soft)';
+      row.querySelector('.dtimes').style.display = on ? 'block' : 'none';
+    }
+    function readScheduleUI(){
+      const out={};
+      $('schedWrap').querySelectorAll('.dayrow.on').forEach(row=>{
+        const dn=row.dataset.d;
+        const g=c=>row.querySelector(c).value||'';
+        out[dn]={ shift1:{s:g('.s1s'),e:g('.s1e')}, shift2:{s:g('.s2s'),e:g('.s2e')} };
+      });
+      return out;
+    }
+    function resetScheduleUI(){
+      $('schedWrap').querySelectorAll('.dayrow').forEach(row=>{
+        row.querySelectorAll('input').forEach(i=>i.value='');
+        setDayRow(row,false);
+      });
+    }
+    function fillScheduleUI(schedule, legacy){
+      resetScheduleUI();
+      // New per-day model.
+      if(schedule && typeof schedule==='object' && Object.keys(schedule).length){
+        $('schedWrap').querySelectorAll('.dayrow').forEach(row=>{
+          const d=schedule[row.dataset.d]; if(!d) return;
+          setDayRow(row,true);
+          const set=(c,v)=>{ row.querySelector(c).value=v||''; };
+          set('.s1s',d.shift1&&d.shift1.s); set('.s1e',d.shift1&&d.shift1.e);
+          set('.s2s',d.shift2&&d.shift2.s); set('.s2e',d.shift2&&d.shift2.e);
+        });
+        return;
+      }
+      // Backward-compat: old model (one shift applied to a list of days).
+      if(legacy && legacy.days && legacy.days.length){
+        $('schedWrap').querySelectorAll('.dayrow').forEach(row=>{
+          if(!legacy.days.includes(row.dataset.d)) return;
+          setDayRow(row,true);
+          row.querySelector('.s1s').value=(legacy.shift1&&legacy.shift1.s)||'';
+          row.querySelector('.s1e').value=(legacy.shift1&&legacy.shift1.e)||'';
+          row.querySelector('.s2s').value=(legacy.shift2&&legacy.shift2.s)||'';
+          row.querySelector('.s2e').value=(legacy.shift2&&legacy.shift2.e)||'';
+        });
+      }
+    }
+    // Compact schedule summary for the team table.
+    function schedSummary(s){
+      const sch=s&&s.schedule;
+      if(sch && typeof sch==='object' && Object.keys(sch).length){
+        const parts=SCHED_DAYS.filter(d=>sch[d]).map(d=>{
+          const x=sch[d]; const w=(x.shift1&&x.shift1.s)?(x.shift1.s+'–'+(x.shift1.e||'')):'all day';
+          const w2=(x.shift2&&x.shift2.s)?(', '+x.shift2.s+'–'+(x.shift2.e||'')):'';
+          return `<div>${d} <small style="color:var(--soft)">${w}${w2}</small></div>`;
+        });
+        return parts.join('');
+      }
+      if(s&&s.days&&s.days.length){
+        return s.days.join(', ')+'<br><small style="color:var(--soft)">'+((s.shift1&&s.shift1.s)?s.shift1.s+'–'+(s.shift1.e||''):'no shift')+((s.shift2&&s.shift2.s)?' , '+s.shift2.s+'–'+(s.shift2.e||''):'')+'</small>';
+      }
+      return 'Always on';
+    }
+    buildScheduleUI();
 
     function vgmsg(txt,ok){ const m=$('vgMsg'); if(!m) return; m.textContent=txt||''; m.style.color= ok ? 'var(--green)' : '#ff8a8a'; }
     async function showVerifyGate(u, name){
@@ -1205,8 +1281,7 @@
       const data={
         nickname:nick, email:$('f_email').value.trim().toLowerCase(),
         job:$('f_job').value.trim(),
-        days:Array.from($('days').querySelectorAll('.day.on')).map(d=>d.dataset.d),
-        shift1:{s:$('f_s1s').value,e:$('f_s1e').value}, shift2:{s:$('f_s2s').value,e:$('f_s2e').value}
+        schedule: readScheduleUI()
       };
       if(fPhoto) data.photo=fPhoto;
       const btn=$('saveStaff'); btn.disabled=true; btn.textContent='Saving…';
@@ -1214,7 +1289,7 @@
         const col=db.collection('businesses').doc(BID).collection('staff');
         const pcol=db.collection('businesses').doc(BID).collection('staffPrivate');
         let savedMsg='Saved ✓', savedType='ok';
-        if(editId){ await col.doc(editId).update(Object.assign({}, data, {realName:firebase.firestore.FieldValue.delete(), phone:firebase.firestore.FieldValue.delete(), leftByStaff:firebase.firestore.FieldValue.delete(), leftAt:firebase.firestore.FieldValue.delete()})); await pcol.doc(editId).set(privateData,{merge:true}); }
+        if(editId){ await col.doc(editId).update(Object.assign({}, data, {days:firebase.firestore.FieldValue.delete(), shift1:firebase.firestore.FieldValue.delete(), shift2:firebase.firestore.FieldValue.delete(), realName:firebase.firestore.FieldValue.delete(), phone:firebase.firestore.FieldValue.delete(), leftByStaff:firebase.firestore.FieldValue.delete(), leftAt:firebase.firestore.FieldValue.delete()})); await pcol.doc(editId).set(privateData,{merge:true}); }
         else{ data.published=true; data.createdAt=firebase.firestore.FieldValue.serverTimestamp(); const docRef=await col.add(data); try{ await pcol.doc(docRef.id).set(privateData); }catch(_){}
           if(data.email){
             try{
@@ -1285,7 +1360,7 @@
         const left=s.leftByStaff===true && !removed;
         const pub=s.published!==false && !removed && !left;
         const av=s.photo?`<img class="tav" src="${s.photo}">`:`<div class="tav">${(s.nickname||'?').charAt(0).toUpperCase()}</div>`;
-        const sched=(s.days&&s.days.length?s.days.join(', '):'—')+'<br><small style="color:var(--soft)">'+(s.shift1&&s.shift1.s?s.shift1.s+'–'+(s.shift1.e||''):'no shift')+(s.shift2&&s.shift2.s?' , '+s.shift2.s+'–'+(s.shift2.e||''):'')+'</small>';
+        const sched=schedSummary(s);
         const tr=document.createElement('tr');
         if(removed||left) tr.style.opacity='.5';
         tr.innerHTML=`<td>${av}</td>
@@ -1324,10 +1399,8 @@
       $('f_nick').value=s.nickname||''; $('f_real').value=s.realName||''; $('f_email').value=s.email||'';
       $('f_email').readOnly=true; $('f_email').title='Email is locked for security. To change it, remove this member and add them again.'; $('f_email').style.background='#101015'; $('f_email').style.color='#7f7f88'; $('f_email').style.cursor='not-allowed';
       $('f_phone').value=s.phone||''; $('f_job').value=s.job||'';
-      $('f_s1s').value=s.shift1?.s||''; $('f_s1e').value=s.shift1?.e||'';
-      $('f_s2s').value=s.shift2?.s||''; $('f_s2e').value=s.shift2?.e||'';
       fPhoto=s.photo||""; $('f_prev').src=s.photo||'';
-      $('days').querySelectorAll('.day').forEach(d=>d.classList.toggle('on',(s.days||[]).includes(d.dataset.d)));
+      fillScheduleUI(s.schedule, s);
       $('formTitle').textContent='Edit '+(s.nickname||'specialist');
       $('saveStaff').textContent='Update specialist'; $('cancelEdit').style.display='block';
       window.scrollTo({top:0,behavior:'smooth'});
@@ -1335,9 +1408,9 @@
     function resetForm(){
       editId=null; fPhoto="";
       $('f_email').readOnly=false; $('f_email').title=''; $('f_email').style.background=''; $('f_email').style.color=''; $('f_email').style.cursor='';
-      ['f_nick','f_real','f_email','f_phone','f_job','f_s1s','f_s1e','f_s2s','f_s2e'].forEach(id=>$(id).value='');
+      ['f_nick','f_real','f_email','f_phone','f_job'].forEach(id=>$(id).value='');
       $('f_prev').src=''; $('f_photo').value='';
-      $('days').querySelectorAll('.day').forEach(d=>d.classList.remove('on'));
+      resetScheduleUI();
       $('formTitle').textContent='Register a specialist'; $('saveStaff').textContent='Register specialist'; $('cancelEdit').style.display='none';
     }
 

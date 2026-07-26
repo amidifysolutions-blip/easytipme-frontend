@@ -208,13 +208,23 @@
     // at the shop, so it matches the shop's local time). No schedule → always on.
     // Supports weekday list (days) + up to two windows (shift1/shift2), incl. overnight.
     function onShiftNow(s){
-      const days=(s&&s.days)||[]; const s1=(s&&s.shift1&&s.shift1.s)?s.shift1:null; const s2=(s&&s.shift2&&s.shift2.s)?s.shift2:null;
-      if(!days.length && !s1 && !s2) return true;                 // no schedule set → always available
       const now=new Date();
-      if(days.length){ const dn=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][now.getDay()]; if(!days.includes(dn)) return false; }
-      if(!s1 && !s2) return true;                                 // days set but no times → all day those days
       const mins=now.getHours()*60+now.getMinutes();
+      const dn=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][now.getDay()];
       const inWin=w=>{ if(!w||!w.s) return false; const a=w.s.split(':'); const st=(+a[0])*60+(+(a[1]||0)); if(!w.e) return mins>=st; const b=w.e.split(':'); let en=(+b[0])*60+(+(b[1]||0)); if(en<=st) return mins>=st||mins<en; return mins>=st&&mins<en; };
+      // New per-day schedule: only the days present are working days; each has its own hours.
+      const sch=s&&s.schedule;
+      if(sch && typeof sch==='object' && Object.keys(sch).length){
+        const day=sch[dn]; if(!day) return false;                 // no shift scheduled today → off
+        const s1=(day.shift1&&day.shift1.s)?day.shift1:null; const s2=(day.shift2&&day.shift2.s)?day.shift2:null;
+        if(!s1 && !s2) return true;                                // working today, no times → all day
+        return inWin(s1)||inWin(s2);
+      }
+      // Legacy: one shift applied to a list of days. No schedule at all → always available.
+      const days=(s&&s.days)||[]; const s1=(s&&s.shift1&&s.shift1.s)?s.shift1:null; const s2=(s&&s.shift2&&s.shift2.s)?s.shift2:null;
+      if(!days.length && !s1 && !s2) return true;
+      if(days.length && !days.includes(dn)) return false;
+      if(!s1 && !s2) return true;
       return inWin(s1)||inWin(s2);
     }
 
