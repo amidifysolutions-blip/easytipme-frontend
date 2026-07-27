@@ -14,9 +14,24 @@ service cloud.firestore {
     match /businesses/{uid} {
       allow get: if true;                                   // shop page reads one shop by ID
       allow list: if isAdmin();                             // only admin can query all shops
-      allow create: if request.auth != null && request.auth.uid == uid;
-      allow update: if (request.auth != null && request.auth.uid == uid) // owner edits their own shop
-                    || isAdmin();                           // platform admin can moderate (block/fix) any shop
+      allow create: if request.auth != null && request.auth.uid == uid
+                    && !request.resource.data.keys().hasAny([          // a new shop can't self-assign platform fields
+                         'commissionPercent','commissionFixed','feePct',
+                         'analyticsEnabled','collectApproved',
+                         'businessTierActive','businessTierSubId','businessProActive','businessProSubId',
+                         'proActive','proSubId','planSince'
+                       ]);
+      // Platform-only fields (commission, admin fee, moderation, subscriptions) can NEVER
+      // be written by a shop owner — not even via a direct DB write that bypasses the app.
+      // Only the platform admin, or the backend admin SDK (which bypasses rules), sets them.
+      allow update: if isAdmin()
+                    || ( request.auth != null && request.auth.uid == uid   // owner edits their own shop…
+                         && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+                              'commissionPercent','commissionFixed','feePct','blocked',
+                              'analyticsEnabled','collectApproved',
+                              'businessTierActive','businessTierSubId','businessProActive','businessProSubId',
+                              'proActive','proSubId','planSince'
+                            ]) );                                            // …but never these platform fields
       allow delete: if isAdmin();                           // only the platform admin can remove a shop
 
       // Team members — shown publicly on the tipping page (nickname, job, photo,
