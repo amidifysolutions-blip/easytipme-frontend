@@ -195,15 +195,9 @@
           <label>Email (for their login + tip alerts)</label><input type="email" id="bmSEmail">
           <label>Phone (optional)</label><input type="tel" id="bmSPhone">
           <div class="photo-pick" style="margin-top:10px"><img id="bmSPrev" class="prev" alt=""><input type="file" id="bmSPhoto" accept="image/*" style="margin-bottom:0"></div>
-          <label style="margin-top:12px">Working days <span style="color:var(--soft);font-weight:400;font-size:12px">— leave empty = always on the tip page</span></label>
-          <div class="days" id="bmDays">
-            <div class="day" data-d="Mon">Mon</div><div class="day" data-d="Tue">Tue</div><div class="day" data-d="Wed">Wed</div>
-            <div class="day" data-d="Thu">Thu</div><div class="day" data-d="Fri">Fri</div><div class="day" data-d="Sat">Sat</div><div class="day" data-d="Sun">Sun</div>
-          </div>
-          <label>Shift 1 <span style="color:var(--soft);font-weight:400;font-size:12px">— disappears from the tip page after it ends</span></label>
-          <div class="times"><input type="time" id="bmS1s"><span style="margin-bottom:16px">–</span><input type="time" id="bmS1e"></div>
-          <label>Shift 2 (optional)</label>
-          <div class="times"><input type="time" id="bmS2s"><span style="margin-bottom:16px">–</span><input type="time" id="bmS2e"></div>
+          <label style="margin-top:12px">Weekly schedule</label>
+          <div style="font-size:12px;color:var(--soft);margin:2px 0 12px;line-height:1.5">Tap a day to set it working, then its hours (each day can differ). A day left off = day off. Leave every day off = always on the tip page.</div>
+          <div id="bmSchedWrap"></div>
           <div id="bmStaffMsg" class="msg"></div>
           <div style="display:flex;gap:10px;margin-top:12px">
             <button class="btn" id="bmStaffSave" style="flex:1">Save member</button>
@@ -558,8 +552,9 @@
     $('menuBtn').onclick=()=>$('sidebar').classList.toggle('open');
     // ---- Per-day schedule builder (each day can have its own hours) ----
     const SCHED_DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-    function buildScheduleUI(){
-      const wrap=$('schedWrap'); if(!wrap) return; wrap.innerHTML='';
+    function buildScheduleUI(wrapId){
+      wrapId=wrapId||'schedWrap';
+      const wrap=$(wrapId); if(!wrap) return; wrap.innerHTML='';
       SCHED_DAYS.forEach(dn=>{
         const row=document.createElement('div');
         row.className='dayrow'; row.dataset.d=dn;
@@ -585,26 +580,29 @@
       st.style.borderColor = on ? 'var(--blue)' : 'var(--line)';
       row.querySelector('.dtimes').style.display = on ? 'block' : 'none';
     }
-    function readScheduleUI(){
+    function readScheduleUI(wrapId){
+      wrapId=wrapId||'schedWrap';
       const out={};
-      $('schedWrap').querySelectorAll('.dayrow.on').forEach(row=>{
+      $(wrapId).querySelectorAll('.dayrow.on').forEach(row=>{
         const dn=row.dataset.d;
         const g=c=>row.querySelector(c).value||'';
         out[dn]={ shift1:{s:g('.s1s'),e:g('.s1e')}, shift2:{s:g('.s2s'),e:g('.s2e')} };
       });
       return out;
     }
-    function resetScheduleUI(){
-      $('schedWrap').querySelectorAll('.dayrow').forEach(row=>{
+    function resetScheduleUI(wrapId){
+      wrapId=wrapId||'schedWrap';
+      $(wrapId).querySelectorAll('.dayrow').forEach(row=>{
         row.querySelectorAll('input').forEach(i=>i.value='');
         setDayRow(row,false);
       });
     }
-    function fillScheduleUI(schedule, legacy){
-      resetScheduleUI();
+    function fillScheduleUI(schedule, legacy, wrapId){
+      wrapId=wrapId||'schedWrap';
+      resetScheduleUI(wrapId);
       // New per-day model.
       if(schedule && typeof schedule==='object' && Object.keys(schedule).length){
-        $('schedWrap').querySelectorAll('.dayrow').forEach(row=>{
+        $(wrapId).querySelectorAll('.dayrow').forEach(row=>{
           const d=schedule[row.dataset.d]; if(!d) return;
           setDayRow(row,true);
           const set=(c,v)=>{ row.querySelector(c).value=v||''; };
@@ -615,7 +613,7 @@
       }
       // Backward-compat: old model (one shift applied to a list of days).
       if(legacy && legacy.days && legacy.days.length){
-        $('schedWrap').querySelectorAll('.dayrow').forEach(row=>{
+        $(wrapId).querySelectorAll('.dayrow').forEach(row=>{
           if(!legacy.days.includes(row.dataset.d)) return;
           setDayRow(row,true);
           row.querySelector('.s1s').value=(legacy.shift1&&legacy.shift1.s)||'';
@@ -1051,8 +1049,8 @@
 
     // ---- Full location management: settings + team + move between locations ----
     const CUR_OPTS=[['CAD','CAD — Canadian Dollar ($)'],['USD','USD — US Dollar ($)'],['EUR','EUR — Euro (€)'],['GBP','GBP — British Pound (£)'],['AED','AED — UAE Dirham'],['SAR','SAR — Saudi Riyal'],['AUD','AUD — Australian Dollar ($)'],['QAR','QAR — Qatari Riyal'],['KWD','KWD — Kuwaiti Dinar'],['BHD','BHD — Bahraini Dinar'],['OMR','OMR — Omani Rial'],['LBP','LBP — Lebanese Pound']];
-    function bmHideForm(){ $('bmStaffForm').style.display='none'; BM.editStaffId=null; BM.sPhoto=''; ['bmSNick','bmSJob','bmSEmail','bmSPhone','bmS1s','bmS1e','bmS2s','bmS2e'].forEach(id=>$(id).value=''); $('bmDays').querySelectorAll('.day').forEach(d=>d.classList.remove('on')); $('bmSPrev').src=''; $('bmSPhoto').value=''; $('bmSEmail').readOnly=false; $('bmStaffMsg').textContent=''; $('bmStaffMsg').className='msg'; }
-    $('bmDays').querySelectorAll('.day').forEach(d=>d.onclick=()=>d.classList.toggle('on'));
+    function bmHideForm(){ $('bmStaffForm').style.display='none'; BM.editStaffId=null; BM.sPhoto=''; ['bmSNick','bmSJob','bmSEmail','bmSPhone'].forEach(id=>$(id).value=''); resetScheduleUI('bmSchedWrap'); $('bmSPrev').src=''; $('bmSPhoto').value=''; $('bmSEmail').readOnly=false; $('bmStaffMsg').textContent=''; $('bmStaffMsg').className='msg'; }
+    buildScheduleUI('bmSchedWrap');
     async function openBranchMgr(id,name){
       BM={id,name,currency:'CAD',shopCode:'',staff:[],locations:[],editStaffId:null,sPhoto:''};
       $('bmTitle').textContent='Manage: '+name;
@@ -1114,8 +1112,7 @@
       BM.editStaffId=s.id; BM.sPhoto=s.photo||'';
       $('bmStaffFormTitle').textContent='Edit member';
       $('bmSNick').value=s.nickname||''; $('bmSJob').value=s.job||''; $('bmSEmail').value=s.email||''; $('bmSEmail').readOnly=!!s.email; $('bmSPhone').value=s.phone||''; $('bmSPrev').src=s.photo||'';
-      $('bmS1s').value=(s.shift1&&s.shift1.s)||''; $('bmS1e').value=(s.shift1&&s.shift1.e)||''; $('bmS2s').value=(s.shift2&&s.shift2.s)||''; $('bmS2e').value=(s.shift2&&s.shift2.e)||'';
-      $('bmDays').querySelectorAll('.day').forEach(d=>d.classList.toggle('on',(s.days||[]).includes(d.dataset.d)));
+      fillScheduleUI(s.schedule, s, 'bmSchedWrap');
       $('bmStaffForm').style.display='block'; $('bmStaffForm').scrollIntoView({behavior:'smooth',block:'nearest'});
     }
     $('bmClose').onclick=()=>{ $('branchMgr').style.display='none'; loadBranches(); if(typeof loadStaff==='function') loadStaff(); };
@@ -1124,8 +1121,7 @@
     $('bmSPhoto').onchange=e=>{const f=e.target.files[0];if(!f){BM.sPhoto='';$('bmSPrev').src='';return;}resize(f,256,d=>{BM.sPhoto=d;$('bmSPrev').src=d;});};
     $('bmStaffSave').onclick=async()=>{
       const nick=$('bmSNick').value.trim(); if(!nick){ $('bmStaffMsg').textContent='Please enter a nickname.'; $('bmStaffMsg').className='msg err'; return; }
-      const bmDays=Array.from($('bmDays').querySelectorAll('.day.on')).map(d=>d.dataset.d);
-      const data={ nickname:nick, job:$('bmSJob').value.trim(), email:$('bmSEmail').value.trim().toLowerCase(), phone:$('bmSPhone').value.trim(), days:bmDays, shift1:{s:$('bmS1s').value,e:$('bmS1e').value}, shift2:{s:$('bmS2s').value,e:$('bmS2e').value} };
+      const data={ nickname:nick, job:$('bmSJob').value.trim(), email:$('bmSEmail').value.trim().toLowerCase(), phone:$('bmSPhone').value.trim(), schedule:readScheduleUI('bmSchedWrap') };
       if(BM.sPhoto) data.photo=BM.sPhoto;
       const btn=$('bmStaffSave'); btn.disabled=true; btn.textContent='Saving…';
       try{
