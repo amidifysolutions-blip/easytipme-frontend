@@ -1066,7 +1066,7 @@
         const r=await fetch(BACKEND+'/branch/team',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,id:BM.id})});
         const j=await r.json();
         if(!j||!j.ok){ $('bmStaffList').innerHTML='<div style="color:#ff8a8a">Could not load team.</div>'; return; }
-        BM.name=j.name; BM.currency=j.currency; BM.shopCode=j.shopCode; BM.staff=j.staff||[];
+        BM.name=j.name; BM.currency=j.currency; BM.shopCode=j.shopCode; BM.staff=j.staff||[]; BM.bankStatus=j.bankStatus||{};
         BM.locations=(BR_LOCATIONS||[]).filter(l=>l.id!==BM.id);
         $('bmName').value=j.name||''; $('bmCode').textContent=j.shopCode||'—'; $('bmCurr').value=j.currency||'CAD';
         const p=j.tipPresets||[]; ['bmTp1','bmTp2','bmTp3','bmTp4'].forEach((id,i)=>$(id).value=(p[i]!=null?p[i]:''));
@@ -1085,7 +1085,7 @@
         const row=document.createElement('div');
         row.style.cssText='display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);flex-wrap:wrap';
         if(removed) row.style.opacity='.5';
-        row.innerHTML=av+'<div style="flex:1;min-width:120px"><b>'+esc(s.nickname||'')+'</b>'+(removed?' <small style="color:#e5484d">(removed)</small>':'')+'<br><small style="color:var(--soft)">'+esc(s.job||'')+'</small></div>'
+        row.innerHTML=av+'<div style="flex:1;min-width:120px"><b>'+esc(s.nickname||'')+'</b>'+(removed?' <small style="color:#e5484d">(removed)</small>':'')+'<br><small style="color:var(--soft)">'+esc(s.job||'')+'</small><br>'+bankBadge((BM.bankStatus||{})[s.id])+'</div>'
           +'<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end">'
           +(removed?'<button class="link bmRestore">Restore</button>':'<button class="link b bmEdit">Edit</button>')
           +((!removed&&BM.locations.length)?'<select class="bmMove" style="padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:#0e0e13;color:#fff;font-size:12px;font-family:inherit"><option value="">Move to…</option>'+moveOpts+'</select>':'')
@@ -1312,6 +1312,24 @@
     };
     $('cancelEdit').onclick=resetForm;
 
+    // Bank-connection status per worker (from the backend, which asks Stripe).
+    // '' / undefined = still checking. connected = bank linked & payouts ready.
+    let bankStat={};
+    function bankBadge(st){
+      const base='display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;line-height:1.6;margin-top:3px';
+      if(st==='connected') return `<span title="Bank connected — ready to receive tips" style="${base};background:rgba(46,160,67,.16);color:#5fd67e;border:1px solid rgba(46,160,67,.45)">🟢 Bank connected</span>`;
+      if(st==='pending') return `<span title="Started Stripe setup but hasn't finished — no bank linked yet" style="${base};background:rgba(230,162,61,.15);color:#e8b04b;border:1px solid rgba(230,162,61,.45)">🟡 Setup not finished</span>`;
+      if(st==='none') return `<span title="Hasn't started bank setup yet" style="${base};background:transparent;color:var(--soft);border:1px solid var(--line)">⚪ No bank yet</span>`;
+      return `<span style="${base};background:transparent;color:var(--soft);border:1px solid var(--line);opacity:.6">… checking</span>`;
+    }
+    async function loadBankStatus(){
+      try{
+        const idToken=await auth.currentUser.getIdToken();
+        const r=await fetch(BACKEND+'/staff/bank-status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken, id:BID})});
+        const j=await r.json().catch(()=>({}));
+        if(j&&j.ok&&j.bankStatus){ bankStat=j.bankStatus; renderStaffTable(); }
+      }catch(_){}
+    }
     let dashStaff=[];
     async function loadStaff(){
       const col=db.collection('businesses').doc(BID).collection('staff');
@@ -1336,6 +1354,7 @@
       dashStaff.sort(cmpStaff);
       $('count').textContent=dashStaff.length?'('+dashStaff.length+')':'';
       renderStaffTable();
+      loadBankStatus();
     }
     function cmpStaff(a,b){
       const ja=(a.job||'').trim().toLowerCase(), jb=(b.job||'').trim().toLowerCase();
@@ -1366,7 +1385,7 @@
         const tr=document.createElement('tr');
         if(removed||left) tr.style.opacity='.5';
         tr.innerHTML=`<td>${av}</td>
-          <td><b>${esc(s.nickname||'')}</b>${removed?' <small style="color:#e5484d">(removed)</small>':(left?' <small style="color:#e5a23d">(left)</small>':'')}<br><small style="color:var(--soft)">${esc(s.job||'')}</small></td>
+          <td><b>${esc(s.nickname||'')}</b>${removed?' <small style="color:#e5484d">(removed)</small>':(left?' <small style="color:#e5a23d">(left)</small>':'')}<br><small style="color:var(--soft)">${esc(s.job||'')}</small><br>${bankBadge(bankStat[s._id])}</td>
           <td>${sched}</td>
           <td><label class="switch"><input type="checkbox" ${pub?'checked':''} ${(removed||left)?'disabled':''}><span class="slider"></span></label></td>
           <td><button class="link b editBtn">Edit</button> &nbsp; <button class="link delBtn">${removed?'Restore':(left?'Return':'Remove')}</button>${removed?' &nbsp; <button class="link purgeBtn" style="color:#e5484d">Delete</button>':''}</td>`;
