@@ -218,6 +218,7 @@
         <div class="nav" data-tab="analytics"><span>Analytics</span></div>
         <div class="nav" data-tab="branches" id="navBranches"><span>Branches</span></div>
         <div class="nav" data-tab="settings"><span>Settings</span></div>
+        <div class="nav" data-tab="guide"><span>Guide</span></div>
         <div class="nav" data-tab="subscribe"><span>⭐ Subscription</span></div>
         <div class="side-bottom">
           <button class="logout" id="logout">Log out</button>
@@ -247,6 +248,8 @@
               </div>
             </div>
           </div>
+          <button class="btn" id="dlCard" style="margin-top:16px">🖨️&nbsp; Download printable tip card (4×6")</button>
+          <p style="color:var(--soft);font-size:12px;margin-top:8px;line-height:1.5">A ready-to-print card auto-filled with your logo, shop name and QR — plus payment logos. Great to place on tables or by the till. Opens a print view; choose “Save as PDF” or print.</p>
         </div>
 
         <div class="card">
@@ -448,6 +451,51 @@
         </div>
 
         <div class="sig">Powered by Amidify Solutions Inc.</div>
+      </div>
+
+      <!-- GUIDE -->
+      <div class="section" id="sec-guide">
+        <h1>Guide</h1>
+        <div class="sub">How to run your team's tipping page — everything in one place.</div>
+
+        <div class="card" style="background:linear-gradient(135deg,#12151f,#141018);border-color:#2b2f45">
+          <div style="display:inline-block;background:var(--blue,#2f6bff);color:#fff;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 10px;border-radius:20px;margin-bottom:8px">Beta · Trial</div>
+          <p style="margin:4px 0;font-size:14px;line-height:1.6">The website is in a trial phase and the mobile app is on the way 🚀. Try everything freely — we'd love your feedback. Send notes or ideas to <a href="mailto:Info@easytipme.com" style="color:#7aa2ff">Info@easytipme.com</a>.</p>
+        </div>
+
+        <div class="card">
+          <h3>1 · Add a team member</h3>
+          <p style="color:var(--soft);font-size:14px;line-height:1.6">Go to <b style="color:#fff">Team management</b> → <b style="color:#fff">Register a specialist</b>. Enter a public nickname, contact details, an optional photo and job title, then set the weekly schedule. Press <b style="color:#fff">Register specialist</b> — they automatically get an email with a login and temporary password.</p>
+        </div>
+
+        <div class="card">
+          <h3>2 · Set a weekly schedule</h3>
+          <p style="color:var(--soft);font-size:14px;line-height:1.6">Under <b style="color:#fff">Weekly schedule</b>, tap a day to make it a working day and set its hours (each day can differ, up to two shifts). A day left off = a day off. Leave every day off = the person always shows to customers. The QR page automatically shows only who's on shift right now.</p>
+        </div>
+
+        <div class="card">
+          <h3>3 · Publish, edit or remove</h3>
+          <p style="color:var(--soft);font-size:14px;line-height:1.6">Each member has a <b style="color:#fff">Published</b> switch and <b style="color:#fff">Edit</b> / <b style="color:#fff">Remove</b> buttons. Turn Published off to hide someone temporarily. Removing them keeps their tip history saved — you can restore them anytime.</p>
+        </div>
+
+        <div class="card">
+          <h3>4 · Bank connection status</h3>
+          <p style="color:var(--soft);font-size:14px;line-height:1.6">Next to each person a small badge shows if they've linked their bank: <span style="color:#5fd67e;font-weight:700">🟢 Bank connected</span>, <span style="color:#e8b04b;font-weight:700">🟡 Setup not finished</span>, or <span style="color:var(--soft);font-weight:700">⚪ No bank yet</span>. Each person connects their own bank from their app (open the login we emailed → “Get paid”). Someone with no bank connected can't be paid until they finish this.</p>
+        </div>
+
+        <div class="card">
+          <h3>5 · Your QR code &amp; printable card</h3>
+          <p style="color:var(--soft);font-size:14px;line-height:1.6">At the top of <b style="color:#fff">Team management</b> is your permanent business QR and a shop link — print the code once and place it where customers can scan it. Use <b style="color:#fff">Download printable tip card (4×6")</b> for a ready-to-print card with your logo, name, QR and payment logos.</p>
+        </div>
+
+        <div class="card">
+          <h3>6 · What customers see</h3>
+          <p style="color:var(--soft);font-size:14px;line-height:1.6">Customers scan the QR, pick the team member (or a pooled tip), choose an amount and pay securely by card, Apple Pay or Google Pay. Off-shift or removed staff are hidden automatically.</p>
+        </div>
+
+        <div class="card" style="text-align:center">
+          <p style="color:var(--soft);font-size:13px;margin:0">Questions or feedback? <a href="mailto:Info@easytipme.com" style="color:#7aa2ff">Info@easytipme.com</a></p>
+        </div>
       </div>
 
       <!-- ANALYTICS -->
@@ -1267,6 +1315,7 @@
     };
     $('copyShop').onclick=()=>{navigator.clipboard.writeText($('shopLink').value);$('copyShop').textContent='Copied';setTimeout(()=>$('copyShop').textContent='Copy',1200);};
     $('openShop').onclick=()=>window.open($('shopLink').value,'_blank');
+    { const dc=$('dlCard'); if(dc) dc.onclick=openTipCard; }
     $('copyStaff').onclick=()=>{navigator.clipboard.writeText($('staffLink').value);$('copyStaff').textContent='Copied';setTimeout(()=>$('copyStaff').textContent='Copy',1200);};
     $('openStaff').onclick=()=>window.open($('staffLink').value,'_blank');
 
@@ -1482,6 +1531,56 @@
       Object.entries(per).sort((a,b)=>b[1]-a[1]).forEach(([n,v])=>by.insertAdjacentHTML('beforeend',`<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #f0f0f2"><span>${esc(n)}</span><b>${sym}${v.toFixed(2)}</b></div>`));
       const rec=$('anRecent'); rec.innerHTML=''; $('anEmpty').style.display=snap.size?'none':'block';
       recent.slice(0,25).forEach(t=>{ const team=(t.pooled===true)||(t.multiple===true)||((t.recipientIds&&t.recipientIds.length>1)); const tag=team?' <span style="font-size:11px;color:var(--soft)">🤝 team split</span>':''; rec.insertAdjacentHTML('beforeend',`<tr><td>${esc(t.recipientName||'—')}${tag}</td><td>${sym}${(t.tip||0).toFixed(2)}</td><td>${t.rating?'★'.repeat(t.rating):'—'}</td></tr>`); });
+    }
+    // ---- Auto-generated printable 4x6 tip card (opens a print view) ----
+    function openTipCard(){
+      var url=shopUrl();
+      var name=esc((typeof bizData!=='undefined'&&bizData&&bizData.businessName)||'Your shop');
+      var logo=(typeof bizData!=='undefined'&&bizData&&bizData.logo)||'';
+      var qr='https://api.qrserver.com/v1/create-qr-code/?size=1000x1000&margin=14&ecc=M&data='+encodeURIComponent(url);
+      var APPLE='<svg viewBox="0 0 24 24" width="16" height="19" style="vertical-align:-3px"><path fill="#000" d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-2.987 1.57-.12 0-.23-.02-.3-.03-.01-.06-.04-.22-.04-.39 0-1.15.572-2.27 1.206-2.98.804-.94 2.142-1.64 3.248-1.68.03.13.05.28.05.43zm4.565 15.71c-.03.07-.463 1.58-1.518 3.12-.945 1.34-1.94 2.71-3.43 2.71-1.517 0-1.9-.88-3.63-.88-1.698 0-2.302.91-3.67.91-1.377 0-2.332-1.26-3.428-2.8-1.287-1.82-2.323-4.63-2.323-7.28 0-4.28 2.797-6.55 5.552-6.55 1.448 0 2.675.95 3.6.95.865 0 2.222-1.01 3.902-1.01.613 0 2.886.06 4.374 2.19-.13.09-2.383 1.37-2.383 4.19 0 3.26 2.854 4.42 2.955 4.45z"/></svg>';
+      var GOOG='<svg viewBox="0 0 48 48" width="19" height="19" style="vertical-align:-4px"><path fill="#4285F4" d="M45.12 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h11.84c-.51 2.75-2.06 5.08-4.39 6.64v5.52h7.11c4.16-3.83 6.56-9.47 6.56-16.17z"/><path fill="#34A853" d="M24 46c5.94 0 10.92-1.97 14.56-5.33l-7.11-5.52c-1.97 1.32-4.49 2.1-7.45 2.1-5.73 0-10.58-3.87-12.31-9.07H4.34v5.7C7.96 41.07 15.4 46 24 46z"/><path fill="#FBBC05" d="M11.69 28.18C11.25 26.86 11 25.45 11 24s.25-2.86.69-4.18v-5.7H4.34C2.85 17.09 2 20.45 2 24s.85 6.91 2.34 9.88l7.35-5.7z"/><path fill="#EA4335" d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 4.18 29.93 2 24 2 15.4 2 7.96 6.93 4.34 14.12l7.35 5.7c1.73-5.2 6.58-9.07 12.31-9.07z"/></svg>';
+      var MC='<svg viewBox="0 0 40 24" width="32" height="19" style="vertical-align:-4px"><circle cx="15.5" cy="12" r="9.5" fill="#EB001B"/><circle cx="24.5" cy="12" r="9.5" fill="#F79E1B"/><path d="M20 4.6a9.5 9.5 0 0 0 0 14.8 9.5 9.5 0 0 0 0-14.8z" fill="#FF5F00"/></svg>';
+      var css='@page{size:4in 6in;margin:0}*{margin:0;padding:0;box-sizing:border-box}html,body{width:4in;height:6in}'
+       +'body{font-family:Outfit,-apple-system,Segoe UI,Roboto,sans-serif;background:#fff;color:#111;-webkit-print-color-adjust:exact;print-color-adjust:exact}'
+       +'.card{width:4in;height:6in;padding:.34in .4in;display:flex;flex-direction:column;align-items:center;text-align:center}'
+       +'.logo{width:.66in;height:.66in;border-radius:20%;object-fit:cover;box-shadow:0 2px 6px rgba(0,0,0,.16)}'
+       +'.shop{font-weight:700;font-size:15pt;margin-top:.1in;color:#111;max-width:3in;overflow-wrap:break-word}'
+       +'.eyebrow{font-weight:700;font-size:7pt;letter-spacing:.3em;color:#2f6bff;margin-top:.2in}'
+       +'.script{font-family:"Dancing Script",cursive;font-size:25pt;color:#2f6bff;margin-top:.02in;line-height:1.15}'
+       +'.qwrap{margin-top:.2in}.qp{background:#fff;border:1px solid #eee;border-radius:.14in;padding:.14in;box-shadow:0 10px 26px -10px rgba(0,0,0,.28)}'
+       +'.qp img{width:1.64in;height:1.64in;display:block}'
+       +'.scan{font-weight:700;font-size:8pt;letter-spacing:.13em;color:#111;margin-top:.13in}'
+       +'.pay{margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:.1in;padding-top:.14in}'
+       +'.row{display:flex;align-items:center;justify-content:center;gap:.18in}'
+       +'.pm{display:inline-flex;align-items:center;gap:5px;font-weight:700}'
+       +'.ap{font-size:13pt;color:#000}.gp{font-size:13pt;color:#5f6368}'
+       +'.visa{font-style:italic;font-weight:800;font-size:12pt;color:#1A1F71}'
+       +'.mc{font-size:7.5pt;color:#555;font-weight:600}'
+       +'.amex{background:#2E77BC;color:#fff;font-size:6pt;font-weight:800;padding:3px 5px;border-radius:2px;line-height:1.05;letter-spacing:.03em}'
+       +'.pbtn{position:fixed;top:12px;right:12px;padding:10px 18px;border:0;border-radius:10px;background:#2f6bff;color:#fff;font:600 14px sans-serif;cursor:pointer}'
+       +'@media print{.pbtn{display:none}}';
+      var body='<div class="card">'
+       +(logo?'<img class="logo" src="'+logo+'">':'')
+       +'<div class="shop">'+name+'</div>'
+       +'<div class="eyebrow">GRATITUDE, MADE SIMPLE</div>'
+       +'<div class="script">A little thank you<br>goes a long way.</div>'
+       +'<div class="qwrap"><div class="qp"><img id="q" src="'+qr+'"></div><div class="scan">SCAN TO LEAVE A TIP OR FEEDBACK</div></div>'
+       +'<div class="pay"><div class="row">'
+       +'<span class="pm ap">'+APPLE+'<span>Pay</span></span>'
+       +'<span class="pm gp">'+GOOG+'<span>Pay</span></span></div>'
+       +'<div class="row">'
+       +'<span class="pm">'+MC+'<span class="mc">mastercard</span></span>'
+       +'<span class="visa">VISA</span>'
+       +'<span class="amex">AMERICAN<br>EXPRESS</span></div></div></div>'
+       +'<button class="pbtn" onclick="window.print()">Print / Save as PDF</button>';
+      var scr='var q=document.getElementById("q");function go(){setTimeout(function(){try{window.focus();window.print();}catch(e){}},450);}function ready(){if(document.fonts&&document.fonts.ready){document.fonts.ready.then(go);}else{go();}}if(q&&q.complete)ready();else if(q){q.onload=ready;q.onerror=ready;}else{go();}';
+      var html='<!doctype html><html><head><meta charset="utf8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+name+' — Tip card</title>'
+       +'<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">'
+       +'<style>'+css+'</style></head><body>'+body+'<scr'+'ipt>'+scr+'<\/scr'+'ipt></body></html>';
+      var w=window.open('','_blank');
+      if(w){ w.document.open(); w.document.write(html); w.document.close(); }
+      else { alert('Please allow pop-ups to open the printable card, then try again.'); }
     }
     function shopUrl(){ return location.origin+location.pathname.replace(/[^/]*$/,'')+'shop.html?s='+BID; }
     function staffUrl(){ return location.origin+location.pathname.replace(/[^/]*$/,'')+'staff.html?s='+BID; }
