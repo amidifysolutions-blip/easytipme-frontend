@@ -325,13 +325,13 @@
       $('payment-element').innerHTML='<div style="text-align:center;color:var(--soft);padding:26px 0">Preparing secure checkout…</div>';
       try{
         // Single recipient → server splits the money (tip to the worker, commission
-        // to the platform). Team tips fall back to a plain charge for now.
-        // If the owner turned on tip pooling, the tip is split equally among the
-        // workers currently on shift (allStaff = the on-shift set shown above).
+        // to the platform). A manual multi-select splits the tip EQUALLY among the
+        // chosen workers (split:true + their ids). If the owner turned on tip
+        // pooling, a single pick is split equally among the on-shift team.
         const poolOn = shop.tipPoolEnabled===true && !recipient.multiple && allStaff.length>0;
         recipient._pool = poolOn; recipient._members = poolOn ? allStaff.slice() : null;
         const body = recipient.multiple
-          ? { amount:Math.round(total*100), currency:curr.toLowerCase() }
+          ? { businessId:BID, tipCents:Math.round(tip*100), currency:curr.toLowerCase(), split:true, poolStaffIds:(recipient.members||[]).map(m=>m.id) }
           : poolOn
             ? { businessId:BID, staffId:recipient.id, tipCents:Math.round(tip*100), currency:curr.toLowerCase(), pool:true, poolStaffIds:allStaff.map(s=>s.id) }
             : { businessId:BID, staffId:recipient.id, tipCents:Math.round(tip*100), currency:curr.toLowerCase() };
@@ -397,8 +397,9 @@
         fetch(BACKEND+'/notify-tip',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
           recipients:members.map(m=>({name:m.nickname,email:m.email,pro:!!m.workerProActive})), amount:perAmt, tipTotal:tip, currency:curr, shopName:shop.businessName||'', fromName:fromName })});
       }catch(e){} }
-      // Settle the money split after the charge succeeds.
-      if(pooled && paymentIntent && paymentIntent.id){
+      // Settle the money split after the charge succeeds. Both the auto Tip-Pool
+      // and a manual multi-select settle the same way (equal split via transfers).
+      if((pooled || recipient.multiple) && paymentIntent && paymentIntent.id){
         try{ fetch(BACKEND+'/settle-pool',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentId:paymentIntent.id})}); }catch(e){}
       } else if(ownerShare>0 && paymentIntent && paymentIntent.id && !recipient.multiple){
         try{ fetch(BACKEND+'/settle-owner-fee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentId:paymentIntent.id})}); }catch(e){}
