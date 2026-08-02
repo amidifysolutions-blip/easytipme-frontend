@@ -112,18 +112,27 @@
 <body>
   <div id="loading" class="center"><div><div class="etm-spin"></div><div class="loadlbl">EasyTipMe</div></div></div>
 
-  <!-- LOGIN -->
+  <!-- LOGIN (passwordless — email + code) -->
   <div id="login" style="display:none">
     <div class="card">
       <div class="brand" style="margin-bottom:18px"><b style="font-size:18px">EasyTipMe</b><span class="rolebadge">Manager</span></div>
       <h1 style="font-size:20px">Sign in</h1>
-      <div class="sub" style="margin-bottom:18px">Use the email you were invited with.</div>
-      <label>Email</label>
-      <input type="email" id="li_email" autocomplete="username" placeholder="you@email.com">
-      <label>Password</label>
-      <input type="password" id="li_pass" autocomplete="current-password" placeholder="Your password">
-      <button class="btn full" id="li_btn">Sign in</button>
-      <div style="text-align:center;margin-top:12px"><button class="link b" id="li_forgot" style="font-size:13px">Forgot your password?</button></div>
+      <div id="li_step1">
+        <div class="sub" style="margin-bottom:18px">Enter your email — we'll send you a sign-in code. No password needed.</div>
+        <label>Email</label>
+        <input type="email" id="li_email" autocomplete="username" inputmode="email" placeholder="you@email.com">
+        <button class="btn full" id="li_send">Send me a code</button>
+      </div>
+      <div id="li_step2" style="display:none">
+        <div class="sub" style="margin-bottom:18px">We sent a 6-digit code to <b id="li_sentTo"></b>. Enter it below to sign in.</div>
+        <label>Sign-in code</label>
+        <input type="text" id="li_code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456" style="letter-spacing:6px;font-size:18px;text-align:center">
+        <button class="btn full" id="li_verify">Sign in</button>
+        <div style="text-align:center;margin-top:12px;display:flex;gap:16px;justify-content:center">
+          <button class="link b" id="li_resend" style="font-size:13px">Resend code</button>
+          <button class="link b" id="li_change" style="font-size:13px">Use a different email</button>
+        </div>
+      </div>
       <div id="li_msg" class="msg"></div>
     </div>
   </div>
@@ -503,21 +512,42 @@
       sel.onchange=()=>{ BID=sel.value; BIZ=ALLBIZ.find(b=>b.bid===BID)||null; $('sideBiz').textContent=(BIZ&&BIZ.name)||''; loadOverview(); loadTeam(); };
     }
 
-    // ---- Login handlers ----
-    $('li_btn').onclick=async()=>{
-      const email=$('li_email').value.trim().toLowerCase(), pass=$('li_pass').value;
-      if(!email||!pass){ msg('li_msg','Enter your email and password.','err'); return; }
-      $('li_btn').disabled=true; $('li_btn').textContent='Signing in…';
-      try{ await auth.signInWithEmailAndPassword(email,pass); }
-      catch(e){ const c=(e&&e.code)||''; msg('li_msg',(c.includes('wrong-password')||c.includes('invalid-credential'))?'Wrong email or password.':(c.includes('user-not-found')?'No account with that email.':'Could not sign in.'),'err'); $('li_btn').disabled=false; $('li_btn').textContent='Sign in'; }
-    };
-    $('li_pass').addEventListener('keydown',e=>{ if(e.key==='Enter') $('li_btn').click(); });
-    $('li_forgot').onclick=async()=>{
+    // ---- Login handlers (passwordless: email + 6-digit code) ----
+    let liEmail='';
+    async function sendCode(){
       const email=$('li_email').value.trim().toLowerCase();
-      if(!email){ msg('li_msg','Type your email above first, then tap Forgot.','err'); return; }
-      try{ await auth.sendPasswordResetEmail(email); msg('li_msg','Password reset email sent to '+email+'.','ok'); }
-      catch(e){ msg('li_msg','Could not send reset email. Check the address.','err'); }
+      if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ msg('li_msg','Enter a valid email address.','err'); return; }
+      $('li_send').disabled=true; $('li_send').textContent='Sending…';
+      try{
+        await fetch(BACKEND+'/mgr/login/request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
+        liEmail=email;
+        $('li_sentTo').textContent=email;
+        $('li_step1').style.display='none'; $('li_step2').style.display='block';
+        msg('li_msg','','' ); $('li_code').value=''; $('li_code').focus();
+      }catch(_){ msg('li_msg','Could not send the code. Please try again.','err'); }
+      $('li_send').disabled=false; $('li_send').textContent='Send me a code';
+    }
+    $('li_send').onclick=sendCode;
+    $('li_resend').onclick=async()=>{ $('li_email').value=liEmail; await sendCode(); msg('li_msg','A new code is on its way.','ok'); };
+    $('li_change').onclick=()=>{ $('li_step2').style.display='none'; $('li_step1').style.display='block'; msg('li_msg','',''); $('li_email').focus(); };
+    $('li_verify').onclick=async()=>{
+      const code=($('li_code').value||'').trim();
+      if(code.length<6){ msg('li_msg','Enter the 6-digit code from your email.','err'); return; }
+      $('li_verify').disabled=true; $('li_verify').textContent='Signing in…';
+      try{
+        const r=await fetch(BACKEND+'/mgr/login/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:liEmail,code})});
+        const j=await r.json().catch(()=>({}));
+        if(!r.ok||!j.token){
+          const m={'wrong-code':'Wrong code — check and try again.','expired':'That code expired. Send a new one.','too-many':'Too many tries. Send a new code.','no-code':'No code found — send a new one.'};
+          msg('li_msg',(m[j&&j.error])||'Could not sign in. Please try again.','err');
+          $('li_verify').disabled=false; $('li_verify').textContent='Sign in'; return;
+        }
+        await auth.signInWithCustomToken(j.token);
+        // onAuthStateChanged takes over from here.
+      }catch(e){ msg('li_msg','Could not sign in. Please try again.','err'); $('li_verify').disabled=false; $('li_verify').textContent='Sign in'; }
     };
+    $('li_email').addEventListener('keydown',e=>{ if(e.key==='Enter') sendCode(); });
+    $('li_code').addEventListener('keydown',e=>{ if(e.key==='Enter') $('li_verify').click(); });
 
     // ---- Auth gate ----
     function showLogin(){ $('loading').style.display='none'; $('app').style.display='none'; $('login').style.display='block'; }
