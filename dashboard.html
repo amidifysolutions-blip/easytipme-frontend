@@ -1667,7 +1667,24 @@
       +'.tcprev{width:192px;height:288px;overflow:hidden;border-radius:10px;box-shadow:0 10px 26px -12px rgba(0,0,0,.5)}'
       +'.tcprev.land{width:288px;height:192px}'
       +'.tcprev>.tccard{transform:scale(.5);transform-origin:top left}';
-    function tcEnsureStyle(){ if($('tcStyle'))return; var s=document.createElement('style'); s.id='tcStyle'; s.textContent=TC_CARD_CSS+TC_GALLERY_CSS; document.head.appendChild(s); }
+    TC_GALLERY_CSS+='.tcsec{width:100%;font-weight:700;font-size:14px;color:var(--ink);margin:4px 0 12px}.tcprev.a4{width:210px;height:297px}.tcprev.a4>.tca4{transform:scale(.264);transform-origin:top left}';
+    var TC_A4_CSS='.tca4{width:8.27in;height:11.69in;display:flex;flex-wrap:wrap;align-content:center;justify-content:center;gap:.26in;background:#fff;position:relative;font-family:-apple-system,BlinkMacSystemFont,sans-serif}'
+      +'.tca4slot{width:3.5in;height:5.25in;overflow:hidden;border:1px dashed #cfcfd6;border-radius:.1in}'
+      +'.tca4slot>.tccard{transform:scale(.875);transform-origin:top left}'
+      +'.tca4note{position:absolute;bottom:.3in;left:0;right:0;text-align:center;font-size:9pt;color:#adadb5;letter-spacing:.05em}';
+    function tcA4Inner(d){ var p={text:d.text,dark:d.dark,land:false}; var one='<div class="tca4slot">'+tcInner(p)+'</div>'; return '<div class="tca4">'+one+one+one+one+'<div class="tca4note">Print on A4 — then cut out the four cards along the dashed edges.</div></div>'; }
+    function printA4(i){
+      var d=TIP_CARDS[i];
+      var html='<!doctype html><html><head><meta charset="utf8"><title>EasyTipMe — A4 tip cards</title>'
+        +'<style>@page{size:A4;margin:0}html,body{margin:0;padding:0}body{-webkit-print-color-adjust:exact;print-color-adjust:exact}'
+        +TC_CARD_CSS+TC_A4_CSS
+        +'.tcpbtn{position:fixed;top:12px;right:12px;padding:10px 18px;border:0;border-radius:10px;background:#2f6bff;color:#fff;font:600 14px sans-serif;cursor:pointer}@media print{.tcpbtn{display:none}}'
+        +'</style></head><body>'+tcA4Inner(d)
+        +'<button class="tcpbtn" onclick="window.print()">Print / Save as PDF</button>'
+        +'<scr'+'ipt>var imgs=document.querySelectorAll(".tcqp img");var n=imgs.length,done=0;function go(){setTimeout(function(){try{window.focus();window.print();}catch(e){}},500);}if(!n){go();}else{imgs.forEach(function(q){if(q.complete){if(++done>=n)go();}else{q.onload=q.onerror=function(){if(++done>=n)go();};}});}<\/scr'+'ipt></body></html>';
+      var w=window.open('','_blank'); if(w){ w.document.open(); w.document.write(html); w.document.close(); } else { alert('Please allow pop-ups to open the printable card, then try again.'); }
+    }
+    function tcEnsureStyle(){ if($('tcStyle'))return; var s=document.createElement('style'); s.id='tcStyle'; s.textContent=TC_CARD_CSS+TC_GALLERY_CSS+TC_A4_CSS; document.head.appendChild(s); }
     function openCardGallery(){
       tcEnsureStyle();
       var m=$('cardModal');
@@ -1683,12 +1700,17 @@
         m.onclick=function(e){ if(e.target===m) m.style.display='none'; };
       }
       var g=$('tcGallery'); g.innerHTML='';
-      TIP_CARDS.forEach(function(d,i){
+      function addItem(previewHTML,land,a4,onPrint){
         var item=document.createElement('div'); item.className='tcitem';
-        item.innerHTML='<div class="tcprev'+(d.land?' land':'')+'">'+tcInner(d)+'</div><button class="btn sm">🖨️ Print / Save PDF</button>';
-        item.querySelector('button').onclick=function(){ printCard(i); };
+        var pc='tcprev'+(land?' land':'')+(a4?' a4':'');
+        item.innerHTML='<div class="'+pc+'">'+previewHTML+'</div><button class="btn sm">🖨️ Print / Save PDF</button>';
+        item.querySelector('button').onclick=onPrint;
         g.appendChild(item);
-      });
+      }
+      var s1=document.createElement('div'); s1.className='tcsec'; s1.textContent='Single cards — 4×6" portrait & 6×4" landscape (photo printers)'; g.appendChild(s1);
+      TIP_CARDS.forEach(function(d,i){ addItem(tcInner(d), d.land, false, function(){ printCard(i); }); });
+      var s2=document.createElement('div'); s2.className='tcsec'; s2.style.marginTop='24px'; s2.textContent='A4 sheets — 4 cards per page, cut to size (any printer)'; g.appendChild(s2);
+      for(var a=0;a<5;a++){ (function(idx){ addItem(tcA4Inner(TIP_CARDS[idx]), false, true, function(){ printA4(idx); }); })(a); }
       m.style.display='block';
     }
     function printCard(i){
