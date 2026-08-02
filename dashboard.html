@@ -257,8 +257,8 @@
               </div>
             </div>
           </div>
-          <button class="btn" id="dlCard" style="margin-top:16px">🖨️&nbsp; Download printable tip card (4×6")</button>
-          <p style="color:var(--soft);font-size:12px;margin-top:8px;line-height:1.5">A ready-to-print card auto-filled with your logo, shop name and QR — plus payment logos. Great to place on tables or by the till. Opens a print view; choose “Save as PDF” or print.</p>
+          <button class="btn" id="dlCard" style="margin-top:16px">🖨️&nbsp; Printable tip cards — choose a design</button>
+          <p style="color:var(--soft);font-size:12px;margin-top:8px;line-height:1.5">Pick from 10 ready-to-print designs — 5 portrait (4×6") and 5 landscape (6×4"), in white or black. Each is auto-filled with your logo, shop name and QR. Choose one, then “Save as PDF” or print.</p>
         </div>
 
         <div class="card">
@@ -1324,7 +1324,7 @@
     };
     $('copyShop').onclick=()=>{navigator.clipboard.writeText($('shopLink').value);$('copyShop').textContent='Copied';setTimeout(()=>$('copyShop').textContent='Copy',1200);};
     $('openShop').onclick=()=>window.open($('shopLink').value,'_blank');
-    { const dc=$('dlCard'); if(dc) dc.onclick=openTipCard; }
+    { const dc=$('dlCard'); if(dc) dc.onclick=openCardGallery; }
     $('copyStaff').onclick=()=>{navigator.clipboard.writeText($('staffLink').value);$('copyStaff').textContent='Copied';setTimeout(()=>$('copyStaff').textContent='Copy',1200);};
     $('openStaff').onclick=()=>window.open($('staffLink').value,'_blank');
 
@@ -1590,6 +1590,116 @@
       var scr='var q=document.getElementById("q");function go(){setTimeout(function(){try{window.focus();window.print();}catch(e){}},450);}function ready(){if(document.fonts&&document.fonts.ready){document.fonts.ready.then(go);}else{go();}}if(q&&q.complete)ready();else if(q){q.onload=ready;q.onerror=ready;}else{go();}';
       var html='<!doctype html><html><head><meta charset="utf8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+name+' — Tip card</title>'
        +'<style>'+css+'</style></head><body>'+body+'<scr'+'ipt>'+scr+'<\/scr'+'ipt></body></html>';
+      var w=window.open('','_blank');
+      if(w){ w.document.open(); w.document.write(html); w.document.close(); }
+      else { alert('Please allow pop-ups to open the printable card, then try again.'); }
+    }
+    // ===== Printable tip cards: 10 designs (5 portrait 4x6 + 5 landscape 6x4) =====
+    var TIP_CARDS=[
+      {text:'Make our day exactly in 3 seconds.', dark:false, land:false},
+      {text:'Zero cash. 100% appreciation. Scan to tip.', dark:false, land:false},
+      {text:'Gently scan your tip in here.', dark:false, land:false},
+      {text:'“Good Vibes” & “Digital Tips” accepted here.', dark:true, land:false},
+      {text:'Tips go digital now. Scan to tip.', dark:true, land:false},
+      {text:'Make our day exactly in 3 seconds.', dark:false, land:true},
+      {text:'Zero cash. 100% appreciation. Scan to tip.', dark:false, land:true},
+      {text:'Gently scan your tip in here.', dark:false, land:true},
+      {text:'“Good Vibes” & “Digital Tips” accepted here.', dark:true, land:true},
+      {text:'Tips go digital now. Scan to tip.', dark:true, land:true}
+    ];
+    var TC_APPLE=function(f){return '<svg viewBox="0 0 24 24" width="14" height="17" style="vertical-align:-3px"><path fill="'+f+'" d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-2.987 1.57-.12 0-.23-.02-.3-.03-.01-.06-.04-.22-.04-.39 0-1.15.572-2.27 1.206-2.98.804-.94 2.142-1.64 3.248-1.68.03.13.05.28.05.43zm4.565 15.71c-.03.07-.463 1.58-1.518 3.12-.945 1.34-1.94 2.71-3.43 2.71-1.517 0-1.9-.88-3.63-.88-1.698 0-2.302.91-3.67.91-1.377 0-2.332-1.26-3.428-2.8-1.287-1.82-2.323-4.63-2.323-7.28 0-4.28 2.797-6.55 5.552-6.55 1.448 0 2.675.95 3.6.95.865 0 2.222-1.01 3.902-1.01.613 0 2.886.06 4.374 2.19-.13.09-2.383 1.37-2.383 4.19 0 3.26 2.854 4.42 2.955 4.45z"/></svg>';};
+    var TC_GOOG='<svg viewBox="0 0 48 48" width="17" height="17" style="vertical-align:-4px"><path fill="#4285F4" d="M45.12 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h11.84c-.51 2.75-2.06 5.08-4.39 6.64v5.52h7.11c4.16-3.83 6.56-9.47 6.56-16.17z"/><path fill="#34A853" d="M24 46c5.94 0 10.92-1.97 14.56-5.33l-7.11-5.52c-1.97 1.32-4.49 2.1-7.45 2.1-5.73 0-10.58-3.87-12.31-9.07H4.34v5.7C7.96 41.07 15.4 46 24 46z"/><path fill="#FBBC05" d="M11.69 28.18C11.25 26.86 11 25.45 11 24s.25-2.86.69-4.18v-5.7H4.34C2.85 17.09 2 20.45 2 24s.85 6.91 2.34 9.88l7.35-5.7z"/><path fill="#EA4335" d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 4.18 29.93 2 24 2 15.4 2 7.96 6.93 4.34 14.12l7.35 5.7c1.73-5.2 6.58-9.07 12.31-9.07z"/></svg>';
+    var TC_MC='<svg viewBox="0 0 40 24" width="28" height="17" style="vertical-align:-4px"><circle cx="15.5" cy="12" r="9.5" fill="#EB001B"/><circle cx="24.5" cy="12" r="9.5" fill="#F79E1B"/><path d="M20 4.6a9.5 9.5 0 0 0 0 14.8 9.5 9.5 0 0 0 0-14.8z" fill="#FF5F00"/></svg>';
+    function tcPay(dark,land){
+      var ap='<span class="tcpm tcap">'+TC_APPLE(dark?'#fff':'#000')+'<span>Pay</span></span>';
+      var gp='<span class="tcpm tcgp">'+TC_GOOG+'<span>Pay</span></span>';
+      var visa='<span class="tcvisa">VISA</span>';
+      if(land){ return '<div class="tcrow">'+ap+gp+'<span class="tcpm">'+TC_MC+'</span>'+visa+'<span class="tcamex">AMEX</span></div>'; }
+      var mc='<span class="tcpm">'+TC_MC+'<span class="tcmc">mastercard</span></span>';
+      return '<div class="tcrow">'+ap+gp+'</div><div class="tcrow">'+mc+visa+'<span class="tcamex">AMERICAN<br>EXPRESS</span></div>';
+    }
+    function tcQR(){ return 'https://api.qrserver.com/v1/create-qr-code/?size=1000x1000&margin=14&ecc=M&data='+encodeURIComponent(shopUrl()); }
+    function tcInner(d){
+      var name=esc((typeof bizData!=='undefined'&&bizData&&bizData.businessName)||'Your shop');
+      var logo=(typeof bizData!=='undefined'&&bizData&&bizData.logo)||'';
+      var qr=tcQR();
+      var cls='tccard'+(d.dark?' dark':'')+(d.land?' land':'');
+      var logoEl=logo?'<img class="tclogo" src="'+logo+'">':'';
+      if(d.land){
+        return '<div class="'+cls+'"><div class="tcleft">'
+          +'<div>'+logoEl+'<div class="tcshop">'+name+'</div></div>'
+          +'<div class="tcscript">'+esc(d.text)+'</div>'
+          +'<div><div class="tcpay">'+tcPay(d.dark,true)+'</div><div class="tcfoot">EasyTipMe · easytipme.com</div></div>'
+          +'</div><div class="tcright"><div class="tcqp"><img src="'+qr+'"></div><div class="tcscan">SCAN TO TIP</div></div></div>';
+      }
+      return '<div class="'+cls+'">'+logoEl+'<div class="tcshop">'+name+'</div>'
+        +'<div class="tcscript">'+esc(d.text)+'</div>'
+        +'<div class="tcqwrap"><div class="tcqp"><img src="'+qr+'"></div><div class="tcscan">SCAN TO TIP</div></div>'
+        +'<div class="tcbottom"><div class="tcpay">'+tcPay(d.dark,false)+'</div><div class="tcfoot">EasyTipMe</div><div class="tcfmail">easytipme.com</div></div></div>';
+    }
+    var TC_CARD_CSS='.tccard{width:4in;height:6in;padding:.32in .38in;display:flex;flex-direction:column;align-items:center;text-align:center;background:#fff;color:#1a1a1a;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;overflow:hidden}'
+      +'.tccard.dark{background:#0a0a0a;color:#f4f4f6}'
+      +'.tccard.land{width:6in;height:4in;flex-direction:row;padding:0}'
+      +'.tclogo{width:.7in;height:.7in;border-radius:20%;object-fit:cover;box-shadow:0 2px 6px rgba(0,0,0,.14)}'
+      +'.tcshop{font-weight:700;font-size:15.5pt;margin-top:.1in;color:#111;max-width:3.1in;line-height:1.2}.tccard.dark .tcshop{color:#fff}'
+      +'.tcscript{font-size:14pt;color:#0071e3;font-weight:700;margin-top:.14in;line-height:1.3;max-width:3in}.tccard.dark .tcscript{color:#4aa8ff}'
+      +'.tcqwrap{margin-top:.16in;display:flex;flex-direction:column;align-items:center}'
+      +'.tcqp{background:#fff;border:1px solid #eee;border-radius:.14in;padding:.12in;box-shadow:0 10px 26px -10px rgba(0,0,0,.26)}'
+      +'.tcqp img{width:2.3in;height:2.3in;display:block}'
+      +'.tcscan{font-weight:800;font-size:12.5pt;letter-spacing:.16em;color:#111;margin-top:.13in}.tccard.dark .tcscan{color:#f0f0f2}'
+      +'.tcbottom{margin-top:auto;display:flex;flex-direction:column;align-items:center}'
+      +'.tcpay{display:flex;flex-direction:column;align-items:center;gap:.09in;padding-top:.08in}'
+      +'.tcrow{display:flex;align-items:center;justify-content:center;gap:.16in}'
+      +'.tcpm{display:inline-flex;align-items:center;gap:5px;font-weight:700}'
+      +'.tcap{font-size:12pt}.tccard:not(.dark) .tcap{color:#000}.tccard.dark .tcap{color:#fff}'
+      +'.tcgp{font-size:12pt;color:#5f6368}.tccard.dark .tcgp{color:#cfd3dc}'
+      +'.tcmc{font-size:7pt;color:#555;font-weight:600}.tccard.dark .tcmc{color:#c9c9d2}'
+      +'.tcvisa{font-style:italic;font-weight:800;font-size:11pt;color:#1A1F71}.tccard.dark .tcvisa{color:#8fb3ff}'
+      +'.tcamex{background:#2E77BC;color:#fff;font-size:5.5pt;font-weight:800;padding:3px 5px;border-radius:2px;line-height:1.05;letter-spacing:.03em}'
+      +'.tcfoot{color:#2f6bff;font-weight:800;font-size:11.5pt;margin-top:.12in}.tccard.dark .tcfoot{color:#4aa8ff}'
+      +'.tcfmail{color:#8a8a8f;font-weight:600;font-size:8pt;margin-top:2px}'
+      +'.tccard.land .tcleft{flex:1.2;padding:.3in;display:flex;flex-direction:column;align-items:center;justify-content:space-between;text-align:center;height:100%}'
+      +'.tccard.land .tcright{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:.24in;border-left:1px solid #eee;height:100%}'
+      +'.tccard.land.dark .tcright{border-left-color:#222}.tccard.land .tcscript{margin-top:0}';
+    var TC_GALLERY_CSS='.tcgrid{display:flex;flex-wrap:wrap;gap:22px;justify-content:center}'
+      +'.tcitem{display:flex;flex-direction:column;align-items:center;gap:10px}'
+      +'.tcprev{width:192px;height:288px;overflow:hidden;border-radius:10px;box-shadow:0 10px 26px -12px rgba(0,0,0,.5)}'
+      +'.tcprev.land{width:288px;height:192px}'
+      +'.tcprev>.tccard{transform:scale(.5);transform-origin:top left}';
+    function tcEnsureStyle(){ if($('tcStyle'))return; var s=document.createElement('style'); s.id='tcStyle'; s.textContent=TC_CARD_CSS+TC_GALLERY_CSS; document.head.appendChild(s); }
+    function openCardGallery(){
+      tcEnsureStyle();
+      var m=$('cardModal');
+      if(!m){
+        m=document.createElement('div'); m.id='cardModal';
+        m.style.cssText='display:none;position:fixed;inset:0;background:rgba(0,0,0,.66);z-index:200;overflow:auto;padding:22px';
+        m.innerHTML='<div style="max-width:1060px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px">'
+          +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><h3 style="font-size:18px">Printable tip cards — pick a design</h3><button class="btn ghost sm" id="tcClose">Close</button></div>'
+          +'<p style="color:var(--soft);font-size:13px;margin-bottom:18px">Tap any design, then Print or Save as PDF. Your logo, shop name and QR are already inside each one.</p>'
+          +'<div id="tcGallery" class="tcgrid"></div></div>';
+        document.body.appendChild(m);
+        $('tcClose').onclick=function(){ m.style.display='none'; };
+        m.onclick=function(e){ if(e.target===m) m.style.display='none'; };
+      }
+      var g=$('tcGallery'); g.innerHTML='';
+      TIP_CARDS.forEach(function(d,i){
+        var item=document.createElement('div'); item.className='tcitem';
+        item.innerHTML='<div class="tcprev'+(d.land?' land':'')+'">'+tcInner(d)+'</div><button class="btn sm">🖨️ Print / Save PDF</button>';
+        item.querySelector('button').onclick=function(){ printCard(i); };
+        g.appendChild(item);
+      });
+      m.style.display='block';
+    }
+    function printCard(i){
+      var d=TIP_CARDS[i];
+      var size=d.land?'6in 4in':'4in 6in';
+      var html='<!doctype html><html><head><meta charset="utf8"><title>EasyTipMe — tip card</title>'
+        +'<style>@page{size:'+size+';margin:0}html,body{margin:0;padding:0}body{-webkit-print-color-adjust:exact;print-color-adjust:exact}'
+        +TC_CARD_CSS
+        +'.tcpbtn{position:fixed;top:12px;right:12px;padding:10px 18px;border:0;border-radius:10px;background:#2f6bff;color:#fff;font:600 14px sans-serif;cursor:pointer}@media print{.tcpbtn{display:none}}'
+        +'</style></head><body>'+tcInner(d)
+        +'<button class="tcpbtn" onclick="window.print()">Print / Save as PDF</button>'
+        +'<scr'+'ipt>var q=document.querySelector(".tcqp img");function go(){setTimeout(function(){try{window.focus();window.print();}catch(e){}},450);}if(q&&q.complete)go();else if(q){q.onload=go;q.onerror=go;}else{go();}<\/scr'+'ipt></body></html>';
       var w=window.open('','_blank');
       if(w){ w.document.open(); w.document.write(html); w.document.close(); }
       else { alert('Please allow pop-ups to open the printable card, then try again.'); }
