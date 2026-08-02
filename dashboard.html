@@ -788,7 +788,18 @@
       // This login owns no business (e.g. a leftover worker/staff session on this
       // browser, or the wrong account). Don't render a broken empty dashboard —
       // sign out cleanly and send them to the sign-in screen for the owner account.
-      if(!doc.exists){ try{ await auth.signOut(); }catch(_){}; location.href='signup.html'; return; }
+      if(!doc.exists){
+        // Not a business owner on this login. Before bouncing, check whether this
+        // account was granted supervisor (manager) access to someone's business —
+        // if so, send them to the manager view instead of the owner dashboard.
+        try{
+          const idToken=await u.getIdToken();
+          const mr=await fetch(BACKEND+'/mgr/access',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken})});
+          const mj=await mr.json().catch(()=>({}));
+          if(mj && mj.businesses && mj.businesses.some(b=>b.role==='manager')){ location.href='manage.html'; return; }
+        }catch(_){}
+        try{ await auth.signOut(); }catch(_){}; location.href='signup.html'; return;
+      }
       const b = doc.data(); bizData=b;
       // HARD GATE: confirm email before the dashboard loads at all.
       try{ await u.reload(); }catch(_){}
