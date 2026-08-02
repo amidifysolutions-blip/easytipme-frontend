@@ -1672,7 +1672,7 @@
       +'.tca4slot{width:3.5in;height:5.25in;overflow:hidden;border:1px dashed #cfcfd6;border-radius:.1in}'
       +'.tca4slot>.tccard{transform:scale(.875);transform-origin:top left}'
       +'.tca4note{position:absolute;bottom:.3in;left:0;right:0;text-align:center;font-size:9pt;color:#adadb5;letter-spacing:.05em}';
-    function tcA4Inner(d){ var p={text:d.text,dark:d.dark,land:false}; var one='<div class="tca4slot">'+tcInner(p)+'</div>'; return '<div class="tca4">'+one+one+one+one+'<div class="tca4note">Print on A4 — then cut out the four cards along the dashed edges.</div></div>'; }
+    function tcA4Inner(d){ var p={text:d.text,dark:false,land:false}; var one='<div class="tca4slot">'+tcInner(p)+'</div>'; return '<div class="tca4">'+one+one+one+one+'<div class="tca4note">Print on A4 — then cut out the four cards along the dashed edges.</div></div>'; }
     function printA4(i){
       var d=TIP_CARDS[i];
       var html='<!doctype html><html><head><meta charset="utf8"><title>EasyTipMe — A4 tip cards</title>'
