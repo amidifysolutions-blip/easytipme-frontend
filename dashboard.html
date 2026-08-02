@@ -1667,21 +1667,42 @@
       +'.tcprev{width:192px;height:288px;overflow:hidden;border-radius:10px;box-shadow:0 10px 26px -12px rgba(0,0,0,.5)}'
       +'.tcprev.land{width:288px;height:192px}'
       +'.tcprev>.tccard{transform:scale(.5);transform-origin:top left}';
-    TC_GALLERY_CSS+='.tcsec{width:100%;font-weight:700;font-size:14px;color:var(--ink);margin:4px 0 12px}.tcprev.a4{width:210px;height:297px}.tcprev.a4>.tca4{transform:scale(.264);transform-origin:top left}';
-    var TC_A4_CSS='.tca4{width:8.27in;height:11.69in;display:flex;flex-wrap:wrap;align-content:center;justify-content:center;gap:.26in;background:#fff;position:relative;font-family:-apple-system,BlinkMacSystemFont,sans-serif}'
-      +'.tca4slot{width:3.5in;height:5.25in;overflow:hidden;border:1px dashed #cfcfd6;border-radius:.1in}'
-      +'.tca4slot>.tccard{transform:scale(.875);transform-origin:top left}'
-      +'.tca4note{position:absolute;bottom:.3in;left:0;right:0;text-align:center;font-size:9pt;color:#adadb5;letter-spacing:.05em}';
-    function tcA4Inner(d){ var p={text:d.text,dark:false,land:false}; var one='<div class="tca4slot">'+tcInner(p)+'</div>'; return '<div class="tca4">'+one+one+one+one+'<div class="tca4note">Print on A4 — then cut out the four cards along the dashed edges.</div></div>'; }
+    TC_GALLERY_CSS+='.tcsec{width:100%;font-weight:700;font-size:14px;color:var(--ink);margin:4px 0 12px}.tcprev.a4{width:210px;height:297px}.tcprev.a4>.a4card{transform:scale(.254);transform-origin:top left}';
+    var TC_A4_CSS='.a4card{width:8.27in;height:11.69in;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:#fff;color:#111;padding:.8in .7in;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}'
+      +'.a4logo{width:1.25in;height:1.25in;border-radius:22%;object-fit:cover;box-shadow:0 3px 10px rgba(0,0,0,.16)}'
+      +'.a4shop{font-weight:700;font-size:30pt;margin-top:.22in;line-height:1.15;max-width:6.6in;color:#111}'
+      +'.a4script{font-weight:700;font-size:25pt;color:#0071e3;margin-top:.24in;line-height:1.3;max-width:6in}'
+      +'.a4qp{background:#fff;border:1px solid #eee;border-radius:.2in;padding:.2in;box-shadow:0 14px 32px -14px rgba(0,0,0,.3);margin-top:.42in}'
+      +'.a4qp img{width:3.4in;height:3.4in;display:block}'
+      +'.a4scan{font-weight:800;font-size:19pt;letter-spacing:.2em;margin-top:.26in;color:#111}'
+      +'.a4pay{display:flex;align-items:center;justify-content:center;gap:.28in;margin-top:.5in;flex-wrap:wrap;font-weight:700}'
+      +'.a4pm{display:inline-flex;align-items:center;gap:7px;font-size:19pt;color:#000}'
+      +'.a4visa{font-style:italic;font-weight:800;font-size:19pt;color:#1A1F71}'
+      +'.a4mc{font-size:12pt;color:#555;font-weight:600}'
+      +'.a4amex{background:#2E77BC;color:#fff;font-size:9pt;font-weight:800;padding:4px 7px;border-radius:3px;letter-spacing:.03em}'
+      +'.a4foot{color:#2f6bff;font-weight:800;font-size:19pt;margin-top:.5in}'
+      +'.a4fmail{color:#8a8a8f;font-weight:600;font-size:12pt;margin-top:.05in}';
+    function a4Pay(){
+      var ap='<span class="a4pm"><svg viewBox="0 0 24 24" width="26" height="31" style="vertical-align:-6px"><path fill="#000" d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-2.987 1.57-.12 0-.23-.02-.3-.03-.01-.06-.04-.22-.04-.39 0-1.15.572-2.27 1.206-2.98.804-.94 2.142-1.64 3.248-1.68.03.13.05.28.05.43zm4.565 15.71c-.03.07-.463 1.58-1.518 3.12-.945 1.34-1.94 2.71-3.43 2.71-1.517 0-1.9-.88-3.63-.88-1.698 0-2.302.91-3.67.91-1.377 0-2.332-1.26-3.428-2.8-1.287-1.82-2.323-4.63-2.323-7.28 0-4.28 2.797-6.55 5.552-6.55 1.448 0 2.675.95 3.6.95.865 0 2.222-1.01 3.902-1.01.613 0 2.886.06 4.374 2.19-.13.09-2.383 1.37-2.383 4.19 0 3.26 2.854 4.42 2.955 4.45z"/></svg><span>Pay</span></span>';
+      var gp='<span class="a4pm"><svg viewBox="0 0 48 48" width="30" height="30" style="vertical-align:-7px"><path fill="#4285F4" d="M45.12 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h11.84c-.51 2.75-2.06 5.08-4.39 6.64v5.52h7.11c4.16-3.83 6.56-9.47 6.56-16.17z"/><path fill="#34A853" d="M24 46c5.94 0 10.92-1.97 14.56-5.33l-7.11-5.52c-1.97 1.32-4.49 2.1-7.45 2.1-5.73 0-10.58-3.87-12.31-9.07H4.34v5.7C7.96 41.07 15.4 46 24 46z"/><path fill="#FBBC05" d="M11.69 28.18C11.25 26.86 11 25.45 11 24s.25-2.86.69-4.18v-5.7H4.34C2.85 17.09 2 20.45 2 24s.85 6.91 2.34 9.88l7.35-5.7z"/><path fill="#EA4335" d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 4.18 29.93 2 24 2 15.4 2 7.96 6.93 4.34 14.12l7.35 5.7c1.73-5.2 6.58-9.07 12.31-9.07z"/></svg><span style="color:#5f6368">Pay</span></span>';
+      var mc='<span class="a4pm"><svg viewBox="0 0 40 24" width="48" height="29" style="vertical-align:-7px"><circle cx="15.5" cy="12" r="9.5" fill="#EB001B"/><circle cx="24.5" cy="12" r="9.5" fill="#F79E1B"/><path d="M20 4.6a9.5 9.5 0 0 0 0 14.8 9.5 9.5 0 0 0 0-14.8z" fill="#FF5F00"/></svg><span class="a4mc">mastercard</span></span>';
+      return '<div class="a4pay">'+ap+gp+mc+'<span class="a4visa">VISA</span><span class="a4amex">AMERICAN&nbsp;EXPRESS</span></div>';
+    }
+    function tcA4Card(d){
+      var name=esc((typeof bizData!=='undefined'&&bizData&&bizData.businessName)||'Your shop');
+      var logo=(typeof bizData!=='undefined'&&bizData&&bizData.logo)||'';
+      var logoEl=logo?'<img class="a4logo" src="'+logo+'">':'';
+      return '<div class="a4card">'+logoEl+'<div class="a4shop">'+name+'</div><div class="a4script">'+esc(d.text)+'</div><div class="a4qp"><img src="'+tcQR()+'"></div><div class="a4scan">SCAN TO TIP</div>'+a4Pay()+'<div class="a4foot">EasyTipMe</div><div class="a4fmail">easytipme.com</div></div>';
+    }
     function printA4(i){
       var d=TIP_CARDS[i];
       var html='<!doctype html><html><head><meta charset="utf8"><title>EasyTipMe — A4 tip cards</title>'
         +'<style>@page{size:A4;margin:0}html,body{margin:0;padding:0}body{-webkit-print-color-adjust:exact;print-color-adjust:exact}'
         +TC_CARD_CSS+TC_A4_CSS
         +'.tcpbtn{position:fixed;top:12px;right:12px;padding:10px 18px;border:0;border-radius:10px;background:#2f6bff;color:#fff;font:600 14px sans-serif;cursor:pointer}@media print{.tcpbtn{display:none}}'
-        +'</style></head><body>'+tcA4Inner(d)
+        +'</style></head><body>'+tcA4Card(d)
         +'<button class="tcpbtn" onclick="window.print()">Print / Save as PDF</button>'
-        +'<scr'+'ipt>var imgs=document.querySelectorAll(".tcqp img");var n=imgs.length,done=0;function go(){setTimeout(function(){try{window.focus();window.print();}catch(e){}},500);}if(!n){go();}else{imgs.forEach(function(q){if(q.complete){if(++done>=n)go();}else{q.onload=q.onerror=function(){if(++done>=n)go();};}});}<\/scr'+'ipt></body></html>';
+        +'<scr'+'ipt>var q=document.querySelector(".a4qp img");function go(){setTimeout(function(){try{window.focus();window.print();}catch(e){}},500);}if(q&&q.complete)go();else if(q){q.onload=go;q.onerror=go;}else{go();}<\/scr'+'ipt></body></html>';
       var w=window.open('','_blank'); if(w){ w.document.open(); w.document.write(html); w.document.close(); } else { alert('Please allow pop-ups to open the printable card, then try again.'); }
     }
     function tcEnsureStyle(){ if($('tcStyle'))return; var s=document.createElement('style'); s.id='tcStyle'; s.textContent=TC_CARD_CSS+TC_GALLERY_CSS+TC_A4_CSS; document.head.appendChild(s); }
@@ -1709,8 +1730,8 @@
       }
       var s1=document.createElement('div'); s1.className='tcsec'; s1.textContent='Single cards — 4×6" portrait & 6×4" landscape (photo printers)'; g.appendChild(s1);
       TIP_CARDS.forEach(function(d,i){ addItem(tcInner(d), d.land, false, function(){ printCard(i); }); });
-      var s2=document.createElement('div'); s2.className='tcsec'; s2.style.marginTop='24px'; s2.textContent='A4 sheets — 4 cards per page, cut to size (any printer)'; g.appendChild(s2);
-      for(var a=0;a<5;a++){ (function(idx){ addItem(tcA4Inner(TIP_CARDS[idx]), false, true, function(){ printA4(idx); }); })(a); }
+      var s2=document.createElement('div'); s2.className='tcsec'; s2.style.marginTop='24px'; s2.textContent='A4 pages — one full white page each (any printer)'; g.appendChild(s2);
+      for(var a=0;a<5;a++){ (function(idx){ addItem(tcA4Card(TIP_CARDS[idx]), false, true, function(){ printA4(idx); }); })(a); }
       m.style.display='block';
     }
     function printCard(i){
