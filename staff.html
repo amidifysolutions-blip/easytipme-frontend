@@ -293,13 +293,19 @@
         <div><div class="nm" id="pName"></div><div id="pBadges" style="margin:3px 0 1px"></div><div class="rl" id="pRole"></div></div>
       </div>
       <div class="card earn">
-        <div class="lbl" data-i18n="your_tips">Your tips</div>
+        <div class="lbl"><span data-i18n="your_tips">Your tips</span> · <span data-i18n="this_month">This month</span></div>
         <div class="big" id="eTotal">—</div>
+        <div id="eAllTime" style="color:var(--soft);font-size:13px;margin-top:6px">—</div>
         <div class="stats">
           <div class="stat"><div class="n" id="eCount">—</div><div class="t" data-i18n="tips">Tips</div></div>
           <div class="stat"><div class="n" id="eAvg">—</div><div class="t" data-i18n="avg_tip">Avg tip</div></div>
           <div class="stat"><div class="n" id="eRating">—</div><div class="t" data-i18n="avg_rating">Avg rating</div></div>
         </div>
+      </div>
+      <div class="card">
+        <div class="h3"><span data-i18n="by_month">By month</span></div>
+        <div id="monthList"></div>
+        <div id="noMonths" style="color:var(--soft);text-align:center;padding:12px 0" data-i18n="no_tips">No tips yet.</div>
       </div>
       <div class="card">
         <div class="h3" id="recentHdr" data-i18n="recent_tips">Recent tips</div>
@@ -486,7 +492,7 @@
       your_tips:"Your tips", tips:"Tips", avg_tip:"Avg tip", avg_rating:"Avg rating",
       recent_tips:"Recent tips", no_tips:"No tips yet.", from:"from", team_share:"Team share", who_tipped_you:"Who tipped you", tips_have_details:"of your tips have a name or message from the customer.", upgrade_to_see:"Upgrade to see who tipped you & read their message.",
       insights_title:"Insights", this_week:"This week", this_month:"This month", all_time:"All time",
-      earned:"Earned", average:"Average", daily_earnings:"Daily earnings (last 14 days)",
+      by_month:"By month", earned:"Earned", average:"Average", daily_earnings:"Daily earnings (last 14 days)",
       top_day:"Best day", named_tips:"With a name", anon_tips:"Anonymous", rating_avg:"Average rating", no_data:"No data for this period yet.",
       settings_title:"Settings", language:"Language", profile:"Profile",
       name_label:"Name", email_label:"Email", phone_label:"Phone", email_status:"Email verification",
@@ -554,7 +560,7 @@
       your_tips:"بقشيشك", tips:"البقشيش", avg_tip:"متوسط البقشيش", avg_rating:"متوسط التقييم",
       recent_tips:"آخر البقشيش", no_tips:"ما في بقشيش بعد.", from:"من", team_share:"حصّة من الفريق", who_tipped_you:"مين تيّبك", tips_have_details:"من تيباتك فيها اسم أو رسالة من الزبون.", upgrade_to_see:"اشترك لتشوف مين تيّبك وتقرا رسالتو.",
       insights_title:"التحليلات", this_week:"هالأسبوع", this_month:"هالشهر", all_time:"الكل",
-      earned:"المكتسب", average:"المتوسط", daily_earnings:"الأرباح اليومية (آخر ١٤ يوم)",
+      by_month:"حسب الشهر", earned:"المكتسب", average:"المتوسط", daily_earnings:"الأرباح اليومية (آخر ١٤ يوم)",
       top_day:"أفضل يوم", named_tips:"مع اسم", anon_tips:"بدون اسم", rating_avg:"متوسط التقييم", no_data:"ما في بيانات لهالفترة بعد.",
       settings_title:"الإعدادات", language:"اللغة", profile:"الملف الشخصي",
       name_label:"الاسم", email_label:"الإيميل", phone_label:"الهاتف", email_status:"تفعيل الإيميل",
@@ -979,7 +985,7 @@
       buildSwitchLine();
       // refresh dynamic bits if signed in
       if(shop){ $('connShop').textContent=t('connected_to',{shop:shop.businessName||'—'}); }
-      if(staffDoc){ renderSettings(auth.currentUser); if(!$('tab-insights').classList.contains('hide')) renderInsights(); if(!$('tab-home').classList.contains('hide')) renderRecent(); }
+      if(staffDoc){ renderSettings(auth.currentUser); if(!$('tab-insights').classList.contains('hide')) renderInsights(); if(!$('tab-home').classList.contains('hide')){ renderRecent(); renderHomeStats(); } }
     }
     function fillLangSelect(sel){ if(!sel)return; sel.innerHTML=''; LANGS.forEach(([code,name])=>{const o=document.createElement('option');o.value=code;o.textContent=name;if(code===LANG)o.selected=true;sel.appendChild(o);}); }
     function onLangChange(v){ LANG=DICT[v]?v:'en'; try{localStorage.setItem('etm_lang',LANG);}catch(_){}; fillLangSelect($('langAuth')); fillLangSelect($('langSet')); applyLang(); }
@@ -1287,12 +1293,34 @@
     }
 
     function renderHomeStats(){
-      let total=0,count=allRows.length,rs=0,rc=0;
-      allRows.forEach(r=>{ total+=r.amt; if(r.rating){rs+=r.rating;rc++;} });
+      const now=new Date(), cy=now.getFullYear(), cm=now.getMonth();
+      let total=0,count=0,rs=0,rc=0,allTotal=0;
+      allRows.forEach(r=>{
+        allTotal+=r.amt;
+        if(r.date && r.date.getFullYear()===cy && r.date.getMonth()===cm){
+          total+=r.amt; count++; if(r.rating){rs+=r.rating;rc++;}
+        }
+      });
       $('eTotal').textContent=curSym+total.toFixed(2);
       $('eCount').textContent=count;
       $('eAvg').textContent=count?curSym+(total/count).toFixed(2):'—';
       $('eRating').textContent=rc?(rs/rc).toFixed(1)+'★':'—';
+      const at=$('eAllTime'); if(at) at.textContent=t('all_time')+': '+curSym+allTotal.toFixed(2);
+      renderMonths();
+    }
+    function renderMonths(){
+      const el=$('monthList'); if(!el) return;
+      const nm=$('noMonths');
+      const map={};
+      allRows.forEach(r=>{ if(!r.date) return; const k=r.date.getFullYear()+'-'+String(r.date.getMonth()+1).padStart(2,'0'); if(!map[k])map[k]={sum:0,n:0}; map[k].sum+=r.amt; map[k].n++; });
+      const keys=Object.keys(map).sort().reverse();
+      if(!keys.length){ el.innerHTML=''; if(nm)nm.style.display='block'; return; }
+      if(nm)nm.style.display='none';
+      el.innerHTML=keys.map(k=>{
+        const parts=k.split('-'), y=+parts[0], m=+parts[1];
+        let label; try{ label=new Date(y,m-1,1).toLocaleDateString(LANG,{month:'long',year:'numeric'}); }catch(_){ label=k; }
+        return '<div class="kv"><span class="k">'+esc(label)+'</span><span class="v">'+curSym+map[k].sum.toFixed(2)+'</span></div>';
+      }).join('');
     }
     function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
     // Worker Pro is the WORKER's OWN subscription (lives on workers/{uid}) and
