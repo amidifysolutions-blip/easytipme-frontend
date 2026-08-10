@@ -167,6 +167,10 @@
     const firebaseConfig={apiKey:"AIzaSyBsY_pCxvbbJUtvRb7ClwgWQ25hGzNTgBM",authDomain:"easy-tip-me.firebaseapp.com",projectId:"easy-tip-me",storageBucket:"easy-tip-me.firebasestorage.app",messagingSenderId:"189382420404",appId:"1:189382420404:web:2f6075c986c81484eab4e1"};
     firebase.initializeApp(firebaseConfig);
     const db=firebase.firestore();
+    // Auto-detect long-polling: fixes the slow FIRST load when the tip page is
+    // opened inside a QR-scanner / in-app browser or on a mobile network, where
+    // the default streaming connection can stall for seconds before data loads.
+    try{ db.settings({ experimentalAutoDetectLongPolling: true }); }catch(_){}
     const BACKEND="https://easytipme-backend.onrender.com";
     // Fallback only. The real key comes from the backend (/create-payment-intent
     // returns publishableKey) so it ALWAYS matches the backend's test/live mode
