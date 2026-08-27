@@ -163,6 +163,25 @@
       </div>
 
       <div class="card">
+        <h3>🤝 Partners <span class="sub" style="margin:0" id="partnerCount"></span></h3>
+        <div class="sub" style="margin-bottom:12px">Everyone referring venues to you: their rate, how many venues they brought, what they are owed and how they want to be paid.</div>
+        <div class="admin-table-wrap" style="overflow-x:auto">
+          <table class="admin-table" style="width:100%;border-collapse:collapse;font-size:13.5px">
+            <thead><tr style="text-align:left;color:var(--soft)">
+              <th style="padding:8px 10px">Partner</th><th style="padding:8px 10px">Code</th>
+              <th style="padding:8px 10px">Tier</th><th class="num" style="padding:8px 10px;text-align:right">Rate</th>
+              <th class="num" style="padding:8px 10px;text-align:right">Venues</th>
+              <th class="num" style="padding:8px 10px;text-align:right">Owed</th>
+              <th class="num" style="padding:8px 10px;text-align:right">Paid</th>
+              <th style="padding:8px 10px">Payout</th><th style="padding:8px 10px"></th>
+            </tr></thead>
+            <tbody id="partnerTable"></tbody>
+          </table>
+        </div>
+        <div id="partnerMsg" class="msg"></div>
+      </div>
+
+      <div class="card">
         <h3>Businesses <span class="sub" style="margin:0" id="bizCount"></span></h3>
         <div class="toolbar">
           <input id="bizSearch" placeholder="Search business or email…">
@@ -283,6 +302,7 @@
       $('minTipInput').value=minTip;
       $('stComm').textContent=commRate+'% + $'+Number(commFix).toFixed(2);
       loadBusinesses();
+      loadPartners();
     }
 
     $('saveComm').onclick=async()=>{
@@ -297,6 +317,71 @@
         msg('commMsg','Saved ✓ — '+p+'% + $'+f.toFixed(2)+' and a $'+mt.toFixed(2)+' minimum tip are live for all shops now.','ok'); }
       catch(e){ msg('commMsg',e.message,'err'); }
     };
+
+    // ---- Partners -----------------------------------------------------------
+    const BACKEND="https://easytipme-backend.onrender.com";
+    async function papi(path,body){
+      const u=auth.currentUser; if(!u) throw new Error('not signed in');
+      const idToken=await u.getIdToken();
+      const r=await fetch(BACKEND+path,{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(Object.assign({idToken},body||{}))});
+      const j=await r.json().catch(()=>({}));
+      if(!r.ok||j.error) throw new Error(j.error||'Request failed');
+      return j;
+    }
+    let PARTNERS=[];
+    async function loadPartners(){
+      const tb=$('partnerTable');
+      try{
+        const j=await papi('/partners/admin/list');
+        PARTNERS=j.partners||[];
+        $('partnerCount').textContent=PARTNERS.length?('· '+PARTNERS.length):'· none yet';
+        if(!PARTNERS.length){ tb.innerHTML='<tr><td colspan="9" style="padding:18px;text-align:center;color:var(--soft)">No partners yet. They appear here as soon as someone joins from the partners page.</td></tr>'; return; }
+        tb.innerHTML=PARTNERS.map(p=>{
+          const pay = p.stripeReady ? 'Stripe' : (p.payoutMethod&&p.payoutMethod.type ? p.payoutMethod.type : '<span style="color:var(--orange,#e8a33d)">not set</span>');
+          const rate = p.rate+'%'+(p.customRate!=null?' <span class="pill">custom</span>':(p.stepsDown>0?' <span class="pill" style="background:#fff5e9;color:#c47a1e">−'+(p.stepsDown*7)+'</span>':''));
+          return '<tr>'
+            +'<td style="padding:9px 10px"><b>'+esc(p.name||'—')+'</b><div style="color:var(--soft);font-size:12px">'+esc(p.email)+'</div></td>'
+            +'<td style="padding:9px 10px"><code>'+esc(p.code)+'</code></td>'
+            +'<td style="padding:9px 10px">'+esc(p.tier)+'</td>'
+            +'<td class="num" style="padding:9px 10px;text-align:right">'+rate+'</td>'
+            +'<td class="num" style="padding:9px 10px;text-align:right">'+p.activeClients+'<span style="color:var(--soft)">/'+p.totalReferred+'</span></td>'
+            +'<td class="num" style="padding:9px 10px;text-align:right"><b>'+money(p.accrued)+'</b></td>'
+            +'<td class="num" style="padding:9px 10px;text-align:right;color:var(--soft)">'+money(p.paid)+'</td>'
+            +'<td style="padding:9px 10px">'+pay+'</td>'
+            +'<td style="padding:9px 10px;white-space:nowrap">'
+              +'<button class="btn ghost sm" data-rate="'+p.uid+'">Rate</button> '
+              +(p.accrued>0?'<button class="btn ghost sm" data-paid="'+p.uid+'">Mark paid</button>':'')
+            +'</td></tr>';
+        }).join('');
+        tb.querySelectorAll('[data-paid]').forEach(b=>{ b.onclick=()=>markPaid(b.getAttribute('data-paid')); });
+        tb.querySelectorAll('[data-rate]').forEach(b=>{ b.onclick=()=>setRate(b.getAttribute('data-rate')); });
+      }catch(e){
+        tb.innerHTML='';
+        $('partnerCount').textContent='';
+        msg('partnerMsg','Could not load partners: '+e.message,'err');
+      }
+    }
+    async function markPaid(uid){
+      const p=PARTNERS.find(x=>x.uid===uid); if(!p) return;
+      // Confirm the exact amount — this only records the payment, it does not send money.
+      const raw=prompt('Record a payout for '+(p.name||p.email)+'.\nOwed: '+money(p.accrued)+'\n\nAmount to record (leave as-is to pay it all):', p.accrued.toFixed(2));
+      if(raw===null) return;
+      const amt=parseFloat(raw);
+      if(isNaN(amt)||amt<=0||amt>p.accrued+0.001){ msg('partnerMsg','Enter an amount between 0 and '+money(p.accrued)+'.','err'); return; }
+      try{ const r=await papi('/partners/admin/mark-paid',{uid,amount:amt});
+        msg('partnerMsg','Recorded '+money(r.paid)+' paid to '+(p.name||p.email)+'. Send the money by their chosen method.','ok');
+        loadPartners();
+      }catch(e){ msg('partnerMsg','Could not record: '+e.message,'err'); }
+    }
+    async function setRate(uid){
+      const p=PARTNERS.find(x=>x.uid===uid); if(!p) return;
+      const raw=prompt('Custom rate for '+(p.name||p.email)+' (%).\nLeave EMPTY to go back to the automatic tier rate.', p.customRate!=null?String(p.customRate):'');
+      if(raw===null) return;
+      try{ await papi('/partners/admin/set-rate',{uid,rate:raw.trim()===''?null:raw.trim()});
+        msg('partnerMsg','Rate updated.','ok'); loadPartners();
+      }catch(e){ msg('partnerMsg','Could not update: '+e.message,'err'); }
+    }
 
     // What Stripe charges us on a card payment. The customer is charged tip+fee,
     // and Stripe takes a % of that WHOLE amount plus a fixed cost per transaction.
