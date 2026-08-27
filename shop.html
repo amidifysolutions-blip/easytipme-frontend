@@ -229,8 +229,14 @@
         // the global default (config/platform), else 7% + $0.30.
         FEE=0.10; FIXED=0.30;
         let _cfg=null; try{const c=await db.collection('config').doc('platform').get(); if(c.exists) _cfg=c.data();}catch(e){}
+        // Minimum is per currency — must mirror the server, which is authoritative.
         if(_cfg&&_cfg.minTip!=null) MIN_TIP=Number(_cfg.minTip)||0;
         if(_cfg&&_cfg.maxTip!=null) MAX_TIP=Number(_cfg.maxTip)||1000;
+        const _ck=(curr||'').toLowerCase();
+        const _byCur=(_cfg&&_cfg.minTipByCurrency)||{};
+        const _minorDefault={aed:12,sar:12,qar:12,lbp:300000,egp:150};
+        if(_byCur[_ck]!=null) MIN_TIP=Number(_byCur[_ck])||MIN_TIP;
+        else if(_minorDefault[_ck]!=null) MIN_TIP=_minorDefault[_ck];
         if(shop.commissionPercent!=null) FEE=shop.commissionPercent/100; else if(_cfg&&_cfg.commissionPercent!=null) FEE=_cfg.commissionPercent/100;
         if(shop.commissionFixed!=null) FIXED=Number(shop.commissionFixed); else if(_cfg&&_cfg.commissionFixed!=null) FIXED=Number(_cfg.commissionFixed);
         // Flat fixed fee only applies in the launch currencies; others = percentage only.
