@@ -234,7 +234,7 @@
         if(_cfg&&_cfg.maxTip!=null) MAX_TIP=Number(_cfg.maxTip)||1000;
         const _ck=(curr||'').toLowerCase();
         const _byCur=(_cfg&&_cfg.minTipByCurrency)||{};
-        const _minorDefault={aed:5,sar:5,qar:5,lbp:100000,egp:50};
+        const _minorDefault={sek:30,nok:30,dkk:20,pln:12,czk:70,huf:1000,ron:14,bgn:6};
         if(_byCur[_ck]!=null) MIN_TIP=Number(_byCur[_ck])||MIN_TIP;
         else if(_minorDefault[_ck]!=null) MIN_TIP=_minorDefault[_ck];
         // Fee resolution MUST mirror server.js /create-payment-intent EXACTLY —
@@ -245,18 +245,19 @@
         const _target=(_cfg&&_cfg.targetNetPercent!=null&&!isNaN(Number(_cfg.targetNetPercent)))?Number(_cfg.targetNetPercent):7;
         const _spHome=(_cfg&&_cfg.stripePercentHome!=null&&!isNaN(Number(_cfg.stripePercentHome)))?Number(_cfg.stripePercentHome):2.9;
         const _spAway=(_cfg&&_cfg.stripePercentForeign!=null&&!isNaN(Number(_cfg.stripePercentForeign)))?Number(_cfg.stripePercentForeign):5.7;
-        const _STRIPE_FIXED={cad:0.30,usd:0.22,eur:0.20,gbp:0.17,aud:0.34,nzd:0.37,chf:0.19,
-          aed:0.80,sar:0.82,qar:0.80,jod:0.16,kwd:0.07,bhd:0.09,omr:0.09,
-          egp:10.5,lbp:19500,try:9,mad:2.2,tnd:0.65,ils:0.81,
-          sek:2.2,nok:2.3,dkk:1.5,pln:0.87,czk:4.8,ron:1.0,huf:78,isk:30,
-          jpy:33,cny:1.55,hkd:1.7,twd:6.9,krw:300,sgd:0.28,myr:0.93,
-          thb:7.5,php:12.5,idr:3600,inr:18.5,vnd:5550,pkr:62,bdt:26,
-          brl:1.2,mxn:4.2,ars:300,clp:210,cop:870,pen:0.81,uyu:8.7,
-          zar:3.9,ngn:330,kes:28.5,ghs:2.7};
+        // Currencies we can ACTUALLY operate in: a Canadian platform can only pay
+        // out to connected accounts in CA / US / UK / EEA / CH. A worker in Egypt,
+        // Lebanon, Saudi Arabia, Qatar, Kuwait, Jordan or Turkey cannot be paid at
+        // all, so those currencies are deliberately absent. Mirrors server.js.
+        const _STRIPE_FIXED={cad:0.30,
+          usd:0.22,gbp:0.17,eur:0.20,chf:0.19,
+          sek:2.2,nok:2.3,dkk:1.5,
+          pln:0.87,czk:4.8,huf:78,ron:1.0,bgn:0.40};
+        const _xb=(_cfg&&_cfg.crossBorderPercent!=null&&!isNaN(Number(_cfg.crossBorderPercent)))?Number(_cfg.crossBorderPercent):0.25;
         const _tidyUp=v=>{ if(!(v>0)) return 0; const m=Math.pow(10,Math.floor(Math.log10(v))-1); return Math.round(Math.ceil(v/m)*m*1e6)/1e6; };
         const _isHome=(_ck===_home);
         const _sp=(_isHome?_spHome:_spAway)/100;
-        const _cpPct=Math.round(((_target/100+_sp)/(1-_sp))*1000)/10;
+        const _cpPct=Math.round(((_target/100+(_isHome?0:_xb/100)+_sp)/(1-_sp))*1000)/10;
         const _cpFix=(_STRIPE_FIXED[_ck]!=null)?_tidyUp(_STRIPE_FIXED[_ck]/(1-_sp)):null;
         const _pctByCur=(_cfg&&_cfg.commissionPercentByCurrency)||{};
         const _fixByCur=(_cfg&&_cfg.commissionFixedByCurrency)||{};

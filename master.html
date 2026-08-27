@@ -165,7 +165,7 @@
 
       <div class="card">
         <h3>🌍 Pricing per currency</h3>
-        <div class="sub" style="margin-bottom:14px">The customer pays the tip, plus <b>exactly what Stripe costs us</b>, plus your profit — so you keep the same net % in every country. Stripe is dearer abroad (foreign card +0.8%, currency conversion +2%), so the rate abroad is higher: that gap is cost, not extra profit. Pick a currency to see what is live, or override it. Amounts for markets you haven't opened yet are estimates \u2014 check a real Stripe charge before launching one.</div>
+        <div class="sub" style="margin-bottom:14px"><b>These are every country we can operate in.</b> Stripe only lets a Canadian platform pay workers in Canada, the US, the UK, the EEA and Switzerland \u2014 a worker in Egypt, Lebanon, Saudi Arabia, Qatar, Kuwait, Jordan or Turkey cannot receive money from us at all, so those currencies are not offered. The customer pays the tip, plus <b>exactly what Stripe costs us</b>, plus your profit — so you keep the same net % in every country. Stripe is dearer abroad (foreign card +0.8%, currency conversion +2%), so the rate abroad is higher: that gap is cost, not extra profit. Pick a currency to see what is live, or override it. Amounts for markets you haven't opened yet are estimates \u2014 check a real Stripe charge before launching one.</div>
         <div class="comm-row">
           <div class="pct"><label>Currency</label><select id="curPick" style="padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:transparent;color:inherit;font:inherit"></select></div>
           <div class="pct"><label>Commission</label><input id="curPct" type="number" step="0.1" min="10" max="50"><span>%</span></div>
@@ -345,27 +345,28 @@
     // MUST stay in sync with FIXED_BY_CUR in the backend (server.js) and in
     // shop.html. Those are the defaults; anything saved here overrides them.
     let cfgCache={};
-    // What Stripe's fixed fee (C$0.30) costs us in each currency.
-    const STRIPE_FIXED={cad:0.30,usd:0.22,eur:0.20,gbp:0.17,aud:0.34,nzd:0.37,chf:0.19,
-      aed:0.80,sar:0.82,qar:0.80,jod:0.16,kwd:0.07,bhd:0.09,omr:0.09,
-      egp:10.5,lbp:19500,try:9,mad:2.2,tnd:0.65,ils:0.81,
-      sek:2.2,nok:2.3,dkk:1.5,pln:0.87,czk:4.8,ron:1.0,huf:78,isk:30,
-      jpy:33,cny:1.55,hkd:1.7,twd:6.9,krw:300,sgd:0.28,myr:0.93,
-      thb:7.5,php:12.5,idr:3600,inr:18.5,vnd:5550,pkr:62,bdt:26,
-      brl:1.2,mxn:4.2,ars:300,clp:210,cop:870,pen:0.81,uyu:8.7,
-      zar:3.9,ngn:330,kes:28.5,ghs:2.7};
-    const CUR_DEF_MIN={aed:5,sar:5,qar:5,lbp:100000,egp:50};
+    // Only the currencies we can actually operate in: a Canadian platform can pay
+    // out to connected accounts in CA / US / UK / EEA / CH and nowhere else.
+    // Values = what Stripe's fixed fee (C$0.30, our account is Canadian) costs us.
+    const STRIPE_FIXED={cad:0.30,
+      usd:0.22,gbp:0.17,eur:0.20,chf:0.19,
+      sek:2.2,nok:2.3,dkk:1.5,
+      pln:0.87,czk:4.8,huf:78,ron:1.0,bgn:0.40};
+    const CUR_NAME={cad:'Canada',usd:'United States',gbp:'United Kingdom',eur:'Eurozone',chf:'Switzerland',
+      sek:'Sweden',nok:'Norway',dkk:'Denmark',pln:'Poland',czk:'Czechia',huf:'Hungary',ron:'Romania',bgn:'Bulgaria'};
+    const CUR_DEF_MIN={sek:30,nok:30,dkk:20,pln:12,czk:70,huf:1000,ron:14,bgn:6};
     const tidyUp=v=>{ if(!(v>0)) return 0; const m=Math.pow(10,Math.floor(Math.log10(v))-1); return Math.round(Math.ceil(v/m)*m*1e6)/1e6; };
     function costPlus(c){
       const home=String(cfgCache.homeCurrency||'cad').toLowerCase();
       const target=cfgCache.targetNetPercent!=null?Number(cfgCache.targetNetPercent):7;
       const spH=cfgCache.stripePercentHome!=null?Number(cfgCache.stripePercentHome):2.9;
       const spA=cfgCache.stripePercentForeign!=null?Number(cfgCache.stripePercentForeign):5.7;
+      const xb=cfgCache.crossBorderPercent!=null?Number(cfgCache.crossBorderPercent):0.25;
       const isHome=(c===home), sp=(isHome?spH:spA)/100;
       return {
-        isHome,
+        isHome, xb,
         stripe:(isHome?spH:spA),
-        pct: isHome ? commRate : Math.round(((target/100+sp)/(1-sp))*1000)/10,
+        pct: isHome ? commRate : Math.round(((target/100+xb/100+sp)/(1-sp))*1000)/10,
         fix: isHome ? (cfgCache.commissionFixed!=null?Number(cfgCache.commissionFixed):0.30)
                     : (STRIPE_FIXED[c]!=null?tidyUp(STRIPE_FIXED[c]/(1-sp)):null)
       };
@@ -374,8 +375,8 @@
     function curInit(){
       const sel=$('curPick'); if(!sel) return;
       const list=Object.keys(STRIPE_FIXED).sort();
-      sel.innerHTML=list.map(c=>'<option value="'+c+'">'+c.toUpperCase()+'</option>').join('');
-      sel.value='aed';
+      sel.innerHTML=list.map(c=>'<option value="'+c+'">'+c.toUpperCase()+' \u2014 '+(CUR_NAME[c]||c.toUpperCase())+'</option>').join('');
+      sel.value='usd';
       sel.onchange=curFill;
       curFill();
     }
@@ -399,7 +400,7 @@
       const keep=(cfgCache.targetNetPercent!=null?cfgCache.targetNetPercent:7);
       $('curState').innerHTML='For <b>'+U+'</b>: '+marks.join(' \u00b7 ')
         +'<br>Stripe costs us about <b>'+cp.stripe+'% + '+(STRIPE_FIXED[c]!=null?STRIPE_FIXED[c]+' '+U:'?')+'</b> here'
-        +(cp.isHome?' (home currency \u2014 local cards, no conversion).':' (foreign card +0.8% and currency conversion +2% on top of the 2.9% base).')
+        +(cp.isHome?' (home currency \u2014 local cards, no conversion).':' (foreign card +0.8% and currency conversion +2% on top of the 2.9% base), plus '+cp.xb+'% to pay a worker outside Canada.')
         +' Charging '+defPct+'% + '+defFix+' '+U+' leaves you <b>'+keep+'% net</b> of the tip.';
       curListOverrides();
     }

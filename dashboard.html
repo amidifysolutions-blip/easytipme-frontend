@@ -381,14 +381,15 @@
             <option value="USD">USD — US Dollar ($)</option>
             <option value="EUR">EUR — Euro (€)</option>
             <option value="GBP">GBP — British Pound (£)</option>
-            <option value="AED">AED — UAE Dirham</option>
-            <option value="SAR">SAR — Saudi Riyal</option>
-            <option value="AUD">AUD — Australian Dollar ($)</option>
-            <option value="QAR">QAR — Qatari Riyal</option>
-            <option value="KWD">KWD — Kuwaiti Dinar</option>
-            <option value="BHD">BHD — Bahraini Dinar</option>
-            <option value="OMR">OMR — Omani Rial</option>
-            <option value="LBP">LBP — Lebanese Pound</option>
+            <option value="CHF">CHF — Swiss Franc</option>
+            <option value="SEK">SEK — Swedish Krona</option>
+            <option value="NOK">NOK — Norwegian Krone</option>
+            <option value="DKK">DKK — Danish Krone</option>
+            <option value="PLN">PLN — Polish Złoty</option>
+            <option value="CZK">CZK — Czech Koruna</option>
+            <option value="HUF">HUF — Hungarian Forint</option>
+            <option value="RON">RON — Romanian Leu</option>
+            <option value="BGN">BGN — Bulgarian Lev</option>
           </select>
         </div>
         <div class="card">
@@ -782,6 +783,7 @@
       if(b.logo){ pLogo=b.logo; $('p_logoPrev').src=b.logo; }
       const presets=b.tipPresets||[5,10,20,''];
       ['tp1','tp2','tp3','tp4'].forEach((id,i)=>$(id).value=presets[i]!=null?presets[i]:'');
+      ensureCurOpt('s_curr', b.currency);
       $('s_curr').value=b.currency||'CAD';
       $('s_notifyEmail').checked=b.notifyEmail!==false;
       $('s_poolOn').checked=b.tipPoolEnabled===true;
@@ -829,8 +831,21 @@
       if(lk) lk.style.display = on?'none':'block';
     }
 
+    // A shop saved before we narrowed the list may hold a currency we can no longer
+    // pay out in. Show it rather than silently flipping the shop to CAD, and say so.
+    function ensureCurOpt(selId,cur){
+      const sel=$(selId); if(!sel||!cur) return;
+      if([...sel.options].some(o=>o.value===cur)) return;
+      const o=document.createElement('option');
+      o.value=cur; o.textContent=cur+' \u2014 not supported for payouts';
+      sel.insertBefore(o, sel.firstChild);
+    }
+
     // ---- Owner bank connect (Stripe Connect) ----
-    const STRIPE_COUNTRIES=[['AU','Australia'],['AT','Austria'],['BE','Belgium'],['BG','Bulgaria'],['CA','Canada'],['HR','Croatia'],['CY','Cyprus'],['CZ','Czechia'],['DK','Denmark'],['EE','Estonia'],['FI','Finland'],['FR','France'],['DE','Germany'],['GI','Gibraltar'],['GR','Greece'],['HK','Hong Kong'],['HU','Hungary'],['IE','Ireland'],['IT','Italy'],['JP','Japan'],['LV','Latvia'],['LI','Liechtenstein'],['LT','Lithuania'],['LU','Luxembourg'],['MT','Malta'],['MX','Mexico'],['NL','Netherlands'],['NZ','New Zealand'],['NO','Norway'],['PL','Poland'],['PT','Portugal'],['RO','Romania'],['SG','Singapore'],['SK','Slovakia'],['SI','Slovenia'],['ES','Spain'],['SE','Sweden'],['CH','Switzerland'],['TH','Thailand'],['AE','United Arab Emirates'],['GB','United Kingdom'],['US','United States'],['BR','Brazil'],['MY','Malaysia'],['ZA','South Africa']];
+    // Stripe cross-border payouts: a platform in Canada can only pay connected
+    // accounts in Canada, the US, the UK, the EEA and Switzerland. Offering any
+    // other country here would let an owner onboard and then never get paid.
+    const STRIPE_COUNTRIES=[['CA','Canada'],['US','United States'],['GB','United Kingdom'],['CH','Switzerland'],['AT','Austria'],['BE','Belgium'],['BG','Bulgaria'],['HR','Croatia'],['CY','Cyprus'],['CZ','Czechia'],['DK','Denmark'],['EE','Estonia'],['FI','Finland'],['FR','France'],['DE','Germany'],['GR','Greece'],['HU','Hungary'],['IE','Ireland'],['IT','Italy'],['LV','Latvia'],['LI','Liechtenstein'],['LT','Lithuania'],['LU','Luxembourg'],['MT','Malta'],['NL','Netherlands'],['NO','Norway'],['PL','Poland'],['PT','Portugal'],['RO','Romania'],['SK','Slovakia'],['SI','Slovenia'],['ES','Spain'],['SE','Sweden']];
     function fillCountriesOwner(def){
       const sel=$('ownerCountry'); if(!sel) return;
       // Pre-select from saved country / currency when we can tell; otherwise show
@@ -845,7 +860,7 @@
     function defaultOwnerCountry(){
       if(bizData.country && STRIPE_COUNTRIES.some(c=>c[0]===bizData.country)) return bizData.country;
       const cur=(bizData.currency||'').toUpperCase();
-      const map={CAD:'CA',USD:'US',GBP:'GB',AUD:'AU',AED:'AE',JPY:'JP',CHF:'CH',SGD:'SG',NZD:'NZ',SEK:'SE',NOK:'NO',DKK:'DK',PLN:'PL',BRL:'BR',MYR:'MY',ZAR:'ZA',THB:'TH',HKD:'HK',MXN:'MX'};
+      const map={CAD:'CA',USD:'US',GBP:'GB',CHF:'CH',SEK:'SE',NOK:'NO',DKK:'DK',PLN:'PL',CZK:'CZ',HUF:'HU',RON:'RO',BGN:'BG'};
       if(map[cur] && STRIPE_COUNTRIES.some(c=>c[0]===map[cur])) return map[cur];
       try{ const loc=(navigator.language||'').split('-')[1]; if(loc && STRIPE_COUNTRIES.some(c=>c[0]===loc.toUpperCase())) return loc.toUpperCase(); }catch(_){}
       return '';
@@ -1105,7 +1120,10 @@
     }
 
     // ---- Full location management: settings + team + move between locations ----
-    const CUR_OPTS=[['CAD','CAD — Canadian Dollar ($)'],['USD','USD — US Dollar ($)'],['EUR','EUR — Euro (€)'],['GBP','GBP — British Pound (£)'],['AED','AED — UAE Dirham'],['SAR','SAR — Saudi Riyal'],['AUD','AUD — Australian Dollar ($)'],['QAR','QAR — Qatari Riyal'],['KWD','KWD — Kuwaiti Dinar'],['BHD','BHD — Bahraini Dinar'],['OMR','OMR — Omani Rial'],['LBP','LBP — Lebanese Pound']];
+    // Only currencies whose country a Canadian Stripe platform can actually pay
+    // out to (Canada, US, UK, EEA, Switzerland). Adding one we cannot pay would
+    // let an owner build a shop whose workers can never receive their tips.
+    const CUR_OPTS=[['CAD','CAD — Canadian Dollar ($)'],['USD','USD — US Dollar ($)'],['EUR','EUR — Euro (€)'],['GBP','GBP — British Pound (£)'],['CHF','CHF — Swiss Franc'],['SEK','SEK — Swedish Krona'],['NOK','NOK — Norwegian Krone'],['DKK','DKK — Danish Krone'],['PLN','PLN — Polish Złoty'],['CZK','CZK — Czech Koruna'],['HUF','HUF — Hungarian Forint'],['RON','RON — Romanian Leu'],['BGN','BGN — Bulgarian Lev']];
     function bmHideForm(){ $('bmStaffForm').style.display='none'; BM.editStaffId=null; BM.sPhoto=''; ['bmSNick','bmSJob','bmSEmail','bmSPhone'].forEach(id=>$(id).value=''); resetScheduleUI('bmSchedWrap'); $('bmSPrev').src=''; $('bmSPhoto').value=''; $('bmSEmail').readOnly=false; $('bmStaffMsg').textContent=''; $('bmStaffMsg').className='msg'; }
     buildScheduleUI('bmSchedWrap');
     async function openBranchMgr(id,name){
@@ -1125,7 +1143,8 @@
         if(!j||!j.ok){ $('bmStaffList').innerHTML='<div style="color:#ff8a8a">Could not load team.</div>'; return; }
         BM.name=j.name; BM.currency=j.currency; BM.shopCode=j.shopCode; BM.staff=j.staff||[]; BM.bankStatus=j.bankStatus||{};
         BM.locations=(BR_LOCATIONS||[]).filter(l=>l.id!==BM.id);
-        $('bmName').value=j.name||''; $('bmCode').textContent=j.shopCode||'—'; $('bmCurr').value=j.currency||'CAD';
+        $('bmName').value=j.name||''; $('bmCode').textContent=j.shopCode||'—';
+        ensureCurOpt('bmCurr', j.currency); $('bmCurr').value=j.currency||'CAD';
         const p=j.tipPresets||[]; ['bmTp1','bmTp2','bmTp3','bmTp4'].forEach((id,i)=>$(id).value=(p[i]!=null?p[i]:''));
         renderBranchTeam();
       }catch(_){ $('bmStaffList').innerHTML='<div style="color:#ff8a8a">Could not load team.</div>'; }
