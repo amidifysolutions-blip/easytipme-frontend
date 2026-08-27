@@ -1573,10 +1573,25 @@
         <button class="btn dark" id="withdrawBtn" ${avail<=0?'disabled':''} style="margin-top:12px">${avail<=0?t('nothing_to_withdraw'):t('withdraw_now')}</button>
         <div class="note" style="margin-top:8px;font-size:11.5px">${t('withdraw_disclaimer')}</div>
         ${rows?`<div class="payhist"><div class="ballab" style="margin:14px 0 6px">${t('recent_payouts')}</div>${rows}</div>`:''}`;
-      const wb=$('withdrawBtn'); if(wb) wb.onclick=()=>{
-        const sel=(box.querySelector('input[name=tier]:checked')||{}).value||'monthly';
-        const tr=PAYOUT_TIERS.find(x=>x.id===sel); const fee=avail*tr.pct/100;
-        alert(t('withdraw_soon')+'\n\n'+t('available')+': '+fmtMoney(avail)+'\n'+t(tr.key)+' · '+(tr.pct?('−'+tr.pct+'% = '+fmtMoney(avail-fee)):t('free')));
+      const wb=$('withdrawBtn'); if(wb) wb.onclick=async()=>{
+        const sel=(box.querySelector('input[name=tier]:checked')||{}).value||'standard';
+        const tr=PAYOUT_TIERS.find(x=>x.id===sel);
+        const base=(sel==='instant')?(+j.instantAvailable||avail):avail;   // instant uses instant-available
+        const fee=base*tr.pct/100, net=base-fee;
+        const accId=(staffDoc&&staffDoc.connectAccountId)||null;
+        if(!accId){ alert(t('bal_unavailable')); return; }
+        if(base<=0){ alert(t('nothing_to_withdraw')); return; }
+        // Worker sees exactly what lands in their bank before confirming.
+        const line=t(tr.key)+' · '+(tr.pct?('−'+tr.pct+'% → '+fmtMoney(net)):(t('free')+' → '+fmtMoney(net)));
+        if(!confirm(t('withdraw_now')+' — '+fmtMoney(base)+'\n'+line)) return;
+        wb.disabled=true; const orig=wb.textContent; wb.textContent='…';
+        try{
+          const r=await fetch(BACKEND+'/connect/withdraw',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accountId:accId, method:sel})});
+          const jr=await r.json();
+          if(jr.error){ const m=(jr.error==='no-available-funds'||jr.error==='no-instant-funds')?t('nothing_to_withdraw'):jr.error; throw new Error(m); }
+          alert('✅ '+(sel==='instant'?t('tier_instant_d'):t('tier_standard_d')));
+          setTimeout(()=>{ try{ loadBalance(accId); }catch(_){}}, 1500);
+        }catch(e){ alert((e&&e.message)||'Could not cash out. Please try again.'); wb.disabled=false; wb.textContent=orig; }
       };
     }
     async function startConnect(u){
