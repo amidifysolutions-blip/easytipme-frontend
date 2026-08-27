@@ -92,6 +92,14 @@
   img.pic{object-fit:cover}
   .thanks{text-align:center;padding:40px 10px}.thanks .big{font-size:52px}.thanks h1{font-size:26px;margin:14px 0 6px}.thanks p{color:var(--soft)}
   .powered{text-align:center;color:#c2c2c7;font-size:12px;margin-top:18px}
+  .pay-foot{margin:30px auto 6px;text-align:center}
+  .pay-foot .brand{display:inline-flex;align-items:center;gap:8px;justify-content:center;font-weight:800;letter-spacing:-.02em;font-size:19px;color:var(--ink)}
+  .pay-foot .brand .mk{width:28px;height:28px;display:block}
+  .pay-foot .cpy{color:var(--soft);font-size:13.5px;margin-top:9px}
+  .pay-foot .cpy a{color:var(--soft);text-decoration:none}
+  .pay-badges{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin-top:16px}
+  .pay-badges .b{background:#e4e4ea;border-radius:11px;height:46px;min-width:70px;display:flex;align-items:center;justify-content:center;padding:0 14px}
+  .pay-badges .b svg{display:block;height:22px;width:auto}
 </style>
 </head>
 <body>
@@ -112,7 +120,6 @@
       <button class="selall hide" id="selectAll">Select all</button>
       <div id="staffList"></div>
       <div id="noStaff" style="text-align:center;color:var(--soft);padding:30px 0;display:none">No team members available right now.</div>
-      <div class="powered">Powered by Amidify Solutions Inc. · <a href="privacy.html" style="color:inherit">Privacy</a> · <a href="terms.html" style="color:inherit">Terms</a></div>
     </div>
     <div class="sticky hide" id="multiBar"><button class="btn" id="multiContinue">Continue</button></div>
 
@@ -133,31 +140,43 @@
         <label style="display:block;font-weight:600;font-size:14px;margin:12px 0 6px">Short message <span style="color:var(--soft);font-weight:400;font-size:12px">— optional</span></label>
         <div class="custom"><span>💬</span><input id="fromMessage" maxlength="140" placeholder="e.g. Thanks for the great service!"></div>
       </div>
-      <button class="btn" id="toPay">Continue</button>
-      <button class="link" id="backPick">← Choose someone else</button>
-    </div>
-
-    <div id="step-pay" class="hide">
-      <div class="card">
-        <div class="qtitle">Payment</div>
-        <div class="breakdown">
-          <div class="r"><span>Tip</span><span id="bkTip"></span></div>
-          <div class="r"><span id="bkFeeLabel">Service fee</span><span id="bkFee"></span></div>
-          <div class="r tot"><span>Total</span><span id="bkTot"></span></div>
+      <div id="payReveal" class="hide">
+        <div class="card">
+          <div class="qtitle">Payment</div>
+          <div class="breakdown">
+            <div class="r"><span>Tip</span><span id="bkTip"></span></div>
+            <div class="r"><span id="bkFeeLabel">Service fee</span><span id="bkFee"></span></div>
+            <div class="r tot"><span>Total</span><span id="bkTot"></span></div>
+          </div>
+          <div id="express-wrap" class="hide">
+            <div id="express-checkout"></div>
+            <div class="ordiv"><span>or pay with card</span></div>
+          </div>
+          <div id="payment-element"></div>
+          <div id="payMsg" class="msg"></div>
         </div>
-        <div id="express-wrap" class="hide">
-          <div id="express-checkout"></div>
-          <div class="ordiv"><span>or pay with card</span></div>
-        </div>
-        <div id="payment-element"></div>
-        <div id="payMsg" class="msg"></div>
+        <button class="btn dark" id="payBtn">Pay <span id="payAmt"></span></button>
       </div>
-      <button class="btn dark" id="payBtn">Pay <span id="payAmt"></span></button>
-      <button class="link" id="backTip">← Back</button>
+      <button class="link" id="backPick">← Choose someone else</button>
     </div>
 
     <div id="step-done" class="hide">
       <div class="card thanks"><div class="big">🎉</div><h1>Thank you!</h1><p id="doneMsg"></p></div>
+    </div>
+
+    <div class="pay-foot">
+      <div class="brand">
+        <span class="mk"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="lgm" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00c2ff"/><stop offset="1" stop-color="#0071e3"/></linearGradient></defs><rect width="100" height="100" rx="24" fill="#0a0a0a"/><rect x="30" y="26" width="10" height="48" rx="5" fill="url(#lgm)"/><rect x="30" y="26" width="34" height="10" rx="5" fill="url(#lgm)"/><rect x="30" y="64" width="34" height="10" rx="5" fill="url(#lgm)"/><rect x="30" y="45" width="22" height="10" rx="5" fill="url(#lgm)"/><circle cx="63" cy="50" r="9" fill="#fff"/><circle cx="63" cy="50" r="4.5" fill="url(#lgm)"/></svg></span>
+        EasyTipMe
+      </div>
+      <div class="cpy">© 2026 EasyTipMe · <a href="contact.html">Contact Us</a></div>
+      <div class="pay-badges">
+        <div class="b" aria-label="Apple Pay"><svg viewBox="0 0 58 24" xmlns="http://www.w3.org/2000/svg"><path fill="#000" d="M11.7 6.4c.5-.63.86-1.5.77-2.37-.74.03-1.64.5-2.17 1.12-.48.55-.9 1.44-.79 2.28.83.07 1.66-.42 2.19-1.03zM12.5 7.75c-1.2-.07-2.22.68-2.8.68-.57 0-1.45-.65-2.4-.63-1.23.02-2.37.72-3 1.83-1.28 2.22-.33 5.5.92 7.3.6.88 1.33 1.87 2.28 1.83.9-.04 1.25-.59 2.34-.59 1.09 0 1.4.59 2.35.57.98-.02 1.6-.9 2.2-1.78.7-1.02.98-2 .99-2.06-.02-.01-1.9-.73-1.92-2.9-.02-1.81 1.48-2.68 1.55-2.72-.85-1.25-2.17-1.39-2.63-1.42z"/><text x="20" y="17.5" font-family="-apple-system,Helvetica,Arial,sans-serif" font-size="15" font-weight="600" fill="#000">Pay</text></svg></div>
+        <div class="b" aria-label="Google Pay"><svg viewBox="0 0 66 24" xmlns="http://www.w3.org/2000/svg"><g transform="translate(1,1.5) scale(0.87)"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></g><text x="26" y="17.5" font-family="Arial,sans-serif" font-size="14.5" font-weight="500" fill="#5f6368">Pay</text></svg></div>
+        <div class="b" aria-label="Mastercard"><svg viewBox="0 0 40 24" xmlns="http://www.w3.org/2000/svg"><circle cx="15" cy="12" r="9" fill="#EB001B"/><circle cx="25" cy="12" r="9" fill="#F79E1B"/><path fill="#FF5F00" d="M20 5.2a9 9 0 0 1 0 13.6 9 9 0 0 1 0-13.6z"/></svg></div>
+        <div class="b" aria-label="Visa"><svg viewBox="0 0 48 24" xmlns="http://www.w3.org/2000/svg"><text x="1" y="18" font-family="Arial,Helvetica,sans-serif" font-size="18" font-weight="800" font-style="italic" fill="#1A1F71" letter-spacing="1">VISA</text></svg></div>
+      </div>
+      <div class="powered" style="margin-top:16px">Powered by Amidify Solutions Inc. · <a href="privacy.html" style="color:inherit">Privacy</a> · <a href="terms.html" style="color:inherit">Terms</a></div>
     </div>
   </div>
 
@@ -317,30 +336,44 @@
       $('recipHead').innerHTML=`${pic}<div><div class="nm">${esc(recipient.nickname||'')}</div><div class="sl">${esc(recipient.multiple?'Split equally':(recipient.job||''))}</div></div>`;
       $('amts').innerHTML=presets.map(p=>`<div class="amt" data-v="${p}">${p}<small>${sym}</small></div>`).join('')
         + billTile(50,'#f8dcc4','#f0ad81','#fdf3ed','#dd6a5f') + billTile(100,'#e2edcf','#bcda9c','#fbe7ee','#dd6a5f');
-      $('amts').querySelectorAll('.amt').forEach(a=>a.onclick=()=>{tip=parseFloat(a.dataset.v);$('customAmt').value='';markAmt(a);});
+      $('amts').querySelectorAll('.amt').forEach(a=>a.onclick=()=>{tip=parseFloat(a.dataset.v);$('customAmt').value='';markAmt(a);onAmountChanged();});
       $('customAmt').value=''; $('fromName').value=''; if($('fromMessage'))$('fromMessage').value='';
       $('stars').querySelectorAll('.star').forEach(st=>{st.classList.remove('on');st.onclick=()=>setRating(+st.dataset.v);});
+      $('payReveal').classList.add('hide'); $('payment-element').innerHTML=''; $('express-wrap').classList.add('hide'); $('express-checkout').innerHTML=''; $('payMsg').className='msg';
       show('step-tip');
     }
     function markAmt(sel){$('amts').querySelectorAll('.amt').forEach(x=>x.classList.remove('sel'));if(sel)sel.classList.add('sel');}
-    $('customAmt').oninput=e=>{tip=parseFloat(e.target.value)||0;markAmt(null);};
+    $('customAmt').oninput=e=>{tip=parseFloat(e.target.value)||0;markAmt(null);onAmountChanged();};
     function setRating(v){rating=v;$('stars').querySelectorAll('.star').forEach(st=>st.classList.toggle('on',+st.dataset.v<=v));}
     $('backPick').onclick=()=>show('step-pick');
 
-    $('toPay').onclick=async()=>{
-      if(!tip||tip<=0){ alert('Please choose or enter a tip amount.'); return; }
+    // Payment appears inline, right under the amount, the moment one is chosen.
+    // Changing the amount rebuilds the payment (debounced) so the charge always
+    // matches what's shown. _payToken ignores a slow response for an amount the
+    // customer already moved away from.
+    let _payTimer=null, _payToken=0;
+    function onAmountChanged(){
+      if(!(tip>0)){ $('payReveal').classList.add('hide'); return; }
       const fee=r2(tip*FEE+FIXED), total=r2(tip+fee);
       $('bkFeeLabel').textContent='Service fee';
       $('bkTip').textContent=sym+tip.toFixed(2); $('bkFee').textContent=sym+fee.toFixed(2); $('bkTot').textContent=sym+total.toFixed(2); $('payAmt').textContent=sym+total.toFixed(2);
-      show('step-pay');
-      const btn=$('payBtn'); btn.disabled=true;
+      $('payReveal').classList.remove('hide');
+      $('payMsg').className='msg';
+      $('payBtn').disabled=true;
       $('express-wrap').classList.add('hide'); $('express-checkout').innerHTML='';
       $('payment-element').innerHTML='<div style="text-align:center;color:var(--soft);padding:26px 0">Preparing secure checkout…</div>';
+      clearTimeout(_payTimer); _payTimer=setTimeout(initPayment, 650);
+    }
+
+    async function initPayment(){
+      if(!(tip>0)) return;
+      const token=++_payToken;
+      const btn=$('payBtn'); btn.disabled=true;
       try{
         // Single recipient → server splits the money (tip to the worker, commission
         // to the platform). A manual multi-select splits the tip EQUALLY among the
-        // chosen workers (split:true + their ids). If the owner turned on tip
-        // pooling, a single pick is split equally among the on-shift team.
+        // chosen workers. If the owner turned on tip pooling, a single pick is split
+        // equally among the on-shift team.
         const poolOn = shop.tipPoolEnabled===true && !recipient.multiple && allStaff.length>0;
         recipient._pool = poolOn; recipient._members = poolOn ? allStaff.slice() : null;
         const body = recipient.multiple
@@ -350,11 +383,10 @@
             : { businessId:BID, staffId:recipient.id, tipCents:Math.round(tip*100), currency:curr.toLowerCase() };
         const res=await fetch(BACKEND+'/create-payment-intent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
         const data=await res.json(); const {clientSecret,publishableKey,breakdown}=data;
+        if(token!==_payToken) return; // amount changed again while we waited — ignore this stale result
         heldTip=!!data.held; // worker not connected yet → we hold their share until they are
-        // The server decides the worker's $2 monthly account fee (0 unless it applies).
-        // Record it on the tip so the worker sees exactly what was deducted from this tip.
         lastMonthlyFee = (breakdown && breakdown.monthlyFee) ? Number(breakdown.monthlyFee)/100 : 0;
-        if(!clientSecret){ $('payment-element').innerHTML=''; pmsg('Could not start payment. Please try again.'); btn.disabled=false; return; }
+        if(!clientSecret){ $('payment-element').innerHTML=''; pmsg('Could not start payment. Please try again.'); return; }
         // Show the server's authoritative breakdown so the total always matches the charge.
         if(breakdown){ const f=breakdown.commission/100, t=breakdown.total/100; $('bkFee').textContent=sym+f.toFixed(2); $('bkTot').textContent=sym+t.toFixed(2); $('payAmt').textContent=sym+t.toFixed(2); }
         stripe=Stripe(publishableKey||STRIPE_PK);
@@ -374,9 +406,8 @@
           ece.mount('#express-checkout');
         }catch(ex){/* wallets unavailable — card still works */}
         btn.disabled=false;
-      }catch(e){ $('payment-element').innerHTML=''; pmsg('Could not start payment. '+e.message); }
-    };
-    $('backTip').onclick=()=>show('step-tip');
+      }catch(e){ if(token!==_payToken) return; $('payment-element').innerHTML=''; pmsg('Could not start payment. '+e.message); }
+    }
 
     $('payBtn').onclick=async()=>{
       const btn=$('payBtn'); btn.disabled=true; btn.textContent='Processing…';
@@ -421,7 +452,7 @@
       show('step-done');
     }
 
-    function show(id){['step-pick','step-tip','step-pay','step-done'].forEach(s=>$(s).classList.add('hide'));$(id).classList.remove('hide');if(id!=='step-pick')$('multiBar').classList.add('hide');else updateMultiBar();window.scrollTo(0,0);}
+    function show(id){['step-pick','step-tip','step-done'].forEach(s=>$(s).classList.add('hide'));$(id).classList.remove('hide');if(id!=='step-pick')$('multiBar').classList.add('hide');else updateMultiBar();window.scrollTo(0,0);}
     function r2(n){return Math.round(n*100)/100;}
     function pmsg(t){const m=$('payMsg');m.textContent=t;m.className='msg err';}
     function esc(s){return(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
