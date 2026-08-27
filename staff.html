@@ -993,7 +993,7 @@
     const _wApp = firebase.apps.some(a=>a.name==='worker') ? firebase.app('worker') : firebase.initializeApp(firebaseConfig,'worker');
     const auth=_wApp.auth(), db=_wApp.firestore();
     const $=id=>document.getElementById(id);
-    const CURSYM={CAD:'$',USD:'$',AUD:'$',EUR:'€',GBP:'£',AED:'AED',SAR:'SAR',QAR:'QAR',KWD:'KWD',BHD:'BHD',OMR:'OMR',LBP:'LBP'};
+    const CURSYM={CAD:'$',USD:'$',EUR:'€',GBP:'£',CHF:'CHF',SEK:'kr',NOK:'kr',DKK:'kr',PLN:'zł',CZK:'Kč',HUF:'Ft',RON:'lei',BGN:'лв',AUD:'$',AED:'AED',SAR:'SAR',QAR:'QAR',KWD:'KWD',BHD:'BHD',OMR:'OMR',LBP:'LBP'};   // last row: legacy shops only — not offered any more, kept so old records still render
     const params=new URLSearchParams(location.search);
     let BID=params.get('s')||localStorage.getItem('etm_staff_bid')||'';
     let staffDoc=null, staffId=null, shop=null, registerMode=false, signInAttempt=false;

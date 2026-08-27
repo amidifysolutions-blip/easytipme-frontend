@@ -212,7 +212,7 @@
     let MIN_TIP=1, MAX_TIP=1000;
     const $=id=>document.getElementById(id);
     const BID=new URLSearchParams(location.search).get('s');
-    const CURSYM={CAD:'$',USD:'$',AUD:'$',EUR:'€',GBP:'£',AED:'AED',SAR:'SAR',QAR:'QAR',KWD:'KWD',BHD:'BHD',OMR:'OMR',LBP:'LBP'};
+    const CURSYM={CAD:'$',USD:'$',EUR:'€',GBP:'£',CHF:'CHF',SEK:'kr',NOK:'kr',DKK:'kr',PLN:'zł',CZK:'Kč',HUF:'Ft',RON:'lei',BGN:'лв',AUD:'$',AED:'AED',SAR:'SAR',QAR:'QAR',KWD:'KWD',BHD:'BHD',OMR:'OMR',LBP:'LBP'};   // last row: legacy shops only — not offered any more, kept so old records still render
 
     let shop={}, curr='CAD', sym='$', presets=[15,30,50,100], allStaff=[], recipient=null, tip=0, rating=0;
     let multiMode=false, selected=new Set(), stripe=null, elements=null, heldTip=false, lastMonthlyFee=0;

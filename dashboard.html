@@ -1534,7 +1534,7 @@
       catch(err){ msg('settingsMsg',err.message,'err'); }
     };
 
-    const CURSYM={CAD:'$',USD:'$',AUD:'$',EUR:'€',GBP:'£',AED:'AED',SAR:'SAR',QAR:'QAR',KWD:'KWD',BHD:'BHD',OMR:'OMR',LBP:'LBP'};
+    const CURSYM={CAD:'$',USD:'$',EUR:'€',GBP:'£',CHF:'CHF',SEK:'kr',NOK:'kr',DKK:'kr',PLN:'zł',CZK:'Kč',HUF:'Ft',RON:'lei',BGN:'лв',AUD:'$',AED:'AED',SAR:'SAR',QAR:'QAR',KWD:'KWD',BHD:'BHD',OMR:'OMR',LBP:'LBP'};   // last row: legacy shops only — not offered any more, kept so old records still render
     async function loadAnalytics(){
       if(!$('anTotal')) return;
       if(!ownerProOn()) return;   // locked — plans shown, analytics data hidden
