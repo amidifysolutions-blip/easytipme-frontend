@@ -57,6 +57,13 @@
   .msg.ok{display:block;background:#eef7ee;color:#237a3a;border:1px solid #cde8d1}
   .hide{display:none}
   .foot{color:var(--ink-soft);font-size:12px;margin-bottom:30px}
+  .social{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:#fff;color:#1d1d1f;border:1.5px solid #e7e7ec;margin-bottom:10px}
+  .social:hover{background:#f7f7f8}
+  .social svg{width:19px;height:19px;flex:0 0 auto}
+  .social.apple{background:#000;color:#fff;border-color:#000}
+  .social.apple:hover{background:#222}
+  .ordiv{display:flex;align-items:center;gap:12px;color:#8a8a90;font-size:13px;margin:16px 0 14px}
+  .ordiv:before,.ordiv:after{content:"";flex:1;height:1px;background:#e7e7ec}
 </style>
 </head>
 <body>
@@ -69,6 +76,19 @@
     <p class="sub" id="subtitle">Create your business account — it takes a minute.</p>
 
     <div id="msg" class="msg"></div>
+
+    <!-- SOCIAL / CODE SIGN-IN (works for both register and log in) -->
+    <div id="socialWrap">
+      <button type="button" class="btn social" id="googleBtn">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        <span>Continue with Google</span>
+      </button>
+      <button type="button" class="btn social apple" id="appleBtn">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill="currentColor" d="M16.7 12.7c0-2.4 2-3.6 2.1-3.6-1.1-1.7-2.9-1.9-3.5-1.9-1.5-.2-2.9.9-3.6.9-.8 0-1.9-.9-3.1-.8-1.6 0-3.1.9-3.9 2.4-1.7 2.9-.4 7.2 1.2 9.6.8 1.2 1.7 2.5 3 2.4 1.2 0 1.6-.8 3.1-.8 1.4 0 1.8.8 3.1.8 1.3 0 2.1-1.2 2.9-2.3.9-1.3 1.3-2.6 1.3-2.7-.1 0-2.5-1-2.6-3.9zM14.3 5.6c.7-.8 1.1-2 1-3.1-1 0-2.2.7-2.9 1.5-.6.7-1.2 1.9-1 3 1.1.1 2.2-.6 2.9-1.4z"/></svg>
+        <span>Continue with Apple</span>
+      </button>
+      <div class="ordiv"><span>or use your email</span></div>
+    </div>
 
     <!-- REGISTER -->
     <form id="registerForm">
@@ -95,6 +115,12 @@
         <div class="forgot"><a href="#" id="rst_resend">Resend code</a></div>
       </div>
       <button class="btn" type="submit" id="l_btn">Log in</button>
+      <div class="forgot"><a href="#" id="codeLink">Email me a sign-in code instead</a></div>
+      <div id="lc_box" class="hide" style="border-top:1px solid #e7e7ec;margin:2px 0 8px;padding-top:12px">
+        <div class="field"><label>Code (6 digits)</label><input id="lc_code" inputmode="numeric" maxlength="6" placeholder="6-digit code" style="letter-spacing:3px"></div>
+        <button class="btn" type="button" id="lc_confirm">Confirm</button>
+        <div class="forgot"><a href="#" id="lc_resend">Resend code</a></div>
+      </div>
       <div class="switch">New here? <a href="#" id="toRegister">Register your business</a></div>
     </form>
   </div>
@@ -146,6 +172,76 @@
 
     function showMsg(text, type){ msg.textContent = text; msg.className = 'msg ' + type; }
     function clearMsg(){ msg.className = 'msg'; msg.textContent=''; }
+
+    const BACKEND="https://easytipme-backend.onrender.com";
+
+    // After ANY sign-in (Google, Apple or code): an owner is only "real" once a
+    // businesses/{uid} record exists. If it doesn't, we do NOT bounce them — we
+    // show the register form pre-filled so they just add the business details.
+    async function afterSignIn(u){
+      try{
+        const doc = await db.collection('businesses').doc(u.uid).get();
+        if(doc.exists){ window.location.href='dashboard.html'; return; }
+      }catch(_){}
+      // No business yet → finish registration (no password needed, already signed in).
+      document.getElementById('socialWrap').classList.add('hide');
+      loginForm.classList.add('hide'); registerForm.classList.remove('hide');
+      document.getElementById('title').textContent='Almost there';
+      document.getElementById('subtitle').textContent='Add your business details to finish setting up.';
+      const em=document.getElementById('r_email'); em.value=u.email||''; em.readOnly=true;
+      const nm=document.getElementById('r_owner'); if(!nm.value) nm.value=(u.displayName||'').trim();
+      // Password is irrelevant for a social/code account — hide and un-require it.
+      const pw=document.getElementById('r_pass');
+      pw.required=false; pw.value=''; pw.closest('.field').classList.add('hide');
+      document.getElementById('r_btn').textContent='Finish setup';
+      clearMsg();
+    }
+
+    async function socialSignIn(provider, btnId){
+      const b=document.getElementById(btnId); b.disabled=true; clearMsg();
+      try{
+        const res=await auth.signInWithPopup(provider);
+        await afterSignIn(res.user);
+      }catch(err){
+        const c=(err&&err.code)||'';
+        if(c!=='auth/popup-closed-by-user' && c!=='auth/cancelled-popup-request') showMsg(prettyError(err),'err');
+      }
+      b.disabled=false;
+    }
+    document.getElementById('googleBtn').onclick=()=>socialSignIn(new firebase.auth.GoogleAuthProvider(),'googleBtn');
+    document.getElementById('appleBtn').onclick=()=>{ const p=new firebase.auth.OAuthProvider('apple.com'); p.addScope('email'); p.addScope('name'); socialSignIn(p,'appleBtn'); };
+
+    // Passwordless code sign-in — the code proves the address, so the account
+    // comes back already verified and skips the dashboard's confirmation gate.
+    let lcEmail='';
+    async function lcRequest(e){
+      if(e) e.preventDefault();
+      const em=(document.getElementById('l_email').value||'').trim().toLowerCase();
+      if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){ showMsg('Enter a valid email address first.','err'); return; }
+      lcEmail=em;
+      try{
+        await fetch(BACKEND+'/auth/login/request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em})});
+        document.getElementById('lc_box').classList.remove('hide');
+        showMsg('We sent a code to '+em+'. Enter it below.','ok');
+      }catch(_){ showMsg('Could not send the code. Please try again.','err'); }
+    }
+    document.getElementById('codeLink').onclick=lcRequest;
+    document.getElementById('lc_resend').onclick=lcRequest;
+    document.getElementById('lc_confirm').onclick=async()=>{
+      const code=(document.getElementById('lc_code').value||'').trim();
+      if(code.length!==6){ showMsg('Enter the 6-digit code from your email.','err'); return; }
+      const b=document.getElementById('lc_confirm'); b.disabled=true;
+      try{
+        const r=await fetch(BACKEND+'/auth/login/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:lcEmail,code})});
+        const j=await r.json().catch(()=>({}));
+        if(!r.ok||!j.token){
+          const m={'wrong-code':'Wrong code — try again.','expired':'Code expired — tap Resend code.','too-many':'Too many attempts — request a new code.','no-code':'Request a code first.'};
+          throw new Error(m[j&&j.error]||'Could not sign you in. Please try again.');
+        }
+        const res=await auth.signInWithCustomToken(j.token);
+        await afterSignIn(res.user);
+      }catch(err){ showMsg((err&&err.message)||'Could not sign you in.','err'); b.disabled=false; }
+    };
 
     // Show / hide password (gray Apple-style eye)
     const EYE = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8e8e93" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1.8 12S5.3 5 12 5s10.2 7 10.2 7-3.5 7-10.2 7S1.8 12 1.8 12z"/><circle cx="12" cy="12" r="3.1"/></svg>';
@@ -224,13 +320,20 @@
         email: document.getElementById('r_email').value.trim().toLowerCase()
       };
       try{
-        const cred = await auth.createUserWithEmailAndPassword(data.email, document.getElementById('r_pass').value);
-        await db.collection('businesses').doc(cred.user.uid).set({
+        // Already signed in via Google / Apple / code? Then there is no password
+        // to create — just attach the business record to the account they have.
+        let uid = auth.currentUser ? auth.currentUser.uid : null;
+        if(!uid){
+          const cred = await auth.createUserWithEmailAndPassword(data.email, document.getElementById('r_pass').value);
+          uid = cred.user.uid;
+        } else {
+          data.email = (auth.currentUser.email || data.email);
+        }
+        await db.collection('businesses').doc(uid).set({
           ...data, blocked: false, createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
-        // The dashboard's confirmation gate emails a 6-digit code on open.
-        showMsg('Account created! We\'ll email you a confirmation code next…','ok');
-        setTimeout(()=>{ window.location.href='dashboard.html'; }, 1200);
+        showMsg('All set — opening your dashboard…','ok');
+        setTimeout(()=>{ window.location.href='dashboard.html'; }, 1000);
       }catch(err){
         btn.disabled=false; btn.textContent='Create account';
         showMsg(prettyError(err),'err');
