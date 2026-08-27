@@ -156,15 +156,16 @@
           <div class="pct"><label>Commission</label><input id="commInput" type="number" step="0.1" min="10" max="50"><span>%</span></div>
           <div class="pct"><label>Fixed fee</label><input id="commFixed" type="number" step="0.05" min="0" max="5"><span>$</span></div>
           <div class="pct"><label>Min tip</label><input id="minTipInput" type="number" step="0.5" min="0" max="100"><span>$</span></div>
+          <div class="pct"><label>Target net profit</label><input id="netTarget" type="number" step="0.5" min="1" max="30"><span>%</span></div>
           <button class="btn" id="saveComm">Save</button>
         </div>
-        <div class="sub" style="margin-top:10px">Minimum commission is <b>10%</b> — a shop can be set higher, never lower. <b>Min tip</b> blocks tips so small that Stripe's fee eats the commission (it is enforced on the server, not just here).</div>
+        <div class="sub" style="margin-top:10px">The first three boxes are in <b>dollars</b> and apply to your home currency (CAD). <b>Target net profit</b> is what you actually keep after Stripe, and it drives the pricing of <b>every other currency</b> automatically — Stripe's real cost there is added on top of it, so you keep the same % in every country. <b>Min tip</b> is enforced on the server, not just here.</div>
         <div id="commMsg" class="msg"></div>
       </div>
 
       <div class="card">
         <h3>🌍 Pricing per currency</h3>
-        <div class="sub" style="margin-bottom:14px">Stripe takes a fixed amount on <b>every</b> charge in <b>every</b> country, so we recover it in every currency — sized to that currency, because $0.40 means nothing in dirhams. Pick a currency to see what is live and change it. Anything you don't set here uses a sensible built-in default.</div>
+        <div class="sub" style="margin-bottom:14px">The customer pays the tip, plus <b>exactly what Stripe costs us</b>, plus your profit — so you keep the same net % in every country. Stripe is dearer abroad (foreign card +0.8%, currency conversion +2%), so the rate abroad is higher: that gap is cost, not extra profit. Pick a currency to see what is live, or override it. Amounts for markets you haven't opened yet are estimates \u2014 check a real Stripe charge before launching one.</div>
         <div class="comm-row">
           <div class="pct"><label>Currency</label><select id="curPick" style="padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:transparent;color:inherit;font:inherit"></select></div>
           <div class="pct"><label>Commission</label><input id="curPct" type="number" step="0.1" min="10" max="50"><span>%</span></div>
@@ -317,6 +318,7 @@
       $('commInput').value=commRate;
       $('commFixed').value=commFix;
       $('minTipInput').value=minTip;
+      $('netTarget').value=(cfgCache.targetNetPercent!=null?cfgCache.targetNetPercent:7);
       $('stComm').textContent=commRate+'% + $'+Number(commFix).toFixed(2);
       curInit();
       loadBusinesses();
@@ -327,10 +329,13 @@
       const p=parseFloat($('commInput').value);
       const f=parseFloat($('commFixed').value);
       const mt=parseFloat($('minTipInput').value);
+      const nt=parseFloat($('netTarget').value);
       if(isNaN(p)||p<MIN_COMM||p>50){ msg('commMsg','Commission must be between '+MIN_COMM+'% and 50%.','err'); return; }
       if(isNaN(f)||f<0||f>5){ msg('commMsg','Enter a valid fixed fee (0–5).','err'); return; }
       if(isNaN(mt)||mt<0||mt>100){ msg('commMsg','Enter a valid minimum tip (0–100).','err'); return; }
-      try{ await db.collection('config').doc('platform').set({commissionPercent:p,commissionFixed:f,minTip:mt},{merge:true});
+      if(isNaN(nt)||nt<1||nt>30){ msg('commMsg','Target net profit must be between 1% and 30%.','err'); return; }
+      try{ await db.collection('config').doc('platform').set({commissionPercent:p,commissionFixed:f,minTip:mt,targetNetPercent:nt},{merge:true});
+        cfgCache.targetNetPercent=nt;
         commRate=p; $('stComm').textContent=p+'% + $'+f.toFixed(2);
         msg('commMsg','Saved ✓ — '+p+'% + $'+f.toFixed(2)+' and a $'+mt.toFixed(2)+' minimum tip are live for all shops now.','ok'); }
       catch(e){ msg('commMsg',e.message,'err'); }
@@ -340,19 +345,35 @@
     // MUST stay in sync with FIXED_BY_CUR in the backend (server.js) and in
     // shop.html. Those are the defaults; anything saved here overrides them.
     let cfgCache={};
-    const CUR_DEF_FIXED={cad:0.40,usd:0.40,eur:0.35,gbp:0.30,aud:0.45,nzd:0.50,chf:0.30,
-      aed:1.50,sar:1.50,qar:1.50,jod:0.30,kwd:0.15,bhd:0.15,omr:0.15,
-      egp:15,lbp:30000,try:15,mad:4,tnd:1.5,ils:1.5,
-      sek:4,nok:4,dkk:3,pln:1.5,czk:9,ron:2,huf:130,isk:55,
-      jpy:50,cny:3,hkd:3,twd:12,krw:500,sgd:0.40,myr:1.5,
-      thb:12,php:20,idr:5000,inr:30,vnd:8000,pkr:90,bdt:40,
-      brl:2,mxn:6,ars:400,clp:300,cop:1200,pen:1.2,uyu:12,
-      zar:6,ngn:500,kes:40,ghs:4};
+    // What Stripe's fixed fee (C$0.30) costs us in each currency.
+    const STRIPE_FIXED={cad:0.30,usd:0.22,eur:0.20,gbp:0.17,aud:0.34,nzd:0.37,chf:0.19,
+      aed:0.80,sar:0.82,qar:0.80,jod:0.16,kwd:0.07,bhd:0.09,omr:0.09,
+      egp:10.5,lbp:19500,try:9,mad:2.2,tnd:0.65,ils:0.81,
+      sek:2.2,nok:2.3,dkk:1.5,pln:0.87,czk:4.8,ron:1.0,huf:78,isk:30,
+      jpy:33,cny:1.55,hkd:1.7,twd:6.9,krw:300,sgd:0.28,myr:0.93,
+      thb:7.5,php:12.5,idr:3600,inr:18.5,vnd:5550,pkr:62,bdt:26,
+      brl:1.2,mxn:4.2,ars:300,clp:210,cop:870,pen:0.81,uyu:8.7,
+      zar:3.9,ngn:330,kes:28.5,ghs:2.7};
     const CUR_DEF_MIN={aed:5,sar:5,qar:5,lbp:100000,egp:50};
+    const tidyUp=v=>{ if(!(v>0)) return 0; const m=Math.pow(10,Math.floor(Math.log10(v))-1); return Math.round(Math.ceil(v/m)*m*1e6)/1e6; };
+    function costPlus(c){
+      const home=String(cfgCache.homeCurrency||'cad').toLowerCase();
+      const target=cfgCache.targetNetPercent!=null?Number(cfgCache.targetNetPercent):7;
+      const spH=cfgCache.stripePercentHome!=null?Number(cfgCache.stripePercentHome):2.9;
+      const spA=cfgCache.stripePercentForeign!=null?Number(cfgCache.stripePercentForeign):5.7;
+      const isHome=(c===home), sp=(isHome?spH:spA)/100;
+      return {
+        isHome,
+        stripe:(isHome?spH:spA),
+        pct: isHome ? commRate : Math.round(((target/100+sp)/(1-sp))*1000)/10,
+        fix: isHome ? (cfgCache.commissionFixed!=null?Number(cfgCache.commissionFixed):0.30)
+                    : (STRIPE_FIXED[c]!=null?tidyUp(STRIPE_FIXED[c]/(1-sp)):null)
+      };
+    }
 
     function curInit(){
       const sel=$('curPick'); if(!sel) return;
-      const list=Object.keys(CUR_DEF_FIXED).sort();
+      const list=Object.keys(STRIPE_FIXED).sort();
       sel.innerHTML=list.map(c=>'<option value="'+c+'">'+c.toUpperCase()+'</option>').join('');
       sel.value='aed';
       sel.onchange=curFill;
@@ -363,17 +384,23 @@
       const pf=(cfgCache.commissionPercentByCurrency||{})[c];
       const ff=(cfgCache.commissionFixedByCurrency||{})[c];
       const mf=(cfgCache.minTipByCurrency||{})[c];
-      const defFix=CUR_DEF_FIXED[c]!=null?CUR_DEF_FIXED[c]:0;
+      const cp=costPlus(c);
+      const defPct=cp.pct;
+      const defFix=cp.fix!=null?cp.fix:0;
       const defMin=CUR_DEF_MIN[c]!=null?CUR_DEF_MIN[c]:(cfgCache.minTip!=null?cfgCache.minTip:1);
-      $('curPct').value = pf!=null?pf:commRate;
+      $('curPct').value = pf!=null?pf:defPct;
       $('curFix').value = ff!=null?ff:defFix;
       $('curMin').value = mf!=null?mf:defMin;
       $('curFixCur').textContent=U; $('curMinCur').textContent=U;
       const marks=[];
-      marks.push(pf!=null?'rate <b>set by you</b>':'rate <b>default</b> ('+commRate+'%)');
+      marks.push(pf!=null?'rate <b>set by you</b>':'rate <b>default</b> ('+defPct+'%)');
       marks.push(ff!=null?'fixed fee <b>set by you</b>':'fixed fee <b>default</b> ('+defFix+' '+U+')');
       marks.push(mf!=null?'min tip <b>set by you</b>':'min tip <b>default</b> ('+defMin+' '+U+')');
-      $('curState').innerHTML='For <b>'+U+'</b>: '+marks.join(' \u00b7 ');
+      const keep=(cfgCache.targetNetPercent!=null?cfgCache.targetNetPercent:7);
+      $('curState').innerHTML='For <b>'+U+'</b>: '+marks.join(' \u00b7 ')
+        +'<br>Stripe costs us about <b>'+cp.stripe+'% + '+(STRIPE_FIXED[c]!=null?STRIPE_FIXED[c]+' '+U:'?')+'</b> here'
+        +(cp.isHome?' (home currency \u2014 local cards, no conversion).':' (foreign card +0.8% and currency conversion +2% on top of the 2.9% base).')
+        +' Charging '+defPct+'% + '+defFix+' '+U+' leaves you <b>'+keep+'% net</b> of the tip.';
       curListOverrides();
     }
     function curListOverrides(){
@@ -389,7 +416,9 @@
     $('saveCur').onclick=async()=>{
       const c=$('curPick').value, U=c.toUpperCase();
       const p=parseFloat($('curPct').value), f=parseFloat($('curFix').value), m=parseFloat($('curMin').value);
-      if(isNaN(p)||p<MIN_COMM||p>50){ msg('curMsg','Commission must be between '+MIN_COMM+'% and 50%.','err'); return; }
+      const cpNow=costPlus(c);
+      const floor=cpNow.isHome?MIN_COMM:Math.max(MIN_COMM,cpNow.pct);
+      if(isNaN(p)||p<floor||p>50){ msg('curMsg','For '+U+' the rate cannot go below '+floor+'% — that is Stripe\u2019s own cost here plus your target profit. Anything lower and you are paying to process the tip.','err'); return; }
       if(isNaN(f)||f<0){ msg('curMsg','Enter a valid fixed fee.','err'); return; }
       if(isNaN(m)||m<0){ msg('curMsg','Enter a valid minimum tip.','err'); return; }
       try{

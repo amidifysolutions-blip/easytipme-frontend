@@ -237,27 +237,46 @@
         const _minorDefault={aed:5,sar:5,qar:5,lbp:100000,egp:50};
         if(_byCur[_ck]!=null) MIN_TIP=Number(_byCur[_ck])||MIN_TIP;
         else if(_minorDefault[_ck]!=null) MIN_TIP=_minorDefault[_ck];
-        // Fee resolution MUST mirror server.js /create-payment-intent exactly — the
-        // server is authoritative, so a mismatch here shows the customer a wrong total.
-        // Stripe's fixed cost per charge exists in EVERY country, so we recover it in
-        // every currency, sized to that currency (~C$0.40). Override from the admin
-        // panel via config/platform.commissionFixedByCurrency / ...PercentByCurrency.
+        // Fee resolution MUST mirror server.js /create-payment-intent EXACTLY —
+        // the server is authoritative, so any drift here shows the customer a total
+        // the server will refuse. Model: the customer pays Stripe's real cost plus
+        // our net margin, so  rate = (m+sp)/(1-sp)  and  fixed = F/(1-sp).
+        const _home=String((_cfg&&_cfg.homeCurrency)||'cad').toLowerCase();
+        const _target=(_cfg&&_cfg.targetNetPercent!=null&&!isNaN(Number(_cfg.targetNetPercent)))?Number(_cfg.targetNetPercent):7;
+        const _spHome=(_cfg&&_cfg.stripePercentHome!=null&&!isNaN(Number(_cfg.stripePercentHome)))?Number(_cfg.stripePercentHome):2.9;
+        const _spAway=(_cfg&&_cfg.stripePercentForeign!=null&&!isNaN(Number(_cfg.stripePercentForeign)))?Number(_cfg.stripePercentForeign):5.7;
+        const _STRIPE_FIXED={cad:0.30,usd:0.22,eur:0.20,gbp:0.17,aud:0.34,nzd:0.37,chf:0.19,
+          aed:0.80,sar:0.82,qar:0.80,jod:0.16,kwd:0.07,bhd:0.09,omr:0.09,
+          egp:10.5,lbp:19500,try:9,mad:2.2,tnd:0.65,ils:0.81,
+          sek:2.2,nok:2.3,dkk:1.5,pln:0.87,czk:4.8,ron:1.0,huf:78,isk:30,
+          jpy:33,cny:1.55,hkd:1.7,twd:6.9,krw:300,sgd:0.28,myr:0.93,
+          thb:7.5,php:12.5,idr:3600,inr:18.5,vnd:5550,pkr:62,bdt:26,
+          brl:1.2,mxn:4.2,ars:300,clp:210,cop:870,pen:0.81,uyu:8.7,
+          zar:3.9,ngn:330,kes:28.5,ghs:2.7};
+        const _tidyUp=v=>{ if(!(v>0)) return 0; const m=Math.pow(10,Math.floor(Math.log10(v))-1); return Math.round(Math.ceil(v/m)*m*1e6)/1e6; };
+        const _isHome=(_ck===_home);
+        const _sp=(_isHome?_spHome:_spAway)/100;
+        const _cpPct=Math.round(((_target/100+_sp)/(1-_sp))*1000)/10;
+        const _cpFix=(_STRIPE_FIXED[_ck]!=null)?_tidyUp(_STRIPE_FIXED[_ck]/(1-_sp)):null;
         const _pctByCur=(_cfg&&_cfg.commissionPercentByCurrency)||{};
         const _fixByCur=(_cfg&&_cfg.commissionFixedByCurrency)||{};
-        const _FIXED_BY_CUR={cad:0.40,usd:0.40,eur:0.35,gbp:0.30,aud:0.45,nzd:0.50,chf:0.30,
-          aed:1.50,sar:1.50,qar:1.50,jod:0.30,kwd:0.15,bhd:0.15,omr:0.15,
-          egp:15,lbp:30000,try:15,mad:4,tnd:1.5,ils:1.5,
-          sek:4,nok:4,dkk:3,pln:1.5,czk:9,ron:2,huf:130,isk:55,
-          jpy:50,cny:3,hkd:3,twd:12,krw:500,sgd:0.40,myr:1.5,
-          thb:12,php:20,idr:5000,inr:30,vnd:8000,pkr:90,bdt:40,
-          brl:2,mxn:6,ars:400,clp:300,cop:1200,pen:1.2,uyu:12,
-          zar:6,ngn:500,kes:40,ghs:4};
-        if(shop.commissionPercent!=null) FEE=shop.commissionPercent/100;
-        else if(_pctByCur[_ck]!=null) FEE=Number(_pctByCur[_ck])/100;
-        else if(_cfg&&_cfg.commissionPercent!=null) FEE=_cfg.commissionPercent/100;
-        if(shop.commissionFixed!=null) FIXED=Number(shop.commissionFixed); else if(_cfg&&_cfg.commissionFixed!=null) FIXED=Number(_cfg.commissionFixed);
-        if(_fixByCur[_ck]!=null) FIXED=Number(_fixByCur[_ck]);
-        else if(!['CAD','USD','EUR','GBP'].includes(curr)) FIXED=(_FIXED_BY_CUR[_ck]!=null)?_FIXED_BY_CUR[_ck]:0;
+
+        if(shop.commissionPercent!=null&&!isNaN(Number(shop.commissionPercent))) FEE=Number(shop.commissionPercent)/100;
+        else if(_pctByCur[_ck]!=null&&!isNaN(Number(_pctByCur[_ck]))) FEE=Number(_pctByCur[_ck])/100;
+        else if(!_isHome) FEE=_cpPct/100;
+        else if(_cfg&&_cfg.commissionPercent!=null) FEE=Number(_cfg.commissionPercent)/100;
+
+        // Mirror the server's floor too — otherwise a shop configured below it
+        // would show the customer a total the server then refuses to match.
+        let _floor=(_cfg&&_cfg.minCommissionPercent!=null&&!isNaN(Number(_cfg.minCommissionPercent)))?Number(_cfg.minCommissionPercent):10;
+        if(!_isHome&&_cpPct>_floor) _floor=_cpPct;
+        if(!(FEE*100>=_floor)) FEE=_floor/100;
+
+        if(shop.commissionFixed!=null&&!isNaN(Number(shop.commissionFixed))) FIXED=Number(shop.commissionFixed);
+        else if(_fixByCur[_ck]!=null&&!isNaN(Number(_fixByCur[_ck]))) FIXED=Number(_fixByCur[_ck]);
+        else if(!_isHome&&_cpFix!=null) FIXED=_cpFix;
+        else if(_cfg&&_cfg.commissionFixed!=null) FIXED=Number(_cfg.commissionFixed);
+        else if(_cpFix!=null) FIXED=_cpFix;
         if(shop.tipPresets&&shop.tipPresets.length) presets=shop.tipPresets.slice(0,4);
         $('shopName').textContent=shop.businessName||'Leave a tip';
         if(shop.slogan) $('shopSlogan').textContent=shop.slogan;
