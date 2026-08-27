@@ -151,7 +151,7 @@
 
       <div class="card">
         <h3>💰 Platform commission</h3>
-        <div class="sub" style="margin-bottom:14px">Added on top of every tip: a % of the tip <b>plus</b> a small fixed fee. The fixed fee covers Stripe's fixed cost (~$0.30) so small tips stay profitable. Applies to all shops (unless a shop has its own rate).</div>
+        <div class="sub" style="margin-bottom:14px">Added on top of every tip: a % of the tip <b>plus</b> a small fixed fee. The fixed fee covers Stripe's fixed cost per charge so small tips stay profitable. These values are in <b>dollars</b> — they apply to CAD/USD/EUR/GBP. Other currencies get their own amounts in the card below.</div>
         <div class="comm-row">
           <div class="pct"><label>Commission</label><input id="commInput" type="number" step="0.1" min="10" max="50"><span>%</span></div>
           <div class="pct"><label>Fixed fee</label><input id="commFixed" type="number" step="0.05" min="0" max="5"><span>$</span></div>
@@ -160,6 +160,22 @@
         </div>
         <div class="sub" style="margin-top:10px">Minimum commission is <b>10%</b> — a shop can be set higher, never lower. <b>Min tip</b> blocks tips so small that Stripe's fee eats the commission (it is enforced on the server, not just here).</div>
         <div id="commMsg" class="msg"></div>
+      </div>
+
+      <div class="card">
+        <h3>🌍 Pricing per currency</h3>
+        <div class="sub" style="margin-bottom:14px">Stripe takes a fixed amount on <b>every</b> charge in <b>every</b> country, so we recover it in every currency — sized to that currency, because $0.40 means nothing in dirhams. Pick a currency to see what is live and change it. Anything you don't set here uses a sensible built-in default.</div>
+        <div class="comm-row">
+          <div class="pct"><label>Currency</label><select id="curPick" style="padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:transparent;color:inherit;font:inherit"></select></div>
+          <div class="pct"><label>Commission</label><input id="curPct" type="number" step="0.1" min="10" max="50"><span>%</span></div>
+          <div class="pct"><label>Fixed fee</label><input id="curFix" type="number" step="0.01" min="0"><span id="curFixCur">—</span></div>
+          <div class="pct"><label>Min tip</label><input id="curMin" type="number" step="0.5" min="0"><span id="curMinCur">—</span></div>
+          <button class="btn" id="saveCur">Save</button>
+          <button class="btn ghost" id="resetCur">Use default</button>
+        </div>
+        <div class="sub" style="margin-top:10px" id="curState"></div>
+        <div class="sub" style="margin-top:6px" id="curOverrides"></div>
+        <div id="curMsg" class="msg"></div>
       </div>
 
       <div class="card">
@@ -294,6 +310,7 @@
 
     async function initPanel(){
       const cfg=await db.collection('config').doc('platform').get();
+      cfgCache=cfg.exists?(cfg.data()||{}):{};
       commRate=cfg.exists&&cfg.data().commissionPercent!=null?cfg.data().commissionPercent:MIN_COMM;
       const commFix=cfg.exists&&cfg.data().commissionFixed!=null?cfg.data().commissionFixed:0.30;
       const minTip=cfg.exists&&cfg.data().minTip!=null?cfg.data().minTip:1;
@@ -301,6 +318,7 @@
       $('commFixed').value=commFix;
       $('minTipInput').value=minTip;
       $('stComm').textContent=commRate+'% + $'+Number(commFix).toFixed(2);
+      curInit();
       loadBusinesses();
       loadPartners();
     }
@@ -316,6 +334,89 @@
         commRate=p; $('stComm').textContent=p+'% + $'+f.toFixed(2);
         msg('commMsg','Saved ✓ — '+p+'% + $'+f.toFixed(2)+' and a $'+mt.toFixed(2)+' minimum tip are live for all shops now.','ok'); }
       catch(e){ msg('commMsg',e.message,'err'); }
+    };
+
+    // ---- Pricing per currency -----------------------------------------------
+    // MUST stay in sync with FIXED_BY_CUR in the backend (server.js) and in
+    // shop.html. Those are the defaults; anything saved here overrides them.
+    let cfgCache={};
+    const CUR_DEF_FIXED={cad:0.40,usd:0.40,eur:0.35,gbp:0.30,aud:0.45,nzd:0.50,chf:0.30,
+      aed:1.50,sar:1.50,qar:1.50,jod:0.30,kwd:0.15,bhd:0.15,omr:0.15,
+      egp:15,lbp:30000,try:15,mad:4,tnd:1.5,ils:1.5,
+      sek:4,nok:4,dkk:3,pln:1.5,czk:9,ron:2,huf:130,isk:55,
+      jpy:50,cny:3,hkd:3,twd:12,krw:500,sgd:0.40,myr:1.5,
+      thb:12,php:20,idr:5000,inr:30,vnd:8000,pkr:90,bdt:40,
+      brl:2,mxn:6,ars:400,clp:300,cop:1200,pen:1.2,uyu:12,
+      zar:6,ngn:500,kes:40,ghs:4};
+    const CUR_DEF_MIN={aed:5,sar:5,qar:5,lbp:100000,egp:50};
+
+    function curInit(){
+      const sel=$('curPick'); if(!sel) return;
+      const list=Object.keys(CUR_DEF_FIXED).sort();
+      sel.innerHTML=list.map(c=>'<option value="'+c+'">'+c.toUpperCase()+'</option>').join('');
+      sel.value='aed';
+      sel.onchange=curFill;
+      curFill();
+    }
+    function curFill(){
+      const c=$('curPick').value, U=c.toUpperCase();
+      const pf=(cfgCache.commissionPercentByCurrency||{})[c];
+      const ff=(cfgCache.commissionFixedByCurrency||{})[c];
+      const mf=(cfgCache.minTipByCurrency||{})[c];
+      const defFix=CUR_DEF_FIXED[c]!=null?CUR_DEF_FIXED[c]:0;
+      const defMin=CUR_DEF_MIN[c]!=null?CUR_DEF_MIN[c]:(cfgCache.minTip!=null?cfgCache.minTip:1);
+      $('curPct').value = pf!=null?pf:commRate;
+      $('curFix').value = ff!=null?ff:defFix;
+      $('curMin').value = mf!=null?mf:defMin;
+      $('curFixCur').textContent=U; $('curMinCur').textContent=U;
+      const marks=[];
+      marks.push(pf!=null?'rate <b>set by you</b>':'rate <b>default</b> ('+commRate+'%)');
+      marks.push(ff!=null?'fixed fee <b>set by you</b>':'fixed fee <b>default</b> ('+defFix+' '+U+')');
+      marks.push(mf!=null?'min tip <b>set by you</b>':'min tip <b>default</b> ('+defMin+' '+U+')');
+      $('curState').innerHTML='For <b>'+U+'</b>: '+marks.join(' \u00b7 ');
+      curListOverrides();
+    }
+    function curListOverrides(){
+      const keys={};
+      ['commissionPercentByCurrency','commissionFixedByCurrency','minTipByCurrency'].forEach(k=>{
+        Object.keys(cfgCache[k]||{}).forEach(c=>{keys[c]=1;});
+      });
+      const list=Object.keys(keys).sort();
+      $('curOverrides').innerHTML = list.length
+        ? 'Currencies you have customised: <b>'+list.map(c=>c.toUpperCase()).join(', ')+'</b>. Everything else uses the defaults.'
+        : 'You have not customised any currency yet — all of them are on the built-in defaults.';
+    }
+    $('saveCur').onclick=async()=>{
+      const c=$('curPick').value, U=c.toUpperCase();
+      const p=parseFloat($('curPct').value), f=parseFloat($('curFix').value), m=parseFloat($('curMin').value);
+      if(isNaN(p)||p<MIN_COMM||p>50){ msg('curMsg','Commission must be between '+MIN_COMM+'% and 50%.','err'); return; }
+      if(isNaN(f)||f<0){ msg('curMsg','Enter a valid fixed fee.','err'); return; }
+      if(isNaN(m)||m<0){ msg('curMsg','Enter a valid minimum tip.','err'); return; }
+      try{
+        await db.collection('config').doc('platform').set({
+          commissionPercentByCurrency:{[c]:p},
+          commissionFixedByCurrency:{[c]:f},
+          minTipByCurrency:{[c]:m}
+        },{merge:true});
+        cfgCache.commissionPercentByCurrency=Object.assign({},cfgCache.commissionPercentByCurrency||{},{[c]:p});
+        cfgCache.commissionFixedByCurrency=Object.assign({},cfgCache.commissionFixedByCurrency||{},{[c]:f});
+        cfgCache.minTipByCurrency=Object.assign({},cfgCache.minTipByCurrency||{},{[c]:m});
+        curFill();
+        msg('curMsg','Saved \u2713 \u2014 '+U+' shops now charge '+p+'% + '+f+' '+U+', with a '+m+' '+U+' minimum tip.','ok');
+      }catch(e){ msg('curMsg',e.message,'err'); }
+    };
+    $('resetCur').onclick=async()=>{
+      const c=$('curPick').value, U=c.toUpperCase(), D=firebase.firestore.FieldValue.delete();
+      try{
+        await db.collection('config').doc('platform').update({
+          ['commissionPercentByCurrency.'+c]:D,
+          ['commissionFixedByCurrency.'+c]:D,
+          ['minTipByCurrency.'+c]:D
+        });
+      }catch(e){ /* nothing saved for this currency yet */ }
+      ['commissionPercentByCurrency','commissionFixedByCurrency','minTipByCurrency'].forEach(k=>{ if(cfgCache[k]) delete cfgCache[k][c]; });
+      curFill();
+      msg('curMsg',U+' is back on the built-in defaults.','ok');
     };
 
     // ---- Partners -----------------------------------------------------------
