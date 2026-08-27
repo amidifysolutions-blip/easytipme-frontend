@@ -164,7 +164,7 @@
 
       <div class="card">
         <h3>🤝 Partners <span class="sub" style="margin:0" id="partnerCount"></span></h3>
-        <div class="sub" style="margin-bottom:12px">Everyone referring venues to you: their rate, how many venues they brought, what they are owed and how they want to be paid.</div>
+        <div class="sub" style="margin-bottom:12px">Everyone referring venues to you. Commission accrues monthly and partners on <b>Stripe are paid automatically</b> — you do nothing. Only partners without Stripe (USDT / Wise / Western Union / bank) need paying by hand, and they show <b>not set</b> under Payout.</div>
         <div class="admin-table-wrap" style="overflow-x:auto">
           <table class="admin-table" style="width:100%;border-collapse:collapse;font-size:13.5px">
             <thead><tr style="text-align:left;color:var(--soft)">
@@ -351,7 +351,7 @@
             +'<td style="padding:9px 10px">'+pay+'</td>'
             +'<td style="padding:9px 10px;white-space:nowrap">'
               +'<button class="btn ghost sm" data-rate="'+p.uid+'">Rate</button> '
-              +(p.accrued>0?'<button class="btn ghost sm" data-paid="'+p.uid+'">Mark paid</button>':'')
+              +((p.accrued>0&&!p.stripeReady)?'<button class="btn ghost sm" data-paid="'+p.uid+'">Mark paid</button>':'')
             +'</td></tr>';
         }).join('');
         tb.querySelectorAll('[data-paid]').forEach(b=>{ b.onclick=()=>markPaid(b.getAttribute('data-paid')); });

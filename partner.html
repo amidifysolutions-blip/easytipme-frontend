@@ -140,7 +140,7 @@
 
     <div class="card">
       <h2>Getting paid</h2>
-      <div class="sub" id="payNote">We pay monthly once your balance reaches $10.</div>
+      <div class="sub" id="payNote">Connect Stripe and you are paid automatically every month.</div>
       <div id="payStripe">
         <button class="btn dark" id="stripeBtn" style="margin-top:14px">Set up payouts with Stripe</button>
         <div class="ordiv"><span>or, if Stripe isn't available where you are</span></div>
@@ -274,7 +274,9 @@
     else if(me.nextStepDownMs) note='Refer a new paying venue before '+new Date(me.nextStepDownMs).toLocaleDateString()+' to keep this rate.';
     $('tierNote').textContent=note;
     $('refLink').value=me.link;
-    $('payNote').textContent='We pay monthly once your balance reaches '+money(me.minPayout)+'.'+(me.stripeReady?' Your Stripe payouts are set up ✓':'');
+    $('payNote').textContent = me.stripeReady
+      ? 'Set up ✓ — your commission is sent to your Stripe account automatically every month, once your balance reaches '+money(me.minPayout)+'. Nothing to click.'
+      : 'Connect Stripe and your commission is paid out automatically every month, once your balance reaches '+money(me.minPayout)+'. Without it we have to pay you by hand, which is slower.';
     $('payStripe').classList.toggle('hide', !!me.stripeReady);
     if(me.payoutMethod&&me.payoutMethod.type){ $('pm_type').value=me.payoutMethod.type; $('pm_details').value=me.payoutMethod.details||''; }
 
