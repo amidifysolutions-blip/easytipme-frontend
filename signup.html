@@ -175,6 +175,36 @@
 
     const BACKEND="https://easytipme-backend.onrender.com";
 
+    // ---- Partner referral capture -------------------------------------------
+    // A partner's link is /signup.html?ref=CODE. Remember it for 90 days so the
+    // owner still gets credited if they come back later, then hand it to the
+    // server once their business record exists. The server locks the venue to
+    // the FIRST partner only and ignores self-referrals.
+    const REF_KEY='etm_ref', REF_DAYS=90;
+    (function captureRef(){
+      try{
+        const c=(new URLSearchParams(location.search).get('ref')||'').trim().toUpperCase();
+        if(c) localStorage.setItem(REF_KEY, JSON.stringify({code:c, ms:Date.now()}));
+      }catch(_){}
+    })();
+    function storedRef(){
+      try{
+        const r=JSON.parse(localStorage.getItem(REF_KEY)||'null');
+        if(!r||!r.code) return null;
+        if(Date.now()-Number(r.ms||0) > REF_DAYS*86400000){ localStorage.removeItem(REF_KEY); return null; }
+        return r.code;
+      }catch(_){ return null; }
+    }
+    async function creditReferral(user){
+      const code=storedRef(); if(!code||!user) return;
+      try{
+        const idToken=await user.getIdToken();
+        await fetch(BACKEND+'/partners/attribute',{method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({idToken, code})});
+        localStorage.removeItem(REF_KEY);
+      }catch(_){ /* never block signup on this */ }
+    }
+
     // After ANY sign-in (Google, Apple or code): an owner is only "real" once a
     // businesses/{uid} record exists. If it doesn't, we do NOT bounce them — we
     // show the register form pre-filled so they just add the business details.
@@ -332,6 +362,7 @@
         await db.collection('businesses').doc(uid).set({
           ...data, blocked: false, createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
+        await creditReferral(auth.currentUser);   // credit the partner who sent them
         showMsg('All set — opening your dashboard…','ok');
         setTimeout(()=>{ window.location.href='dashboard.html'; }, 1000);
       }catch(err){

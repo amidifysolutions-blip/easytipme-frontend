@@ -101,6 +101,7 @@
       <a href="#how" class="hide-m">How it works</a>
       <a href="#rates" class="hide-m">Rates</a>
       <a href="#faq" class="hide-m">FAQ</a>
+      <a href="partner.html" class="hide-m">Partner sign in</a>
       <a href="#apply" class="btn btn-primary">Become a partner</a>
     </div>
   </div>
@@ -302,6 +303,7 @@
       <a href="privacy.html">Privacy</a>
       <a href="terms.html">Terms</a>
       <a href="contact.html">Contact</a>
+      <a href="partner.html">Partner sign in</a>
     </div>
     <div>© 2026 EasyTipMe — a product owned and operated by Amidify Solutions Inc.</div>
   </div>
@@ -325,7 +327,7 @@
         body:JSON.stringify({name,email,country,audience})});
       const j=await r.json().catch(()=>({}));
       if(!r.ok||j.error) throw new Error(j.error||'Could not send');
-      m.textContent='Thanks — your application is in. We’ll email you at '+email+' with your partner link.';
+      m.innerHTML='Thanks — you\u2019re in. <a href="partner.html" style="color:inherit;text-decoration:underline">Open your partner dashboard</a> to get your link now.';
       m.className='fmsg ok';
       $('applyForm').reset();
     }catch(err){

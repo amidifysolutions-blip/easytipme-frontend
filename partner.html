@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Partner dashboard — EasyTipMe</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%230a0a0a'/%3E%3Crect x='30' y='26' width='10' height='48' rx='5' fill='%230071e3'/%3E%3Crect x='30' y='26' width='34' height='10' rx='5' fill='%230071e3'/%3E%3Crect x='30' y='64' width='34' height='10' rx='5' fill='%230071e3'/%3E%3Crect x='30' y='45' width='22' height='10' rx='5' fill='%230071e3'/%3E%3Ccircle cx='63' cy='50' r='9' fill='%23fff'/%3E%3C/svg%3E">
+<style>
+  :root{--bg:#f0f0f2;--card:#fff;--ink:#1d1d1f;--soft:#8a8a8e;--line:#e6e6ea;--accent:#0071e3;--accent-d:#0058b9;--green:#34c759;--danger:#e5484d;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",Arial,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.5;min-height:100vh}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:920px;margin:0 auto;padding:0 18px}
+  .top{display:flex;align-items:center;justify-content:space-between;padding:16px 0}
+  .logo{display:flex;align-items:center;gap:9px;font-weight:700;font-size:19px;letter-spacing:-.02em}
+  .logo .mk{width:28px;height:28px;display:block}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;margin-bottom:14px}
+  h1{font-size:26px;letter-spacing:-.03em;font-weight:700}
+  h2{font-size:18px;letter-spacing:-.02em;font-weight:700;margin-bottom:4px}
+  .sub{color:var(--soft);font-size:15px;margin-top:6px}
+  label{display:block;font-size:14px;font-weight:600;margin:14px 0 6px}
+  input,select{width:100%;border:1px solid var(--line);border-radius:12px;padding:13px 14px;font-size:16px;font-family:inherit;color:var(--ink);background:#fff}
+  input:focus,select:focus{outline:2px solid rgba(0,113,227,.35);border-color:var(--accent)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;width:100%;background:var(--accent);color:#fff;border:none;border-radius:14px;padding:14px;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s}
+  .btn:hover{background:var(--accent-d)}.btn:disabled{opacity:.55;cursor:default}
+  .btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line)}
+  .btn.ghost:hover{background:#f7f7f8}
+  .btn.dark{background:#000}.btn.dark:hover{background:#222}
+  .btn.social{background:#fff;color:var(--ink);border:1.5px solid var(--line);margin-bottom:10px}
+  .btn.social svg{width:19px;height:19px}
+  .btn.social.apple{background:#000;color:#fff;border-color:#000}
+  .ordiv{display:flex;align-items:center;gap:12px;color:var(--soft);font-size:13px;margin:16px 0 12px}
+  .ordiv:before,.ordiv:after{content:"";flex:1;height:1px;background:var(--line)}
+  .msg{font-size:14.5px;border-radius:11px;padding:11px 13px;margin-top:12px;display:none}
+  .msg.err{display:block;background:#fdecec;color:var(--danger)}
+  .msg.ok{display:block;background:#eaf9ee;color:#1c7a35}
+  .hide{display:none!important}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
+  .stat .v{font-size:25px;font-weight:800;letter-spacing:-.03em}
+  .stat .l{font-size:12.5px;color:var(--soft);margin-top:3px}
+  .stat.hi{background:linear-gradient(135deg,#0071e3,#00a2ff);border:none;color:#fff}
+  .stat.hi .l{color:rgba(255,255,255,.85)}
+  .tierrow{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .pill{display:inline-block;font-size:12.5px;font-weight:700;padding:5px 12px;border-radius:20px;background:#eef6ff;color:var(--accent)}
+  .linkrow{display:flex;gap:9px;margin-top:10px}
+  .linkrow input{font-size:14px;background:#f7f7f8}
+  .linkrow button{width:auto;padding:13px 18px;flex:0 0 auto}
+  .rows{margin-top:6px}
+  .row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #f0f0f2;font-size:14.5px}
+  .row:last-child{border-bottom:none}
+  .row .m{color:var(--soft);font-size:13px}
+  .empty{color:var(--soft);font-size:14.5px;padding:16px 0;text-align:center}
+  .note{color:var(--soft);font-size:13px;margin-top:10px;line-height:1.6}
+  .powered{text-align:center;color:var(--soft);font-size:12.5px;padding:22px 0 30px}
+  .spin{width:26px;height:26px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:sp .8s linear infinite;margin:30px auto}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  @media(max-width:700px){.stats{grid-template-columns:repeat(2,1fr)}h1{font-size:23px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a href="/" class="logo"><span class="mk"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00c2ff"/><stop offset="1" stop-color="#0071e3"/></linearGradient></defs><rect width="100" height="100" rx="24" fill="#0a0a0a"/><rect x="30" y="26" width="10" height="48" rx="5" fill="url(#lg)"/><rect x="30" y="26" width="34" height="10" rx="5" fill="url(#lg)"/><rect x="30" y="64" width="34" height="10" rx="5" fill="url(#lg)"/><rect x="30" y="45" width="22" height="10" rx="5" fill="url(#lg)"/><circle cx="63" cy="50" r="9" fill="#fff"/><circle cx="63" cy="50" r="4.5" fill="url(#lg)"/></svg></span> EasyTipMe</a>
+    <button class="btn ghost hide" id="logoutBtn" style="width:auto;padding:9px 16px;font-size:14px">Log out</button>
+  </div>
+
+  <div id="loading"><div class="spin"></div></div>
+
+  <!-- SIGN IN -->
+  <div id="auth" class="hide">
+    <div class="card">
+      <h1>Partner sign in</h1>
+      <div class="sub">Sign in to see your referral link, your rate and your payouts.</div>
+      <div style="margin-top:20px">
+        <button class="btn social" id="googleBtn">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          <span>Continue with Google</span>
+        </button>
+        <button class="btn social apple" id="appleBtn">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M16.7 12.7c0-2.4 2-3.6 2.1-3.6-1.1-1.7-2.9-1.9-3.5-1.9-1.5-.2-2.9.9-3.6.9-.8 0-1.9-.9-3.1-.8-1.6 0-3.1.9-3.9 2.4-1.7 2.9-.4 7.2 1.2 9.6.8 1.2 1.7 2.5 3 2.4 1.2 0 1.6-.8 3.1-.8 1.4 0 1.8.8 3.1.8 1.3 0 2.1-1.2 2.9-2.3.9-1.3 1.3-2.6 1.3-2.7-.1 0-2.5-1-2.6-3.9zM14.3 5.6c.7-.8 1.1-2 1-3.1-1 0-2.2.7-2.9 1.5-.6.7-1.2 1.9-1 3 1.1.1 2.2-.6 2.9-1.4z"/></svg>
+          <span>Continue with Apple</span>
+        </button>
+        <div class="ordiv"><span>or use your email</span></div>
+        <label for="a_email">Email</label>
+        <input id="a_email" type="email" autocomplete="email" placeholder="you@example.com">
+        <button class="btn" id="codeBtn" style="margin-top:14px">Email me a sign-in code</button>
+        <div id="codeBox" class="hide" style="margin-top:14px;border-top:1px solid var(--line);padding-top:14px">
+          <label for="a_code">Code</label>
+          <input id="a_code" inputmode="numeric" maxlength="6" placeholder="6-digit code" style="letter-spacing:3px">
+          <button class="btn" id="verifyBtn" style="margin-top:12px">Confirm</button>
+        </div>
+        <div id="authMsg" class="msg"></div>
+        <div class="note">New here? <a href="partners.html" style="color:var(--accent)">See the partner program</a> first — joining is free and takes about a minute.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JOIN (signed in but not yet a partner) -->
+  <div id="join" class="hide">
+    <div class="card">
+      <h1>Create your partner link</h1>
+      <div class="sub">One step and you're in. Free, no approval, and nothing is ever deducted from what you earn.</div>
+      <label for="j_name">Your name</label>
+      <input id="j_name" maxlength="80" placeholder="Full name">
+      <label for="j_country">Country</label>
+      <input id="j_country" maxlength="60" placeholder="Where you're based">
+      <button class="btn" id="joinBtn" style="margin-top:18px">Create my partner link</button>
+      <div id="joinMsg" class="msg"></div>
+      <div class="note">By joining you accept the <a href="partners.html#faq" style="color:var(--accent)">partner terms</a>: commission is earned on real payments only, one venue is credited to one partner, and self-referrals are not allowed.</div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="dash" class="hide">
+    <h1 style="margin-bottom:14px">Partner dashboard</h1>
+    <div class="stats">
+      <div class="stat hi"><div class="v" id="s_accrued">—</div><div class="l">Accrued (unpaid)</div></div>
+      <div class="stat"><div class="v" id="s_paid">—</div><div class="l">Paid to date</div></div>
+      <div class="stat"><div class="v" id="s_active">—</div><div class="l">Active venues</div></div>
+      <div class="stat"><div class="v" id="s_total">—</div><div class="l">Total referred</div></div>
+    </div>
+
+    <div class="card">
+      <div class="tierrow">
+        <div><h2>Your rate</h2><div class="sub" id="tierNote">—</div></div>
+        <div style="text-align:right"><div style="font-size:34px;font-weight:800;letter-spacing:-.03em;color:var(--accent)" id="s_rate">—</div><span class="pill" id="s_tier">—</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Your referral link</h2>
+      <div class="sub">Share it anywhere. A venue that signs up through it is yours — permanently.</div>
+      <div class="linkrow">
+        <input id="refLink" readonly>
+        <button class="btn" id="copyBtn">Copy</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Getting paid</h2>
+      <div class="sub" id="payNote">We pay monthly once your balance reaches $10.</div>
+      <div id="payStripe">
+        <button class="btn dark" id="stripeBtn" style="margin-top:14px">Set up payouts with Stripe</button>
+        <div class="ordiv"><span>or, if Stripe isn't available where you are</span></div>
+      </div>
+      <label for="pm_type">Payout method</label>
+      <select id="pm_type">
+        <option value="">Choose…</option>
+        <option value="usdt">USDT (crypto)</option>
+        <option value="wise">Wise</option>
+        <option value="western-union">Western Union</option>
+        <option value="bank">Bank transfer</option>
+      </select>
+      <label for="pm_details" id="pm_label">Details</label>
+      <input id="pm_details" maxlength="400" placeholder="Wallet address, account details…">
+      <button class="btn ghost" id="pmBtn" style="margin-top:14px">Save payout details</button>
+      <div id="payMsg" class="msg"></div>
+    </div>
+
+    <div class="card">
+      <h2>Your venues</h2>
+      <div class="rows" id="refRows"><div class="empty">No referrals yet. Share your link above to get started.</div></div>
+    </div>
+
+    <div class="card">
+      <h2>Commission history</h2>
+      <div class="rows" id="ledRows"><div class="empty">Nothing yet. Commission is credited monthly.</div></div>
+    </div>
+  </div>
+
+  <div class="powered">© 2026 EasyTipMe · Powered by Amidify Solutions Inc.</div>
+</div>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script>
+  const firebaseConfig={apiKey:"AIzaSyBsY_pCxvbbJUtvRb7ClwgWQ25hGzNTgBM",authDomain:"easy-tip-me.firebaseapp.com",projectId:"easy-tip-me",storageBucket:"easy-tip-me.firebasestorage.app",messagingSenderId:"189382420404",appId:"1:189382420404:web:2f6075c986c81484eab4e1"};
+  firebase.initializeApp(firebaseConfig);
+  const auth=firebase.auth();
+  const BACKEND="https://easytipme-backend.onrender.com";
+  const $=id=>document.getElementById(id);
+  const money=n=>'$'+(Number(n)||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+  function show(which){ ['loading','auth','join','dash'].forEach(s=>$(s).classList.add('hide')); $(which).classList.remove('hide');
+    $('logoutBtn').classList.toggle('hide', which==='auth'||which==='loading'); }
+  function msg(el,text,type){ const m=$(el); m.textContent=text; m.className='msg '+(type||'err'); }
+  fetch(BACKEND+'/health').catch(()=>{});   // warm the backend
+
+  // ---- sign in -------------------------------------------------------------
+  async function social(provider,btn){
+    const b=$(btn); b.disabled=true;
+    try{ await auth.signInWithPopup(provider); }
+    catch(e){ const c=(e&&e.code)||'';
+      if(c!=='auth/popup-closed-by-user'&&c!=='auth/cancelled-popup-request') msg('authMsg',(e&&e.message)||'Could not sign in.'); }
+    b.disabled=false;
+  }
+  $('googleBtn').onclick=()=>social(new firebase.auth.GoogleAuthProvider(),'googleBtn');
+  $('appleBtn').onclick=()=>{ const p=new firebase.auth.OAuthProvider('apple.com'); p.addScope('email'); p.addScope('name'); social(p,'appleBtn'); };
+
+  let codeEmail='';
+  $('codeBtn').onclick=async()=>{
+    const em=($('a_email').value||'').trim().toLowerCase();
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){ msg('authMsg','Enter a valid email address.'); return; }
+    codeEmail=em; const b=$('codeBtn'); b.disabled=true;
+    try{
+      await fetch(BACKEND+'/auth/login/request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em})});
+      $('codeBox').classList.remove('hide');
+      msg('authMsg','We sent a code to '+em+'. Enter it below.','ok');
+    }catch(_){ msg('authMsg','Could not send the code. Please try again.'); }
+    b.disabled=false;
+  };
+  $('verifyBtn').onclick=async()=>{
+    const code=($('a_code').value||'').trim();
+    if(code.length!==6){ msg('authMsg','Enter the 6-digit code from your email.'); return; }
+    const b=$('verifyBtn'); b.disabled=true;
+    try{
+      const r=await fetch(BACKEND+'/auth/login/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:codeEmail,code})});
+      const j=await r.json().catch(()=>({}));
+      if(!r.ok||!j.token){
+        const m={'wrong-code':'Wrong code — try again.','expired':'Code expired — request a new one.','too-many':'Too many attempts — request a new code.','no-code':'Request a code first.'};
+        throw new Error(m[j&&j.error]||'Could not sign you in.');
+      }
+      await auth.signInWithCustomToken(j.token);
+    }catch(e){ msg('authMsg',(e&&e.message)||'Could not sign you in.'); b.disabled=false; }
+  };
+  $('logoutBtn').onclick=()=>auth.signOut();
+
+  // ---- load ----------------------------------------------------------------
+  let ME=null;
+  async function api(path,body){
+    const u=auth.currentUser; if(!u) throw new Error('not signed in');
+    const idToken=await u.getIdToken();
+    const r=await fetch(BACKEND+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.assign({idToken},body||{}))});
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok||j.error) throw new Error(j.error||'Request failed');
+    return j;
+  }
+
+  auth.onAuthStateChanged(async u=>{
+    if(!u){ show('auth'); return; }
+    show('loading');
+    try{
+      const me=await api('/partners/me');
+      if(!me.registered){
+        $('j_name').value=(u.displayName||'').trim();
+        show('join'); return;
+      }
+      ME=me; render(me); show('dash');
+      // Returning from Stripe onboarding? Re-check whether payouts are live.
+      if(new URLSearchParams(location.search).get('connect')){
+        try{ await api('/partners/connect-status'); const fresh=await api('/partners/me'); ME=fresh; render(fresh); }catch(_){}
+      }
+    }catch(e){ show('auth'); msg('authMsg',(e&&e.message)||'Could not load your account.'); }
+  });
+
+  $('joinBtn').onclick=async()=>{
+    const b=$('joinBtn'); b.disabled=true;
+    try{
+      await api('/partners/register',{name:($('j_name').value||'').trim(),country:($('j_country').value||'').trim()});
+      const me=await api('/partners/me'); ME=me; render(me); show('dash');
+    }catch(e){ msg('joinMsg',(e&&e.message)||'Could not create your partner link.'); b.disabled=false; }
+  };
+
+  function render(me){
+    $('s_accrued').textContent=money(me.accrued);
+    $('s_paid').textContent=money(me.paid);
+    $('s_active').textContent=me.activeClients;
+    $('s_total').textContent=me.totalReferred;
+    $('s_rate').textContent=me.rate+'%';
+    $('s_tier').textContent=me.tier;
+    // Explain the rate plainly, including any step-down.
+    let note='Recurring on the net revenue your venues earn us.';
+    if(me.stepsDown>0) note='Stepped down from '+me.baseRate+'% after '+(me.stepsDown*6)+' quiet months. Refer one new paying venue and it goes straight back to '+me.baseRate+'%.';
+    else if(me.nextStepDownMs) note='Refer a new paying venue before '+new Date(me.nextStepDownMs).toLocaleDateString()+' to keep this rate.';
+    $('tierNote').textContent=note;
+    $('refLink').value=me.link;
+    $('payNote').textContent='We pay monthly once your balance reaches '+money(me.minPayout)+'.'+(me.stripeReady?' Your Stripe payouts are set up ✓':'');
+    $('payStripe').classList.toggle('hide', !!me.stripeReady);
+    if(me.payoutMethod&&me.payoutMethod.type){ $('pm_type').value=me.payoutMethod.type; $('pm_details').value=me.payoutMethod.details||''; }
+
+    const rr=$('refRows');
+    rr.innerHTML=(me.referrals&&me.referrals.length)
+      ? me.referrals.map(r=>'<div class="row"><span>'+esc(r.name)+'</span><span class="m">'+(r.joinedMs?new Date(r.joinedMs).toLocaleDateString():'—')+(r.active?'':' · inactive')+'</span></div>').join('')
+      : '<div class="empty">No referrals yet. Share your link above to get started.</div>';
+
+    const lr=$('ledRows');
+    lr.innerHTML=(me.ledger&&me.ledger.length)
+      ? me.ledger.map(l=>'<div class="row"><span>'+esc(l.period)+'<span class="m"> · '+l.rate+'%</span></span><b>'+money(l.commission)+'</b></div>').join('')
+      : '<div class="empty">Nothing yet. Commission is credited monthly.</div>';
+  }
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+  $('copyBtn').onclick=async()=>{
+    try{ await navigator.clipboard.writeText($('refLink').value); }
+    catch(_){ $('refLink').select(); try{document.execCommand('copy');}catch(__){} }
+    const b=$('copyBtn'); const t=b.textContent; b.textContent='Copied'; setTimeout(()=>b.textContent=t,1400);
+  };
+
+  $('stripeBtn').onclick=async()=>{
+    const b=$('stripeBtn'); b.disabled=true;
+    try{ const r=await api('/partners/connect'); if(r.url) location.href=r.url; else throw new Error('No link'); }
+    catch(e){ msg('payMsg',(e&&e.message)||'Could not start Stripe setup.'); b.disabled=false; }
+  };
+
+  const PM_LABEL={usdt:'Wallet address (and network)',wise:'Wise email or account',"western-union":'Full name and city for pickup',bank:'IBAN / account details'};
+  $('pm_type').onchange=()=>{ $('pm_label').textContent=PM_LABEL[$('pm_type').value]||'Details'; };
+  $('pmBtn').onclick=async()=>{
+    const type=$('pm_type').value, details=($('pm_details').value||'').trim();
+    if(!type){ msg('payMsg','Choose a payout method.'); return; }
+    if(!details){ msg('payMsg','Enter your payout details.'); return; }
+    const b=$('pmBtn'); b.disabled=true;
+    try{ await api('/partners/payout-details',{type,details}); msg('payMsg','Saved ✓ — we’ll use this for your monthly payout.','ok'); }
+    catch(e){ msg('payMsg',(e&&e.message)||'Could not save.'); }
+    b.disabled=false;
+  };
+</script>
+</body>
+</html>
