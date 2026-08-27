@@ -133,7 +133,7 @@
       <div class="sub" id="ovSub">Live snapshot across all businesses.</div>
 
       <div class="stats">
-        <div class="stat hi"><div class="n" id="stRev">—</div><div class="l">Platform revenue (your cut)</div><div class="d" id="stRevM"></div></div>
+        <div class="stat hi"><div class="n" id="stRev">—</div><div class="l">Net revenue (after Stripe)</div><div class="d" id="stRevM"></div></div>
         <div class="stat"><div class="n" id="stVol">—</div><div class="l">Tips volume</div><div class="d" id="stVolM"></div></div>
         <div class="stat"><div class="n" id="stTipsN">—</div><div class="l">Tips count</div></div>
         <div class="stat"><div class="n" id="stAvg">—</div><div class="l">Avg tip</div></div>
@@ -153,10 +153,12 @@
         <h3>💰 Platform commission</h3>
         <div class="sub" style="margin-bottom:14px">Added on top of every tip: a % of the tip <b>plus</b> a small fixed fee. The fixed fee covers Stripe's fixed cost (~$0.30) so small tips stay profitable. Applies to all shops (unless a shop has its own rate).</div>
         <div class="comm-row">
-          <div class="pct"><label>Commission</label><input id="commInput" type="number" step="0.1" min="0" max="50"><span>%</span></div>
+          <div class="pct"><label>Commission</label><input id="commInput" type="number" step="0.1" min="10" max="50"><span>%</span></div>
           <div class="pct"><label>Fixed fee</label><input id="commFixed" type="number" step="0.05" min="0" max="5"><span>$</span></div>
+          <div class="pct"><label>Min tip</label><input id="minTipInput" type="number" step="0.5" min="0" max="100"><span>$</span></div>
           <button class="btn" id="saveComm">Save</button>
         </div>
+        <div class="sub" style="margin-top:10px">Minimum commission is <b>10%</b> — a shop can be set higher, never lower. <b>Min tip</b> blocks tips so small that Stripe's fee eats the commission (it is enforced on the server, not just here).</div>
         <div id="commMsg" class="msg"></div>
       </div>
 
@@ -216,7 +218,10 @@
     const auth=firebase.auth(), db=firebase.firestore();
     const $=id=>document.getElementById(id);
     const ADMINS=['amidifysolutions@gmail.com'];
-    let commRate=5, bizRows=[], sortKey='rev', sortDir=-1;
+    // Platform floor: no shop may ever be put on a commission below this. Mirrors
+    // the same floor enforced server-side in server.js, which is authoritative.
+    const MIN_COMM=10;
+    let commRate=MIN_COMM, bizRows=[], sortKey='rev', sortDir=-1;
     const money=n=>'$'+(Number(n)||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
 
     auth.onAuthStateChanged(u=>{
@@ -270,10 +275,12 @@
 
     async function initPanel(){
       const cfg=await db.collection('config').doc('platform').get();
-      commRate=cfg.exists&&cfg.data().commissionPercent!=null?cfg.data().commissionPercent:7;
+      commRate=cfg.exists&&cfg.data().commissionPercent!=null?cfg.data().commissionPercent:MIN_COMM;
       const commFix=cfg.exists&&cfg.data().commissionFixed!=null?cfg.data().commissionFixed:0.30;
+      const minTip=cfg.exists&&cfg.data().minTip!=null?cfg.data().minTip:1;
       $('commInput').value=commRate;
       $('commFixed').value=commFix;
+      $('minTipInput').value=minTip;
       $('stComm').textContent=commRate+'% + $'+Number(commFix).toFixed(2);
       loadBusinesses();
     }
@@ -281,20 +288,28 @@
     $('saveComm').onclick=async()=>{
       const p=parseFloat($('commInput').value);
       const f=parseFloat($('commFixed').value);
-      if(isNaN(p)||p<0||p>50){ msg('commMsg','Enter a valid percentage (0–50).','err'); return; }
+      const mt=parseFloat($('minTipInput').value);
+      if(isNaN(p)||p<MIN_COMM||p>50){ msg('commMsg','Commission must be between '+MIN_COMM+'% and 50%.','err'); return; }
       if(isNaN(f)||f<0||f>5){ msg('commMsg','Enter a valid fixed fee (0–5).','err'); return; }
-      try{ await db.collection('config').doc('platform').set({commissionPercent:p,commissionFixed:f},{merge:true});
+      if(isNaN(mt)||mt<0||mt>100){ msg('commMsg','Enter a valid minimum tip (0–100).','err'); return; }
+      try{ await db.collection('config').doc('platform').set({commissionPercent:p,commissionFixed:f,minTip:mt},{merge:true});
         commRate=p; $('stComm').textContent=p+'% + $'+f.toFixed(2);
-        msg('commMsg','Saved ✓ — new '+p+'% + $'+f.toFixed(2)+' rate is live for all shops now.','ok'); }
+        msg('commMsg','Saved ✓ — '+p+'% + $'+f.toFixed(2)+' and a $'+mt.toFixed(2)+' minimum tip are live for all shops now.','ok'); }
       catch(e){ msg('commMsg',e.message,'err'); }
     };
+
+    // What Stripe charges us on a card payment. The customer is charged tip+fee,
+    // and Stripe takes a % of that WHOLE amount plus a fixed cost per transaction.
+    // So our real income is the commission MINUS this — never the commission itself.
+    const STRIPE_PCT=0.029, STRIPE_FIX=0.30;
+    function netFee(tip,fee){ return (fee||0) - (STRIPE_PCT*((tip||0)+(fee||0)) + STRIPE_FIX); }
 
     function ms(ts){ return ts&&ts.toMillis?ts.toMillis():(ts&&ts.seconds?ts.seconds*1000:0); }
     function dstr(m){ if(!m) return '—'; const d=new Date(m); return d.toLocaleDateString(undefined,{year:'2-digit',month:'short',day:'numeric'}); }
 
     async function loadBusinesses(){
       const biz=await db.collection('businesses').get();
-      let tRev=0,tVol=0,tN=0,tStaff=0,activeBiz=0,revMonth=0,volMonth=0;
+      let tRev=0,tGross=0,tVol=0,tN=0,tStaff=0,activeBiz=0,revMonth=0,volMonth=0;
       const now=new Date(); const monthStart=new Date(now.getFullYear(),now.getMonth(),1).getTime();
       const days=[]; const today=new Date(); today.setHours(0,0,0,0);
       for(let i=29;i>=0;i--){ days.push({d:new Date(today.getTime()-i*86400000), v:0}); }
@@ -308,12 +323,17 @@
         try{ staffSnap=await db.collection('businesses').doc(b.id).collection('staff').get(); }catch(_){ }
         try{ tipsSnap=await db.collection('businesses').doc(b.id).collection('tips').get(); }catch(_){ }
         const tipList=(tipsSnap&&tipsSnap.docs)||[], tipCount=(tipsSnap&&tipsSnap.size)||0, staffList=(staffSnap&&staffSnap.docs)||[];
-        let vol=0,rev=0,last=0;
+        let vol=0,rev=0,gross=0,last=0;
         tipList.forEach(t=>{ const x=t.data(); const tip=x.tip||0, fee=x.fee||0, m=ms(x.createdAt);
-          vol+=tip; rev+=fee; if(m>last) last=m;
-          if(m>=monthStart){ revMonth+=fee; volMonth+=tip; }
-          days.forEach(day=>{ if(m>=day.d.getTime() && m<day.d.getTime()+86400000) day.v+=fee; });
+          // rev = what we ACTUALLY keep. The recorded `fee` is the gross commission
+          // charged on top of the tip; Stripe then takes its cut of the WHOLE charge
+          // (tip + fee). Showing gross here would roughly double our apparent income.
+          const net=netFee(tip,fee);
+          vol+=tip; gross+=fee; rev+=net; if(m>last) last=m;
+          if(m>=monthStart){ revMonth+=net; volMonth+=tip; }
+          days.forEach(day=>{ if(m>=day.d.getTime() && m<day.d.getTime()+86400000) day.v+=net; });
         });
+        tGross+=gross;
         let activeStaff=0; staffList.forEach(s=>{ const sd=s.data(); if(sd.status!=='removed' && sd.leftByStaff!==true) activeStaff++; });
         const feePct=(d.tipShareEnabled? (d.tipSharePercent||0):0);
         tRev+=rev; tVol+=vol; tN+=tipCount; tStaff+=activeStaff; if(tipCount>0) activeBiz++;
@@ -330,7 +350,9 @@
       $('fDup').textContent='Duplicates ('+dupN+')'; $('fBlk').textContent='Blocked ('+blkN+')';
       // KPIs
       $('stRev').textContent=money(tRev);
-      $('stRevM').textContent='take rate '+(tVol>0?(tRev/tVol*100).toFixed(1):'0')+'%'; $('stRevM').className='d up';
+      // Show the real take rate (net) and the gross we billed, so the gap between
+      // "charged" and "kept" is never invisible again.
+      $('stRevM').textContent='net take '+(tVol>0?(tRev/tVol*100).toFixed(1):'0')+'% · billed '+money(tGross); $('stRevM').className='d up';
       $('stVol').textContent=money(tVol);
       $('stVolM').textContent=money(volMonth)+' this month';
       $('stTipsN').textContent=tN.toLocaleString();
@@ -424,7 +446,7 @@
       // Per-shop commission: blank = clear override (use global default). Number = override.
       const commRaw=$('bm_comm').value.trim();
       let commVal=null;
-      if(commRaw!==''){ commVal=parseFloat(commRaw); if(isNaN(commVal)||commVal<0||commVal>50){ msg('bmMsg','Commission must be 0–50% (or blank for default).','err'); return; } }
+      if(commRaw!==''){ commVal=parseFloat(commRaw); if(isNaN(commVal)||commVal<MIN_COMM||commVal>50){ msg('bmMsg','Commission must be '+MIN_COMM+'–50% (or blank for the platform default). A shop can be set above the minimum, never below it.','err'); return; } }
       const commFixRaw=$('bm_commFixed').value.trim();
       let commFixVal=null;
       if(commFixRaw!==''){ commFixVal=parseFloat(commFixRaw); if(isNaN(commFixVal)||commFixVal<0||commFixVal>5){ msg('bmMsg','Fixed fee must be 0–5 (or blank for default).','err'); return; } }

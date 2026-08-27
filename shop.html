@@ -133,6 +133,7 @@
         <div class="qtitle">Would you like to leave a tip?</div>
         <div class="amts" id="amts"></div>
         <div class="custom"><span>☕</span><input id="customAmt" inputmode="decimal" placeholder="Enter the tip amount"></div>
+        <div id="tipWarn" class="msg err" style="display:none;margin-top:10px"></div>
       </div>
       <div class="card">
         <div style="display:flex;align-items:center;justify-content:space-between">
@@ -205,7 +206,10 @@
     // returns publishableKey) so it ALWAYS matches the backend's test/live mode
     // and can never drift out of sync. Do not rely on this constant.
     const STRIPE_PK="pk_live_51Tv0VwP5hdbiGSZmrDrfJOML8K1dssKuI3tmWdw3pKn6pQJnMCWYKP5Mf0VslQcBftlKy2QsPueNeXQjZ1o6inaF00cns9RH1p";
-    let FEE=0.07, FIXED=0.30;
+    let FEE=0.10, FIXED=0.30;
+    // Tip limits come from config/platform. The SERVER enforces them too — this is
+    // only so the customer sees a friendly message instead of a failed checkout.
+    let MIN_TIP=1, MAX_TIP=1000;
     const $=id=>document.getElementById(id);
     const BID=new URLSearchParams(location.search).get('s');
     const CURSYM={CAD:'$',USD:'$',AUD:'$',EUR:'€',GBP:'£',AED:'AED',SAR:'SAR',QAR:'QAR',KWD:'KWD',BHD:'BHD',OMR:'OMR',LBP:'LBP'};
@@ -223,8 +227,10 @@
         if(shop.blocked){ $('loading').innerHTML='<div style="text-align:center;color:var(--soft);max-width:320px;margin:0 auto"><div style="font-size:34px;margin-bottom:10px">🚫</div>This tip page is currently unavailable.</div>'; return; }
         // Commission = % of tip + a small fixed fee. Per-shop value wins, else
         // the global default (config/platform), else 7% + $0.30.
-        FEE=0.07; FIXED=0.30;
+        FEE=0.10; FIXED=0.30;
         let _cfg=null; try{const c=await db.collection('config').doc('platform').get(); if(c.exists) _cfg=c.data();}catch(e){}
+        if(_cfg&&_cfg.minTip!=null) MIN_TIP=Number(_cfg.minTip)||0;
+        if(_cfg&&_cfg.maxTip!=null) MAX_TIP=Number(_cfg.maxTip)||1000;
         if(shop.commissionPercent!=null) FEE=shop.commissionPercent/100; else if(_cfg&&_cfg.commissionPercent!=null) FEE=_cfg.commissionPercent/100;
         if(shop.commissionFixed!=null) FIXED=Number(shop.commissionFixed); else if(_cfg&&_cfg.commissionFixed!=null) FIXED=Number(_cfg.commissionFixed);
         // Flat fixed fee only applies in the launch currencies; others = percentage only.
@@ -364,7 +370,19 @@
     // customer already moved away from.
     let _payTimer=null, _payToken=0, cardMounted=false;
     function onAmountChanged(){
-      if(!(tip>0)){ $('payReveal').classList.add('hide'); return; }
+      if(!(tip>0)){ $('payReveal').classList.add('hide'); $('tipWarn').style.display='none'; return; }
+      // Below the platform minimum the charge would cost more in card fees than it
+      // earns, so the server rejects it. Say so here rather than failing later.
+      if(tip<MIN_TIP||tip>MAX_TIP){
+        $('payReveal').classList.add('hide');
+        const w=$('tipWarn');
+        w.textContent = tip<MIN_TIP
+          ? ('The smallest tip is '+sym+Number(MIN_TIP).toFixed(2)+'.')
+          : ('The largest tip is '+sym+Number(MAX_TIP).toFixed(2)+'.');
+        w.style.display='block';
+        return;
+      }
+      $('tipWarn').style.display='none';
       const fee=r2(tip*FEE+FIXED), total=r2(tip+fee);
       $('bkFeeLabel').textContent='Service fee';
       $('bkTip').textContent=sym+tip.toFixed(2); $('bkFee').textContent=sym+fee.toFixed(2); $('bkTot').textContent=sym+total.toFixed(2); $('payAmt').textContent=sym+total.toFixed(2);
