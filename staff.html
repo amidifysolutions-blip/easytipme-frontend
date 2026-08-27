@@ -124,6 +124,14 @@
   html[dir=rtl] .srow .val{text-align:left}
   .pill{display:inline-block;font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px}
   .pill.g{background:#eef7ee;color:var(--green)}.pill.o{background:#fff5e9;color:var(--orange)}
+  /* social sign-in */
+  .social{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:#fff;color:#1d1d1f;border:1.5px solid var(--line,#e7e7ec);margin-bottom:10px}
+  .social:hover{background:#f7f7f8}
+  .social svg{width:19px;height:19px;flex:0 0 auto}
+  .social.apple{background:#000;color:#fff;border-color:#000}
+  .social.apple:hover{background:#222}
+  .ordiv{display:flex;align-items:center;gap:12px;color:var(--soft,#8a8a8e);font-size:13px;margin:16px 0 14px}
+  .ordiv:before,.ordiv:after{content:"";flex:1;height:1px;background:var(--line,#e7e7ec)}
   /* balance + withdrawal */
   .balhead{display:flex;justify-content:space-between;align-items:flex-end;padding:14px 16px;border-radius:14px;background:var(--card2,#f5f6f8);border:1px solid var(--line)}
   html[data-theme=dark] .balhead{background:#14141b}
@@ -201,6 +209,17 @@
           <div style="flex:1"><label data-i18n="last">Last name</label><input id="f_last" type="text" autocomplete="family-name" data-i18n-ph="last_ph" placeholder="Last"></div>
         </div>
       </div>
+      <div id="socialWrap">
+        <button type="button" class="btn social" id="googleBtn">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          <span data-i18n="cont_google">Continue with Google</span>
+        </button>
+        <button type="button" class="btn social apple" id="appleBtn">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill="currentColor" d="M16.7 12.7c0-2.4 2-3.6 2.1-3.6-1.1-1.7-2.9-1.9-3.5-1.9-1.5-.2-2.9.9-3.6.9-.8 0-1.9-.9-3.1-.8-1.6 0-3.1.9-3.9 2.4-1.7 2.9-.4 7.2 1.2 9.6.8 1.2 1.7 2.5 3 2.4 1.2 0 1.6-.8 3.1-.8 1.4 0 1.8.8 3.1.8 1.3 0 2.1-1.2 2.9-2.3.9-1.3 1.3-2.6 1.3-2.7-.1 0-2.5-1-2.6-3.9zM14.3 5.6c.7-.8 1.1-2 1-3.1-1 0-2.2.7-2.9 1.5-.6.7-1.2 1.9-1 3 1.1.1 2.2-.6 2.9-1.4z"/></svg>
+          <span data-i18n="cont_apple">Continue with Apple</span>
+        </button>
+        <div class="ordiv"><span data-i18n="or_email">or use your email</span></div>
+      </div>
       <label data-i18n="email">Email</label>
       <input id="email" type="email" autocomplete="email" placeholder="you@email.com">
       <label data-i18n="password">Password</label>
@@ -215,6 +234,13 @@
       <button class="btn ghost hide" id="registerBtn" style="margin-top:10px" data-i18n="create_btn">Create account</button>
       <div class="switch" id="switchLine"></div>
       <div class="switch hide" id="forgotWrap" style="margin-top:4px"><a id="forgotLink" data-i18n="forgot_pw">Forgot password?</a></div>
+      <div class="switch" id="codeWrap" style="margin-top:4px"><a id="codeLink" data-i18n="signin_code">Email me a sign-in code instead</a></div>
+      <div id="lc_box" class="hide" style="margin-top:12px;border-top:1px solid var(--line,#e7e7ec);padding-top:12px;text-align:left">
+        <label data-i18n="code_ph">Code</label>
+        <input id="lc_code" inputmode="numeric" maxlength="6" placeholder="6-digit code" style="letter-spacing:3px">
+        <button class="btn" id="lc_confirm" style="margin-top:10px" data-i18n="confirm_btn">Confirm</button>
+        <div class="switch" style="margin-top:4px"><a id="lc_resend" data-i18n="resend_code">Resend code</a></div>
+      </div>
       <div id="sr_box" class="hide" style="margin-top:12px;border-top:1px solid var(--line,#e7e7ec);padding-top:12px;text-align:left">
         <label data-i18n="code_ph">Code</label>
         <input id="sr_code" inputmode="numeric" maxlength="6" placeholder="6-digit code" style="letter-spacing:3px">
@@ -506,6 +532,8 @@
       fp_title:"Set your password", fp_sub:"Welcome! Choose your own password to secure your account.", fp_new:"New password", fp_save:"Save & continue", fp_relogin:"For security, please sign in again with your temporary password to set a new one.",
       verify_sub_code:"We emailed a 6-digit code to", verify_sub_code2:"Enter it below to confirm.", code_ph:"6-digit code", confirm_btn:"Confirm", resend_code:"Resend code",
       m_enter_code6:"Enter the 6-digit code from your email.", m_wrong_code:"Wrong code — try again.", m_code_expired:"Code expired — tap Resend code.",
+      cont_google:"Continue with Google", cont_apple:"Continue with Apple", or_email:"or use your email",
+      signin_code:"Email me a sign-in code instead", m_code_sent:"We sent a code to {email}. Enter it below.", m_code_fail:"Could not send the code. Please try again.",
       available:"Available", pending:"Pending", withdraw_speed:"Withdrawal speed", withdraw_now:"Withdraw",
       free:"Free", recent_payouts:"Recent payouts", bal_unavailable:"Balance is loading — check back in a moment.", nothing_to_withdraw:"Nothing to withdraw yet",
       tier_instant:"Instant", tier_instant_d:"Arrives in minutes", tier_standard:"Standard", tier_standard_d:"Free · 1–2 business days",
@@ -574,6 +602,8 @@
       fp_title:"عيّن كلمة مرورك", fp_sub:"أهلًا! اختر كلمة مرور خاصة فيك لتأمين حسابك.", fp_new:"كلمة مرور جديدة", fp_save:"حفظ ومتابعة", fp_relogin:"لأمانك، سجّل دخول مرة تانية بالباسورد المؤقت عشان تعيّن باسورد جديد.",
       verify_sub_code:"بعتنالك كود من ٦ أرقام على", verify_sub_code2:"اكتبو تحت للتأكيد.", code_ph:"كود من ٦ أرقام", confirm_btn:"تأكيد", resend_code:"إعادة إرسال الكود",
       m_enter_code6:"اكتب الكود المكوّن من ٦ أرقام من إيميلك.", m_wrong_code:"كود غلط — جرّب مرة تانية.", m_code_expired:"انتهت صلاحية الكود — اضغط إعادة إرسال.",
+      cont_google:"تابع مع Google", cont_apple:"تابع مع Apple", or_email:"أو استعمل إيميلك",
+      signin_code:"ابعتولي كود على الإيميل بدل الباسورد", m_code_sent:"بعتنالك كود على {email}. اكتبو تحت.", m_code_fail:"ما قدرنا نبعت الكود. جرّب مرة تانية.",
       available:"المتاح", pending:"قيد الانتظار", withdraw_speed:"سرعة السحب", withdraw_now:"اسحب",
       free:"مجاني", recent_payouts:"آخر التحويلات", bal_unavailable:"عم يحمّل الرصيد — رجاع بعد شوي.", nothing_to_withdraw:"ما في رصيد للسحب بعد",
       tier_instant:"فوري", tier_instant_d:"بيوصل خلال دقائق", tier_standard:"عادي", tier_standard_d:"مجاني · يوم-يومين عمل",
@@ -1177,6 +1207,71 @@
     }
 
     const ENFORCE_VERIFY=false;
+    // ---- Sign in with Google / Apple ------------------------------------
+    // Firebase is set to "link accounts that use the same email", so a worker who
+    // already has an email+password account keeps the SAME account (and their
+    // tips and bank details) when they switch to a social button.
+    async function socialSignIn(provider, btn){
+      const b=$(btn); b.disabled=true;
+      signInAttempt=true;
+      try{
+        const res=await auth.signInWithPopup(provider);
+        const u=res.user;
+        // Keep the shop link and seed the profile from the provider's name so the
+        // worker isn't asked to type it again.
+        if(BID){ try{ localStorage.setItem('etm_staff_bid',BID); }catch(_){} }
+        try{
+          const dn=(u.displayName||'').trim();
+          const prof=JSON.parse(localStorage.getItem('etm_staff_profile')||'{}');
+          if(dn && !prof.firstName){
+            const p=dn.split(/\s+/);
+            localStorage.setItem('etm_staff_profile', JSON.stringify(
+              Object.assign(prof,{firstName:p[0]||'', lastName:p.slice(1).join(' '), email:u.email||''})));
+          }
+        }catch(_){}
+      }catch(e){
+        const c=(e&&e.code)||'';
+        if(c!=='auth/popup-closed-by-user' && c!=='auth/cancelled-popup-request') amsg(prettyErr(e));
+      }
+      b.disabled=false;
+    }
+    if($('googleBtn')) $('googleBtn').onclick=()=>socialSignIn(new firebase.auth.GoogleAuthProvider(),'googleBtn');
+    if($('appleBtn'))  $('appleBtn').onclick =()=>{ const p=new firebase.auth.OAuthProvider('apple.com'); p.addScope('email'); p.addScope('name'); socialSignIn(p,'appleBtn'); };
+
+    // ---- Sign in with an emailed code (no password) -----------------------
+    // Entering the code proves the address, so the account comes back verified.
+    let lcEmail='';
+    async function lcRequest(){
+      const em=($('email').value||'').trim().toLowerCase();
+      if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){ amsg(t('m_enter_email_pass')); return; }
+      lcEmail=em;
+      const a=$('codeLink'); if(a) a.style.pointerEvents='none';
+      try{
+        await fetch(BACKEND+'/auth/login/request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em})});
+        $('lc_box').classList.remove('hide');
+        amsg(t('m_code_sent',{email:em}),'ok');
+      }catch(_){ amsg(t('m_code_fail')); }
+      if(a) setTimeout(()=>{ a.style.pointerEvents=''; }, 20000);
+    }
+    if($('codeLink')) $('codeLink').onclick=lcRequest;
+    if($('lc_resend')) $('lc_resend').onclick=lcRequest;
+    if($('lc_confirm')) $('lc_confirm').onclick=async()=>{
+      const code=($('lc_code').value||'').trim();
+      if(code.length!==6){ amsg(t('m_enter_code6')); return; }
+      const b=$('lc_confirm'); b.disabled=true;
+      signInAttempt=true;
+      try{
+        const r=await fetch(BACKEND+'/auth/login/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:lcEmail,code})});
+        const j=await r.json().catch(()=>({}));
+        if(!r.ok||!j.token){
+          const em={'wrong-code':t('m_wrong_code'),'expired':t('m_code_expired'),'too-many':t('m_wrong_code'),'no-code':t('m_code_expired')};
+          throw new Error(em[j&&j.error]||t('m_code_fail'));
+        }
+        if(BID){ try{ localStorage.setItem('etm_staff_bid',BID); }catch(_){} }
+        await auth.signInWithCustomToken(j.token);
+      }catch(e){ amsg((e&&e.message)||t('m_code_fail')); b.disabled=false; }
+    };
+
     auth.onAuthStateChanged(async u=>{
       if(!u){ applyMode(); show('auth'); return; }
       if(ENFORCE_VERIFY && !u.emailVerified){ showVerify(u); return; }
