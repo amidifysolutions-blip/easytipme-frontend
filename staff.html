@@ -371,10 +371,6 @@
     <!-- SETTINGS TAB -->
     <div id="tab-settings" class="tabpanel hide">
       <h1 style="margin:2px 2px 14px" data-i18n="settings_title">Settings</h1>
-      <div class="card" id="wproCard" style="border:1px solid rgba(240,180,41,.55)">
-        <div id="wproBody" style="font-size:14px">Loading…</div>
-        <div id="wproMsg" style="font-size:13px;margin-top:8px;color:var(--danger)"></div>
-      </div>
       <div class="card">
         <div class="srow"><span class="lab" data-i18n="language">Language</span>
           <span class="langsel"><select id="langSet"></select></span></div>
@@ -516,7 +512,7 @@
       verified_continue:"I've verified — continue", resend:"Resend email", use_diff:"Use a different email",
       verify_banner:"Verify your email to secure your account.", resend_short:"Resend",
       your_tips:"Your tips", tips:"Tips", avg_tip:"Avg tip", avg_rating:"Avg rating",
-      recent_tips:"Recent tips", no_tips:"No tips yet.", from:"from", team_share:"Team share", who_tipped_you:"Who tipped you", tips_have_details:"of your tips have a name or message from the customer.", upgrade_to_see:"Upgrade to see who tipped you & read their message.",
+      recent_tips:"Recent tips", no_tips:"No tips yet.", from:"from", team_share:"Team share", who_tipped_you:"Who tipped you",
       insights_title:"Insights", this_week:"This week", this_month:"This month", all_time:"All time",
       by_month:"By month", earned:"Earned", average:"Average", daily_earnings:"Daily earnings (last 14 days)",
       top_day:"Best day", named_tips:"With a name", anon_tips:"Anonymous", rating_avg:"Average rating", no_data:"No data for this period yet.",
@@ -586,7 +582,7 @@
       verified_continue:"فعّلت — متابعة", resend:"إعادة إرسال الإيميل", use_diff:"استخدم إيميل آخر",
       verify_banner:"فعّل إيميلك لتأمين حسابك.", resend_short:"إعادة إرسال",
       your_tips:"بقشيشك", tips:"البقشيش", avg_tip:"متوسط البقشيش", avg_rating:"متوسط التقييم",
-      recent_tips:"آخر البقشيش", no_tips:"ما في بقشيش بعد.", from:"من", team_share:"حصّة من الفريق", who_tipped_you:"مين تيّبك", tips_have_details:"من تيباتك فيها اسم أو رسالة من الزبون.", upgrade_to_see:"اشترك لتشوف مين تيّبك وتقرا رسالتو.",
+      recent_tips:"آخر البقشيش", no_tips:"ما في بقشيش بعد.", from:"من", team_share:"حصّة من الفريق", who_tipped_you:"مين تيّبك",
       insights_title:"التحليلات", this_week:"هالأسبوع", this_month:"هالشهر", all_time:"الكل",
       by_month:"حسب الشهر", earned:"المكتسب", average:"المتوسط", daily_earnings:"الأرباح اليومية (آخر ١٤ يوم)",
       top_day:"أفضل يوم", named_tips:"مع اسم", anon_tips:"بدون اسم", rating_avg:"متوسط التقييم", no_data:"ما في بيانات لهالفترة بعد.",
@@ -1384,7 +1380,6 @@
       try{ window._tipsUnsub = tipsQ.onSnapshot(processTips, ()=>{}); }catch(_){}
       renderSettings(u); setupPayout(u); setupConsent(u);
       show('app'); switchTab('home');
-      handleWorkerProReturn(u);
     }
 
     function renderHomeStats(){
@@ -1447,12 +1442,6 @@
       const since=Date.now()-HISTORY_DAYS*86400000;
       const rows=allRows.filter(r=>!r.ms || r.ms>=since);
       $('noTips').style.display=rows.length?'none':'block';
-      if(!pro){
-        const hidden=rows.filter(r=>r.from||r.msg).length;
-        if(hidden>0){
-          el.insertAdjacentHTML('beforeend',`<div style="background:rgba(240,180,41,.12);border:1px solid rgba(240,180,41,.5);border-radius:12px;padding:12px;margin-bottom:12px;font-size:13px;line-height:1.5">🔒 <b>${hidden}</b> ${t('tips_have_details')} <b>${t('upgrade_to_see')}</b></div>`);
-        }
-      }
       rows.slice(0,120).forEach(r=>{
         const ds=r.date?r.date.toLocaleDateString(LANG,{month:'short',day:'numeric'}):'';
         const stars=r.rating?(' · '+'★'.repeat(r.rating)):'';
@@ -1518,60 +1507,6 @@
       $('setVerified').innerHTML = ver?`<span class="pill g">${t('verified')}</span>`:`<span class="pill o">${t('not_verified')}</span>`;
       $('setResend').classList.toggle('hide', !!ver);
       $('setResend').onclick=()=>showVerify(u);   // open the code screen instead of an alert
-      renderWorkerPro(u);
-    }
-
-    // ---- Worker Pro ($4.99/mo): Who Tipped Me? + no $2 fee + instant payout ----
-    function wpmsg(txt){ const m=$('wproMsg'); if(m) m.textContent=txt||''; }
-    function renderWorkerPro(u){
-      const body=$('wproBody'); if(!body) return;
-      const head='<div style="font-weight:800;font-size:16px;margin-bottom:6px">⭐ Pro</div>';
-      if(isWorkerPro()){
-        let since=''; try{ if(staffDoc&&staffDoc.workerProSince) since=new Date(staffDoc.workerProSince).toLocaleDateString(LANG||'en',{year:'numeric',month:'short',day:'numeric'}); }catch(_){}
-        body.innerHTML=head+'<div style="color:var(--green);font-weight:700">✓ Active'+(since?(' · since '+since):'')+'</div>'
-          +'<div style="color:var(--soft);font-size:13px;margin-top:6px;line-height:1.5">You can see who tipped you and their messages, your $2 monthly fee is waived, and instant payout is on when withdrawals go live. Thank you! 🎉</div>'
-          +'<button class="linkbtn" id="wproCancel" style="margin-top:10px;color:var(--danger)">Cancel Pro</button>';
-        const c=$('wproCancel'); if(c) c.onclick=()=>cancelWorkerPro(u);
-      } else {
-        body.innerHTML=head
-          +'<div style="color:var(--soft);font-size:13px;line-height:1.6">Unlock <b>“Who Tipped Me?”</b> — see the name &amp; message behind each tip. Plus <b>no $2 monthly fee</b> and <b>instant payout</b> (when live).</div>'
-          +'<div style="font-weight:800;font-size:20px;margin:10px 0">$4.99<span style="font-size:13px;color:var(--soft);font-weight:500">/month</span></div>'
-          +'<div style="font-size:11.5px;color:var(--soft);margin-bottom:10px">🔒 “Who Tipped Me?” is private to you — your workplace can’t see it.</div>'
-          +'<button class="btn dark" id="wproBtn">Upgrade to Pro</button>';
-        const b=$('wproBtn'); if(b) b.onclick=()=>startWorkerProCheckout(u);
-      }
-    }
-    async function startWorkerProCheckout(u){
-      const b=$('wproBtn'); if(b){b.disabled=true;b.textContent='Opening…';}
-      wpmsg('');
-      try{
-        const idToken=await u.getIdToken();
-        const r=await fetch(BACKEND+'/billing/create-checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,plan:'worker',bid:BID,staffId:(staffId||'')})});
-        const j=await r.json();
-        if(j&&j.url){ location.href=j.url; } else { wpmsg('Could not start checkout. Try again.'); if(b){b.disabled=false;b.textContent='Upgrade to Pro';} }
-      }catch(_){ wpmsg('Could not start checkout. Try again.'); if(b){b.disabled=false;b.textContent='Upgrade to Pro';} }
-    }
-    async function cancelWorkerPro(u){
-      if(!confirm('Cancel Pro? You’ll lose “Who Tipped Me?” and your $2 fee waiver.')) return;
-      try{
-        const idToken=await u.getIdToken();
-        const r=await fetch(BACKEND+'/billing/cancel',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,plan:'worker',bid:BID,staffId:(staffId||'')})});
-        const j=await r.json();
-        if(j&&j.ok){ WORKER_PRO=false; if(staffDoc) staffDoc.workerProActive=false; wpmsg(''); renderWorkerPro(u); renderRecent(); renderProfileBadges(); }
-        else wpmsg('Could not cancel. Try again.');
-      }catch(_){ wpmsg('Could not cancel. Try again.'); }
-    }
-    async function handleWorkerProReturn(u){
-      const p=new URLSearchParams(location.search);
-      if(p.get('pro')==='success' && p.get('session_id')){
-        try{
-          const idToken=await u.getIdToken();
-          const r=await fetch(BACKEND+'/billing/confirm',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,sessionId:p.get('session_id')})});
-          const j=await r.json();
-          history.replaceState({},'',location.pathname);
-          if(j&&j.active){ WORKER_PRO=true; if(staffDoc) staffDoc.workerProActive=true; renderWorkerPro(u); renderRecent(); renderProfileBadges(); switchTab('settings'); }
-        }catch(_){ history.replaceState({},'',location.pathname); }
-      } else if(p.get('pro')==='cancel'){ history.replaceState({},'',location.pathname); }
     }
 
     // ---- Stripe Connect (staff payouts) ----
