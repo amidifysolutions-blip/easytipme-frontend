@@ -275,6 +275,7 @@
     <div class="section-head">
       <h2>Become a partner</h2>
       <p>Tell us where you'll be sharing your link and we'll set you up. Your network is worth more than one commission.</p>
+      <p style="margin-top:6px">Every partner is approved by hand — it keeps the programme clean for everyone in it. We review applications quickly and email you the moment you're in.</p>
     </div>
     <form class="apply" id="applyForm" novalidate>
       <label for="pf_name">Your name</label>
@@ -287,7 +288,7 @@
       <textarea id="pf_audience" name="audience" rows="3" maxlength="500" placeholder="Your agency clients, an email list, social, hospitality contacts…"></textarea>
       <button type="submit" class="btn btn-primary btn-lg" id="pf_btn">Apply to join</button>
       <div class="fmsg" id="pf_msg"></div>
-      <div class="cta-note" style="text-align:center">Free to join · No fee ever comes out of what you earn</div>
+      <div class="cta-note" style="text-align:center">Free to join · Reviewed by a human · No fee ever comes out of what you earn</div>
     </form>
   </div>
 </section>
@@ -327,7 +328,7 @@
         body:JSON.stringify({name,email,country,audience})});
       const j=await r.json().catch(()=>({}));
       if(!r.ok||j.error) throw new Error(j.error||'Could not send');
-      m.innerHTML='Thanks — you\u2019re in. <a href="partner.html" style="color:inherit;text-decoration:underline">Open your partner dashboard</a> to get your link now.';
+      m.innerHTML='Thanks — we\u2019ve got your application. <a href="partner.html" style="color:inherit;text-decoration:underline">Create your partner account</a> now; your link goes live the moment we approve you, and we\u2019ll email you.';
       m.className='fmsg ok';
       $('applyForm').reset();
     }catch(err){

@@ -181,16 +181,17 @@
 
       <div class="card">
         <h3>🤝 Partners <span class="sub" style="margin:0" id="partnerCount"></span></h3>
-        <div class="sub" style="margin-bottom:12px">Everyone referring venues to you. Commission accrues monthly and partners on <b>Stripe are paid automatically</b> — you do nothing. Only partners without Stripe (USDT / Wise / Western Union / bank) need paying by hand, and they show <b>not set</b> under Payout.</div>
+        <div class="sub" style="margin-bottom:12px"><b>Nobody earns anything until you approve them.</b> A new partner sits as <b>Pending</b> — their link credits no one and no commission accrues — until you press Approve. Commission then accrues monthly and partners on <b>Stripe are paid automatically</b> — you do nothing. Only partners without Stripe (USDT / Wise / Western Union / bank) need paying by hand, and they show <b>not set</b> under Payout.</div>
         <div class="admin-table-wrap" style="overflow-x:auto">
           <table class="admin-table" style="width:100%;border-collapse:collapse;font-size:13.5px">
             <thead><tr style="text-align:left;color:var(--soft)">
-              <th style="padding:8px 10px">Partner</th><th style="padding:8px 10px">Code</th>
+              <th style="padding:8px 10px">Partner</th><th style="padding:8px 10px">Status</th>
+              <th style="padding:8px 10px">Code</th>
               <th style="padding:8px 10px">Tier</th><th class="num" style="padding:8px 10px;text-align:right">Rate</th>
               <th class="num" style="padding:8px 10px;text-align:right">Venues</th>
               <th class="num" style="padding:8px 10px;text-align:right">Owed</th>
               <th class="num" style="padding:8px 10px;text-align:right">Paid</th>
-              <th style="padding:8px 10px">Payout</th><th style="padding:8px 10px"></th>
+              <th style="padding:8px 10px">Payout</th><th style="padding:8px 10px">Action</th>
             </tr></thead>
             <tbody id="partnerTable"></tbody>
           </table>
@@ -467,12 +468,24 @@
         const j=await papi('/partners/admin/list');
         PARTNERS=j.partners||[];
         $('partnerCount').textContent=PARTNERS.length?('· '+PARTNERS.length):'· none yet';
-        if(!PARTNERS.length){ tb.innerHTML='<tr><td colspan="9" style="padding:18px;text-align:center;color:var(--soft)">No partners yet. They appear here as soon as someone joins from the partners page.</td></tr>'; return; }
+        if(!PARTNERS.length){ tb.innerHTML='<tr><td colspan="10" style="padding:18px;text-align:center;color:var(--soft)">No partners yet. They appear here as soon as someone joins from the partners page.</td></tr>'; return; }
+        // Anyone waiting on you comes first — an approval you never see is an approval that never happens.
+        const rank=x=>((x.status||'active')==='pending'?0:((x.status||'active')==='active'?1:2));
+        PARTNERS.sort((a,b)=>rank(a)-rank(b) || (b.accrued-a.accrued));
+        const waiting=PARTNERS.filter(x=>(x.status||'active')==='pending').length;
+        $('partnerCount').textContent=(PARTNERS.length?('\u00b7 '+PARTNERS.length):'\u00b7 none yet')+(waiting?('  \u2014 '+waiting+' waiting for approval'):'');
         tb.innerHTML=PARTNERS.map(p=>{
+          const st=p.status||'active';
+          const pill=(bg,fg,t)=>'<span class="pill" style="background:'+bg+';color:'+fg+'">'+t+'</span>';
+          const stCell = st==='pending'  ? pill('#fff5e9','#c47a1e','Pending')
+                       : st==='active'   ? pill('rgba(34,197,94,.14)','#15803d','Approved')
+                       : st==='rejected' ? pill('rgba(255,107,107,.14)','#c0392b','Rejected')
+                                         : pill('#eee','#666','Paused');
           const pay = p.stripeReady ? 'Stripe' : (p.payoutMethod&&p.payoutMethod.type ? p.payoutMethod.type : '<span style="color:var(--orange,#e8a33d)">not set</span>');
           const rate = p.rate+'%'+(p.customRate!=null?' <span class="pill">custom</span>':(p.stepsDown>0?' <span class="pill" style="background:#fff5e9;color:#c47a1e">−'+(p.stepsDown*7)+'</span>':''));
           return '<tr>'
             +'<td style="padding:9px 10px"><b>'+esc(p.name||'—')+'</b><div style="color:var(--soft);font-size:12px">'+esc(p.email)+'</div></td>'
+            +'<td style="padding:9px 10px">'+stCell+'</td>'
             +'<td style="padding:9px 10px"><code>'+esc(p.code)+'</code></td>'
             +'<td style="padding:9px 10px">'+esc(p.tier)+'</td>'
             +'<td class="num" style="padding:9px 10px;text-align:right">'+rate+'</td>'
@@ -481,12 +494,20 @@
             +'<td class="num" style="padding:9px 10px;text-align:right;color:var(--soft)">'+money(p.paid)+'</td>'
             +'<td style="padding:9px 10px">'+pay+'</td>'
             +'<td style="padding:9px 10px;white-space:nowrap">'
-              +'<button class="btn ghost sm" data-rate="'+p.uid+'">Rate</button> '
-              +((p.accrued>0&&!p.stripeReady)?'<button class="btn ghost sm" data-paid="'+p.uid+'">Mark paid</button>':'')
+              +(st==='pending'
+                 ? '<button class="btn sm" data-approve="'+p.uid+'">Approve</button> <button class="btn ghost sm" data-reject="'+p.uid+'">Reject</button>'
+                 : (st==='active'
+                     ? '<button class="btn ghost sm" data-rate="'+p.uid+'">Rate</button> '
+                       +((p.accrued>0&&!p.stripeReady)?'<button class="btn ghost sm" data-paid="'+p.uid+'">Mark paid</button> ':'')
+                       +'<button class="btn ghost sm" data-pause="'+p.uid+'">Pause</button>'
+                     : '<button class="btn sm" data-approve="'+p.uid+'">Approve</button>'))
             +'</td></tr>';
         }).join('');
         tb.querySelectorAll('[data-paid]').forEach(b=>{ b.onclick=()=>markPaid(b.getAttribute('data-paid')); });
         tb.querySelectorAll('[data-rate]').forEach(b=>{ b.onclick=()=>setRate(b.getAttribute('data-rate')); });
+        tb.querySelectorAll('[data-approve]').forEach(b=>{ b.onclick=()=>setStatus(b.getAttribute('data-approve'),'active'); });
+        tb.querySelectorAll('[data-reject]').forEach(b=>{ b.onclick=()=>setStatus(b.getAttribute('data-reject'),'rejected'); });
+        tb.querySelectorAll('[data-pause]').forEach(b=>{ b.onclick=()=>setStatus(b.getAttribute('data-pause'),'suspended'); });
       }catch(e){
         tb.innerHTML='';
         $('partnerCount').textContent='';
@@ -505,6 +526,23 @@
         loadPartners();
       }catch(e){ msg('partnerMsg','Could not record: '+e.message,'err'); }
     }
+    async function setStatus(uid,status){
+      const p=PARTNERS.find(x=>x.uid===uid); if(!p) return;
+      const who=p.name||p.email;
+      const ask = status==='active'
+        ? 'Approve '+who+'?\n\nTheir referral link goes live immediately and they start earning commission on the venues they bring in. They get an email telling them they are approved.'
+        : status==='rejected'
+          ? 'Reject '+who+'?\n\nTheir link will never credit anyone. You can approve them later if you change your mind.'
+          : 'Pause '+who+'?\n\nTheir link stops crediting new venues and nothing more accrues. Commission already earned stays safe.';
+      if(!confirm(ask)) return;
+      try{
+        await papi('/partners/admin/set-status',{uid,status});
+        const word = status==='active'?'approved':(status==='rejected'?'rejected':'paused');
+        msg('partnerMsg',who+' '+word+'.','ok');
+        loadPartners();
+      }catch(e){ msg('partnerMsg','Could not update: '+e.message,'err'); }
+    }
+
     async function setRate(uid){
       const p=PARTNERS.find(x=>x.uid===uid); if(!p) return;
       const raw=prompt('Custom rate for '+(p.name||p.email)+' (%).\nLeave EMPTY to go back to the automatic tier rate.', p.customRate!=null?String(p.customRate):'');

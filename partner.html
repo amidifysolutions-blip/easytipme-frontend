@@ -113,6 +113,19 @@
   </div>
 
   <!-- DASHBOARD -->
+  <div id="review" class="hide">
+    <h1 style="margin-bottom:14px">Application received</h1>
+    <div class="card">
+      <div style="font-size:40px;line-height:1;margin-bottom:12px" id="rv_icon">⏳</div>
+      <h2 id="rv_title">We're reviewing your application</h2>
+      <div class="sub" id="rv_text" style="margin-top:8px;line-height:1.7">
+        Every partner is approved by hand before their link goes live — it keeps the programme clean
+        for everyone in it. We'll email you at the address you signed up with as soon as you're approved.
+      </div>
+      <div class="sub" id="rv_note" style="margin-top:14px">Your referral link appears here the moment your account is approved.</div>
+    </div>
+  </div>
+
   <div id="dash" class="hide">
     <h1 style="margin-bottom:14px">Partner dashboard</h1>
     <div class="stats">
@@ -181,7 +194,7 @@
   const BACKEND="https://easytipme-backend.onrender.com";
   const $=id=>document.getElementById(id);
   const money=n=>'$'+(Number(n)||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
-  function show(which){ ['loading','auth','join','dash'].forEach(s=>$(s).classList.add('hide')); $(which).classList.remove('hide');
+  function show(which){ ['loading','auth','join','dash','review'].forEach(s=>$(s).classList.add('hide')); $(which).classList.remove('hide');
     $('logoutBtn').classList.toggle('hide', which==='auth'||which==='loading'); }
   function msg(el,text,type){ const m=$(el); m.textContent=text; m.className='msg '+(type||'err'); }
   fetch(BACKEND+'/health').catch(()=>{});   // warm the backend
@@ -245,7 +258,10 @@
         $('j_name').value=(u.displayName||'').trim();
         show('join'); return;
       }
-      ME=me; render(me); show('dash');
+      ME=me;
+      // Not approved yet (or turned down): no link, no stats — just a clear status.
+      if(me.approved===false || (me.status && me.status!=='active')){ renderReview(me); show('review'); return; }
+      render(me); show('dash');
       // Returning from Stripe onboarding? Re-check whether payouts are live.
       if(new URLSearchParams(location.search).get('connect')){
         try{ await api('/partners/connect-status'); const fresh=await api('/partners/me'); ME=fresh; render(fresh); }catch(_){}
@@ -257,9 +273,26 @@
     const b=$('joinBtn'); b.disabled=true;
     try{
       await api('/partners/register',{name:($('j_name').value||'').trim(),country:($('j_country').value||'').trim()});
-      const me=await api('/partners/me'); ME=me; render(me); show('dash');
+      const me=await api('/partners/me'); ME=me;
+      if(me.approved===false || (me.status && me.status!=='active')){ renderReview(me); show('review'); return; }
+      render(me); show('dash');
     }catch(e){ msg('joinMsg',(e&&e.message)||'Could not create your partner link.'); b.disabled=false; }
   };
+
+  function renderReview(me){
+    const st=(me&&me.status)||'pending';
+    if(st==='rejected'){
+      $('rv_icon').textContent='✖️';
+      $('rv_title').textContent='Your application was not approved';
+      $('rv_text').textContent='We are not able to take your application forward at the moment. If you think this is a mistake, reply to the email you received and we will take another look.';
+      $('rv_note').textContent='';
+    } else if(st==='suspended'){
+      $('rv_icon').textContent='⏸️';
+      $('rv_title').textContent='Your partner account is paused';
+      $('rv_text').textContent='Your referral link is not active right now. Any commission already earned is safe. Get in touch and we will sort it out.';
+      $('rv_note').textContent='';
+    }
+  }
 
   function render(me){
     $('s_accrued').textContent=money(me.accrued);
