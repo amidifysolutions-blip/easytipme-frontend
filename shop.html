@@ -323,9 +323,9 @@
           fsDoc('config/platform').catch(()=>({exists:false,data:()=>null})),
           fsCol('businesses/'+BID+'/staff').catch(()=>({forEach:()=>{},docs:[],size:0,empty:true})),
         ]);
-        if(!bd.exists){ $('loading').textContent='Shop not found.'; return; }
+        if(!bd.exists){ _shown=true; $('loading').textContent='Shop not found.'; return; }
         shop=bd.data(); curr=shop.currency||'CAD'; sym=CURSYM[curr]||'$';
-        if(shop.blocked){ $('loading').innerHTML='<div style="text-align:center;color:var(--soft);max-width:320px;margin:0 auto"><div style="font-size:34px;margin-bottom:10px">🚫</div>This tip page is currently unavailable.</div>'; return; }
+        if(shop.blocked){ _shown=true; $('loading').innerHTML='<div style="text-align:center;color:var(--soft);max-width:320px;margin:0 auto"><div style="font-size:34px;margin-bottom:10px">🚫</div>This tip page is currently unavailable.</div>'; return; }
         // Commission = % of tip + a small fixed fee. Per-shop value wins, else
         // the global default (config/platform), else 7% + $0.30.
         FEE=0.10; FIXED=0.30;
