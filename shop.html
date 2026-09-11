@@ -29,7 +29,14 @@
 <meta property="og:image:height" content="630" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:image" content="https://easytipme.com/og.png" />
-<script src="https://js.stripe.com/v3/"></script>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://firestore.googleapis.com">
+<link rel="preconnect" href="https://easytipme-backend.onrender.com" crossorigin>
+<link rel="preconnect" href="https://js.stripe.com">
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<!-- async: Stripe.js is ~120KB gzipped and is not needed until the customer picks
+     an amount. Loading it in the render path delayed the whole page on mobile. -->
+<script src="https://js.stripe.com/v3/" async></script>
 <style>
   :root{--bg:#f0f0f2;--card:#fff;--ink:#1d1d1f;--soft:#8a8a8e;--line:#e6e6ea;--accent:#0071e3;--accent-d:#0058b9;--danger:#e5484d;--on:#34c759;}
   *{box-sizing:border-box;margin:0;padding:0}
@@ -191,16 +198,66 @@
     </div>
   </div>
 
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <!-- defer: the Firestore SDK is ~1.2MB of JavaScript. It used to block the page
+       before a single pixel appeared, which is why the tip page was slow to come up
+       after a scan. The three reads this page needs now go through the Firestore
+       REST API with plain fetch (no SDK), and the SDK is only used for the tip
+       record written after a payment succeeds - seconds later, long since loaded. -->
+  <script defer src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script>
     const firebaseConfig={apiKey:"AIzaSyBsY_pCxvbbJUtvRb7ClwgWQ25hGzNTgBM",authDomain:"easy-tip-me.firebaseapp.com",projectId:"easy-tip-me",storageBucket:"easy-tip-me.firebasestorage.app",messagingSenderId:"189382420404",appId:"1:189382420404:web:2f6075c986c81484eab4e1"};
-    firebase.initializeApp(firebaseConfig);
-    const db=firebase.firestore();
-    // Auto-detect long-polling: fixes the slow FIRST load when the tip page is
-    // opened inside a QR-scanner / in-app browser or on a mobile network, where
-    // the default streaming connection can stall for seconds before data loads.
-    try{ db.settings({ experimentalAutoDetectLongPolling: true }); }catch(_){}
+
+    // ---- Firestore over REST -------------------------------------------------
+    // Reading three documents does not justify downloading the whole SDK first.
+    // Same project, same API key, same security rules - just plain fetch, and the
+    // page can paint while these are in flight.
+    const FS='https://firestore.googleapis.com/v1/projects/'+firebaseConfig.projectId+'/databases/(default)/documents/';
+    const FSK='?key='+firebaseConfig.apiKey;
+    function fsVal(v){
+      if(v==null) return null;
+      if('stringValue'    in v) return v.stringValue;
+      if('booleanValue'   in v) return v.booleanValue;
+      if('integerValue'   in v) return Number(v.integerValue);
+      if('doubleValue'    in v) return Number(v.doubleValue);
+      if('nullValue'      in v) return null;
+      if('timestampValue' in v) return v.timestampValue;
+      if('mapValue'       in v) return fsFields((v.mapValue&&v.mapValue.fields)||{});
+      if('arrayValue'     in v) return ((v.arrayValue&&v.arrayValue.values)||[]).map(fsVal);
+      if('referenceValue' in v) return v.referenceValue;
+      return null;
+    }
+    function fsFields(f){ const o={}; for(const k in f) o[k]=fsVal(f[k]); return o; }
+    // Shaped like the SDK's snapshot so the rest of the page is unchanged.
+    async function fsDoc(path){
+      const r=await fetch(FS+path+FSK,{cache:'no-store'});
+      if(r.status===404) return {exists:false,data:()=>null};
+      if(!r.ok) throw new Error('Could not load the shop ('+r.status+')');
+      const j=await r.json();
+      return {exists:true,data:()=>fsFields(j.fields||{})};
+    }
+    async function fsCol(path){
+      const r=await fetch(FS+path+FSK+'&pageSize=300',{cache:'no-store'});
+      const j=r.ok?await r.json():{};
+      const docs=((j.documents)||[]).map(d=>({id:String(d.name||'').split('/').pop(),data:()=>fsFields(d.fields||{})}));
+      return {forEach:fn=>docs.forEach(fn),docs:docs,size:docs.length,empty:!docs.length};
+    }
+
+    // The SDK is only needed for the tip record written after a successful charge.
+    let _db=null;
+    function fbDb(){
+      if(_db) return _db;
+      if(typeof firebase==='undefined') return null;
+      try{ if(!firebase.apps.length) firebase.initializeApp(firebaseConfig); _db=firebase.firestore(); }catch(_){ return null; }
+      return _db;
+    }
+    // Stripe.js loads async now, so wait for it the first time it is actually used.
+    function stripeReady(){
+      return new Promise(res=>{
+        if(typeof Stripe!=='undefined') return res();
+        let n=0; const t=setInterval(()=>{ if(typeof Stripe!=='undefined'||++n>200){ clearInterval(t); res(); } },25);
+      });
+    }
     const BACKEND="https://easytipme-backend.onrender.com";
     // Fallback only. The real key comes from the backend (/create-payment-intent
     // returns publishableKey) so it ALWAYS matches the backend's test/live mode
@@ -217,18 +274,29 @@
     let shop={}, curr='CAD', sym='$', presets=[15,30,50,100], allStaff=[], recipient=null, tip=0, rating=0;
     let multiMode=false, selected=new Set(), stripe=null, elements=null, heldTip=false, lastMonthlyFee=0;
 
+    // Fire this before anything else: Render may have the backend asleep, and
+    // waking it up while the customer reads the page costs them nothing. Doing it
+    // at the end of init (as it was) meant the wake-up happened too late to help.
+    try{ fetch(BACKEND+'/health',{mode:'cors',cache:'no-store'}).catch(()=>{}); }catch(_){}
+
     if(!BID){ $('loading').textContent='Invalid link.'; } else init();
 
     async function init(){
       try{
-        const bd=await db.collection('businesses').doc(BID).get();
+        // All three reads leave together. They used to run one after another, so a
+        // phone on mobile data paid for three round trips before seeing anything.
+        const [bd,cfgSnap,staffSnap]=await Promise.all([
+          fsDoc('businesses/'+BID),
+          fsDoc('config/platform').catch(()=>({exists:false,data:()=>null})),
+          fsCol('businesses/'+BID+'/staff').catch(()=>({forEach:()=>{},docs:[],size:0,empty:true})),
+        ]);
         if(!bd.exists){ $('loading').textContent='Shop not found.'; return; }
         shop=bd.data(); curr=shop.currency||'CAD'; sym=CURSYM[curr]||'$';
         if(shop.blocked){ $('loading').innerHTML='<div style="text-align:center;color:var(--soft);max-width:320px;margin:0 auto"><div style="font-size:34px;margin-bottom:10px">🚫</div>This tip page is currently unavailable.</div>'; return; }
         // Commission = % of tip + a small fixed fee. Per-shop value wins, else
         // the global default (config/platform), else 7% + $0.30.
         FEE=0.10; FIXED=0.30;
-        let _cfg=null; try{const c=await db.collection('config').doc('platform').get(); if(c.exists) _cfg=c.data();}catch(e){}
+        let _cfg=null; try{ if(cfgSnap.exists) _cfg=cfgSnap.data(); }catch(e){}
         // Minimum is per currency — must mirror the server, which is authoritative.
         if(_cfg&&_cfg.minTip!=null) MIN_TIP=Number(_cfg.minTip)||0;
         if(_cfg&&_cfg.maxTip!=null) MAX_TIP=Number(_cfg.maxTip)||1000;
@@ -282,7 +350,7 @@
         $('shopName').textContent=shop.businessName||'Leave a tip';
         if(shop.slogan) $('shopSlogan').textContent=shop.slogan;
         if(shop.logo){ $('shopLogo').src=shop.logo; $('shopLogo').style.display='block'; }
-        const snap=await db.collection('businesses').doc(BID).collection('staff').get();
+        const snap=staffSnap;
         // Only show workers who are ON SHIFT right now. The customer is physically
         // at the shop, so their device's local clock == the shop's local time —
         // no timezone conversion needed. A worker with no schedule always shows.
@@ -291,7 +359,7 @@
         drawStaff(allStaff);
         $('noStaff').style.display=allStaff.length?'none':'block';
         $('loading').style.display='none'; $('wrap').classList.remove('hide');
-        fetch(BACKEND+'/health').catch(()=>{}); // warm the payment backend so checkout is fast
+        // (the backend was already warmed at the top of the file, before the reads)
       }catch(e){ $('loading').textContent='Something went wrong. '+e.message; }
     }
 
@@ -467,6 +535,8 @@
         if(!clientSecret){ $('prepNote').style.display='block'; $('prepNote').textContent='Could not start payment. Please try again.'; return; }
         // Show the server's authoritative breakdown so the total always matches the charge.
         if(breakdown){ const f=breakdown.commission/100, t=breakdown.total/100; $('bkFee').textContent=sym+f.toFixed(2); $('bkTot').textContent=sym+t.toFixed(2); $('payAmt').textContent=sym+t.toFixed(2); }
+        await stripeReady();
+        if(typeof Stripe==='undefined'){ $('prepNote').style.display='block'; $('prepNote').textContent='Payment is still loading — one moment.'; return; }
         stripe=Stripe(publishableKey||STRIPE_PK);
         elements=stripe.elements({clientSecret});
         // The card element is NOT mounted here. It is created lazily only when the
@@ -531,7 +601,8 @@
       const pooled = recipient._pool===true;
       const members = pooled ? (recipient._members||[]) : recipient.members;
       const isMulti = pooled || !!recipient.multiple;
-      try{ await db.collection('businesses').doc(BID).collection('tips').add({
+      const _wdb=fbDb();
+      try{ if(_wdb) await _wdb.collection('businesses').doc(BID).collection('tips').add({
         recipientIds:members.map(m=>m.id), recipientEmails:members.map(m=>(m.email||'').toLowerCase()).filter(Boolean), recipientName:recipient.nickname||'team', multiple:isMulti, pooled:pooled, pickedId:(pooled?recipient.id:null),
         fromName:fromName, message:message, tip, fee, total:tip+fee, currency:curr, rating, ownerShare, staffShare, monthlyFee:(isMulti?0:lastMonthlyFee), paymentId:paymentIntent?.id||'',
         held:heldTip, released:false, staffId:(isMulti?null:recipient.id),
