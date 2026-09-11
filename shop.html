@@ -1,13 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XTQ0B35CMQ"></script>
+  <!-- Google tag (gtag.js) - loaded AFTER the page is on screen. Analytics must
+       never sit in the critical path of a customer standing at the till. -->
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag("js", new Date());
     gtag("config", "G-XTQ0B35CMQ");
+    addEventListener('load',function(){ setTimeout(function(){
+      var s=document.createElement('script'); s.async=true;
+      s.src='https://www.googletagmanager.com/gtag/js?id=G-XTQ0B35CMQ';
+      document.head.appendChild(s);
+    },1500); });
   </script>
 
 <meta charset="UTF-8" />
@@ -32,11 +37,12 @@
 <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
 <link rel="dns-prefetch" href="https://firestore.googleapis.com">
 <link rel="preconnect" href="https://easytipme-backend.onrender.com" crossorigin>
-<link rel="preconnect" href="https://js.stripe.com">
-<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
-<!-- async: Stripe.js is ~120KB gzipped and is not needed until the customer picks
-     an amount. Loading it in the render path delayed the whole page on mobile. -->
-<script src="https://js.stripe.com/v3/" async></script>
+<link rel="dns-prefetch" href="https://js.stripe.com">
+<link rel="dns-prefetch" href="https://www.gstatic.com">
+<!-- Stripe.js (~250KB) and the Firebase SDK (~110KB) are NOT loaded here any
+     more. Neither is needed to show the team list, and together they were the
+     bulk of what a phone had to download after a scan. They are now fetched
+     on demand: Stripe when a payment starts, Firebase after a charge. -->
 <style>
   :root{--bg:#f0f0f2;--card:#fff;--ink:#1d1d1f;--soft:#8a8a8e;--line:#e6e6ea;--accent:#0071e3;--accent-d:#0058b9;--danger:#e5484d;--on:#34c759;}
   *{box-sizing:border-box;margin:0;padding:0}
@@ -203,8 +209,6 @@
        after a scan. The three reads this page needs now go through the Firestore
        REST API with plain fetch (no SDK), and the SDK is only used for the tip
        record written after a payment succeeds - seconds later, long since loaded. -->
-  <script defer src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script defer src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script>
     const firebaseConfig={apiKey:"AIzaSyBsY_pCxvbbJUtvRb7ClwgWQ25hGzNTgBM",authDomain:"easy-tip-me.firebaseapp.com",projectId:"easy-tip-me",storageBucket:"easy-tip-me.firebasestorage.app",messagingSenderId:"189382420404",appId:"1:189382420404:web:2f6075c986c81484eab4e1"};
 
@@ -246,35 +250,65 @@
       }
       throw last;
     }
+    // A field mask keeps the response small. This matters enormously here:
+    // worker photos are stored INSIDE the documents as base64 data URLs, so
+    // asking for the whole staff collection downloaded every photo before the
+    // list could be drawn - a few hundred KB on a phone, over mobile data, at a
+    // till. The first read now excludes the images entirely.
+    const mask=f=>(f&&f.length)?f.map(x=>'&mask.fieldPaths='+encodeURIComponent(x)).join(''):'';
     // Shaped like the SDK's snapshot so the rest of the page is unchanged.
-    async function fsDoc(path){
-      const r=await tryHard(()=>fetchT(FS+path+FSK,5000),3);
+    async function fsDoc(path,o){
+      o=o||{};
+      const r=await tryHard(()=>fetchT(FS+path+FSK+mask(o.fields),o.timeout||8000),o.tries||3);
       if(r.status===404) return {exists:false,data:()=>null};
       if(!r.ok) throw new Error('Could not load the shop ('+r.status+')');
       const j=await r.json();
       return {exists:true,data:()=>fsFields(j.fields||{})};
     }
-    async function fsCol(path){
-      const r=await tryHard(()=>fetchT(FS+path+FSK+'&pageSize=300',6000),3);
+    async function fsCol(path,o){
+      o=o||{};
+      const r=await tryHard(()=>fetchT(FS+path+FSK+'&pageSize=300'+mask(o.fields),o.timeout||8000),o.tries||3);
       const j=r.ok?await r.json():{};
       const docs=((j.documents)||[]).map(d=>({id:String(d.name||'').split('/').pop(),data:()=>fsFields(d.fields||{})}));
       return {forEach:fn=>docs.forEach(fn),docs:docs,size:docs.length,empty:!docs.length};
     }
+    // Everything the first screen needs - deliberately WITHOUT logo / photo.
+    const BIZ_FIELDS=['businessName','slogan','currency','blocked','commissionPercent','commissionFixed','tipPresets','tipPoolEnabled','tipShareEnabled','tipSharePercent','notifyEmail'];
+    const STAFF_FIELDS=['nickname','job','email','published','status','leftByStaff','schedule','days','shift1','shift2','split','workerProActive'];
 
-    // The SDK is only needed for the tip record written after a successful charge.
-    let _db=null;
-    function fbDb(){
+    // The compat SDK is only needed for the tip record written AFTER a
+    // successful charge, so it is fetched then - not on every scan.
+    let _db=null,_fbP=null;
+    function loadFb(){
+      if(_fbP) return _fbP;
+      _fbP=new Promise(res=>{
+        if(typeof firebase!=='undefined'&&firebase.firestore) return res();
+        const base='https://www.gstatic.com/firebasejs/10.12.0/';
+        const add=(f,next)=>{ const el=document.createElement('script'); el.src=base+f; el.onload=next; el.onerror=()=>res(); document.head.appendChild(el); };
+        add('firebase-app-compat.js',()=>add('firebase-firestore-compat.js',()=>res()));
+        setTimeout(res,15000);
+      });
+      return _fbP;
+    }
+    async function fbDb(){
       if(_db) return _db;
-      if(typeof firebase==='undefined') return null;
+      await loadFb();
+      if(typeof firebase==='undefined'||!firebase.firestore) return null;
       try{ if(!firebase.apps.length) firebase.initializeApp(firebaseConfig); _db=firebase.firestore(); }catch(_){ return null; }
       return _db;
     }
-    // Stripe.js loads async now, so wait for it the first time it is actually used.
+    // Same for Stripe.js: fetched the first time a payment actually starts.
+    let _stripeP=null;
     function stripeReady(){
-      return new Promise(res=>{
+      if(_stripeP) return _stripeP;
+      _stripeP=new Promise(res=>{
         if(typeof Stripe!=='undefined') return res();
-        let n=0; const t=setInterval(()=>{ if(typeof Stripe!=='undefined'||++n>200){ clearInterval(t); res(); } },25);
+        const el=document.createElement('script'); el.src='https://js.stripe.com/v3/'; el.async=true;
+        el.onload=()=>res(); el.onerror=()=>res();
+        document.head.appendChild(el);
+        setTimeout(res,15000);
       });
+      return _stripeP;
     }
     const BACKEND="https://easytipme-backend.onrender.com";
     // Fallback only. The real key comes from the backend (/create-payment-intent
@@ -300,13 +334,15 @@
     // Last line of defence: if nothing is on screen after 6 seconds, give the
     // customer a button instead of a spinner. Nobody standing at a till should
     // have to guess that refreshing is what fixes it.
-    let _shown=false;
+    let _shown=false, _lastErr='';
     function stuckUI(){
       if(_shown) return;
       $('loading').innerHTML='<div style="text-align:center;max-width:300px;margin:0 auto">'
         +'<div class="loadlbl" style="margin-bottom:6px">Still loading\u2026</div>'
         +'<div style="color:var(--soft);font-size:13.5px;line-height:1.6;margin-bottom:16px">The connection is slow right now.</div>'
-        +'<button class="btn" id="retryBtn" style="padding:12px 24px">Try again</button></div>';
+        +'<button class="btn" id="retryBtn" style="padding:12px 24px">Try again</button>'
+        +(_lastErr?'<div style="color:var(--soft);font-size:11px;margin-top:14px;opacity:.7">'+esc(String(_lastErr).slice(0,80))+'</div>':'')
+        +'</div>';
       const rb=$('retryBtn');
       if(rb) rb.onclick=()=>{ $('loading').innerHTML='<div><div class="etm-spin"></div><div class="loadlbl">EasyTipMe</div></div>'; setTimeout(()=>{ if(!_shown) stuckUI(); },6000); init(); };
     }
@@ -319,9 +355,9 @@
         // All three reads leave together. They used to run one after another, so a
         // phone on mobile data paid for three round trips before seeing anything.
         const [bd,cfgSnap,staffSnap]=await Promise.all([
-          fsDoc('businesses/'+BID),
+          fsDoc('businesses/'+BID,{fields:BIZ_FIELDS}),
           fsDoc('config/platform').catch(()=>({exists:false,data:()=>null})),
-          fsCol('businesses/'+BID+'/staff').catch(()=>({forEach:()=>{},docs:[],size:0,empty:true})),
+          fsCol('businesses/'+BID+'/staff',{fields:STAFF_FIELDS}).catch(()=>({forEach:()=>{},docs:[],size:0,empty:true})),
         ]);
         if(!bd.exists){ _shown=true; $('loading').textContent='Shop not found.'; return; }
         shop=bd.data(); curr=shop.currency||'CAD'; sym=CURSYM[curr]||'$';
@@ -393,8 +429,34 @@
         $('noStaff').style.display=allStaff.length?'none':'block';
         _shown=true;
         $('loading').style.display='none'; $('wrap').classList.remove('hide');
+        // The list is on screen. NOW go and get the pictures, in the background.
+        // If they are slow, or never arrive, the customer can already pick a
+        // person and pay - initials stand in for a photo.
+        loadPictures(); loadLogo();
         // (the backend was already warmed at the top of the file, before the reads)
-      }catch(e){ if(!_shown) stuckUI(); }
+      }catch(e){ _lastErr=(e&&e.message)||''; if(!_shown) stuckUI(); }
+    }
+
+    // Worker photos and the shop logo are base64 images kept inside the
+    // documents, so they are fetched separately and merged in when they land.
+    // Failure here is silent on purpose: a missing photo must never stop a tip.
+    async function loadPictures(){
+      try{
+        const snap=await fsCol('businesses/'+BID+'/staff',{fields:['photo'],timeout:25000,tries:2});
+        const by={}; snap.forEach(d=>{ const ph=(d.data()||{}).photo; if(ph) by[d.id]=ph; });
+        if(!Object.keys(by).length) return;
+        let hit=false;
+        allStaff.forEach(w=>{ if(by[w.id]){ w.photo=by[w.id]; hit=true; } });
+        if(recipient&&!recipient.photo&&by[recipient.id]) recipient.photo=by[recipient.id];
+        if(hit) drawStaff(currentList());
+      }catch(_){}
+    }
+    async function loadLogo(){
+      try{
+        const d=await fsDoc('businesses/'+BID,{fields:['logo'],timeout:25000,tries:2});
+        const lg=d.exists&&(d.data()||{}).logo;
+        if(lg){ shop.logo=lg; $('shopLogo').src=lg; $('shopLogo').style.display='block'; }
+      }catch(_){}
     }
 
     // Is this worker on shift right now? Uses the customer's local clock (they're
@@ -635,7 +697,7 @@
       const pooled = recipient._pool===true;
       const members = pooled ? (recipient._members||[]) : recipient.members;
       const isMulti = pooled || !!recipient.multiple;
-      const _wdb=fbDb();
+      const _wdb=await fbDb();
       try{ if(_wdb) await _wdb.collection('businesses').doc(BID).collection('tips').add({
         recipientIds:members.map(m=>m.id), recipientEmails:members.map(m=>(m.email||'').toLowerCase()).filter(Boolean), recipientName:recipient.nickname||'team', multiple:isMulti, pooled:pooled, pickedId:(pooled?recipient.id:null),
         fromName:fromName, message:message, tip, fee, total:tip+fee, currency:curr, rating, ownerShare, staffShare, monthlyFee:(isMulti?0:lastMonthlyFee), paymentId:paymentIntent?.id||'',
